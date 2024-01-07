@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>FlaskBlog</title>
-</head>
-<body>
-   <h1>Welcome to FlaskBlog</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Welcome to Gulf Wars Troll {% endblock %}</h1>
+{% for reg in registrations %}
+    <a href="#">
+        <h2>{{ reg['fname'] }} </h2>
+    </a>
+    <span class="badge badge-primary">{{ reg['lodging'] }}</span>
+    <hr>
+{% endfor %}
+
+{% endblock %}
