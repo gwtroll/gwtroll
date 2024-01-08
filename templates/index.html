@@ -3,10 +3,11 @@
 {% block content %}
     <h1>{% block title %} Welcome to Gulf Wars Troll {% endblock %}</h1>
 {% for reg in registrations %}
-    <a href="#">
-        <h2>{{ reg['fname'] }} </h2>
+    <a href="{{ url_for('reg', reg_id=reg['id']) }}">
+        <h2>{{ reg['fname'] }}  {{ reg['lname'] }}</h2>
     </a>
     <span class="badge badge-primary">{{ reg['lodging'] }}</span>
+    {{ reg['badgeid'] }}
     <hr>
 {% endfor %}
 
