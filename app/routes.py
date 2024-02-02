@@ -1,3 +1,4 @@
+from app import app
 import sqlite3
 from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
@@ -16,11 +17,14 @@ def get_reg(reg_id):
         abort(404)
     return reg
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'change_me!'
+def query_db(query, args=(), one=False):
+    cur = get_db_connection().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
 
 @app.route('/')
-def index():
+def index():     
     conn = get_db_connection()
     registrations = conn.execute('SELECT * FROM registrations').fetchall()
     conn.close()
@@ -53,3 +57,15 @@ def create():
         'create.html',
         lodgingdata=[{'lodging': "Open Camping"}, {'lodging': "Ansteorra - Namron"}, {'lodging': "RV"},
                     {'lodging': 'Nova'}, {'lodging': "Ansteorra - Northkeep"}])
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    if request.method == "POST":
+        search_value = request.form.get('search_name')
+        print(search_value)
+        reg = query_db(
+            "SELECT * FROM registrations WHERE fname LIKE ? OR lname LIKE ? OR scaname LIKE ?",
+            ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+        return render_template('search.html', searchreg=reg)
+    else:
+        return render_template('search.html')

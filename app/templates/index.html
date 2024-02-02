@@ -2,7 +2,8 @@
 
 {% block content %}
     <h1>{% block title %} Welcome to Gulf Wars Troll {% endblock %}</h1>
-{% for reg in registrations %}
+
+ {% for reg in registrations %}
     <a href="{{ url_for('reg', reg_id=reg['id']) }}">
         <h2>{{ reg['fname'] }}  {{ reg['lname'] }}</h2>
     </a>
