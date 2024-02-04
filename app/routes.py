@@ -3,6 +3,7 @@ import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
+import os
 
 def get_db_connection():
     conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
