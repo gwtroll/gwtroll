@@ -4,11 +4,12 @@
     <h1>{% block title %} Welcome to Gulf Wars Troll {% endblock %}</h1>
 
  {% for reg in registrations %}
-    <a href="{{ url_for('reg', reg_id=reg['id']) }}">
+    Modern Name: <a href="{{ url_for('reg', reg_id=reg['id']) }}">
         <h2>{{ reg['fname'] }}  {{ reg['lname'] }}</h2>
     </a>
+    <p>SCA Name: {{ reg['scaname'] }}</p>
     <span class="badge badge-primary">{{ reg['lodging'] }}</span>
-    {{ reg['badgeid'] }}
+    <p>Medallion # {{ reg['medallion'] }} </p>
     <hr>
 {% endfor %}
 

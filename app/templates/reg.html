@@ -2,6 +2,13 @@
 
 {% block content %}
     <h2>{% block title %} Name: {{ reg['fname'] }} {{ reg['lname'] }} {% endblock %}</h2>
-    <span class="badge badge-primary">{{ reg['lodging'] }}</span>
     <p>{{ reg['scaname'] }}</p>
+    <p>{{ reg['lodging'] }}</p>
+    <p>{{ reg['medallion'] }}</p>
+    <form method="post">
+    <a href="/checkin">
+        <button type="submit" class="btn btn-primary">Check-In</button>
+    </a>
+    </form>
+   
 {% endblock %}

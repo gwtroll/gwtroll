@@ -1,36 +1,31 @@
-import sqlite3
-import csv
+import psycopg2
+#import csv
+import os
 
-connection = sqlite3.connect('database.db')
+conn = psycopg2.connect(
+        host="localhost",
+        database="gwtroll-database",
+        user=os.environ["DB_USERNAME"],
+        password=os.environ["DB_PASSWORD"])
+
+cur = conn.cursor()
+
+### Create Table
+
+cur.execute('DROP TABLE IF EXISTS registrations;')
+
+cur.execute('CREATE TABLE registrations'
+    '(id SERIAL PRIMARY KEY,'
+    'fname TEXT NOT NULL,'
+    'lname TEXT NOT NULL,'
+    'scaname TEXT,'
+    'lodging TEXT NOT NULL,'
+    'regdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,'
+    'checkin TIMESTAMP,'
+    'regid INTEGER,'
+    'medallion INTEGER);'
+    )
 
 
-with open('schema.sql') as f:
-    connection.executescript(f.read())
-
-cur = connection.cursor()
-
-#cur.execute("INSERT INTO posts (title, content) VALUES (?, ?)",
-#            ('First Post', 'Content for the first post')
-#            )
-
-#cur.execute("INSERT INTO posts (title, content) VALUES (?, ?)",
-#            ('Second Post', 'Content for the second post')
-#            )
-
-# Opening the person-records.csv file
-file = open('import.csv')
- 
-# Reading the contents of the 
-# person-records.csv file
-contents = csv.reader(file)
- 
-# SQL query to insert data into the
-# person table
-insert_records = "INSERT INTO registrations (fname, lname, scaname, lodging) VALUES(?, ?, ?, ?)"
- 
-# Importing the contents of the file 
-# into our person table
-cur.executemany(insert_records, contents)
- 
-connection.commit()
-connection.close()
+conn.commit()
+conn.close()

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>{% block title %} Name: {{ reg['fname'] }} {{ reg['lname'] }} {% endblock %}</h2>
+    <p>{{ reg['scaname'] }}</p>
+    <p>{{ reg['lodging'] }}</p>
+    <p>{{ reg['medallion'] }}</p>
+
+    <form method="post">
+        <div class="form-group">
+            <label for="medallion">Medallion Number</label>
+            <input type="int" name="medallion"
+                   placeholder="Medallion Number" class="form-control"
+                   value="{{ request.form['medallion'] }}"></input>
+        </div>
+    
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+{% endblock %}
