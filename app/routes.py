@@ -5,14 +5,11 @@ from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 
 def get_db_connection():
-    conn = psycopg2.connect(
-        host="localhost",
-        database="gwtroll-database",
-        user="gwtroll-database",
-        password="GWTr0ll2024!")
+    conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
+        #host="localhost",
+        #database="gwtroll-database",
         #user=os.environ["DB_USERNAME"],
         #password=os.environ["DB_PASSWORD"])
-    #cur = conn.cursor()
 
 
     #conn.row_factory = sqlite3.Row
