@@ -66,4 +66,4 @@ jobs:
         with:
           app-name: 'GWTroll'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_395AE79F31AD4F5A8FC3B22A7F1A1A9D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9A47F4EA7E974E7B978A4E63B45E34FD }}
