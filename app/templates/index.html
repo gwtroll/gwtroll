@@ -10,6 +10,9 @@
     <p>SCA Name: {{ reg['scaname'] }}</p>
     <span class="badge badge-primary">{{ reg['lodging'] }}</span>
     <p>Medallion # {{ reg['medallion'] }} </p>
+    {% if reg['checkin'] %}
+    <p>{{ reg['checkin'] }}</p>
+    {% endif %}
     <hr>
 {% endfor %}
 

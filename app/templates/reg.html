@@ -5,10 +5,13 @@
     <p>{{ reg['scaname'] }}</p>
     <p>{{ reg['lodging'] }}</p>
     <p>{{ reg['medallion'] }}</p>
-    <form method="post">
-    <a href="/checkin">
-        <button type="submit" class="btn btn-primary">Check-In</button>
-    </a>
-    </form>
+    <p>{{ reg['checkin'] }}</p>
+    {% if not reg['checkin'] %}
+        <form method="post">
+        <a href="/checkin">
+            <button type="submit" class="btn btn-primary">Check-In</button>
+        </a>
+        </form>
+    {%endif%}
    
 {% endblock %}

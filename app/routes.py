@@ -6,7 +6,10 @@ from werkzeug.exceptions import abort
 import os
 
 def get_db_connection():
-    conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
+    conn = psycopg2.connect(os.environ
+        ###Azure Environment###
+        ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
+        ###Local Environment###
         #host="localhost",
         #database="gwtroll-database",
         #user=os.environ["DB_USERNAME"],
@@ -38,7 +41,7 @@ def query_db(query, args=(), one=False):
 def index():     
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-    cur.execute('SELECT * FROM registrations;')
+    cur.execute('SELECT * FROM registrations order by lname, fname;')
     registrations = cur.fetchall()
     conn.close()
     for reg in registrations:
@@ -83,7 +86,7 @@ def search():
         search_value = request.form.get('search_name')
         print(search_value)
         reg = query_db(
-            "SELECT * FROM registrations WHERE fname LIKE %s OR lname LIKE %s OR scaname LIKE %s",
+            "SELECT * FROM registrations WHERE fname LIKE %s OR lname LIKE %s OR scaname LIKE %s order by lname, fname",
             ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
         return render_template('search.html', searchreg=reg)
     else:
@@ -102,7 +105,7 @@ def checkin():
         else:
             conn = get_db_connection()
             cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-            cur.execute('UPDATE registrations SET medallion = %s WHERE id = %s;',
+            cur.execute('UPDATE registrations SET (medallion, checkin) = (%s, current_timestamp(0)) WHERE id = %s;',
                          (medallion, reg_id))
             conn.commit()
             conn.close()
