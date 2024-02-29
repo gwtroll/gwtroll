@@ -128,37 +128,6 @@ def create():
         return redirect(url_for('reg', regid=regid))
     return render_template('create.html', title = 'New Registration', form=form)
 
-    """ if request.method == 'POST':
-        fname = request.form['fname']
-        lname = request.form['lname']
-        scaname = request.form['scaname']
-        lodging = request.form['lodging']
-        mbr_num = request.form['mbr_num']
-        mbr_exp = request.form['mbr_exp']
-
-        age = int(request.form['age'])
-        if age >= 18:
-            rate_age = '18+'
-        else:
-            rate_age = str(age)
-
-        if not lodging:
-            flash('Lodging is required!')
-        else:
-            conn = get_db_connection()
-            cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-            cur.execute('INSERT INTO registrations (fname, lname, scaname, lodging) VALUES (%s, %s, %s, %s);',
-                         (fname, lname, scaname, lodging))
-            conn.commit()
-            conn.close()
-            return redirect(url_for('index'))
-
-    return render_template(
-        'create.html',
-        lodgingdata=lodgingdata,          
-        agedata=[{'age': "18+"}, {'age': "0-5"}, {'age': "6-12"}, {'age': "13-17"}],
-        mbrdata=[{'mbr': "Member"}, {'mbr': "Non-Member"}]) """
-
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
@@ -173,6 +142,12 @@ def checkin():
     #Calculate Total Price
 
     today = int(datetime.today().date().strftime('%-d'))  #Get today's day to calculate pricing
+    
+    if today >= 23:
+        today = 9
+    
+    print(today)
+
     
     if reg['rate_age'] is not None:
         if reg['rate_age'].__contains__('18+'):  #Adult Pricing
@@ -248,3 +223,24 @@ def checkin():
 
     return render_template('checkin.html', reg=reg, price_due=price_due, price_calc=price_calc, price_paid=price_paid, form=form)
 
+@app.route('/reports', methods=['GET', 'POST'])
+def reports():
+    
+    if request.method == "POST":
+        if request.form.get('search_name'):
+            search_value = request.form.get('search_name')
+            print(search_value)
+            reg = query_db(
+                "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
+                #(search_value, search_value, search_value))
+                ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            return render_template('index.html', searchreg=reg)
+        elif request.form.get('order_id'):
+            search_value = request.form.get('order_id')
+            print(search_value)
+            reg = query_db(
+                "SELECT * FROM registrations WHERE order_id = %s order by lname, fname",
+                (search_value,))
+            return render_template('index.html', searchreg=reg)
+    else:
+        return render_template('reports.html')

@@ -1,4 +1,5 @@
-Show Membership Status
-Show Cost Breakdown for Cashiers
-Add Kingdom Field
-Expand Lodging list
+Show Membership Status - Done
+Show Cost Breakdown for Cashiers - Done
+Add Kingdom Field - Done
+Expand Lodging list - Done
+
