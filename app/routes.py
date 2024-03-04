@@ -133,14 +133,21 @@ def create():
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
-    form = CheckinForm()
     regid = request.args['regid']
     reg = get_reg(regid)
+    #if not reg['kingdom']:
+        #reg['kingdom'] = "Select Kingdom"
+    form = CheckinForm(kingdom = reg['kingdom'], rate_mbr = reg['rate_mbr'], medallion = reg['medallion'])
+    price_due= 0
     price_paid = reg['price_paid']
     price_calc = reg['price_calc']
+    kingdom = reg['kingdom']
+    rate_mbr = reg['rate_mbr']
 
-    if form.validate_on_submit():
-        print(form)
+    print(form.kingdom)
+
+    #if form.validate_on_submit():
+        #print(form)
     #Calculate Total Price
 
     today = int(datetime.today().date().strftime('%-d'))  #Get today's day to calculate pricing
@@ -151,79 +158,85 @@ def checkin():
     print(today)
 
     
-    if reg['rate_age'] is not None:
-        if reg['rate_age'].__contains__('18+'):  #Adult Pricing
-            if reg['prereg_status'] == 'SUCCEEDED':   #Pre-reg Pricing
-                # Calculate daily pricing for both Members and Non-Members
-                if today <= opening_day: # Saturday or Earlier
-                    price_calc = prereg_sat_price
-                elif  today == opening_day + 1: # Sunday
-                    price_calc = prereg_sun_price 
-                elif  today == opening_day + 2: # Monday 
-                    price_calc = prereg_mon_price
-                elif  today == opening_day + 3: # Tuesday
-                    price_calc = prereg_tue_price
-                elif  today == opening_day + 4: # Wednesday
-                    price_calc = prereg_wed_price 
-                elif  today == opening_day + 5: # Thursday
-                    price_calc = prereg_thur_price
-                elif  today == opening_day + 6: # Friday
-                    price_calc = prereg_fri_price
-                elif  today == opening_day + 7: # Saturday2
-                    price_calc = prereg_sat2_price
-                else:
-                    print('Error, arival date out of range')
-            else:  # At the Door pricing
-                # Calculate daily pricing for both Members and Non-Members
-                if today <= opening_day: # Saturday or Earlier
-                    price_calc = door_sat_price 
-                elif  today == opening_day + 1: # Sunday
-                    price_calc = door_sun_price 
-                elif  today == opening_day + 2: # Monday 
-                    price_calc = door_mon_price
-                elif  today == opening_day + 3: # Tuesday
-                    price_calc = door_tue_price
-                elif  today == opening_day + 4: # Wednesday
-                    price_calc = door_wed_price 
-                elif  today == opening_day + 5: # Thursday
-                    price_calc = door_thur_price
-                elif  today == opening_day + 6: # Friday
-                    price_calc = door_fri_price
-                elif  today == opening_day + 7: # Saturday2
-                    price_calc = door_sat2_price
-                else:
-                    print('Error, arival date out of range')    
-            if reg['rate_mbr'] == 'Non-Member':   # Add NMR to non members
-                price_calc = price_calc + nmr
-        else:  # Youth and Royal Pricing
-            price_calc = 0
-    else:  # Youth and Royal Pricing if Age Rate is None
-            price_calc = 0
-
-    #Calculate Price Due
-    if price_paid > price_calc:  #Account for people who showed up late.  No refund.
-        price_due = 0
-    else:
-        price_due = price_calc - price_paid  
     
 
     #Check for medallion number    
     if request.method == 'POST':
         medallion = form.medallion.data
+        kingdom = form.kingdom.data
+        rate_mbr = form.rate_mbr.data
 
         if not medallion:
             flash('Medallion is required!')
-        else:
-            conn = get_db_connection()
-            cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-            #Update DB with medallion number, timestamp, and costs
-            cur.execute('UPDATE registrations SET (medallion, price_calc, price_due, checkin) = (%s, %s, %s, current_timestamp(0)) WHERE regid = %s;',
-                         (medallion, price_calc, price_due, regid))
-            conn.commit()
-            conn.close()
-            return redirect(url_for('reg', regid=regid))
+            flash('form.kingdom.data')       
+        elif reg['rate_age'] is not None:
+            print("Pricing Start")
+            if reg['rate_age'].__contains__('18+'):  #Adult Pricing
+                if reg['prereg_status'] == 'SUCCEEDED':   #Pre-reg Pricing
+                    # Calculate daily pricing for both Members and Non-Members
+                    if today <= opening_day: # Saturday or Earlier
+                        price_calc = prereg_sat_price
+                    elif  today == opening_day + 1: # Sunday
+                        price_calc = prereg_sun_price 
+                    elif  today == opening_day + 2: # Monday 
+                        price_calc = prereg_mon_price
+                    elif  today == opening_day + 3: # Tuesday
+                        price_calc = prereg_tue_price
+                    elif  today == opening_day + 4: # Wednesday
+                        price_calc = prereg_wed_price 
+                    elif  today == opening_day + 5: # Thursday
+                        price_calc = prereg_thur_price
+                    elif  today == opening_day + 6: # Friday
+                        price_calc = prereg_fri_price
+                    elif  today == opening_day + 7: # Saturday2
+                        price_calc = prereg_sat2_price
+                    else:
+                        print('Error, arival date out of range')
+                else:  # At the Door pricing
+                    # Calculate daily pricing for both Members and Non-Members
+                    if today <= opening_day: # Saturday or Earlier
+                        price_calc = door_sat_price 
+                    elif  today == opening_day + 1: # Sunday
+                        price_calc = door_sun_price 
+                    elif  today == opening_day + 2: # Monday 
+                        price_calc = door_mon_price
+                    elif  today == opening_day + 3: # Tuesday
+                        price_calc = door_tue_price
+                    elif  today == opening_day + 4: # Wednesday
+                        price_calc = door_wed_price 
+                    elif  today == opening_day + 5: # Thursday
+                        price_calc = door_thur_price
+                    elif  today == opening_day + 6: # Friday
+                        price_calc = door_fri_price
+                    elif  today == opening_day + 7: # Saturday2
+                        price_calc = door_sat2_price
+                    else:
+                        print('Error, arival date out of range')    
+                if reg['rate_mbr'] == 'Non-Member':   # Add NMR to non members
+                    price_calc = price_calc + nmr
+            else:  # Youth and Royal Pricing
+                price_calc = 0
+        else:  # Youth and Royal Pricing if Age Rate is None
+                price_calc = 0
 
-    return render_template('checkin.html', reg=reg, price_due=price_due, price_calc=price_calc, price_paid=price_paid, form=form)
+        #Calculate Price Due
+        if price_paid > price_calc:  #Account for people who showed up late.  No refund.
+            price_due = 0
+        else:
+            price_due = price_calc - price_paid 
+            print("Calculating price:", price_calc) 
+    
+            
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+        #Update DB with medallion number, timestamp, and costs
+        cur.execute('UPDATE registrations SET (medallion, price_calc, price_due, rate_mbr, kingdom, checkin) = (%s, %s, %s, %s, %s, current_timestamp(0)) WHERE regid = %s;',
+                        (medallion, price_calc, price_due, rate_mbr, kingdom, regid))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('reg', regid=regid))
+
+    return render_template('checkin.html', reg=reg, price_due=price_due, price_calc=price_calc, price_paid=price_paid, kingdom=kingdom, rate_mbr=rate_mbr, form=form)
 
 @app.route('/reports', methods=['GET', 'POST'])
 def reports():

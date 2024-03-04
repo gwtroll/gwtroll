@@ -11,6 +11,7 @@ conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
 cur = conn.cursor()
 
 ### Create Table
+cur.execute('DROP TABLE IF EXISTS alembic_version;')
 
 cur.execute('DROP TABLE IF EXISTS registrations;')
 

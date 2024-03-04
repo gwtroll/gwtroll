@@ -27,7 +27,26 @@
         </tr>
     </table>
     <br>
-    <h5>Cost</h5>
+   
+        
+    <form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.rate_mbr.label }}<br>
+        {{ form.rate_mbr() }}
+    </p>
+    <p>
+        {{ form.kingdom.label }}<br>
+        {{ form.kingdom() }}
+    </p>
+    <p>
+        {{ form.medallion.label }}<br>
+        {{ form.medallion() }}
+    </p>
+    <p>{{ form.submit() }}</p>
+    </form>
+
+    <!-- <h5>Cost</h5>
     <table>
         <tr>
             <th>Registration Price</th>
@@ -39,36 +58,28 @@
             <td>{{ price_paid }}</td>
             <td>{{ price_due }}</td>
         </tr>
-    </table>
-    <!-- <h2>{% block title %} Name: {{ reg['fname'] }} {{ reg['lname'] }} {% endblock %}</h2>
-    <p>{{ reg['scaname'] }}</p>
-    <p>{{ reg['lodging'] }}</p>
-    <p>{{ reg['medallion'] }}</p>
-    <p> Cost:  {{ price_calc }} - {{ price_paid }} = {{ price_due }} </p> 
+    </table> -->
+{% endblock %}
 
-    <form method="post">
-        <div class="form-group">
-            <label for="medallion">Medallion Number</label>
-            <input type="int" name="medallion"
-                   placeholder="Medallion Number" class="form-control"
-                   value="{{ request.form['medallion'] }}"></input>
-        </div>
-    
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-    </form> -->
-    
-    <form action="" method="post" novalidate>
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.kingdom.label }}<br>
-        {{ form.kingdom() }}
-    </p>
-    <p>
-        {{ form.medallion.label }}<br>
-        {{ form.medallion() }}
-    </p>
-    <p>{{ form.submit() }}</p>
-    </form>
+{% block script %}
+<!-- <script>
+let mbrField = document.getElementById("rate_mbr");
+let mbr = '{{ rate_mbr }}';
+
+for(var i, j = 0; i = mbrField.options[j]; j++) {
+    if(i.value == mbr) {
+        mbrField.selectedIndex = j;
+        break;
+    }
+}
+let kingdomField = document.getElementById("kingdom");
+let kingdom = '{{ kingdom }}';
+
+for(var i, j = 0; i = kingdomField.options[j]; j++) {
+    if(i.value == kingdom) {
+        kingdomField.selectedIndex = j;
+        break;
+    }
+} 
+</script> -->
 {% endblock %}

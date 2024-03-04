@@ -46,6 +46,8 @@ class CheckinForm(FlaskForm):
     #mbr_exp
     submit = SubmitField('Submit')
 
+    
+
 
 class WaiverForm(FlaskForm):
     
