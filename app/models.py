@@ -27,6 +27,7 @@ class Registrations(db.Model):
     requests: so.Mapped[Optional[str]] 
     checkin: so.Mapped[Optional[datetime]]
     medallion: so.Mapped[Optional[int]]
+    signature: so.Mapped[Optional[str]]
     reg_date_time: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
 

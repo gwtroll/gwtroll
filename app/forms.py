@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField
 from wtforms.validators import DataRequired
 import pandas as pd
 
@@ -24,10 +24,10 @@ class CreateRegForm(FlaskForm):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     scaname = StringField('SCA Name', validators=[])
-    kingdom = SelectField('Last Name', validators=[DataRequired()], choices=kingdomdata)
-    lodging = SelectField('Select an option', validators=[DataRequired()], choices=lodgingdata)
-    rate_age = SelectField('Select an option', validators=[DataRequired()], choices=agedata)
-    rate_mbr = SelectField('Select an option', validators=[DataRequired()], choices=mbrdata)
+    kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
+    lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
+    rate_mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     #mbr_num
     #mbr_exp
     submit = SubmitField('Submit')
@@ -37,11 +37,24 @@ class CheckinForm(FlaskForm):
     fname = StringField('First Name')
     lname = StringField('Last Name')
     scaname = StringField('SCA Name')
-    kingdom = SelectField('Last Name', validators=[DataRequired()], choices=kingdomdata)
-    lodging = SelectField('Select an option', validators=[DataRequired()], choices=lodgingdata)
-    rate_age = SelectField('Select an option', validators=[DataRequired()], choices=agedata)
-    rate_mbr = SelectField('Select an option', validators=[DataRequired()], choices=mbrdata)
+    kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
+    lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
+    rate_mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     medallion = IntegerField('Medallion #', validators=[DataRequired()])
     #mbr_num
     #mbr_exp
     submit = SubmitField('Submit')
+
+
+class WaiverForm(FlaskForm):
+    
+    signature = HiddenField(
+        'signature',
+        render_kw={'id':'signature'}
+    )
+    
+    submit = SubmitField(
+        'Submit',
+        render_kw={'id':'submit'}
+    )

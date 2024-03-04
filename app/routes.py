@@ -1,5 +1,5 @@
 from app import app, db
-from app.forms import CreateRegForm, CheckinForm
+from app.forms import CreateRegForm, CheckinForm, WaiverForm
 from app.models import Registrations
 import psycopg2
 import psycopg2.extras
@@ -95,11 +95,13 @@ def index():
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
 def reg(regid):
-    if request.method == 'POST':
+    reg = get_reg(regid)
+    if request.method == 'POST' and reg['signature'] is None:
+        return redirect(url_for('waiver', regid=regid))
+    elif request.method == 'POST':
         return redirect(url_for('checkin', regid=regid))
     else:
-        reg = get_reg(regid)
-    return render_template('reg.html', reg=reg)
+        return render_template('reg.html', reg=reg)
 
 @app.route('/create', methods=('GET', 'POST'))
 def create():
@@ -205,7 +207,7 @@ def checkin():
         price_due = price_calc - price_paid  
     
 
-#Check for medallion number    
+    #Check for medallion number    
     if request.method == 'POST':
         medallion = form.medallion.data
 
@@ -244,3 +246,22 @@ def reports():
             return render_template('index.html', searchreg=reg)
     else:
         return render_template('reports.html')
+    
+@app.route('/waiver', methods=['GET', 'POST'])
+def waiver():
+    form = WaiverForm()
+    regid = request.args['regid']
+    reg = get_reg(regid)
+    if request.method == 'POST':
+        signature = form.signature.data
+        print(signature)
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+        #Update DB with medallion number, timestamp, and costs
+        cur.execute('UPDATE registrations SET signature = %s WHERE regid = %s;',(signature, regid))
+
+        conn.commit()
+        conn.close()
+        return redirect(url_for('reg', regid=regid))
+
+    return render_template('waiver.html', form=form)

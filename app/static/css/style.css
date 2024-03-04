@@ -14,3 +14,47 @@ th, td {
     padding-left: 30px;
     padding-right: 40px;
   }
+  div {
+    margin-top:1em;
+    margin-bottom:1em;
+}
+input {
+    padding: .5em;
+    margin: .5em;
+}
+select {
+    padding: .5em;
+    margin: .5em;
+}
+
+#signatureparent {
+    color:darkblue;
+    background-color:darkgrey;
+    /*max-width:600px;*/
+    padding:20px;
+}
+
+/*This is the div within which the signature canvas is fitted*/
+#signature-pad {
+    border: 2px dotted black;
+    background-color:lightgrey;
+    max-width:600px;
+    max-height:200px;
+}
+
+/* Drawing the 'gripper' for touch-enabled devices */ 
+html.touch #content {
+    float:left;
+    width:92%;
+}
+html.touch #scrollgrabber {
+    float:right;
+    width:4%;
+    margin-right:2%;
+    background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAFCAAAAACh79lDAAAAAXNSR0IArs4c6QAAABJJREFUCB1jmMmQxjCT4T/DfwAPLgOXlrt3IwAAAABJRU5ErkJggg==)
+}
+html.borderradius #scrollgrabber {
+    border-radius: 1em;
+}
+ 
+svg {fill:black; float:left}

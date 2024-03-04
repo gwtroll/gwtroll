@@ -45,6 +45,12 @@
             <td>Check-In Date: </td>
             <td>{{ reg['checkin'] }}</td>
         </tr>
+        <tr>
+            <td>Waiver Signature: </td>
+                      
+            <td><img src="{{ reg['signature'] }}"> </td>
+        
+        </tr>
     </table>
     <br>
     <h5>Cost</h5>
@@ -60,15 +66,25 @@
             <td>{{ reg['price_due'] }}</td>
         </tr>
     </table>
+    {% if not reg['signature'] %}
+        <br>
+        <form method="post">
+        <a href="/waiver">
+            <button type="submit" class="btn btn-primary">Waiver</button>
+        </a>
+        </form>
+    {% endif %}
 
-    {% if not reg['checkin'] %}
+    {% if (not reg['checkin']) and (reg['signature']) %}
         <br>
         <form method="post">
         <a href="/checkin">
             <button type="submit" class="btn btn-primary">Check-In</button>
         </a>
         </form>
-    {%else%}
+    {% endif %}
+    
+    {% if reg['checkin'] %}
         <br>
         <p>
         <input value='Print' type='button' class="btn btn-primary" onclick='handlePrint()' />

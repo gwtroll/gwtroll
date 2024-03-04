@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<p>Waiver Text Here:</p>
+<p>Blah Blah Blah <br>
+    First Born Child <br>
+    Blah Blah Blah <br>
+</p>
+
+<div id="signature-pad" class="signature-pad">
+    <div class="signature-pad--body">
+      <canvas width="664" style="touch-action: none; user-select: none;" height="339"></canvas>
+    </div>
+    <div class="column">
+        
+        <button type="submit" class="button save" form="WaiverForm" data-action="save-svg">Submit</button>
+        
+    </div>
+    <form action="" method="post" novalidate id="WaiverForm">
+        {{ form.hidden_tag() }}
+        <p>{{ form.signature }}</p>
+
+    </form>
+    
+</div>
+
+
+  
+<!-- Canvas:
+<div id="signature"></div>
+Output:
+<div id="someelement">Test</div>
+<div><p>Display Area:</p><div id="displayarea"></div></div>
+
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>{{ form.signature() }}</p>
+  
+    <p>{{ form.submit() }}</p> -->
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+    const wrapper = document.getElementById("signature-pad");
+    const saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
+    const submitButton = wrapper.querySelector("[data-action=save-svg]");
+    var canvas = document.querySelector("canvas");
+
+    var signaturePad = new SignaturePad(canvas);
+   
+
+
+    
+
+    saveSVGButton.addEventListener("click", () => {
+    if (signaturePad.isEmpty()) {
+    alert("Please provide a signature first.");
+    } else {
+    const dataURL = signaturePad.toDataURL('image/svg+xml');
+    var signature = document.getElementById('signature').value;
+
+    document.getElementById('signature').value = dataURL;
+    console.log(signature)
+
+    }
+});
+
+    //var i = signaturePad.toDataURL("image/svg+xml"); // save image as SVG data url
+
+  
+
+  </script>
+
+  {% endblock %}
