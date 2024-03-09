@@ -6,12 +6,12 @@ import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 import os
-from flask_login import current_user, login_user, logout_user
+from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
 import pandas as pd
 from datetime import datetime
 import re
-
+from urllib.parse import urlsplit
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
