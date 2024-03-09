@@ -35,6 +35,7 @@ door_sat2_price = int(price_df.loc[price_df['arrday'] == 'saturday2', 'door_pric
 nmr = int(price_df.loc[price_df['arrday'] == 'saturday', 'nmr'].values[0])
 opening_day = str(price_df.loc[price_df['arrday'] == 'saturday', 'arrdate'].values[0])
 opening_day = int(re.search("\/(\d+)\/", opening_day).group(1)) # Remove month and year so just the day is left
+regcount = 0
 
 
 
@@ -61,6 +62,18 @@ def get_reg(regid):
     if reg is None:
         abort(404)
     return reg
+
+def reg_count():
+    conn= get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT count(*) FROM registrations WHERE checkin IS NOT NULL;', [])
+    results = cur.fetchone()
+    for regcount in results:
+        print(regcount)
+    conn.close()
+    if regcount is None:
+        abort(404)
+    return regcount
 
 def query_db(query, args=(), one=False):
     conn = get_db_connection()
@@ -93,6 +106,7 @@ def logout():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    regcount = reg_count()
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
@@ -110,14 +124,12 @@ def index():
                 (search_value,))
             return render_template('index.html', searchreg=reg)
     else:
-        return render_template('index.html')
+        return render_template('index.html', regcount=regcount)
     
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
 def reg(regid):
     reg = get_reg(regid)
-    print('request.form.get', request.form.get('action'))
-    print('request.form.keys', request.form.keys)
     if request.form.get("action") == 'Edit':
     #if request.method == 'POST' and request.path == '/editreg':
         return redirect(url_for('editreg', regid=regid))
@@ -282,7 +294,7 @@ def checkin():
                         price_calc = door_sat2_price
                     else:
                         print('Error, arival date out of range')    
-                if reg['rate_mbr'] == 'Non-Member':   # Add NMR to non members
+                if rate_mbr == 'Non-Member':   # Add NMR to non members
                     price_calc = price_calc + nmr
             else:  # Youth and Royal Pricing
                 price_calc = 0
@@ -310,25 +322,10 @@ def checkin():
 
 @app.route('/reports', methods=['GET', 'POST'])
 def reports():
-    
-    if request.method == "POST":
-        if request.form.get('search_name'):
-            search_value = request.form.get('search_name')
-            print(search_value)
-            reg = query_db(
-                "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
-                #(search_value, search_value, search_value))
-                ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
-            return render_template('index.html', searchreg=reg)
-        elif request.form.get('order_id'):
-            search_value = request.form.get('order_id')
-            print(search_value)
-            reg = query_db(
-                "SELECT * FROM registrations WHERE order_id = %s order by lname, fname",
-                (search_value,))
-            return render_template('index.html', searchreg=reg)
-    else:
-        return render_template('reports.html')
+
+    regcount = reg_count()    
+
+    return render_template('reports.html', regcount=regcount)
     
 @app.route('/waiver', methods=['GET', 'POST'])
 def waiver():
