@@ -1,11 +1,13 @@
-from app import app, db
+from app import app, db, login
 from app.forms import CreateRegForm, CheckinForm, WaiverForm
-from app.models import Registrations
+from app.models import Registrations, User
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 import os
+from flask_login import current_user, login_user, logout_user
+import sqlalchemy as sa
 import pandas as pd
 from datetime import datetime
 import re
@@ -68,7 +70,25 @@ def query_db(query, args=(), one=False):
     conn.close()
     return (rv[0] if rv else None) if one else rv
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = db.session.scalar(
+            sa.select(User).where(User.username == form.username.data))
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user, remember=form.remember_me.data)
+        return redirect(url_for('index'))
+    return render_template('login.html', title='Sign In', form=form)
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 @app.route('/', methods=['GET', 'POST'])
