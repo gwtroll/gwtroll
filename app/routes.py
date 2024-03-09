@@ -1,4 +1,6 @@
-from app import app
+from app import app, db
+from app.forms import CreateRegForm, CheckinForm
+from app.models import Registrations
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect
@@ -31,6 +33,7 @@ door_sat2_price = int(price_df.loc[price_df['arrday'] == 'saturday2', 'door_pric
 nmr = int(price_df.loc[price_df['arrday'] == 'saturday', 'nmr'].values[0])
 opening_day = str(price_df.loc[price_df['arrday'] == 'saturday', 'arrdate'].values[0])
 opening_day = int(re.search("\/(\d+)\/", opening_day).group(1)) # Remove month and year so just the day is left
+
 
 
 def get_db_connection():
@@ -89,16 +92,6 @@ def index():
     else:
         return render_template('index.html')
     
-""" @app.route('/')
-def index():     
-    conn = get_db_connection()
-    cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-    cur.execute('SELECT * FROM registrations order by lname, fname;')
-    registrations = cur.fetchall()
-    conn.close()
-    for reg in registrations:
-        
-    return render_template('index.html', registrations=registrations) """
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
 def reg(regid):
@@ -110,16 +103,39 @@ def reg(regid):
 
 @app.route('/create', methods=('GET', 'POST'))
 def create():
-    if request.method == 'POST':
+    form = CreateRegForm()
+    if form.validate_on_submit():
+
+        reg = Registrations(
+        fname = form.fname.data,
+        lname = form.lname.data,
+        scaname = form.scaname.data,
+        kingdom = form.kingdom.data,
+        lodging = form.lodging.data,
+        rate_age = form.rate_age.data,
+        rate_mbr = form.rate_mbr.data,
+        price_paid = 0)
+        #mbr_num = form.mbr_num.data,
+        #mbr_exp = form.mbr_exp.data)
+
+        db.session.add(reg)
+        db.session.commit()
+        print(reg.regid)
+        regid = reg.regid
+        flash('Registration {} created for {} {}.'.format(
+            regid, reg.fname, reg.lname))
+
+        return redirect(url_for('reg', regid=regid))
+    return render_template('create.html', title = 'New Registration', form=form)
+
+    """ if request.method == 'POST':
         fname = request.form['fname']
         lname = request.form['lname']
         scaname = request.form['scaname']
         lodging = request.form['lodging']
-        mbr = request.form['mbr']
-        if mbr == True:
-            rate_mbr = 'Member'
-        else:
-            rate_mbr = "Non-Member"
+        mbr_num = request.form['mbr_num']
+        mbr_exp = request.form['mbr_exp']
+
         age = int(request.form['age'])
         if age >= 18:
             rate_age = '18+'
@@ -139,18 +155,21 @@ def create():
 
     return render_template(
         'create.html',
-        lodgingdata=[{'lodging': "Open Camping"}, {'lodging': "Ansteorra - Namron"}, {'lodging': "RV"},
-                    {'lodging': 'Nova'}, {'lodging': "Ansteorra - Northkeep"}])
+        lodgingdata=lodgingdata,          
+        agedata=[{'age': "18+"}, {'age': "0-5"}, {'age': "6-12"}, {'age': "13-17"}],
+        mbrdata=[{'mbr': "Member"}, {'mbr': "Non-Member"}]) """
 
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
+    form = CheckinForm()
     regid = request.args['regid']
     reg = get_reg(regid)
     price_paid = reg['price_paid']
     price_calc = reg['price_calc']
 
-
+    if form.validate_on_submit():
+        print(form)
     #Calculate Total Price
 
     today = int(datetime.today().date().strftime('%-d'))  #Get today's day to calculate pricing
@@ -213,7 +232,7 @@ def checkin():
 
 #Check for medallion number    
     if request.method == 'POST':
-        medallion = request.form['medallion']
+        medallion = form.medallion.data
 
         if not medallion:
             flash('Medallion is required!')
@@ -227,5 +246,5 @@ def checkin():
             conn.close()
             return redirect(url_for('reg', regid=regid))
 
-    return render_template('checkin.html', reg=reg, price_due=price_due, price_calc=price_calc, price_paid=price_paid)
+    return render_template('checkin.html', reg=reg, price_due=price_due, price_calc=price_calc, price_paid=price_paid, form=form)
 

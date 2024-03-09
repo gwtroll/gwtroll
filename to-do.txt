@@ -1,2 +1,4 @@
 Show Membership Status
 Show Cost Breakdown for Cashiers
+Add Kingdom Field
+Expand Lodging list

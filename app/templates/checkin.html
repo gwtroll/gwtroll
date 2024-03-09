@@ -44,7 +44,7 @@
     <p>{{ reg['scaname'] }}</p>
     <p>{{ reg['lodging'] }}</p>
     <p>{{ reg['medallion'] }}</p>
-    <p> Cost:  {{ price_calc }} - {{ price_paid }} = {{ price_due }} </p> -->
+    <p> Cost:  {{ price_calc }} - {{ price_paid }} = {{ price_due }} </p> 
 
     <form method="post">
         <div class="form-group">
@@ -57,5 +57,18 @@
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>
+    </form> -->
+    
+    <form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.kingdom.label }}<br>
+        {{ form.kingdom() }}
+    </p>
+    <p>
+        {{ form.medallion.label }}<br>
+        {{ form.medallion() }}
+    </p>
+    <p>{{ form.submit() }}</p>
     </form>
 {% endblock %}

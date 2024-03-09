@@ -21,6 +21,7 @@ cur.execute('CREATE TABLE registrations'
     'medallion INTEGER,'
     'fname TEXT,'
     'lname TEXT,'
+    'kingdom TEXT,'
     'event_ticket TEXT,'
 	'rate_mbr TEXT,'
 	'rate_age TEXT,'
@@ -34,9 +35,12 @@ cur.execute('CREATE TABLE registrations'
     'scaname TEXT,'
     'mbr_num_exp TEXT,'
     'mbr_num INTEGER,'
+    'mbr_exp DATE,'
     'requests TEXT,'
     'checkin TIMESTAMP);'
     )
+
+cur.execute ('ALTER SEQUENCE registrations_regid_seq RESTART WITH 60001;')
 # cur.execute('DROP TABLE IF EXISTS pricing;')
 
 # cur.execute('CREATE TABLE pricing'
