@@ -46,6 +46,23 @@ class CheckinForm(FlaskForm):
     #mbr_exp
     submit = SubmitField('Submit')
 
+class EditForm(FlaskForm):
+    regid = IntegerField()
+    fname = StringField('First Name')
+    lname = StringField('Last Name')
+    scaname = StringField('SCA Name')
+    kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
+    lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
+    rate_mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
+    medallion = IntegerField('Medallion #', validators=[DataRequired()])
+    price_paid = IntegerField('Amount Paid')
+    price_calc = IntegerField('Calculated Price')
+    price_due = IntegerField('Price Due')
+
+    #mbr_exp
+    submit = SubmitField('Submit')
+
     
 
 

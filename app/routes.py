@@ -1,5 +1,5 @@
 from app import app, db, login
-from app.forms import CreateRegForm, CheckinForm, WaiverForm
+from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm
 from app.models import Registrations, User
 import psycopg2
 import psycopg2.extras
@@ -116,7 +116,12 @@ def index():
 @app.route('/<int:regid>', methods=('GET', 'POST'))
 def reg(regid):
     reg = get_reg(regid)
-    if request.method == 'POST' and reg['signature'] is None:
+    print('request.form.get', request.form.get('action'))
+    print('request.form.keys', request.form.keys)
+    if request.form.get("action") == 'Edit':
+    #if request.method == 'POST' and request.path == '/editreg':
+        return redirect(url_for('editreg', regid=regid))
+    elif request.method == 'POST' and reg['signature'] is None:
         return redirect(url_for('waiver', regid=regid))
     elif request.method == 'POST':
         return redirect(url_for('checkin', regid=regid))
@@ -149,6 +154,51 @@ def create():
 
         return redirect(url_for('reg', regid=regid))
     return render_template('create.html', title = 'New Registration', form=form)
+
+@app.route('/editreg', methods=['GET', 'POST'])
+def editreg():
+    regid = request.args['regid']
+    reg = get_reg(regid)
+    kingdom = reg['kingdom']
+    rate_mbr = reg['rate_mbr']
+    rate_age = reg['rate_age']
+    medallion = reg['medallion']
+    price_due = reg['price_due']
+    price_paid = reg['price_paid']
+    price_calc = reg['price_calc']
+    lodging = reg['lodging']
+    form = EditForm(kingdom = reg['kingdom'], 
+                    rate_mbr = reg['rate_mbr'], 
+                    rate_age = reg['rate_age'], 
+                    medallion = reg['medallion'],
+                    price_due = reg['price_due'],
+                    price_paid = reg['price_paid'],
+                    price_calc = reg['price_calc'],
+                    lodging = reg['lodging'],
+                   )
+    print(price_due)
+    if request.method == 'POST':
+
+        medallion = form.medallion.data
+        kingdom = form.kingdom.data
+        rate_mbr = form.rate_mbr.data
+        rate_age = form.rate_age.data
+        price_due= form.price_due.data
+        price_paid = form.price_paid.data
+        price_calc = form.price_calc.data
+        lodging = form.lodging.data
+
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+        #Update DB with medallion number, timestamp, and costs
+        cur.execute('UPDATE registrations SET (medallion, price_calc, price_paid, price_due, rate_mbr, rate_age, kingdom, lodging) = (%s, %s, %s, %s, %s, %s, %s, %s ) WHERE regid = %s;',
+                        (medallion, price_calc, price_paid, price_due, rate_mbr, rate_age, kingdom, lodging, regid))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('reg', regid=regid))
+
+    return render_template('editreg.html', reg=reg, price_due=price_due, price_calc=price_calc, price_paid=price_paid, kingdom=kingdom, rate_mbr=rate_mbr, medallion=medallion, lodging=lodging, form=form)
+
 
 
 @app.route('/checkin', methods=['GET', 'POST'])

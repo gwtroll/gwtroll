@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+    <table>
+        <colgroup>
+            <col span="1" style="background-color: #D6EEEE">
+        </colgroup>
+        <tr> 
+            <td>Name: </td>
+            <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
+        </tr>
+        <tr>
+            <td>SCA Name: </td>
+            <td>{{ reg['scaname'] }}</td>
+        </tr>
+        <tr>
+            <td>Check-In Date: </td>
+            <td>{{ reg['checkin'] }}</td>
+        </tr>
+    </table>
+    <br>
+   
+        
+    <p>
+        {{ form.lodging.label }}<br>
+        {{ form.lodging() }}
+    </p>
+    <p>
+        {{ form.kingdom.label }}<br>
+        {{ form.kingdom() }}
+    </p>
+    <p>
+        {{ form.rate_mbr.label }}<br>
+        {{ form.rate_mbr() }}
+    </p>
+    <p>
+        {{ form.rate_age.label }}<br>
+        {{ form.rate_age() }}
+    </p>
+    <p>
+        {{ form.medallion.label }}<br>
+        {{ form.medallion() }}
+    </p>
+    <p>
+        {{ form.price_calc.label }}<br>
+        {{ form.price_calc() }}
+    </p>    <p>
+        {{ form.price_paid.label }}<br>
+        {{ form.price_paid() }}
+    </p>    <p>
+        {{ form.price_due.label }}<br>
+        {{ form.price_due() }}
+    </p>
+    <p>{{ form.submit() }}</p>
+    </form>
+
+   
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

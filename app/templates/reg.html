@@ -66,12 +66,14 @@
             <td>{{ reg['price_due'] }}</td>
         </tr>
     </table>
+   
+
     {% if not reg['signature'] %}
         <br>
         <form method="post">
-        <a href="/waiver">
-            <button type="submit" class="btn btn-primary">Waiver</button>
-        </a>
+        <div class="btn btn-primary">
+            <input type="submit" name="action" value="waiver">
+        </div>
         </form>
     {% endif %}
 
@@ -79,7 +81,7 @@
         <br>
         <form method="post">
         <a href="/checkin">
-            <button type="submit" class="btn btn-primary">Check-In</button>
+            <button type="submit" name="action" value="checkin" class="btn btn-primary">Check-In</button>
         </a>
         </form>
     {% endif %}
@@ -104,6 +106,22 @@
         </a>
         </p>
     {%endif%}
+
+    {% if current_user.username == 'shiftlead' %}
+    <br>
+    <form action="" method="post">
+    <div class="panel-body">
+        <input type="submit" name="action" value="Edit">
+    </div>
+    </form>
+        <!-- <br>
+        <form method="post">
+        <a href="/editreg">
+            <button type="submit" name="action" value="editreg" class="btn btn-primary">Edit</button>
+        </a>
+        </form> -->
+    {% endif %}
+    
    
    
 {% endblock %}
