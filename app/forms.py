@@ -9,9 +9,11 @@ lodgingdata = lodging_df.to_dict(orient='list')
 kingdom_df = pd.read_csv('gwkingdoms.csv')
 kingdomdata = kingdom_df.to_dict(orient='list')
 
-agedata = [('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 12'), ('0-5', 'Child 0 - 5')]
+agedata = [('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 12'), ('0-5', 'Child 0 - 5'), ('tour_adult', 'Tour 18+'), ('tour_teen', 'Tour 12 - 17'), ('tour_child', 'Tour 0 - 11')]
 
 mbrdata = [('Member', 'Member'), ('Non-Member', 'Non-Member')]
+
+reporttypedata = [( 'daily_report', 'daily_report')]
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -77,3 +79,7 @@ class WaiverForm(FlaskForm):
         'Submit',
         render_kw={'id':'submit'}
     )
+
+class ReportForm(FlaskForm):
+    report_type = SelectField('Report Type', validators=[DataRequired()], choices=reporttypedata)
+    submit = SubmitField('Submit')

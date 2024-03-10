@@ -1,15 +1,15 @@
 from app import app, db, login
-from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm
+from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm
 from app.models import Registrations, User
 import psycopg2
 import psycopg2.extras
-from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Flask, render_template, request, url_for, flash, redirect, send_from_directory, send_file
 from werkzeug.exceptions import abort
 import os
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, date
 import re
 from urllib.parse import urlsplit
 
@@ -115,14 +115,14 @@ def index():
                 "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
                 #(search_value, search_value, search_value))
                 ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
-            return render_template('index.html', searchreg=reg)
+            return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
             print(search_value)
             reg = query_db(
                 "SELECT * FROM registrations WHERE order_id = %s order by lname, fname",
                 (search_value,))
-            return render_template('index.html', searchreg=reg)
+            return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
         return render_template('index.html', regcount=regcount)
     
@@ -219,12 +219,13 @@ def checkin():
     reg = get_reg(regid)
     #if not reg['kingdom']:
         #reg['kingdom'] = "Select Kingdom"
-    form = CheckinForm(kingdom = reg['kingdom'], rate_mbr = reg['rate_mbr'], medallion = reg['medallion'])
+    form = CheckinForm(kingdom = reg['kingdom'], rate_mbr = reg['rate_mbr'], medallion = reg['medallion'], rate_age = reg['rate_age'])
     price_due= 0
     price_paid = reg['price_paid']
     price_calc = reg['price_calc']
     kingdom = reg['kingdom']
     rate_mbr = reg['rate_mbr']
+    rate_age = reg['rate_age']
 
     print(form.kingdom)
 
@@ -247,13 +248,12 @@ def checkin():
         medallion = form.medallion.data
         kingdom = form.kingdom.data
         rate_mbr = form.rate_mbr.data
+        rate_age = form.rate_age.data
 
-        if not medallion:
-            flash('Medallion is required!')
-            flash('form.kingdom.data')       
-        elif reg['rate_age'] is not None:
+        
+        if rate_age is not None:
             print("Pricing Start")
-            if reg['rate_age'].__contains__('18+'):  #Adult Pricing
+            if rate_age.__contains__('18+'):  #Adult Pricing
                 if reg['prereg_status'] == 'SUCCEEDED':   #Pre-reg Pricing
                     # Calculate daily pricing for both Members and Non-Members
                     if today <= opening_day: # Saturday or Earlier
@@ -296,9 +296,11 @@ def checkin():
                         print('Error, arival date out of range')    
                 if rate_mbr == 'Non-Member':   # Add NMR to non members
                     price_calc = price_calc + nmr
+            elif rate_age == 'tour_adult':
+                price_calc = 20
+            elif rate_age == 'tour_teen':
+                price_calc = 10
             else:  # Youth and Royal Pricing
-                price_calc = 0
-        else:  # Youth and Royal Pricing if Age Rate is None
                 price_calc = 0
 
         #Calculate Price Due
@@ -322,10 +324,22 @@ def checkin():
 
 @app.route('/reports', methods=['GET', 'POST'])
 def reports():
+    form = ReportForm()
+    conn = get_db_connection()    
+    if form.validate_on_submit():
+        report_type = form.report_type.data
+        if report_type == 'daily_report':
+            rptquery = "SELECT * FROM registrations"
+            print(rptquery)
+        df = pd.read_sql_query(rptquery, conn)
 
-    regcount = reg_count()    
+        writer = pd.ExcelWriter('./reports/test.xlsx', engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='Report' ,index = False , header = False)
+        writer.close()
+        
+        return send_file('./reports/test.xlsx')
+    return render_template('reports.html', form=form)
 
-    return render_template('reports.html', regcount=regcount)
     
 @app.route('/waiver', methods=['GET', 'POST'])
 def waiver():

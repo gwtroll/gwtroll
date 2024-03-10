@@ -2,6 +2,14 @@
 
 {% block content %}
 
-Current number of people checked in is {{ regcount }}
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    <p>
+        {{ form.report_type.label }}<br>
+        {{ form.report_type() }}
+    </p>
+    <p>{{ form.submit() }}</p>
+    </form>
 
 {% endblock %}
