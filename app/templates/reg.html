@@ -1,18 +1,77 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>{% block title %} Name: {{ reg['fname'] }} {{ reg['lname'] }} {% endblock %}</h2>
-    <p>{{ reg['scaname'] }}</p>
-    <p>{{ reg['lodging'] }}</p>
-    <p>{{ reg['medallion'] }}</p>
-    <p> Cost:  {{ reg['price_calc'] }} - {{ reg['price_paid'] }} = {{ reg['price_due'] }} </p>
-    <p>{{ reg['checkin'] }}</p>
+    <table>
+        <colgroup>
+            <col span="1" style="background-color: #D6EEEE">
+        </colgroup>
+        <tr> 
+            <td>Name: </td>
+            <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
+        </tr>
+        <tr>
+            <td>SCA Name: </td>
+            <td>{{ reg['scaname'] }}</td>
+        </tr>
+        <tr>
+            <td>Pre-reg Order ID: </td>
+            <td>{{ reg['order_id'] }}</td>
+        </tr>
+        <tr>
+            <td>Camp Group: </td>
+            <td>{{ reg['lodging'] }}</td>
+        </tr>
+        <tr>
+            <td>Medallion Number: </td>
+            <td>{{ reg['medallion'] }}</td>
+        </tr>
+        <tr>
+            <td>Check-In Date: </td>
+            <td>{{ reg['checkin'] }}</td>
+        </tr>
+    </table>
+    <br>
+    <h5>Cost</h5>
+    <table>
+        <tr>
+            <th>Registration Price</th>
+            <th>Amount Paid</th>
+            <th>Amount Due</th>
+        </tr>
+        <tr>
+            <td>{{ reg['price_calc'] }}</td>
+            <td>{{ reg['price_paid'] }}</td>
+            <td>{{ reg['price_due'] }}</td>
+        </tr>
+    </table>
+
     {% if not reg['checkin'] %}
+        <br>
         <form method="post">
         <a href="/checkin">
             <button type="submit" class="btn btn-primary">Check-In</button>
         </a>
         </form>
+    {%else%}
+        <br>
+        <p>
+        <input value='Print' type='button' class="btn btn-primary" onclick='handlePrint()' />
+        <script type="text/javascript">
+        const handlePrint = () => {
+            var actContents = document.body.innerHTML;
+            document.body.innerHTML = actContents;
+            window.print();
+            window.print();
+        }
+        </script>
+        </p>
+        <br>
+        <p>
+        <a href="/">
+            <button type="submit" class="btn btn-primary">Home</button>
+        </a>
+        </p>
     {%endif%}
+   
    
 {% endblock %}

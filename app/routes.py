@@ -8,10 +8,9 @@ import pandas as pd
 from datetime import datetime
 import re
 
+
+#Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
-
-
-print(price_df.dtypes)
 
 prereg_sat_price = int(price_df.loc[price_df['arrday'] == 'saturday', 'prereg_price'].values[0])
 prereg_sun_price = int(price_df.loc[price_df['arrday'] == 'sunday', 'prereg_price'].values[0])
@@ -36,16 +35,16 @@ opening_day = int(re.search("\/(\d+)\/", opening_day).group(1)) # Remove month a
 
 def get_db_connection():
     conn = psycopg2.connect(os.environ
+        
         ###Azure Environment###
         ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
+        
         ###Local Environment###
         #host="localhost",
         #database="gwtroll-database",
         #user=os.environ["DB_USERNAME"],
         #password=os.environ["DB_PASSWORD"])
 
-
-    #conn.row_factory = sqlite3.Row
     return conn
 
 def get_reg(regid):
@@ -69,6 +68,27 @@ def query_db(query, args=(), one=False):
 
 
 
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == "POST":
+        if request.form.get('search_name'):
+            search_value = request.form.get('search_name')
+            print(search_value)
+            reg = query_db(
+                "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
+                (search_value, search_value, search_value))
+                #('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            return render_template('index.html', searchreg=reg)
+        elif request.form.get('order_id'):
+            search_value = request.form.get('order_id')
+            print(search_value)
+            reg = query_db(
+                "SELECT * FROM registrations WHERE order_id = %s order by lname, fname",
+                (search_value,))
+            return render_template('index.html', searchreg=reg)
+    else:
+        return render_template('index.html')
+    
 """ @app.route('/')
 def index():     
     conn = get_db_connection()
@@ -122,17 +142,6 @@ def create():
         lodgingdata=[{'lodging': "Open Camping"}, {'lodging': "Ansteorra - Namron"}, {'lodging': "RV"},
                     {'lodging': 'Nova'}, {'lodging': "Ansteorra - Northkeep"}])
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == "POST":
-        search_value = request.form.get('search_name')
-        print(search_value)
-        reg = query_db(
-            "SELECT * FROM registrations WHERE fname LIKE %s OR lname LIKE %s OR scaname LIKE %s order by lname, fname",
-            ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
-        return render_template('index.html', searchreg=reg)
-    else:
-        return render_template('index.html')
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():

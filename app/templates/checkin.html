@@ -1,11 +1,50 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>{% block title %} Name: {{ reg['fname'] }} {{ reg['lname'] }} {% endblock %}</h2>
+    <table>
+        <colgroup>
+            <col span="1" style="background-color: #D6EEEE">
+        </colgroup>
+        <tr> 
+            <td>Name: </td>
+            <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
+        </tr>
+        <tr>
+            <td>SCA Name: </td>
+            <td>{{ reg['scaname'] }}</td>
+        </tr>
+        <tr>
+            <td>Camp Group: </td>
+            <td>{{reg['lodging'] }}</td>
+        </tr>
+        <tr>
+            <td>Medallion Number: </td>
+            <td>{{ reg['medallion'] }}</td>
+        </tr>
+        <tr>
+            <td>Check-In Date: </td>
+            <td>{{ reg['checkin'] }}</td>
+        </tr>
+    </table>
+    <br>
+    <h5>Cost</h5>
+    <table>
+        <tr>
+            <th>Registration Price</th>
+            <th>Amount Paid</th>
+            <th>Amount Due</th>
+        </tr>
+        <tr>
+            <td>{{ price_calc }}</td>
+            <td>{{ price_paid }}</td>
+            <td>{{ price_due }}</td>
+        </tr>
+    </table>
+    <!-- <h2>{% block title %} Name: {{ reg['fname'] }} {{ reg['lname'] }} {% endblock %}</h2>
     <p>{{ reg['scaname'] }}</p>
     <p>{{ reg['lodging'] }}</p>
     <p>{{ reg['medallion'] }}</p>
-    <p> Cost:  {{ price_calc }} - {{ price_paid }} = {{ price_due }} </p>
+    <p> Cost:  {{ price_calc }} - {{ price_paid }} = {{ price_due }} </p> -->
 
     <form method="post">
         <div class="form-group">
