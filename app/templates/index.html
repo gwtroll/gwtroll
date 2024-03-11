@@ -1,19 +1,33 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Welcome to Gulf Wars Troll {% endblock %}</h1>
+<h1>{% block title %} Search for a Registration {% endblock %}</h1>
 
- {% for reg in registrations %}
-    Modern Name: <a href="{{ url_for('reg', reg_id=reg['id']) }}">
-        <h2>{{ reg['fname'] }}  {{ reg['lname'] }}</h2>
-    </a>
-    <p>SCA Name: {{ reg['scaname'] }}</p>
-    <span class="badge badge-primary">{{ reg['lodging'] }}</span>
-    <p>Medallion # {{ reg['medallion'] }} </p>
-    {% if reg['checkin'] %}
-    <p>{{ reg['checkin'] }}</p>
-    {% endif %}
-    <hr>
-{% endfor %}
+<form action="/" method="POST">
+    <div class="mb-5 d-flex position-relative">
+        <!-- Search -->
+        <div class="input-group w-50 mx-auto">
+            <input class="form-control py-2"
+                   placeholder="Search by Name" name="search_name" value=""/>
+            <button type="submit" class="btn btn-secondary">Search
+            </button>
+        </div>
+    </div>
+</form>
+{% if searchreg %}
+<div>
+    {% for reg in searchreg %}
+        <a href="{{ url_for('reg', regid=reg['regid']) }}">
+            <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
+        </a>
+        <div>
+            <p class="text-muted">{{ reg['scaname'] }}</p>
+        </div>
+        <hr>
+    {% endfor %}
+</div>
+{% endif %}
+</body>
+</html>
 
 {% endblock %}

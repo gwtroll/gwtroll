@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Welcome to Gulf Wars Troll {% endblock %}</h1>
+
+ {% for reg in registrations %}
+    Modern Name: <a href="{{ url_for('reg', regid=reg['regid']) }}">
+        <h2>{{ reg['fname'] }}  {{ reg['lname'] }}</h2>
+    </a>
+    <p>SCA Name: {{ reg['scaname'] }}</p>
+    <span class="badge badge-primary">{{ reg['lodging'] }}</span>
+    <p>Medallion # {{ reg['medallion'] }} </p>
+    {% if reg['checkin'] %}
+    <p>{{ reg['checkin'] }}</p>
+    {% endif %}
+    <hr>
+{% endfor %}
+
+{% endblock %}

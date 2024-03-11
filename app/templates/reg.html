@@ -5,6 +5,7 @@
     <p>{{ reg['scaname'] }}</p>
     <p>{{ reg['lodging'] }}</p>
     <p>{{ reg['medallion'] }}</p>
+    <p> Cost:  {{ reg['price_calc'] }} - {{ reg['price_paid'] }} = {{ reg['price_due'] }} </p>
     <p>{{ reg['checkin'] }}</p>
     {% if not reg['checkin'] %}
         <form method="post">

@@ -15,15 +15,36 @@ cur = conn.cursor()
 cur.execute('DROP TABLE IF EXISTS registrations;')
 
 cur.execute('CREATE TABLE registrations'
-    '(id SERIAL PRIMARY KEY,'
-    'fname TEXT NOT NULL,'
-    'lname TEXT NOT NULL,'
+    '(regid SERIAL PRIMARY KEY,'
+    'order_id INTEGER,'
+    'reg_date_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,'
+    'medallion INTEGER,'
+    'fname TEXT,'
+    'lname TEXT,'
+    'event_ticket TEXT,'
+	'rate_mbr TEXT,'
+	'rate_age TEXT,'
+	'rate_date TEXT,'
+    'price_calc INTEGER,'
+    'price_paid INTEGER,'
+	'price_due INTEGER,'
+    'lodging TEXT,'
+    'pay_type TEXT,'
+    'prereg_status TEXT,'
     'scaname TEXT,'
-    'lodging TEXT NOT NULL,'
-    'regdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,'
-    'checkin TIMESTAMP,'
-    'regid INTEGER,'
-    'medallion INTEGER);'
+    'mbr_num_exp TEXT,'
+    'mbr_num INTEGER,'
+    'requests TEXT,'
+    'checkin TIMESTAMP);'
+    )
+cur.execute('DROP TABLE IF EXISTS pricing;')
+
+cur.execute('CREATE TABLE pricing'
+    '(arrdate DATE PRIMARY KEY,'
+    'arrday TEXT NOT NULL,'
+    'prereg_price INTEGER NOT NULL,'
+    'door_price INTEGER NOT NULL,'
+    'nmr INTEGER NOT NULL);'
     )
 
 
