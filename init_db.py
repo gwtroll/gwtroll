@@ -37,15 +37,15 @@ cur.execute('CREATE TABLE registrations'
     'requests TEXT,'
     'checkin TIMESTAMP);'
     )
-cur.execute('DROP TABLE IF EXISTS pricing;')
+# cur.execute('DROP TABLE IF EXISTS pricing;')
 
-cur.execute('CREATE TABLE pricing'
-    '(arrdate DATE PRIMARY KEY,'
-    'arrday TEXT NOT NULL,'
-    'prereg_price INTEGER NOT NULL,'
-    'door_price INTEGER NOT NULL,'
-    'nmr INTEGER NOT NULL);'
-    )
+# cur.execute('CREATE TABLE pricing'
+#     '(arrdate DATE PRIMARY KEY,'
+#     'arrday TEXT NOT NULL,'
+#     'prereg_price INTEGER NOT NULL,'
+#     'door_price INTEGER NOT NULL,'
+#     'nmr INTEGER NOT NULL);'
+#     )
 
 
 conn.commit()

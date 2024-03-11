@@ -76,8 +76,8 @@ def index():
             print(search_value)
             reg = query_db(
                 "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
-                (search_value, search_value, search_value))
-                #('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+                #(search_value, search_value, search_value))
+                ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
