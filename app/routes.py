@@ -123,6 +123,13 @@ def index():
                 "SELECT * FROM registrations WHERE order_id = %s order by lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
+        elif request.form.get('medallion'):
+            search_value = request.form.get('medallion')
+            print(search_value)
+            reg = query_db(
+                "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
+                (search_value,))
+            return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
         return render_template('index.html', regcount=regcount)
     
@@ -325,19 +332,27 @@ def checkin():
 @app.route('/reports', methods=['GET', 'POST'])
 def reports():
     form = ReportForm()
+    s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
+    conndict = dict(item.split("=") for item in s.split(" "))
+    connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
+    engine=db.create_engine(connstring)
+
     conn = get_db_connection()    
     if form.validate_on_submit():
         report_type = form.report_type.data
+        date_test = date.today()
+        print(date_test)
         if report_type == 'daily_report':
-            rptquery = "SELECT * FROM registrations"
+            reg[checkin]
+            rptquery = "SELECT * FROM registrations WHERE date(checkin) = {};"
             print(rptquery)
-        df = pd.read_sql_query(rptquery, conn)
+            df = pd.read_sql_query(rptquery.format('2024-03-10'), engine)
 
         writer = pd.ExcelWriter('./reports/test.xlsx', engine='xlsxwriter')
-        df.to_excel(writer, sheet_name='Report' ,index = False , header = False)
+        df.to_excel(writer, sheet_name='Report' ,index = False)
         writer.close()
         
-        return send_file('./reports/test.xlsx')
+        return send_file('../reports/test.xlsx')
     return render_template('reports.html', form=form)
 
     
