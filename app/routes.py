@@ -336,23 +336,34 @@ def reports():
     conndict = dict(item.split("=") for item in s.split(" "))
     connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
     engine=db.create_engine(connstring)
-
-    conn = get_db_connection()    
+    
+    file = 'test_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
+    path1 = './reports/' + file
+    path2 = '../reports/' + file
+    reg = get_reg(46307)
+   
     if form.validate_on_submit():
         report_type = form.report_type.data
+        
         date_test = date.today()
         print(date_test)
+        print(type(date_test))
         if report_type == 'daily_report':
-            reg[checkin]
-            rptquery = "SELECT * FROM registrations WHERE date(checkin) = {};"
-            print(rptquery)
-            df = pd.read_sql_query(rptquery.format('2024-03-10'), engine)
+            #test_checkin = date(reg['checkin'])
+            #print(test_checkin)
+            #print(type(test_checkin))
 
-        writer = pd.ExcelWriter('./reports/test.xlsx', engine='xlsxwriter')
+            rptquery = "SELECT * FROM registrations WHERE checkin::date = {}"
+            rptquery = rptquery.format('%(blah)s')
+            print(rptquery)
+            params = {'blah':date_test}
+            df = pd.read_sql_query(rptquery, engine, params=params)
+
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
         df.to_excel(writer, sheet_name='Report' ,index = False)
         writer.close()
         
-        return send_file('../reports/test.xlsx')
+        return send_file(path2)
     return render_template('reports.html', form=form)
 
     
