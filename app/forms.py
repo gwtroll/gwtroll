@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField
+from wtforms.fields import DateField
 from wtforms.validators import DataRequired
 import pandas as pd
 
@@ -82,4 +83,6 @@ class WaiverForm(FlaskForm):
 
 class ReportForm(FlaskForm):
     report_type = SelectField('Report Type', validators=[DataRequired()], choices=reporttypedata)
+    dt_start = DateField('Start Date', format='%Y-%m-%d')
+    dt_end = DateField('End Date', format='%Y-%m-%d')
     submit = SubmitField('Submit')

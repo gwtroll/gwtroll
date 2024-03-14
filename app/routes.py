@@ -338,6 +338,8 @@ def reports():
     engine=db.create_engine(connstring)
     
     file = 'test_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
+    start_date = form.dt_start.data
+    end_date = form.dt_end.data
     path1 = './reports/' + file
     path2 = '../reports/' + file
     reg = get_reg(46307)
@@ -345,18 +347,16 @@ def reports():
     if form.validate_on_submit():
         report_type = form.report_type.data
         
-        date_test = date.today()
-        print(date_test)
-        print(type(date_test))
+        
         if report_type == 'daily_report':
             #test_checkin = date(reg['checkin'])
             #print(test_checkin)
             #print(type(test_checkin))
 
-            rptquery = "SELECT * FROM registrations WHERE checkin::date = {}"
-            rptquery = rptquery.format('%(blah)s')
+            rptquery = "SELECT * FROM registrations WHERE checkin::date BETWEEN {} and {}"
+            rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
             print(rptquery)
-            params = {'blah':date_test}
+            params = {'start_date':start_date, 'end_date':end_date}
             df = pd.read_sql_query(rptquery, engine, params=params)
 
         writer = pd.ExcelWriter(path1, engine='xlsxwriter')
