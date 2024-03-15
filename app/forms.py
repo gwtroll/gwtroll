@@ -14,7 +14,7 @@ agedata = [('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 
 
 mbrdata = [('Member', 'Member'), ('Non-Member', 'Non-Member')]
 
-reporttypedata = [( 'daily_report', 'daily_report')]
+reporttypedata = [('full_report', 'full_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count')]
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])

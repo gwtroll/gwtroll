@@ -340,29 +340,81 @@ def reports():
     file = 'test_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
     start_date = form.dt_start.data
     end_date = form.dt_end.data
-    path1 = './reports/' + file
-    path2 = '../reports/' + file
-    reg = get_reg(46307)
+
    
     if form.validate_on_submit():
         report_type = form.report_type.data
         
         
-        if report_type == 'daily_report':
-            #test_checkin = date(reg['checkin'])
-            #print(test_checkin)
-            #print(type(test_checkin))
+        if report_type == 'full_report':
+
+            file = 'full_report_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
 
             rptquery = "SELECT * FROM registrations WHERE checkin::date BETWEEN {} and {}"
             rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
             print(rptquery)
             params = {'start_date':start_date, 'end_date':end_date}
             df = pd.read_sql_query(rptquery, engine, params=params)
+            path1 = './reports/' + file
+            path2 = '../reports/' + file
 
-        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
-        df.to_excel(writer, sheet_name='Report' ,index = False)
-        writer.close()
+            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+            worksheet = writer.sheets['Report']
+
+            df.to_excel(writer, sheet_name='Report' ,index = False)
+            writer.close()
         
+        if report_type == 'at_door_count':
+
+            file = 'at_door_count_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
+
+            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg_status is Null"
+            rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
+            print(rptquery)
+            params = {'start_date':start_date, 'end_date':end_date}
+            df = pd.read_sql_query(rptquery, engine, params=params)
+            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg_status = {}"
+            rptquery = rptquery.format('%(start_date)s', '%(end_date)s', '%(prereg_status)s')
+            params = {'start_date':start_date, 'end_date':end_date, 'prereg_status':"SUCCEEDED"}
+            df = df.merge(pd.read_sql_query(rptquery, engine, params=params), how='outer')
+
+            path1 = './reports/' + file
+            path2 = '../reports/' + file
+
+            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+
+            df.to_excel(writer, sheet_name='Report' ,index = False, startcol=1)
+            workbook = writer.book
+            worksheet = writer.sheets["Report"]           
+            worksheet.write('A2', "At the Door")
+            worksheet.write('A3', "Pre-Reg")
+            worksheet.write('C1', "Income Total")
+
+            writer.close()
+        
+        if report_type == 'kingdom_count':
+
+            file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
+
+            rptquery = "SELECT kingdom, count(*) FROM registrations WHERE checkin::date BETWEEN {} and {} GROUP BY kingdom ORDER BY kingdom"
+            rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
+            print(rptquery)
+            params = {'start_date':start_date, 'end_date':end_date}
+            df = pd.read_sql_query(rptquery, engine, params=params)
+            
+            path1 = './reports/' + file
+            path2 = '../reports/' + file
+
+            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+
+            df.to_excel(writer, sheet_name='Report' ,index = False)
+            workbook = writer.book
+            worksheet = writer.sheets["Report"]           
+
+            
+
+            writer.close()
+
         return send_file(path2)
     return render_template('reports.html', form=form)
 
