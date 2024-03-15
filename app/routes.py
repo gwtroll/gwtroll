@@ -357,11 +357,13 @@ def reports():
             df = pd.read_sql_query(rptquery, engine, params=params)
             path1 = './reports/' + file
             path2 = '../reports/' + file
+            
+            df.to_excel(writer, sheet_name='Report' ,index = False)
 
             writer = pd.ExcelWriter(path1, engine='xlsxwriter')
             worksheet = writer.sheets['Report']
 
-            df.to_excel(writer, sheet_name='Report' ,index = False)
+
             writer.close()
         
         if report_type == 'at_door_count':
@@ -396,7 +398,7 @@ def reports():
 
             file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
 
-            rptquery = "SELECT kingdom, count(*) FROM registrations WHERE checkin::date BETWEEN {} and {} GROUP BY kingdom ORDER BY kingdom"
+            rptquery = "SELECT kingdom, count(*) FROM registrations WHERE checkin::date BETWEEN {} and {} GROUP BY kingdom, checkin::date ORDER BY kingdom"
             rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
             print(rptquery)
             params = {'start_date':start_date, 'end_date':end_date}
@@ -409,10 +411,26 @@ def reports():
 
             df.to_excel(writer, sheet_name='Report' ,index = False)
             workbook = writer.book
-            worksheet = writer.sheets["Report"]           
+            worksheet = writer.sheets["Report"]
 
-            
+            writer.close()
 
+        if report_type == 'ghost_report':
+
+            file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
+
+            rptquery = "SELECT * FROM registrations WHERE prereg_status = {} AND checkin IS NULL"
+            rptquery = rptquery.format('%(prereg_status)s')
+            print(rptquery)
+            params = {'prereg_status':"SUCCEEDED"}
+            df = pd.read_sql_query(rptquery, engine, params=params)
+            path1 = './reports/' + file
+            path2 = '../reports/' + file
+
+            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+            #worksheet = writer.sheets['Report']
+
+            df.to_excel(writer, sheet_name='Report' ,index = False)
             writer.close()
 
         return send_file(path2)
