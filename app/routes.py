@@ -427,7 +427,7 @@ def reports():
 
             file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
 
-            rptquery = "SELECT fname, lname, scaname, rate_age, lodging, prereg_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
+            rptquery = "SELECT order_id, regid, fname, lname, scaname, rate_age, lodging, prereg_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
             rptquery = rptquery.format('%(prereg_status)s')
             print(rptquery)
             params = {'prereg_status':"SUCCEEDED"}
