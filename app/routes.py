@@ -357,9 +357,9 @@ def reports():
             df.to_csv(path1)
             
          
-        if report_type == 'full_report':
+        if report_type == 'full_checkin_report':
 
-            file = 'full_report_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
+            file = 'full_checkin_report_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
 
             rptquery = "SELECT * FROM registrations WHERE checkin::date BETWEEN {} and {}"
             rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
@@ -427,7 +427,7 @@ def reports():
 
             file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
 
-            rptquery = "SELECT * FROM registrations WHERE prereg_status = {} AND checkin IS NULL"
+            rptquery = "SELECT fname, lname, scaname, rate_age, lodging, prereg_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
             rptquery = rptquery.format('%(prereg_status)s')
             print(rptquery)
             params = {'prereg_status':"SUCCEEDED"}
