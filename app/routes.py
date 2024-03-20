@@ -345,7 +345,18 @@ def reports():
     if form.validate_on_submit():
         report_type = form.report_type.data
         
-        
+        if report_type == 'full_export':
+
+            file = 'full_export_' + str(datetime.now().isoformat(' ', 'seconds')) + '.csv'
+
+            rptquery = "SELECT * FROM registrations"
+            df = pd.read_sql_query(rptquery, engine)
+            path1 = './reports/' + file
+            path2 = '../reports/' + file
+            
+            df.to_csv(path1)
+            
+         
         if report_type == 'full_report':
 
             file = 'full_report_' + str(datetime.now().isoformat(' ', 'seconds')) + '.xlsx'
@@ -358,12 +369,9 @@ def reports():
             path1 = './reports/' + file
             path2 = '../reports/' + file
             
-            df.to_excel(writer, sheet_name='Report' ,index = False)
-
             writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+            df.to_excel(writer, sheet_name='Report' ,index = False)
             worksheet = writer.sheets['Report']
-
-
             writer.close()
         
         if report_type == 'at_door_count':
