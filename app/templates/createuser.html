@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table id="createUserTable" class="table table-striped">
+    <thread>
+        <tr>
+            <th>User Name</th>
+            <th>Role</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Password</th>
+            <th></th>
+        </tr>
+    </thread>
+    <tbody>
+        <tr>
+            <form action="" method="post">
+                <td>
+                    {{form.username()}}
+                </td>
+                <td>
+                    {{form.role()}}
+                </td>
+                <td>
+                    {{form.fname()}}
+                </td>
+                <td>
+                    {{form.lname()}}
+                </td>
+                <td>
+                    {{form.password()}}
+                </td>
+                <td>
+                    <input class="form__submit form__input" type="submit" value="Submit" name="select_value"/>
+                </td>
+            </form>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}

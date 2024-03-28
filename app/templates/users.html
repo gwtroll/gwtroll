@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table id="userTable" class="table table-striped">
+    <thread>
+        <tr>
+            <th>User Name</th>
+            <th>Role</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Edit</th>
+            <th>Password Reset</th>
+        </tr>
+    </thread>
+    <tbody>
+        {%for user in users %}
+        <tr>
+            <form action="/user">
+                <td style="display: none;">
+                    <input type="hidden" name="userid" id="userid" value="{{user.id}}">{{user.id}}
+                </td>
+                <td> 
+                    {{user.username}}
+                </td>
+                <td> 
+                    {{user.role}}
+                </td>
+                <td> 
+                    {{user.fname}}
+                </td>
+                <td> 
+                    {{user.lname}}
+                </td>
+                <td>
+                    <input class="form__submit form__input" type="Submit" value="Edit" name="submitValue"/>
+                </td>
+                <td>
+                    <input class="form__submit form__input" type="Submit" value="Password Reset" name="submitValue"/>
+                </td>
+            </form>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

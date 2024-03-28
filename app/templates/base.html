@@ -46,16 +46,24 @@
           </ul>
         </div>
       <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-            <li class="nav-item active">
-                <a class="nav-link" href="#">About</a>
-            </li>
-            </ul>
+        <div class="dropdown">
+        <button class="navbar-nav" type="button" id="adminMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expandable="true" >
+          Admin
+        </button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="/user/create">Create User</a>
+          <a class="dropdown-item" href="/users">Manage Users</a>
+          <a class="dropdown-item" href="/upload">Upload</a>
+        </div>
+      </div>
       </div>
       <div>
         {% if current_user.is_anonymous %}
         <a href="{{ url_for('login') }}">Login</a>
         {% else %}
+        <div>
+          {{current_user.username}}
+        </div>
         <a href="{{ url_for('logout') }}">Logout</a>
         {% endif %}
      </div>
