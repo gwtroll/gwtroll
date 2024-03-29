@@ -595,4 +595,5 @@ def waiver():
         return redirect(url_for('reg', regid=regid))
 
     return render_template('waiver.html', form=form)
-#test
+
+#test test
