@@ -1,6 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+    <!-- <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endif %}
+        {% endwith %}
+    </div> -->
+
     <table>
         <colgroup>
             <col span="1" style="background-color: #D6EEEE">
@@ -107,7 +119,6 @@
         </p>
     {%endif%}
 
-    {% if current_user.username == 'shiftlead' %}
     <br>
     <form action="" method="post">
     <div class="panel-body">
@@ -120,7 +131,6 @@
             <button type="submit" name="action" value="editreg" class="btn btn-primary">Edit</button>
         </a>
         </form> -->
-    {% endif %}
     
    
    

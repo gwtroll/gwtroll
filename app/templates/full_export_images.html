@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table id="fullExportTable" class="table table-striped">
+    <thread>
+        <tr>
+            <th>Reg Id</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Signature</th>
+        </tr>
+    </thread>
+    <tbody>
+        {%for reg in regs %}
+        <tr>
+                <td> 
+                    {{reg.regid}}
+                </td>
+                <td> 
+                    {{reg.fname}}
+                </td>
+                <td> 
+                    {{reg.lname}}
+                </td>
+                <td> 
+                    <img src="{{reg.signature}}" width="100" height="25"/>
+                </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

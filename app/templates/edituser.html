@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if edit_request == 'Edit' %}
+<table id="editUserTable" class="table table-striped">
+    <thread>
+        <tr>
+            <th>User Id</th>
+            <th>User Name</th>
+            <th>Role</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th></th>
+        </tr>
+    </thread>
+    <tbody>
+        <tr>
+            <form action="" method="post">
+                <td>
+                    {{form.id(readonly=true)}}
+                </td>
+                <td>
+                    {{form.username(readonly=true)}}
+                </td>
+                <td>
+                    {{form.role()}}
+                </td>
+                <td>
+                    {{form.fname()}}
+                </td>
+                <td>
+                    {{form.lname()}}
+                </td>
+                <td>
+                    <input class="form__submit form__input" type="submit" value="Submit" name="select_value"/>
+                </td>
+            </form>
+        </tr>
+    </tbody>
+</table>
+{% endif %}
+
+{% if edit_request == 'Password Reset' %}
+<table id="updatePasswordTable" class="table table-striped">
+    <thread>
+        <tr>
+            <th>User Id</th>
+            <th>User Name</th>
+            <th>Password</th>
+            <th></th>
+        </tr>
+    </thread>
+    <tbody>
+        <tr>
+            <form action="" method="post">
+                <td>
+                    {{form.id(readonly=true)}}
+                </td>
+                <td>
+                    {{form.username(readonly=true)}}
+                </td>
+                <td>
+                    {{form.password()}}
+                </td>
+                <td>
+                    <input class="form__submit form__input" type="submit" value="Password Reset" name="select_value"/>
+                </td>
+            </form>
+        </tr>
+    </tbody>
+</table>
+{% endif %}
+
+
+{% endblock %}
