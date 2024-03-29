@@ -16,9 +16,9 @@ class User(UserMixin, db.Model):
     #                                        unique=True)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
 
-    # role: so.Mapped[str] = so.mapped_column(sa.String(64))
+    role: so.Mapped[str] = so.mapped_column(sa.String(64))
 
-    roles = db.relationship('Role', secondary='user_roles')
+    # roles = db.relationship('Role', secondary='user_roles')
 
     fname: so.Mapped[str] = so.mapped_column(sa.String(64))
 
@@ -34,17 +34,17 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 #Role Data Model
-class Role(db.Model):
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+# class Role(db.Model):
+#     __tablename__ = 'roles'
+#     id = db.Column(db.Integer(), primary_key=True)
+#     name = db.Column(db.String(50), unique=True)
     
 #UserRoles association table
-class UserRoles(db.Model):
-    __tablename__ = 'user_roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
+# class UserRoles(db.Model):
+#     __tablename__ = 'user_roles'
+#     id = db.Column(db.Integer(), primary_key=True)
+#     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
+#     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
 
 @login.user_loader
 def load_user(id):
