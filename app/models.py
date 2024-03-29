@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     #                                        unique=True)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
 
-    role: so.Mapped[str] = so.mapped_column(sa.String(64))
+    # role: so.Mapped[str] = so.mapped_column(sa.String(64))
 
     roles = db.relationship('Role', secondary='user_roles')
 
