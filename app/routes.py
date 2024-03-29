@@ -481,19 +481,15 @@ def reports():
         
         if report_type == 'full_export':
 
-            file = 'full_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+            file = 'full_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
             rptquery = "SELECT * FROM registrations"
             df = pd.read_sql_query(rptquery, engine)
             path1 = './reports/' + file
             path2 = '../reports/' + file
             
-            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
-            df.to_excel(writer, sheet_name='Report' ,index = False)
-            worksheet = writer.sheets['Report']
-            writer.close()
+            df.to_csv(path1)
             
-         
         if report_type == 'full_checkin_report':
 
             file = 'full_checkin_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
