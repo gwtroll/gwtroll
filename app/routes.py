@@ -1,6 +1,6 @@
 from app import app, db, login
 from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm, EditUserForm, UpdatePasswordForm, CreateUserForm
-from app.models import Registrations, User, Role, UserRoles
+from app.models import Registrations, User, Role
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_from_directory, send_file
