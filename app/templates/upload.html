@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<html>   
+<head>   
+    <title>upload the file : GFG</title>   
+</head>   
+<body>   
+    <form action = "/upload" method = "post" enctype="multipart/form-data">   
+        <input type="file" name="file" />   
+        <input type = "submit" value="Upload">   
+    </form>   
+</body>   
+</html>
+
+{% endblock %}
