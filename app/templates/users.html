@@ -24,7 +24,10 @@
                     {{user.username}}
                 </td>
                 <td> 
-                    {{user.role}}
+                {% for role in user.roles %}
+                    {{role.name}}
+                    <br/>
+                {% endfor %}
                 </td>
                 <td> 
                     {{user.fname}}

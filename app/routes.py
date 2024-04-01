@@ -1,12 +1,13 @@
 from app import app, db, login
 from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm, EditUserForm, UpdatePasswordForm, CreateUserForm
-from app.models import Registrations, User, Role
+from app.models import Registrations, User, Role, UserRoles
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_from_directory, send_file
 from werkzeug.exceptions import abort
 import os
 from flask_login import current_user, login_user, logout_user, login_required
+from flask_security import roles_accepted
 from werkzeug.security import generate_password_hash
 import sqlalchemy as sa
 import pandas as pd
@@ -14,6 +15,7 @@ from datetime import datetime, date
 import re
 from urllib.parse import urlsplit
 from markupsafe import Markup
+import uuid
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
@@ -67,6 +69,18 @@ def get_user(userid):
         abort(404)
     return user
 
+def get_user_roles(userid):
+    userRoles = UserRoles.query.filter_by(user_id=userid).first()
+    if userRoles is None:
+        abort(404)
+    return userRoles
+
+def get_role(roleid):
+    role = Role.query.filter_by(id=roleid).first()
+    if role is None:
+        abort(404)
+    return role
+
 def reg_count():
     conn= get_db_connection()
     cur = conn.cursor()
@@ -110,6 +124,7 @@ def logout():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    print(current_user)
     regcount = reg_count()
     if request.method == "POST":
         if request.form.get('search_name'):
@@ -139,6 +154,7 @@ def index():
     
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
+@roles_accepted('Admin','Shift Lead','User')
 def reg(regid):
     reg = get_reg(regid)
     if request.form.get("action") == 'Edit':
@@ -152,22 +168,30 @@ def reg(regid):
         return render_template('reg.html', reg=reg)
 
 @app.route('/users', methods=('GET', 'POST'))
+@roles_accepted('Admin')
 def users():
-    users = query_db("SELECT * FROM public.users")
+    users = User.query.all()
+    print(users)
     return render_template('users.html', users=users)
 
 
 @app.route('/user/create', methods=('GET', 'POST'))
+@roles_accepted('Admin')
 def createuser():
 
     form = CreateUserForm()
     
     if request.method == 'POST':
+        print(form.role.data)
         user = User()
         user.username = form.username.data
-        user.role = form.role.data
+        for roleid in form.role.data:
+            print(get_role(roleid))
+            user.roles.append(get_role(roleid))
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.fs_uniquifier = uuid.uuid4().hex
+        user.active = True
         user.set_password(form.password.data)
 
         db.session.add(user)
@@ -179,6 +203,7 @@ def createuser():
     return render_template('createuser.html', form=form)
 
 @app.route('/user', methods=('GET', 'POST'))
+@roles_accepted('Admin')
 def edituser():
     user = get_user(request.args.get("userid"))
     edit_request = request.args.get("submitValue")
@@ -187,7 +212,7 @@ def edituser():
         form = EditUserForm(
             id = user.id, 
             username = user.username, 
-            role = user.role, 
+            role = user.roles, 
             fname = user.fname,
             lname = user.lname,
         )
@@ -202,7 +227,7 @@ def edituser():
     if request.method == 'POST' and edit_request == 'Edit':
         user = get_user(form.id.data)
         user.username = form.username.data
-        user.role = form.role.data
+        user.roles = form.role.data
         user.fname = form.fname.data
         user.lname = form.lname.data
 
@@ -223,6 +248,7 @@ def edituser():
     return render_template('edituser.html', user=user, form=form, edit_request=edit_request)
 
 @app.route('/upload', methods=('GET', 'POST'))
+@roles_accepted('Admin')
 def upload():
     if request.method == 'POST':   
         f = request.files['file'] 
@@ -265,6 +291,7 @@ def upload():
     return render_template('upload.html')
 
 @app.route('/create', methods=('GET', 'POST'))
+@roles_accepted('Admin','Shift Lead','User')
 def create():
     form = CreateRegForm()
     if form.validate_on_submit():
@@ -292,6 +319,7 @@ def create():
     return render_template('create.html', title = 'New Registration', form=form)
 
 @app.route('/editreg', methods=['GET', 'POST'])
+@roles_accepted('Admin', 'Shift Lead')
 def editreg():
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -336,6 +364,7 @@ def editreg():
 
 
 @app.route('/checkin', methods=['GET', 'POST'])
+@roles_accepted('Admin','Shift Lead','User')
 def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -461,6 +490,7 @@ def full_export():
     return render_template('full_export_images.html', regs=regs)
 
 @app.route('/reports', methods=['GET', 'POST'])
+@roles_accepted('Admin')
 def reports():
     form = ReportForm()
     s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
@@ -595,5 +625,3 @@ def waiver():
         return redirect(url_for('reg', regid=regid))
 
     return render_template('waiver.html', form=form)
-
-#test test

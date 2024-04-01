@@ -30,3 +30,4 @@ Werkzeug==3.0.1
 WTForms==3.1.2
 wtforms-html5==0.6.1
 XlsxWriter==3.2.0
+flask_security-too==5.4.3
