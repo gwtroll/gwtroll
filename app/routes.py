@@ -569,24 +569,16 @@ def reports():
 
             file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-            date_check = query_db(
-            "SELECT DISTINCT checkin::DATE FROM registrations WHERE checkin IS NOT NULL;")
+            df = pd.read_sql("SELECT kingdom, checkin::date, COUNT(regid) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", engine)
+            df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count')
+            print(df_pivot)
 
-            date_cols = []
-            for d  in date_check:
-                date_cols.append("\"" + str(d['checkin']) + "\" bigint")
-            date_cols_str =', '.join(date_cols)
-
-            rptquery = "CREATE EXTENSION IF NOT EXISTS tablefunc; SELECT * FROM crosstab('SELECT kingdom, checkin::DATE, COUNT(regid) FROM registrations WHERE checkin::date IS NOT NULL GROUP BY kingdom, checkin::date ORDER BY 1', 'SELECT DISTINCT checkin::DATE FROM registrations WHERE checkin IS NOT NULL;') AS (kingdom text, "+ date_cols_str +");"
-
-            df = pd.read_sql_query(rptquery, engine)
-            
             path1 = './reports/' + file
             path2 = '../reports/' + file
 
             writer = pd.ExcelWriter(path1, engine='xlsxwriter')
 
-            df.to_excel(writer, sheet_name='Report' ,index = False)
+            df_pivot.to_excel(writer, sheet_name='Report' ,index = True)
             workbook = writer.book
             worksheet = writer.sheets["Report"]
 
