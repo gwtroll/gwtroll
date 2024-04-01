@@ -570,7 +570,7 @@ def reports():
             file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
             df = pd.read_sql("SELECT kingdom, checkin::date, COUNT(regid) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", engine)
-            df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count')
+            df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
             print(df_pivot)
 
             path1 = './reports/' + file
@@ -578,7 +578,12 @@ def reports():
 
             writer = pd.ExcelWriter(path1, engine='xlsxwriter')
 
-            df_pivot.to_excel(writer, sheet_name='Report' ,index = True)
+            # df_pivot.to_excel(writer, sheet_name='Report' ,index = True)
+
+            out = df_pivot.assign(Total=df_pivot.sum(axis=1))
+            out = pd.concat([out, out.sum().to_frame('Total').T])
+            out.to_excel(writer, sheet_name='Report', index = True)
+            print(out)
             workbook = writer.book
             worksheet = writer.sheets["Report"]
 
