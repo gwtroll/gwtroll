@@ -354,7 +354,7 @@ def editreg():
 
             db.session.commit()
             db.session.close()
-            return render_template('/<int:regid>', regid=regid)
+            return redirect(url_for('reg',regid=regid))
 
     return render_template('editreg.html', regid=reg.regid, reg=reg, form=form)
 
