@@ -124,12 +124,10 @@ def logout():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    print(current_user)
     regcount = reg_count()
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
-            print(search_value)
             reg = query_db(
                 "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
                 #(search_value, search_value, search_value))
@@ -137,14 +135,12 @@ def index():
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
-            print(search_value)
             reg = query_db(
                 "SELECT * FROM registrations WHERE order_id = %s order by lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
-            print(search_value)
             reg = query_db(
                 "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
                 (search_value,))
@@ -171,7 +167,6 @@ def reg(regid):
 @roles_accepted('Admin')
 def users():
     users = User.query.all()
-    print(users)
     return render_template('users.html', users=users)
 
 
@@ -182,11 +177,9 @@ def createuser():
     form = CreateUserForm()
     
     if request.method == 'POST':
-        print(form.role.data)
         user = User()
         user.username = form.username.data
         for roleid in form.role.data:
-            print(get_role(roleid))
             user.roles.append(get_role(roleid))
         user.fname = form.fname.data
         user.lname = form.lname.data
@@ -207,12 +200,14 @@ def createuser():
 def edituser():
     user = get_user(request.args.get("userid"))
     edit_request = request.args.get("submitValue")
-    print(edit_request)
     if edit_request == "Edit" :
+        role_array = []
+        for role in user.roles:
+            role_array.append(role.id)
         form = EditUserForm(
             id = user.id, 
             username = user.username, 
-            role = user.roles, 
+            role = role_array,
             fname = user.fname,
             lname = user.lname,
         )
@@ -225,9 +220,12 @@ def edituser():
         )
 
     if request.method == 'POST' and edit_request == 'Edit':
+        role_array = []
+        for roleid in form.role.data:
+            role_array.append(get_role(roleid))
         user = get_user(form.id.data)
         user.username = form.username.data
-        user.roles = form.role.data
+        user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data
 
@@ -253,7 +251,6 @@ def upload():
     if request.method == 'POST':   
         f = request.files['file'] 
         f.save(f.filename)
-        print(os.path.join(os.path.abspath(os.path.dirname(app.root_path)),"../",f.filename))
 
         s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
         conndict = dict(item.split("=") for item in s.split(" "))
@@ -377,8 +374,6 @@ def checkin():
     rate_mbr = reg.rate_mbr
     rate_age = reg.rate_age
 
-    print(form.kingdom)
-
     #if form.validate_on_submit():
         #print(form)
     #Calculate Total Price
@@ -389,11 +384,6 @@ def checkin():
 
     if today >= 23:
         today = 9
-    
-    print(today)
-
-    
-    
 
     #Check for medallion number    
     if request.method == 'POST':
@@ -526,7 +516,6 @@ def reports():
 
             rptquery = "SELECT * FROM registrations WHERE checkin::date BETWEEN {} and {}"
             rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
-            print(rptquery)
             params = {'start_date':start_date, 'end_date':end_date}
             df = pd.read_sql_query(rptquery, engine, params=params)
             path1 = './reports/' + file
@@ -543,7 +532,6 @@ def reports():
 
             rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg_status is Null"
             rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
-            print(rptquery)
             params = {'start_date':start_date, 'end_date':end_date}
             df = pd.read_sql_query(rptquery, engine, params=params)
             rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg_status = {}"
@@ -571,7 +559,6 @@ def reports():
 
             df = pd.read_sql("SELECT kingdom, checkin::date, COUNT(regid) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", engine)
             df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
-            print(df_pivot)
 
             path1 = './reports/' + file
             path2 = '../reports/' + file
@@ -583,7 +570,6 @@ def reports():
             out = df_pivot.assign(Total=df_pivot.sum(axis=1))
             out = pd.concat([out, out.sum().to_frame('Total').T])
             out.to_excel(writer, sheet_name='Report', index = True)
-            print(out)
             workbook = writer.book
             worksheet = writer.sheets["Report"]
 
@@ -595,7 +581,6 @@ def reports():
 
             rptquery = "SELECT order_id, regid, fname, lname, scaname, rate_age, lodging, prereg_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
             rptquery = rptquery.format('%(prereg_status)s')
-            print(rptquery)
             params = {'prereg_status':"SUCCEEDED"}
             df = pd.read_sql_query(rptquery, engine, params=params)
             path1 = './reports/' + file
