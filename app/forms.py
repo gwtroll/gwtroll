@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField
 from wtforms.fields import DateField
 from wtforms.validators import DataRequired
 import pandas as pd
@@ -16,7 +16,8 @@ mbrdata = [('Member', 'Member'), ('Non-Member', 'Non-Member')]
 
 reporttypedata = [('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report')]
 
-roledata = [('User', 'User'), ('Shift Lead', 'Shift Lead'), ('Admin','Admin')]
+roledata = [(5, 'User'), (2, 'Shift Lead'), (1, 'Admin'), (3, 'Marshal'),(4, 'Land')]
+
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -26,7 +27,7 @@ class LoginForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     # id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    role = SelectField('Role', validators=[DataRequired()], choices=roledata)
+    role = SelectMultipleField('Role', validators=[DataRequired()], choices=roledata)
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -35,7 +36,7 @@ class CreateUserForm(FlaskForm):
 class EditUserForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    role = SelectField('Role', validators=[DataRequired()], choices=roledata)
+    role = SelectMultipleField('Role', validators=[DataRequired()], choices=roledata)
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     submit = SubmitField('Submit')
