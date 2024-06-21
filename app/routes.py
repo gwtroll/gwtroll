@@ -150,7 +150,7 @@ def index():
     
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
-@roles_accepted('Admin','Shift Lead','User')
+@roles_accepted('Admin','Troll Shift Lead','Troll User')
 def reg(regid):
     reg = get_reg(regid)
     if request.form.get("action") == 'Edit':
@@ -288,7 +288,7 @@ def upload():
     return render_template('upload.html')
 
 @app.route('/create', methods=('GET', 'POST'))
-@roles_accepted('Admin','Shift Lead','User')
+@roles_accepted('Admin','Troll Shift Lead','Troll User')
 def create():
     form = CreateRegForm()
     if form.validate_on_submit():
@@ -316,7 +316,7 @@ def create():
     return render_template('create.html', title = 'New Registration', form=form)
 
 @app.route('/editreg', methods=['GET', 'POST'])
-@roles_accepted('Admin', 'Shift Lead')
+@roles_accepted('Admin', 'Troll Shift Lead')
 def editreg():
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -361,7 +361,7 @@ def editreg():
 
 
 @app.route('/checkin', methods=['GET', 'POST'])
-@roles_accepted('Admin','Shift Lead','User')
+@roles_accepted('Admin','Troll Shift Lead','Troll User')
 def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -475,6 +475,7 @@ def checkin():
     return render_template('checkin.html', reg=reg, form=form)
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
+@roles_accepted('Admin')
 def full_export():
     regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
     return render_template('full_export_images.html', regs=regs)
