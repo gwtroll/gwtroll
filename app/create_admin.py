@@ -5,12 +5,14 @@ from app.models import User, Role, db
 import uuid
 
 def create_admin():
-    if User.query.filter_by(id=1).first() is None:
+
+    if User.query.filter_by(id=1).first() == None:
         admin = models.User(id=1, username='admin', roles=[Role.query.filter_by(id=1).first()], fname='Admin', lname='Admin', fs_uniquifier=uuid.uuid4().hex, active=True)
         admin.set_password("admin")
 
+    try:
         db.session.add(admin)
         db.session.commit()
-        db.session.close()
-
         print("Admin Created")
+    except:
+        print("Admin Already Initialized")

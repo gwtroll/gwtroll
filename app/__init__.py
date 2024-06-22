@@ -25,4 +25,6 @@ app.security = Security(app, user_datastore)
 
 with app.app_context():
     create_roles()
+    print("Roles Created")
     create_admin()
+    print("Admin Created")

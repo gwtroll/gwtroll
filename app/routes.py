@@ -1,5 +1,5 @@
 from app import app, db, login
-from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm, EditUserForm, UpdatePasswordForm, CreateUserForm
+from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm, EditUserForm, UpdatePasswordForm, CreateUserForm, MartialForm
 from app.models import Registrations, User, Role, UserRoles
 import psycopg2
 import psycopg2.extras
@@ -16,6 +16,7 @@ import re
 from urllib.parse import urlsplit
 from markupsafe import Markup
 import uuid
+from sqlalchemy import or_, and_
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
@@ -75,6 +76,19 @@ def get_user_roles(userid):
         abort(404)
     return userRoles
 
+def get_roles():
+    roles = Role.query.all()
+    if roles is None:
+        abort(404)
+    return roles
+
+def get_role_choices():
+    roles = get_roles()
+    role_choices = []
+    for r in roles:
+        role_choices.append([r.id, r.name])
+    return role_choices
+
 def get_role(roleid):
     role = Role.query.filter_by(id=roleid).first()
     if role is None:
@@ -121,32 +135,61 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    regcount = reg_count()
+@app.route('/martialhome', methods=['GET', 'POST'])
+def martialhome():
     if request.method == "POST":
+        print("MARTIAL REG POST")
+        if request.form.get('search_name'):
+            search_value = '%'+request.form.get('search_name')+'%'
+            reg = Registrations.query.filter(and_(or_(Registrations.fname.like(search_value), Registrations.lname.like(search_value), Registrations.scaname.like(search_value))),Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
+            return render_template('martial_home.html', searchreg=reg)
+        elif request.form.get('order_id'):
+            search_value = request.form.get('order_id')
+            reg = Registrations.query.filter(and_(Registrations.order_id == search_value), Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
+            return render_template('martial_home.html', searchreg=reg)
+        elif request.form.get('medallion'):
+            search_value = request.form.get('medallion')
+            reg = Registrations.query.filter(and_(Registrations.medallion == search_value), Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
+            return render_template('martial_home.html', searchreg=reg)
+    else:
+        return render_template('martial_home.html')
+
+@app.route('/trollhome', methods=['GET', 'POST'])
+def trollhome():
+    regcount = reg_count()
+    print(request.method)
+    if request.method == "POST":
+        print("SEARCHED")
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
             reg = query_db(
                 "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
                 #(search_value, search_value, search_value))
                 ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
-            return render_template('index.html', searchreg=reg, regcount=regcount)
+            return render_template('troll_home.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
             reg = query_db(
                 "SELECT * FROM registrations WHERE order_id = %s order by lname, fname",
                 (search_value,))
-            return render_template('index.html', searchreg=reg, regcount=regcount)
+            return render_template('troll_home.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
             reg = query_db(
                 "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
                 (search_value,))
-            return render_template('index.html', searchreg=reg, regcount=regcount)
+            return render_template('troll_home.html', searchreg=reg, regcount=regcount)
     else:
-        return render_template('index.html', regcount=regcount)
+        return render_template('troll_home.html', regcount=regcount)
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    elif current_user.has_role('Troll User') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Admin'):
+        return redirect(url_for('trollhome'))
+    elif current_user.has_role('Troll User') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Admin'):
+        return redirect(url_for('trollhome'))
     
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
@@ -162,6 +205,37 @@ def reg(regid):
         return redirect(url_for('checkin', regid=regid))
     else:
         return render_template('reg.html', reg=reg)
+    
+@app.route('/martial/<int:regid>', methods=('GET', 'POST'))
+@roles_accepted('Admin','Martial Admin','Martial User')
+def martial_reg(regid):
+    reg = get_reg(regid)
+    form = MartialForm()
+    form.chivalric_inspection.data = reg.chivalric_inspection
+    form.rapier_inspection.data = reg.rapier_inspection
+    if request.method == 'POST':
+        chivalric_inspection = request.form.get('chivalric_inspection')
+        rapier_inspection = request.form.get('rapier_inspection')
+        print(chivalric_inspection)
+        print(rapier_inspection)
+        reg.chivalric_inspection = bool(chivalric_inspection)
+        reg.rapier_inspection = bool(rapier_inspection)
+        if chivalric_inspection:
+            reg.chivalric_inspection_martial_id = current_user.id
+            reg.chivalric_inspection_date = datetime.now()
+        else:
+            reg.chivalric_inspection_martial = None
+            reg.chivalric_inspection_date = None
+        if rapier_inspection:
+            reg.rapier_inspection_martial_id = current_user.id
+            reg.rapier_inspection_date = datetime.now()
+        else:
+            reg.rapier_inspection_martial = None
+            reg.rapier_inspection_date = None
+        db.session.add(reg)
+        db.session.commit()
+        return redirect(url_for('checkin', regid=regid))
+    return render_template('martial_reg.html', reg=reg, form=form)
 
 @app.route('/users', methods=('GET', 'POST'))
 @roles_accepted('Admin')
@@ -175,6 +249,7 @@ def users():
 def createuser():
 
     form = CreateUserForm()
+    form.role.choices = get_role_choices()
     
     if request.method == 'POST':
         user = User()
@@ -211,6 +286,7 @@ def edituser():
             fname = user.fname,
             lname = user.lname,
         )
+        form.role.choices = get_role_choices()
         
     elif edit_request == "Password Reset":
         form = UpdatePasswordForm(

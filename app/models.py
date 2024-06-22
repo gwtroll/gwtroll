@@ -79,6 +79,14 @@ class Registrations(db.Model):
     signature: so.Mapped[Optional[str]]
     reg_date_time: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
+    chivalric_inspection: so.Mapped[Optional[bool]]
+    chivalric_inspection_date: so.Mapped[Optional[date]]
+    chivalric_inspection_martial_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    chivalric_inspection_martial = db.relationship("User", foreign_keys=[chivalric_inspection_martial_id])
+    rapier_inspection: so.Mapped[Optional[bool]]
+    rapier_inspection_date: so.Mapped[Optional[date]]
+    rapier_inspection_martial_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    rapier_inspection_martial = db.relationship('User', foreign_keys=[rapier_inspection_martial_id])
 
     def __repr__(self):
         return '<Registrations {}>'.format(self.regid)

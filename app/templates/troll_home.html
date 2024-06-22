@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3> <p>There are {{regcount}} people checked in to Gulf Wars.</p></h3>
+<h1>{% block title %} Search for a Registration {% endblock %}</h1>
+
+<form action="/trollhome" method="POST">
+    <div class="mb-5 d-flex position-relative">
+        <!-- Search -->
+        <div class="input-group w-50 mx-auto">
+            <input class="form-control py-2"
+                   placeholder="Search by Name" name="search_name" value=""/>
+            <button type="submit" class="btn btn-secondary">Search
+            </button>
+        </div>
+    </div>
+    <div class="mb-5 d-flex position-relative">
+        <!-- Search -->
+        <div class="input-group w-50 mx-auto">
+            <input class="form-control py-2"
+                   placeholder="Search by Order ID" name="order_id" value=""/>
+            <button type="submit" class="btn btn-secondary">Search
+            </button>
+        </div>
+    </div>
+    <div class="mb-5 d-flex position-relative">
+        <!-- Search -->
+        <div class="input-group w-50 mx-auto">
+            <input class="form-control py-2"
+                   placeholder="Search by Medallion Number" name="medallion" value=""/>
+            <button type="submit" class="btn btn-secondary">Search
+            </button>
+        </div>
+    </div>
+</form>
+{% if searchreg %}
+<div>
+    {% for reg in searchreg %}
+        <a href="{{ url_for('reg', regid=reg['regid']) }}">
+            <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
+        </a>
+        <div>
+            <p class="text-muted">{{ reg['scaname'] }}</p>
+        </div>
+        <hr>
+    {% endfor %}
+</div>
+{% endif %}
+</body>
+</html>
+
+{% endblock %}

@@ -16,8 +16,6 @@ mbrdata = [('Member', 'Member'), ('Non-Member', 'Non-Member')]
 
 reporttypedata = [('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report')]
 
-roledata = [(5, 'User'), (2, 'Shift Lead'), (1, 'Admin'), (3, 'Marshal'),(4, 'Land')]
-
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -27,7 +25,7 @@ class LoginForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     # id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    role = SelectMultipleField('Role', validators=[DataRequired()], choices=roledata)
+    role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -36,7 +34,7 @@ class CreateUserForm(FlaskForm):
 class EditUserForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    role = SelectMultipleField('Role', validators=[DataRequired()], choices=roledata)
+    role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     submit = SubmitField('Submit')
@@ -110,4 +108,10 @@ class ReportForm(FlaskForm):
     report_type = SelectField('Report Type', validators=[DataRequired()], choices=reporttypedata)
     dt_start = DateField('Start Date', format='%Y-%m-%d')
     dt_end = DateField('End Date', format='%Y-%m-%d')
+    submit = SubmitField('Submit')
+
+class MartialForm(FlaskForm):
+    regid = IntegerField()
+    chivalric_inspection = BooleanField('Chivalric Inspection')
+    rapier_inspection = BooleanField('Rapier Inspection')
     submit = SubmitField('Submit')

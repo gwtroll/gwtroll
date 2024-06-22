@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h3> <p>There are {{regcount}} people checked in to Gulf Wars.</p></h3>
+<h3> <p>There are MARTIAL COUNT people checked in to Gulf Wars.</p></h3>
 <h1>{% block title %} Search for a Registration {% endblock %}</h1>
 
-<form action="/" method="POST">
+<form action="/martialhome" method="POST">
     <div class="mb-5 d-flex position-relative">
         <!-- Search -->
         <div class="input-group w-50 mx-auto">
@@ -36,7 +36,7 @@
 {% if searchreg %}
 <div>
     {% for reg in searchreg %}
-        <a href="{{ url_for('reg', regid=reg['regid']) }}">
+        <a href="{{ url_for('martial_reg', regid=reg['regid']) }}">
             <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
         </a>
         <div>

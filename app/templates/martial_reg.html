@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <!-- <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endif %}
+        {% endwith %}
+    </div> -->
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <table class="table">
+                    <colgroup>
+                        <col span="1" style="background-color: #D6EEEE">
+                    </colgroup>
+                    <tbody>
+                        <tr> 
+                            <td>Name: </td>
+                            <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>SCA Name: </td>
+                            <td>{{ reg['scaname'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Registration ID: </td>
+                            <td>{{ reg['regid'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Pre-reg Order ID: </td>
+                            <td>{{ reg['order_id'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Age Range: </td>
+                            <td>{{ reg['rate_age'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Membership: </td>
+                            <td>{{ reg['rate_mbr'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Kingdom: </td>
+                            <td>{{ reg['kingdom'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Camp Group: </td>
+                            <td>{{ reg['lodging'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Medallion Number: </td>
+                            <td>{{ reg['medallion'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Check-In Date: </td>
+                            <td>{{ reg['checkin'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Waiver Signature: </td>
+                                    
+                            <td><img src="{{ reg['signature'] }}" class="img-fluid"></td>
+                        
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <form action="/martial/{{reg.regid}}" method="POST">
+                    {{form.chivalric_inspection.label()}}{{form.chivalric_inspection}}
+                    {% if reg.chivalric_inspection %}
+                        {{reg.chivalric_inspection_martial.username}} : {{reg.chivalric_inspection_date}}
+                    {% endif %}
+                    <br>
+                    {{form.rapier_inspection.label()}}{{form.rapier_inspection}}
+                    {% if reg.rapier_inspection %}
+                        {{reg.rapier_inspection_martial.username}} : {{reg.rapier_inspection_date}}
+                    {% endif %}
+                    <br>
+                    {{form.submit}}
+                </form>
+                Add Bow
+                Add Crossbow
+            </div>
+        </div>
+        
+{% endblock %}
