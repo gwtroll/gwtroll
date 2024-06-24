@@ -1,6 +1,6 @@
 from app import app, db, login
-from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm, EditUserForm, UpdatePasswordForm, CreateUserForm, MartialForm
-from app.models import Registrations, User, Role, UserRoles
+from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm, EditUserForm, UpdatePasswordForm, CreateUserForm, MartialForm, BowForm, CrossBowForm
+from app.models import Registrations, User, Role, UserRoles, Bows, Crossbows
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_from_directory, send_file
@@ -16,6 +16,7 @@ import re
 from urllib.parse import urlsplit
 from markupsafe import Markup
 import uuid
+from collections import namedtuple
 from sqlalchemy import or_, and_
 
 #Import pricing from CSV and set global variables
@@ -184,12 +185,13 @@ def trollhome():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    print(current_user.roles)
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
     elif current_user.has_role('Troll User') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Admin'):
         return redirect(url_for('trollhome'))
-    elif current_user.has_role('Troll User') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Admin'):
-        return redirect(url_for('trollhome'))
+    elif current_user.has_role('Marshal User') or current_user.has_role('Marshal Admin'):
+        return redirect(url_for('martialhome'))
     
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
@@ -206,35 +208,92 @@ def reg(regid):
     else:
         return render_template('reg.html', reg=reg)
     
+@app.route('/martial/<int:regid>/addbow', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_bow(regid):
+    reg = get_reg(regid)
+    form = BowForm()
+    if request.method == 'POST':
+        if request.form.get("poundage"):
+            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            bow = Bows()
+            bow.poundage = request.form.get("poundage")
+            bow.bow_inspection_martial_id = current_user.id
+            bow.bow_inspection_date = datetime.now()
+            if update_reg.bows:
+                update_reg.bows.append(bow)
+            else:
+                bows = []
+                bows.append(bow)
+                update_reg.bows = bows
+            db.session.commit()
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_bow.html', reg=reg, form=form)
+
+@app.route('/martial/<int:regid>/addcrossbow', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_crossbow(regid):
+    reg = get_reg(regid)
+    form = CrossBowForm()
+    if request.method == 'POST':
+        if request.form.get("inchpounds"):
+            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            print(request.form.get("inchpounds"))
+            crossbow = Crossbows()
+            crossbow.inchpounds = request.form.get("inchpounds")
+            crossbow.crossbow_inspection_martial_id = current_user.id
+            crossbow.crossbow_inspection_date = datetime.now()
+            if update_reg.crossbows:
+                update_reg.crossbows.append(crossbow)
+            else:
+                crossbows = []
+                crossbows.append(crossbow)
+                update_reg.crossbows = crossbows
+            db.session.commit()
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_crossbow.html', reg=reg, form=form)
+    
 @app.route('/martial/<int:regid>', methods=('GET', 'POST'))
-@roles_accepted('Admin','Martial Admin','Martial User')
+@roles_accepted('Admin','Marshal Admin','Marshal User')
 def martial_reg(regid):
     reg = get_reg(regid)
     form = MartialForm()
     form.chivalric_inspection.data = reg.chivalric_inspection
     form.rapier_inspection.data = reg.rapier_inspection
+    if reg.bows:
+        for bow in reg.bows:
+            form.bows.append_entry(bow)
+    if reg.crossbows:
+        for crossbow in reg.crossbows:
+            form.crossbows.append_entry(crossbow)
+
     if request.method == 'POST':
         chivalric_inspection = request.form.get('chivalric_inspection')
         rapier_inspection = request.form.get('rapier_inspection')
-        print(chivalric_inspection)
-        print(rapier_inspection)
+
         reg.chivalric_inspection = bool(chivalric_inspection)
         reg.rapier_inspection = bool(rapier_inspection)
         if chivalric_inspection:
-            reg.chivalric_inspection_martial_id = current_user.id
-            reg.chivalric_inspection_date = datetime.now()
+            if reg.chivalric_inspection_martial_id is None:
+                reg.chivalric_inspection_martial_id = current_user.id
+                reg.chivalric_inspection_date = datetime.now()
         else:
             reg.chivalric_inspection_martial = None
             reg.chivalric_inspection_date = None
         if rapier_inspection:
-            reg.rapier_inspection_martial_id = current_user.id
-            reg.rapier_inspection_date = datetime.now()
+            if reg.rapier_inspection_martial_id is None:
+                reg.rapier_inspection_martial_id = current_user.id
+                reg.rapier_inspection_date = datetime.now()
         else:
             reg.rapier_inspection_martial = None
             reg.rapier_inspection_date = None
+
+        # for crossbow in form.crossbows:
+        #     print(bow.data.get('inchpound'))
+
         db.session.add(reg)
         db.session.commit()
-        return redirect(url_for('checkin', regid=regid))
+        return redirect(url_for('index'))
     return render_template('martial_reg.html', reg=reg, form=form)
 
 @app.route('/users', methods=('GET', 'POST'))

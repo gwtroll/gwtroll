@@ -71,20 +71,102 @@
             </div>
             <div class="col">
                 <form action="/martial/{{reg.regid}}" method="POST">
-                    {{form.chivalric_inspection.label()}}{{form.chivalric_inspection}}
-                    {% if reg.chivalric_inspection %}
-                        {{reg.chivalric_inspection_martial.username}} : {{reg.chivalric_inspection_date}}
-                    {% endif %}
-                    <br>
-                    {{form.rapier_inspection.label()}}{{form.rapier_inspection}}
-                    {% if reg.rapier_inspection %}
-                        {{reg.rapier_inspection_martial.username}} : {{reg.rapier_inspection_date}}
-                    {% endif %}
+                    <table>
+                        <thead>
+                            <th>Type</th>
+                            <th>Inspected</th>
+                            <th>Martial</th>
+                            <th>Date/Time</th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <b>Chivalric</b>    
+                                </td>
+                                <td>
+                                    {{form.chivalric_inspection}}
+                                </td>
+                                <td>
+                                    {% if reg.chivalric_inspection %}
+                                        {{reg.chivalric_inspection_martial.fname}} {{reg.chivalric_inspection_martial.lname}}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reg.chivalric_inspection %}
+                                    {{reg.chivalric_inspection_date}}
+                                {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Rapier</b>
+                                </td>
+                                <td>
+                                    {{form.rapier_inspection}}
+                                </td>
+                                <td>
+                                    {% if reg.rapier_inspection %}
+                                    {{reg.rapier_inspection_martial.fname}} {{reg.rapier_inspection_martial.lname}}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reg.rapier_inspection %}
+                                    {{reg.rapier_inspection_date}}
+                                {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <br>
                     {{form.submit}}
                 </form>
-                Add Bow
-                Add Crossbow
+                <br>
+                <h4>Bows</h4>
+                <br>
+                <table>
+                    <thead>
+                        <th>Poundage</th>
+                        <th>Martial</th>
+                        <th>Date/Time</th>
+                    </thead>
+                    <tbody>
+                        {% for bow in reg.bows %}
+                        <tr>
+                            <td>{{ bow.poundage }}</td>
+                            <td>{{ bow.bow_inspection_martial.fname}} {{bow.bow_inspection_martial.lname}}</td>
+                            <td>{{ bow.bow_inspection_date}}</td>
+                        </tr>   
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <form action="/martial/{{reg.regid}}/addbow" method="get">
+                    <button type="submit" id="addBow">
+                        Add Bow
+                    </button>
+                </form>
+                <br>
+                <h4>Crossbows</h4>
+                <br>
+                <table>
+                    <thead>
+                        <th>Inch/Pounds</th>
+                        <th>Martial</th>
+                        <th>Date/Time</th>
+                    </thead>
+                    <tbody>
+                        {% for crossbow in reg.crossbows %}
+                        <td>{{ crossbow.inchpounds }}</td>
+                        <td>{{ crossbow.crossbow_inspection_martial.username}}</td>
+                        <td>{{ crossbow.crossbow_inspection_date}}</td>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <form action="/martial/{{reg.regid}}/addcrossbow" method="get">
+                    <button type="submit" id="addCrossBow">
+                        Add Crossbow
+                    </button>
+                </form>
             </div>
         </div>
         

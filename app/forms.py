@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, DecimalField, FieldList, FormField
 from wtforms.fields import DateField
 from wtforms.validators import DataRequired
 import pandas as pd
@@ -110,8 +110,20 @@ class ReportForm(FlaskForm):
     dt_end = DateField('End Date', format='%Y-%m-%d')
     submit = SubmitField('Submit')
 
+class BowForm(FlaskForm):
+    id = IntegerField("Bow Id")
+    poundage = DecimalField('Poundage')
+    submit = SubmitField('Submit')
+
+class CrossBowForm(FlaskForm):
+    id = IntegerField("Crossbow Id")
+    inchpounds = DecimalField('Inch/Pound')
+    submit = SubmitField('Submit')
+
 class MartialForm(FlaskForm):
     regid = IntegerField()
     chivalric_inspection = BooleanField('Chivalric Inspection')
     rapier_inspection = BooleanField('Rapier Inspection')
+    bows = FieldList(FormField(BowForm))
+    crossbows = FieldList(FormField(CrossBowForm))
     submit = SubmitField('Submit')
