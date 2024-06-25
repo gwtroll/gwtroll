@@ -1,7 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h3> <p>There are MARTIAL COUNT people checked in to Gulf Wars.</p></h3>
+<h3> <p>Rapier Inspections: {{inspection_stats.rapier_inspections}} 
+    <br>
+    Chivalric Inspections: {{inspection_stats.chivalric_inspections}}
+    <br>
+    Bows: {{inspection_stats.bow_inspections}}
+    <br>
+    Crossbows: {{inspection_stats.crossbow_inspections}}
+    </p>
+</h3>
 <h1>{% block title %} Search for a Registration {% endblock %}</h1>
 
 <form action="/martialhome" method="POST">

@@ -108,6 +108,30 @@ def reg_count():
         abort(404)
     return regcount
 
+def get_inspection_stats():
+    inspection_stats = {}
+    inspections = Registrations.query.filter(or_(Registrations.crossbows != None, Registrations.bows != None, Registrations.chivalric_inspection == True, Registrations.rapier_inspection == True)).all()
+    chivalric_inspections = 0
+    rapier_inspections = 0
+    bow_inspections = 0
+    crossbow_inspections = 0
+    for i in inspections:
+        if i.chivalric_inspection:
+            chivalric_inspections += 1
+        if i.rapier_inspection:
+            rapier_inspections += 1
+        if i.bows:
+            bow_inspections += len(i.bows)
+        if i.crossbows:
+            crossbow_inspections += len(i.crossbows)
+    inspection_stats = {
+    'chivalric_inspections':chivalric_inspections, 
+    'rapier_inspections':rapier_inspections, 
+    'bow_inspections':bow_inspections, 
+    'crossbow_inspections':crossbow_inspections}
+    return inspection_stats
+
+
 def query_db(query, args=(), one=False):
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
@@ -138,22 +162,22 @@ def logout():
 
 @app.route('/martialhome', methods=['GET', 'POST'])
 def martialhome():
+    inspection_stats = get_inspection_stats()
     if request.method == "POST":
-        print("MARTIAL REG POST")
         if request.form.get('search_name'):
             search_value = '%'+request.form.get('search_name')+'%'
             reg = Registrations.query.filter(and_(or_(Registrations.fname.like(search_value), Registrations.lname.like(search_value), Registrations.scaname.like(search_value))),Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
-            return render_template('martial_home.html', searchreg=reg)
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
             reg = Registrations.query.filter(and_(Registrations.order_id == search_value), Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
-            return render_template('martial_home.html', searchreg=reg)
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
             reg = Registrations.query.filter(and_(Registrations.medallion == search_value), Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
-            return render_template('martial_home.html', searchreg=reg)
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
     else:
-        return render_template('martial_home.html')
+        return render_template('martial_home.html', inspection_stats=inspection_stats)
 
 @app.route('/trollhome', methods=['GET', 'POST'])
 def trollhome():
