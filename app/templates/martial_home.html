@@ -1,48 +1,60 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h3> <p>Rapier Inspections: {{inspection_stats.rapier_inspections}} 
-    <br>
-    Chivalric Inspections: {{inspection_stats.chivalric_inspections}}
-    <br>
-    Bows: {{inspection_stats.bow_inspections}}
-    <br>
-    Crossbows: {{inspection_stats.crossbow_inspections}}
-    </p>
-</h3>
-<h1>{% block title %} Search for a Registration {% endblock %}</h1>
-
+<div class="row">
+    <div class="col">
+        <h1>{% block title %} Search for a Registration {% endblock %}</h1>
+    </div>
+</div>
+<div class="row">
+        <div class="col">
+            <h4>Rapier Inspections: {{inspection_stats.rapier_inspections}}</h4>
+        </div>
+        <div class="col">
+            <h4>Chivalric Inspections: {{inspection_stats.chivalric_inspections}}</h4>
+        </div>
+        <div class="col">
+            <h4>Bows: {{inspection_stats.bow_inspections}}</h4>
+        </div>
+        <div class="col">
+            <h4>Crossbows: {{inspection_stats.crossbow_inspections}}</h4>
+        </div>
+</div>
+    <div class="row justify-content-center">
+        <div class="col-5 text-center">
 <form action="/martialhome" method="POST">
-    <div class="mb-5 d-flex position-relative">
+    <div class="mb-5">
         <!-- Search -->
-        <div class="input-group w-50 mx-auto">
-            <input class="form-control py-2"
+        <div class="input-group input-group-lg minw-50">
+            <input class="form-control py-2 minw-50"
                    placeholder="Search by Name" name="search_name" value=""/>
             <button type="submit" class="btn btn-secondary">Search
             </button>
         </div>
     </div>
-    <div class="mb-5 d-flex position-relative">
+    <div class="mb-5">
         <!-- Search -->
-        <div class="input-group w-50 mx-auto">
-            <input class="form-control py-2"
+        <div class="input-group input-group-lg minw-50">
+            <input class="form-control py-2 minw-50"
                    placeholder="Search by Order ID" name="order_id" value=""/>
             <button type="submit" class="btn btn-secondary">Search
             </button>
         </div>
     </div>
-    <div class="mb-5 d-flex position-relative">
+    <div class="mb-5">
         <!-- Search -->
-        <div class="input-group w-50 mx-auto">
-            <input class="form-control py-2"
+        <div class="input-group input-group-lg minw-50">
+            <input class="form-control py-2 minw-50"
                    placeholder="Search by Medallion Number" name="medallion" value=""/>
             <button type="submit" class="btn btn-secondary">Search
             </button>
         </div>
     </div>
 </form>
+</div>
+<div class="col vh-50">
 {% if searchreg %}
-<div>
+<div class="overflow-auto vh-50">
     {% for reg in searchreg %}
         <a href="{{ url_for('martial_reg', regid=reg['regid']) }}">
             <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
@@ -54,6 +66,8 @@
     {% endfor %}
 </div>
 {% endif %}
+</div>
+</div>
 </body>
 </html>
 
