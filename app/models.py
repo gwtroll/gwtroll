@@ -56,9 +56,20 @@ def load_user(id):
 class Registrations(db.Model):
     regid: so.Mapped[int] = so.mapped_column(primary_key=True)
     order_id: so.Mapped[Optional[int]]
+    invoice_number: so.Mapped[Optional[str]] 
+    invoice_paid: so.Mapped[bool] = so.mapped_column(default=False)
+    invoice_date: so.Mapped[Optional[datetime]]
+    invoice_canceled: so.Mapped[bool] = so.mapped_column(default=False)
+    refund_check_num: so.Mapped[Optional[int]]
     fname: so.Mapped[str] 
     lname: so.Mapped[str] 
     scaname: so.Mapped[Optional[str]] 
+    city: so.Mapped[Optional[str]] 
+    state_province: so.Mapped[Optional[str]] 
+    zip: so.Mapped[Optional[int]] 
+    country: so.Mapped[Optional[str]] 
+    phone: so.Mapped[Optional[str]] 
+    email: so.Mapped[Optional[str]] 
     kingdom: so.Mapped[Optional[str]] 
     event_ticket: so.Mapped[Optional[str]] 
     rate_mbr: so.Mapped[Optional[str]] 
@@ -72,11 +83,17 @@ class Registrations(db.Model):
     prereg_status: so.Mapped[Optional[str]] 
     mbr_num_exp: so.Mapped[Optional[str]] 
     mbr_num: so.Mapped[Optional[int]]
-    mbr_exp: so.Mapped[Optional[date]]
+    onsite_contact_name: so.Mapped[Optional[str]] 
+    onsite_contact_sca_name: so.Mapped[Optional[str]] 
+    onsite_contact_kingdom: so.Mapped[Optional[str]] 
+    onsite_contact_group: so.Mapped[Optional[str]] 
+    offsite_contact_name: so.Mapped[Optional[str]] 
+    offsite_contact_phone: so.Mapped[Optional[str]] 
     requests: so.Mapped[Optional[str]] 
     checkin: so.Mapped[Optional[datetime]]
     medallion: so.Mapped[Optional[int]]
     signature: so.Mapped[Optional[str]]
+    prereg_date_time: so.Mapped[Optional[datetime]]
     reg_date_time: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
 

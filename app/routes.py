@@ -1,5 +1,5 @@
 from app import app, db, login
-from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm, EditUserForm, UpdatePasswordForm, CreateUserForm
+from app.forms import *
 from app.models import Registrations, User, Role, UserRoles
 import psycopg2
 import psycopg2.extras
@@ -10,12 +10,14 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_security import roles_accepted
 from werkzeug.security import generate_password_hash
 import sqlalchemy as sa
+from sqlalchemy import and_, or_
 import pandas as pd
 from datetime import datetime, date
 import re
 from urllib.parse import urlsplit
 from markupsafe import Markup
 import uuid
+import json
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
@@ -62,6 +64,21 @@ def get_reg(regid):
     if reg is None:
         abort(404)
     return reg
+
+def get_reg_by_invoice(invoice_number):
+    reg = Registrations.query.filter(Registrations.invoice_number == invoice_number).first()
+    if reg is None:
+        abort(404)
+    return reg
+
+def is_duplicate_invoice_number(invoice_number, regid):
+    reg = Registrations.query.filter(Registrations.invoice_number == invoice_number).first()
+    if reg is None:
+        return False
+    elif reg.regid == regid:
+        return False
+    else:
+        return True
 
 def get_user(userid):
     user = User.query.filter_by(id=userid).first()
@@ -149,6 +166,8 @@ def index():
         return render_template('index.html', regcount=regcount)
     
 
+    
+
 @app.route('/<int:regid>', methods=('GET', 'POST'))
 @roles_accepted('Admin','Shift Lead','User')
 def reg(regid):
@@ -162,6 +181,93 @@ def reg(regid):
         return redirect(url_for('checkin', regid=regid))
     else:
         return render_template('reg.html', reg=reg)
+    
+@app.route('/invoice/unsent', methods=('GET', 'POST'))
+@roles_accepted('Admin')
+def unsentinvoices():
+    regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.invoice_date == None, Registrations.prereg_status == "SUCCEEDED")).all()
+    return render_template('invoice_list.html', regs=regs, back='unsent')
+
+@app.route('/invoice/open', methods=('GET', 'POST'))
+@roles_accepted('Admin')
+def openinvoices():
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_canceled == False, Registrations.invoice_paid == False)).all()
+    return render_template('invoice_list.html', regs=regs, back='open')
+
+@app.route('/invoice/paid', methods=('GET', 'POST'))
+@roles_accepted('Admin')
+def paidinvoices():
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_canceled == False, Registrations.invoice_paid == True)).all()
+    return render_template('invoice_list.html', regs=regs, back='paid')
+
+
+@app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
+@roles_accepted('Admin')
+def updateinvoice(regid):
+    back = request.args.get('back')
+    reg = get_reg(regid)
+    form = UpdateInvoiceForm()
+    form.price_paid.data = reg.price_paid
+    form.price_calc.data = reg.price_calc
+    form.price_due.data = reg.price_due
+    form.invoice_number.data = reg.invoice_number
+    form.invoice_paid.data = reg.invoice_paid
+    if reg.invoice_date is not None:
+        form.invoice_date.data = reg.invoice_date
+    else:
+        form.invoice_date.data = datetime.now()
+    form.invoice_canceled.data = reg.invoice_canceled
+    
+    if request.method == 'POST':
+        invoice_number = request.form.get('invoice_number')
+        price_paid = int(request.form.get('price_paid'))
+        price_calc = int(request.form.get('price_calc'))
+        invoice_paid = bool(request.form.get('invoice_paid'))
+        invoice_date = request.form.get('invoice_date')
+        invoice_canceled = bool(request.form.get('invoice_canceled'))
+
+        if invoice_paid == True and price_paid <= 0:
+            flash('Price Paid must be greater than 0 if invoice is Paid')
+            return render_template('update_invoice.html', reg=reg, form=form)
+
+        if invoice_paid == False and price_paid > 0:
+            flash('Invoice must be marked as Paid if Price Paid is greater than 0')
+            return render_template('update_invoice.html', reg=reg, form=form)
+
+        if is_duplicate_invoice_number(invoice_number, regid):
+            flash('Duplicate Invoice Number {}'.format(
+            invoice_number))
+            return render_template('update_invoice.html', reg=reg, form=form)
+
+        reg.invoice_paid = invoice_paid
+        reg.price_paid = price_paid
+        reg.price_calc = price_calc
+        if invoice_number != None and invoice_number != '':          
+            reg.invoice_number = invoice_number
+
+        if invoice_date != '' and invoice_date is not None:
+            reg.invoice_date = invoice_date
+        reg.invoice_canceled = invoice_canceled
+
+        reg.price_due = price_calc - price_paid
+
+        db.session.commit()
+
+        match back:
+            case 'unsent': 
+                return redirect('/invoice/unsent')
+            case 'open': 
+                return redirect('/invoice/open')
+            case 'paid': 
+                return redirect('/invoice/paid')
+            case 'canceled': 
+                return redirect('/invoice/canceled')
+            case _:
+                return redirect('/')
+
+
+    return render_template('update_invoice.html', reg=reg, form=form)
+
 
 @app.route('/users', methods=('GET', 'POST'))
 @roles_accepted('Admin')
@@ -230,7 +336,6 @@ def edituser():
         user.lname = form.lname.data
 
         db.session.commit()
-        db.session.close()
 
         return redirect('/users')
 
@@ -239,7 +344,6 @@ def edituser():
         user.set_password(form.password.data)
 
         db.session.commit()
-        db.session.close()
 
         return redirect('/users')
     
@@ -286,6 +390,66 @@ def upload():
         conn.close()
         flash("SUCCESS!")
     return render_template('upload.html')
+
+@app.route('/registration', methods=('GET', 'POST'))
+def createprereg():
+    form = CreatePreRegForm()
+    if form.validate_on_submit() and request.method == 'POST':
+        reg = Registrations(
+            fname = form.fname.data,
+            lname = form.lname.data,
+            scaname = form.scaname.data,
+            city = form.city.data,
+            state_province = form.state_province.data,
+            zip = form.zip.data,
+            country = form.country.data,
+            phone = form.phone.data, 
+            email = form.email.data, 
+            rate_age = form.rate_age.data,
+            rate_date = datetime.strptime(form.rate_date.data, '%m-%d-%Y'),
+            kingdom = form.kingdom.data, 
+            lodging = form.lodging.data, 
+            prereg_status = 'SUCCEEDED',
+            rate_mbr = form.rate_mbr.data,
+            mbr_num_exp = form.mbr_num_exp.data, 
+            mbr_num = form.mbr_num.data,
+            onsite_contact_name = form.onsite_contact_name.data, 
+            onsite_contact_sca_name = form.onsite_contact_sca_name.data, 
+            onsite_contact_kingdom = form.onsite_contact_kingdom.data, 
+            onsite_contact_group = form.onsite_contact_group.data, 
+            offsite_contact_name = form.offsite_contact_name.data, 
+            offsite_contact_phone = form.offsite_contact_phone.data,
+            prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
+            price_paid = 0
+        )
+
+        if form.rate_age.data != '18+':
+            rate_category = 'CHILDREN 17 AND UNDER'
+        elif form.rate_mbr.data == 'Member':
+            rate_category = 'Pre-Registered Member'
+        elif form.rate_mbr.data == 'Non-Member':
+            rate_category = 'Pre-Registered Non-Member'
+
+        with open('rate_sheet.json') as f:
+            rate_sheet = json.load(f)
+            reg.price_calc = rate_sheet[rate_category][form.rate_date.data]
+            reg.price_due = rate_sheet[rate_category][form.rate_date.data]
+
+        print (reg)
+        db.session.add(reg)
+        db.session.commit()
+
+        regid = reg.regid
+        flash('Registration {} created for {} {}.'.format(
+            reg.regid, reg.fname, reg.lname))
+        
+        return redirect(url_for('success'))
+    return render_template('create_prereg.html', title = 'New Registration', form=form)
+
+@app.route('/success')
+def success():
+    return render_template('reg_success.html')
+
 
 @app.route('/create', methods=('GET', 'POST'))
 @roles_accepted('Admin','Shift Lead','User')
@@ -353,7 +517,7 @@ def editreg():
             reg.lodging = form.lodging.data
 
             db.session.commit()
-            db.session.close()
+
             return redirect(url_for('reg',regid=regid))
 
     return render_template('editreg.html', regid=reg.regid, reg=reg, form=form)

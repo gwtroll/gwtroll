@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+    <table>
+        <colgroup>
+            <col span="1" style="background-color: #D6EEEE">
+        </colgroup>
+        <tr> 
+            <td>Name: </td>
+            <td>{{ reg.fname }} {{ reg.lname }}</td>
+        </tr>
+        <tr>
+            <td>SCA Name: </td>
+            <td>{{ reg.scaname }}</td>
+        </tr>
+        <tr>
+            <td>Email: </td>
+            <td>{{ reg.email }}</td>
+        </tr>
+    </table>
+    <br>
+   
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.invoice_date.label }}<br>
+                {{ form.invoice_date(class_='form-control') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.invoice_number.label }}<br>
+                {{ form.invoice_number(class_='form-control') }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.price_calc.label }}<br>
+                {{ form.price_calc(class_='form-control', readonly=true) }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.price_due.label }}<br>
+                {{ form.price_due(class_='form-control', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.price_paid.label }}<br>
+                {{ form.price_paid(class_='form-control') }}
+            </p>
+        </div>
+        <div class="col text-center">
+            <p>
+                {{ form.invoice_paid.label }}<br>
+                {{ form.invoice_paid(class_='form-control') }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center">
+            <p>
+                {{ form.invoice_canceled.label }}<br>
+                {{ form.invoice_canceled(class_='form-control') }}
+            </p>  
+        </div>
+    </div>
+  
+    <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>
+    </form>
+
+   
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

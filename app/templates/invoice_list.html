@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table id="userTable" class="table table-striped">
+    <thread>
+        <tr>
+            {% if back != 'unsent' %}
+            <th>Invoice Number</th>
+            <th>Invoice Date</th>
+            {% endif %}
+            <th>Email</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Update</th>
+        </tr>
+    </thread>
+    <tbody>
+        {%for reg in regs %}
+        <tr>
+            <form action="/invoice/{{reg.regid}}" method="GET">
+                <td style="display: none;">
+                    <input type="hidden" name="back" id="back" value="{{back}}">{{back}}
+                </td>
+                {% if back != 'unsent' %}
+                <td> 
+                    {{reg.invoice_number}}
+                </td>
+                <td> 
+                    {{reg.invoice_date}}
+                </td>
+                {% endif %}
+                <td> 
+                    {{reg.email}}
+                </td>
+                <td> 
+                    {{reg.fname}}
+                </td>
+                <td> 
+                    {{reg.lname}}
+                </td>
+                <td>
+                    <input class="form__submit form__input" type="Submit" value="Update"/>
+                </td>
+            </form>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
