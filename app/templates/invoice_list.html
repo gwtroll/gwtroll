@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<input class="form-control" type="text" id="searchEmailInput" onkeyup="searchEmailFunction()" placeholder="Search Email...">
+<input class="form-control" type="text" id="searchInvoiceInput" onkeyup="searchInvoiceFunction()" placeholder="Search Invoice #...">
 
-<table id="userTable" class="table table-striped">
+<table id="invoiceTable" class="table table-striped">
     <thread>
         <tr>
-            {% if back != 'unsent' %}
             <th>Invoice Number</th>
             <th>Invoice Date</th>
-            {% endif %}
             <th>Email</th>
             <th>First Name</th>
             <th>Last Name</th>
@@ -16,18 +16,23 @@
         </tr>
     </thread>
     <tbody>
+      {% if regs %}
         {%for reg in regs %}
         <tr>
             <form action="/invoice/{{reg.regid}}" method="GET">
                 <td style="display: none;">
                     <input type="hidden" name="back" id="back" value="{{back}}">{{back}}
                 </td>
-                {% if back != 'unsent' %}
                 <td> 
                     {{reg.invoice_number}}
                 </td>
+                {% if reg.invoice_date %}
                 <td> 
-                    {{reg.invoice_date}}
+                    {{reg.invoice_date.strftime('%m-%d-%Y')}}
+                </td>
+                {% else %}
+                <td> 
+                  None
                 </td>
                 {% endif %}
                 <td> 
@@ -45,7 +50,53 @@
             </form>
         </tr>
         {% endfor %}
+        {% endif %}
     </tbody>
 </table>
+<script>
+    function searchEmailFunction() {
+      // Declare variables
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById("searchEmailInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("invoiceTable");
+      tr = table.getElementsByTagName("tr");
+    
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[3];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+
+    function searchInvoiceFunction() {
+        // Declare variables
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInvoiceInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("invoiceTable");
+        tr = table.getElementsByTagName("tr");
+      
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td")[1];
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
+            }
+          }
+        }
+      }
+    </script>
 
 {% endblock %}

@@ -50,6 +50,17 @@
             <td>{{ reg['lodging'] }}</td>
         </tr>
         <tr>
+            <td>Onsite Emergency Contact: </td>
+            <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
+                <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
+                Group: {{ reg.onsite_contact_group }}</td>
+        </tr>
+        <tr>
+            <td>Offsite Emergency Contact: </td>
+            <td>{{ reg.offsite_contact_name }} <br>
+                Phone: {{ reg.offsite_contact_phone }} </td>
+        </tr>
+        <tr>
             <td>Medallion Number: </td>
             <td>{{ reg['medallion'] }}</td>
         </tr>
@@ -74,56 +85,87 @@
         </tr>
         <tr>
             <td>{{ reg['price_calc'] }}</td>
-            <td>{{ reg['price_paid'] }}</td>
+            <td>{{ reg['price_paid'] + reg['atd_paid'] }}</td>
             <td>{{ reg['price_due'] }}</td>
         </tr>
     </table>
    
 
     {% if not reg['signature'] %}
-        <br>
+
         <form method="post">
-        <div class="btn btn-primary">
-            <input type="submit" name="action" value="waiver">
-        </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        <a href="/waiver">
+                            <button type="submit" name="action" value="waiver" class="form-control btn btn-success btn-lg">Waivers</button>
+                        </a>
+                    </p>
+                </div>
+            </div>
         </form>
     {% endif %}
 
     {% if (not reg['checkin']) and (reg['signature']) %}
-        <br>
+
         <form method="post">
-        <a href="/checkin">
-            <button type="submit" name="action" value="checkin" class="btn btn-primary">Check-In</button>
-        </a>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        <a href="/checkin">
+                            <button type="submit" name="action" value="checkin" class="form-control btn btn-success btn-lg">Check-In</button>
+                        </a>
+                    </p>
+                </div>
+            </div>
         </form>
     {% endif %}
+
+    {% if reg['price_due'] > 0 and reg['checkin'] and reg['signature'] and (current_user.has_role('Admin') or current_user.has_role('Cashier'))%}
+
+    <form method="post">
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    <a href="/payment">
+                        <button type="submit" name="action" value="payment" class="form-control btn btn-success btn-lg">Payment</button>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </form>
+{% endif %}
     
     {% if reg['checkin'] %}
-        <br>
-        <p>
-        <input value='Print' type='button' class="btn btn-primary" onclick='handlePrint()' />
+        <div class="row form-group">
+            <div class="col form-group">
+                <input value='Print' type='button' class="btn btn-primary btn-lg form-control" onclick='handlePrint()' />           
+            </div>
+        </div>
         <script type="text/javascript">
         const handlePrint = () => {
             var actContents = document.body.innerHTML;
             document.body.innerHTML = actContents;
             window.print();
-            window.print();
         }
         </script>
-        </p>
-        <br>
+
         <p>
-        <a href="/">
-            <button type="submit" class="btn btn-primary">Home</button>
-        </a>
+            <a href="/">
+                <button type="submit" class="btn btn-primary btn-lg form-control">Home</button>
+            </a>
         </p>
     {%endif%}
-
-    <br>
-    <form action="" method="post">
-    <div class="panel-body">
-        <input type="submit" name="action" value="Edit">
-    </div>
+    <form method="post">
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    <a href="/">
+                        <button type="submit" name="action" value="Edit" class="form-control btn btn-warning btn-lg">Edit</button>
+                    </a>              
+                </p>
+            </div>
+        </div>
     </form>
         <!-- <br>
         <form method="post">
