@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form action="" method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.fname.label }}<br>
+                    {{ form.fname(class_='form-control m-0', readonly=true) }}
+                </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.lname.label }}<br>
+                    {{ form.lname(class_='form-control m-0', readonly=true) }}
+                </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.scaname.label }}<br>
+                    {{ form.scaname(class_='form-control m-0', readonly=true) }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.price_calc.label }}<br>
+                    {{ form.price_calc(class_='form-control', readonly=true) }}
+                </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.price_due.label }}<br>
+                    {{ form.price_due(class_='form-control', readonly=true) }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.pay_type.label }}<br>
+                    {{ form.pay_type(class_='form-control') }}
+                </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.atd_paid.label }}<br>
+                    {{ form.atd_paid(class_='form-control') }}
+                </p>
+            </div>
+        </div>
+        <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>
+    </form>
+{% endblock %}

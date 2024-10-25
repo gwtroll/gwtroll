@@ -45,6 +45,7 @@
           </li>
           </ul>
         </div>
+      {% if current_user.has_role('Admin') %} 
       <div class="collapse navbar-collapse" id="navbarNav">
         <div class="dropdown">
         <button class="navbar-nav" type="button" id="adminMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expandable="true" >
@@ -57,6 +58,22 @@
         </div>
       </div>
       </div>
+      {% endif %}
+      {% if current_user.has_role('Invoices') or current_user.has_role('Admin') %} 
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="dropdown">
+        <button class="navbar-nav" type="button" id="invoiceButtonMenu" data-toggle="dropdown" aria-haspopup="true" aria-expandable="true" >
+          Invoices
+        </button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="/invoice/unsent">Unsent Invoices</a>
+          <a class="dropdown-item" href="/invoice/open">Open Invoices</a>
+          <a class="dropdown-item" href="/invoice/paid">Paid Invoices</a>
+          <a class="dropdown-item" href="/invoice/canceled">Canceled Invoices</a>
+        </div>
+      </div>
+      </div>
+      {% endif %}
       <div>
         {% if current_user.is_authenticated %}
            Hi {{ current_user.username }}! <br/>

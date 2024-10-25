@@ -1,0 +1,290 @@
+{% extends 'base_restricted.html' %}
+
+{% block content %}
+<div style="background-color: rgb(255, 255, 255); padding: 10px; border-radius: 1em;">
+<h1>{% block title %} Gulf Wars XXXIII – March 8-16, 2025 {% endblock %}</h1>
+<h3 class="text-center">King’s Arrow Ranch, Lumberton, Mississippi</h3>
+<p class="text-center"><a href="http://www.gulfwars.org">www.gulfwars.org</a></p>
+
+<table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Autocrats:</th>
+        <th scope="col">
+            Doe Flynn<br>
+            AEoelboerht of Harduic<br>
+            Catina Marciano<br>
+            <a href="mailto:autocrats@gulfwars.org">autocrats@gulfwars.org</a>
+        </th>
+        <th scope="col">Registration:</th>
+        <th scope="col">
+            Gulf Wars Registrations CST 918-640-5242 <br>
+            Mistress Jutte Vonderberg <a href="mailto:reservations@gulfwars.org">reservations@gulfwars.org</a><br>
+            209 S Dogwood Ave. <br>
+            Broken Arrow, OK 74012
+        </th>
+      </tr>
+    </thead>
+
+<table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col" style="color: red;">Arrival Dates and Rates</th>
+        <th scope="col">Sat-Sun 03/08-03/09</th>
+        <th scope="col">Mon-Tues 03/10-03/11</th>
+        <th scope="col">Wed-Thurs 03/12-03/13</th>
+        <th scope="col">Fri-Sat 03/14-03/15</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Pre-Registered Member</th>
+        <td>$125.00</td>
+        <td>$110.00</td>
+        <td>$95.00</td>
+        <td>$55.00</td>
+      </tr>
+      <tr>
+        <th scope="row">At the Door Member</th>
+        <td>$130.00</td>
+        <td>$115.00</td>
+        <td>$100.00</td>
+        <td>$60.00</td>
+      </tr>
+      <tr>
+        <th scope="row">CHILDREN 17 AND UNDER</th>
+        <td>Free</td>
+        <td>Free</td>
+        <td>Free</td>
+        <td>Free</td>
+      </tr>
+      <tr>
+        <th scope="row">Pre-Registered Non-Member</th>
+        <td>$135.00</td>
+        <td>$120.00</td>
+        <td>$105.00</td>
+        <td>$65.00</td>
+      </tr>
+      <tr>
+        <th scope="row">At the Door Non-Member</th>
+        <td>$140.00</td>
+        <td>$125.00</td>
+        <td>$110.00</td>
+        <td>$70.00</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col" class="text-center" style="color: red;">THERE IS NO SEPARATE PRICING FOR DAYTRIPPERS. TRANSFERS OF RESERVATIONS ARE NOT ALLOWED.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Proof of Membership is defined as a membership card, mailing label from a Society publication showing membership # and expiration date, payment acknowledgement from the Society registry, or statement showing check payment or charge to Society registry.</th>
+      </tr>
+      <tr>
+        <th scope="row">Refunds: Requests for refunds must be made IN WRITING via mail or email to the Registration address above. They MUST be postmarked or dated ON OR BEFORE February 14, 2025 and MUST include a mailing address, all names, and camping information. Refunds for requests emailed or postmarked on or before February 14, 2025 will be made for any reason. Refunds for requests emailed or postmarked after February 14, 2025 will be at the discretion of the Gulf Wars Exchequer and the Gulf Wars Autocrat(s). There will be a processing fee of $10 (Ten Dollars) per canceled person, on ALL refunds. All refunds will be sent via check. You must include a valid mailing address with your request.<br>
+            Absolutely no refunds will be granted after  the first day of War, March 8, 2025, even if the attendee registered for a late arrival.</th>
+      </tr>
+    </tbody>
+  </table>
+
+<form action="" method="POST" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.rate_date.label }}
+                {{ form.rate_date(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.rate_age.label }}<br>
+                {{ form.rate_age(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.fname.label }}<br>
+                {{ form.fname(class_='form-control m-0') }}
+            </p>
+            {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.lname.label }}<br>
+                {{ form.lname(class_='form-control m-0') }}
+            </p>
+            {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.scaname.label }}<br>
+                {{ form.scaname(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.city.label }}<br>
+                {{ form.city(class_='form-control m-0') }}
+            </p>
+            {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.state_province.label }}<br>
+                {{ form.state_province(class_='form-control m-0') }}
+            </p>
+            {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.zip.label }}<br>
+                {{ form.zip(class_='form-control m-0') }}
+            </p>
+            {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.country.label }}<br>
+                {{ form.country(class_='form-control m-0') }}
+            </p>
+            {% if form.country.errors %}{% for error in form.country.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.phone.label }}<br>
+                {{ form.phone(class_='form-control m-0') }}
+            </p>
+            {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.email.label }}<br>
+                {{ form.email(class_='form-control m-0') }}
+            </p>
+            {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.kingdom.label }}<br>
+                {{ form.kingdom(class_='form-control m-0') }}
+            </p>
+            {% if form.kingdom.errors %}{% for error in form.kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.lodging.label }}<br>
+                {{ form.lodging(class_='form-control m-0') }}
+            </p>
+            {% if form.lodging.errors %}{% for error in form.lodging.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.rate_mbr.label }}<br>
+                {{ form.rate_mbr(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.mbr_num.label }}<br>
+                {{ form.mbr_num(class_='form-control m-0') }}
+                {% if form.mbr_num.errors %}{% for error in form.mbr_num.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.mbr_num_exp.label }}<br>
+                {{ form.mbr_num_exp(class_='form-control m-0') }}
+                {% if form.mbr_num_exp.errors %}{% for error in form.mbr_num_exp.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+    <h4>Onsite - Emergency Contact</h4>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.onsite_contact_name.label }}<br>
+                {{ form.onsite_contact_name(class_='form-control m-0') }}
+            </p>
+            {% if form.onsite_contact_name.errors %}{% for error in form.onsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.onsite_contact_sca_name.label }}<br>
+                {{ form.onsite_contact_sca_name(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.onsite_contact_kingdom.label }}<br>
+                {{ form.onsite_contact_kingdom(class_='form-control m-0') }}
+            </p>
+            {% if form.onsite_contact_kingdom.errors %}{% for error in form.onsite_contact_kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.onsite_contact_group.label }}<br>
+                {{ form.onsite_contact_group(class_='form-control m-0') }}
+            </p>
+            {% if form.onsite_contact_group.errors %}{% for error in form.onsite_contact_group.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <h4>Offsite - Emergency Contact</h4>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.offsite_contact_name.label }}<br>
+                {{ form.offsite_contact_name(class_='form-control m-0') }}
+            </p>
+            {% if form.offsite_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.offsite_contact_phone.label }}<br>
+                {{ form.offsite_contact_phone(class_='form-control m-0') }}
+            </p>
+            {% if form.offsite_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <p>{{ form.submit(class_='form-control btn-primary btn-lg  m-0') }}</p>
+</form>
+
+<table class="table">
+    <tbody>
+      <tr>
+        <th scope="row">Land Requests: Groups who wish to camp together and are registered, may contact <a href="mailto:landcrat@gulfwars.org">landcrat@gulfwars.org</a>. When reserving, ensure everyone camping together puts the same group name in the “camping with” section on the registration form. The deadline for requests is February 14, 2025. Groups with permanent camping sites at Gulf Wars need to reserve at least 20 people or risk losing their use of the land.</th>
+      </tr>
+      <tr>
+        <th scope="row">Merchants: If you are interested in receiving a merchant packet contact <a href="mailto:merchantcrat@gulfwars.org">merchantcrat@gulfwars.org</a></th>
+      </tr>
+      <tr>
+        <th scope="row">Animals: Any person bringing a service animal is asked to pre-register at: <a href="mailto:animalliaison@gulfwars.org">animalliaison@gulfwars.org</a></th>
+      </tr>
+      <tr>
+        <th scope="row">Equestrians contact: <a href="mailto:equestrianactivities@gulfwars.org">equestrianactivities@gulfwars.org</a></th>
+      </tr>
+      <tr>
+        <th scope="row">Please visit <a href="http://www.gulfwars.org">www.gulfwars.org</a> for more information on attending and participating at the War</th>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
