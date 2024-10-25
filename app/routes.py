@@ -500,7 +500,7 @@ def createprereg():
             reg.regid, reg.fname, reg.lname))
         
         return redirect(url_for('success'))
-    return render_template('create_prereg.html', title = 'New Registration', form=form)
+    return render_template('create_prereg.html', titl='New Registration', form=form)
 
 @app.route('/success')
 def success():
@@ -550,7 +550,7 @@ def create():
 
 @app.route('/editreg', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', 'Troll Shift Lead')
+@roles_accepted('Admin', 'Troll Shift Lead', 'Troll User')
 def editreg():
     regid = request.args['regid']
     reg = get_reg(regid)
