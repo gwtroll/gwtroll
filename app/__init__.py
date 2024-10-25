@@ -23,6 +23,6 @@ from app.models import Role, User
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 app.security = Security(app, user_datastore)
 
-#with app.app_context():
-#    create_roles()
-#    create_admin()
+with app.app_context():
+    create_roles()
+    create_admin()
