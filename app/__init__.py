@@ -14,15 +14,13 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 
-from app import routes, models, create_roles
-from app.create_roles import create_roles
-from app.create_admin import create_admin
+from app import routes, models
 from app.models import Role, User
 
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 app.security = Security(app, user_datastore)
 
-with app.app_context():
-   create_roles()
-   create_admin()
+# with app.app_context():
+#    create_roles()
+#    create_admin()
