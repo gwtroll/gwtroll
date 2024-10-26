@@ -550,7 +550,7 @@ def create():
 
 @app.route('/editreg', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', 'Troll Shift Lead', 'Troll User')
+@roles_accepted('Admin', 'Troll Shift Lead')
 def editreg():
     regid = request.args['regid']
     reg = get_reg(regid)

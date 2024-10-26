@@ -56,7 +56,7 @@ class RequiredIf(InputRequired):
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password')
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
