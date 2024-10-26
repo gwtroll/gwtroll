@@ -1,5 +1,5 @@
 from app import app, db, login
-from app.forms import CreateRegForm, CheckinForm, WaiverForm, LoginForm, EditForm, ReportForm, EditUserForm, UpdatePasswordForm, CreateUserForm
+from app.forms import *
 from app.models import Registrations, User, Role, UserRoles
 import psycopg2
 import psycopg2.extras
@@ -10,12 +10,18 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_security import roles_accepted
 from werkzeug.security import generate_password_hash
 import sqlalchemy as sa
+from sqlalchemy import and_, or_
 import pandas as pd
 from datetime import datetime, date
 import re
 from urllib.parse import urlsplit
 from markupsafe import Markup
 import uuid
+import json
+
+@login.unauthorized_handler
+def unauthorized_callback():
+    return redirect('/login?next=' + request.path)
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
@@ -63,6 +69,25 @@ def get_reg(regid):
         abort(404)
     return reg
 
+def get_reg_by_invoice(invoice_number):
+    reg = Registrations.query.filter(Registrations.invoice_number == invoice_number).first()
+    if reg is None:
+        abort(404)
+    return reg
+
+def is_duplicate_invoice_number(invoice_number, reg):
+    new_reg = Registrations.query.filter(and_(Registrations.invoice_number == invoice_number, Registrations.regid != reg.regid, Registrations.email != reg.email)).first()
+    if new_reg is None:
+        return False
+    else:
+        return True
+
+def get_roles():
+    roles = Role.query.all()
+    role_return = []
+    [role_return.append((role.id,role.name)) for role in roles]
+    return role_return
+
 def get_user(userid):
     user = User.query.filter_by(id=userid).first()
     if user is None:
@@ -92,6 +117,31 @@ def reg_count():
     if regcount is None:
         abort(404)
     return regcount
+
+def calculate_price_calc(reg):
+    today_datetime = date.today()
+    if today_datetime < datetime(2025,3,8).date():
+        today_date = datetime(2025,3,8).strftime('%m-%d-%Y')
+    elif today_datetime > datetime(2025,3,15).date():
+        today_date = datetime(2025,3,15).strftime('%m-%d-%Y')
+    else:
+        today_date = today_datetime.strftime('%m-%d-%Y')
+
+    with open('rate_sheet.json') as f:
+        rate_sheet = json.load(f)
+        if reg.rate_age.__contains__('18+'):
+            if reg.prereg_status == 'SUCCEEDED' and reg.rate_mbr == 'Member':
+                price_calc = rate_sheet['Pre-Registered Member'][today_date]
+            elif reg.prereg_status != 'SUCCEEDED' and reg.rate_mbr == 'Member':
+                price_calc = rate_sheet['At the Door Member'][today_date]
+            elif reg.prereg_status == 'SUCCEEDED' and reg.rate_mbr != 'Member':
+                price_calc = rate_sheet['Pre-Registered Non-Member'][today_date]
+            elif reg.prereg_status != 'SUCCEEDED' and reg.rate_mbr != 'Member':
+                price_calc = rate_sheet['At the Door Non-Member'][today_date]               
+        else:
+            price_calc = 0
+
+    return price_calc
 
 def query_db(query, args=(), one=False):
     conn = get_db_connection()
@@ -123,15 +173,19 @@ def logout():
 
 
 @app.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
     regcount = reg_count()
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
-            reg = query_db(
-                "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
-                #(search_value, search_value, search_value))
-                ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            print('bob')
+            print(search_value)
+            if search_value is not None and search_value != '':
+                reg = query_db(
+                    "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
+                    #(search_value, search_value, search_value))
+                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
@@ -147,23 +201,117 @@ def index():
             return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
         return render_template('index.html', regcount=regcount)
-    
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
-@roles_accepted('Admin','Shift Lead','User')
+@login_required
+@roles_accepted('Admin','Troll Shift Lead','Troll User','Cashier')
 def reg(regid):
     reg = get_reg(regid)
     if request.form.get("action") == 'Edit':
     #if request.method == 'POST' and request.path == '/editreg':
         return redirect(url_for('editreg', regid=regid))
-    elif request.method == 'POST' and reg.signature is None:
+    elif request.method == 'POST' and reg.signature is None and request.form.get("action") == 'waiver':
         return redirect(url_for('waiver', regid=regid))
-    elif request.method == 'POST':
+    elif request.method == 'POST' and request.form.get("action") == 'payment':
+        return redirect(url_for('payment', regid=regid))
+    elif request.method == 'POST'and request.form.get("action") == 'checkin':
         return redirect(url_for('checkin', regid=regid))
     else:
         return render_template('reg.html', reg=reg)
+    
+@app.route('/invoice/unsent', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Invoices')
+def unsentinvoices():
+    regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.invoice_date == None, Registrations.prereg_status == "SUCCEEDED")).all()
+    return render_template('invoice_list.html', regs=regs, back='unsent')
+
+@app.route('/invoice/open', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Invoices')
+def openinvoices():
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_canceled == False, Registrations.invoice_paid == False)).all()
+    return render_template('invoice_list.html', regs=regs, back='open')
+
+@app.route('/invoice/paid', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Invoices')
+def paidinvoices():
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_canceled == False, Registrations.invoice_paid == True)).all()
+    return render_template('invoice_list.html', regs=regs, back='paid')
+
+@app.route('/invoice/canceled', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Invoices')
+def canceledinvoices():
+    regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_canceled == True)).all()
+    return render_template('invoice_list.html', regs=regs, back='canceled')
+
+@app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Invoices')
+def updateinvoice(regid):
+    back = request.args.get('back')
+    reg = get_reg(regid)
+    form = UpdateInvoiceForm()
+    form.price_paid.data = reg.price_paid
+    form.price_calc.data = reg.price_calc
+    form.price_due.data = reg.price_due
+    form.invoice_number.data = reg.invoice_number
+    form.invoice_paid.data = reg.invoice_paid
+    if reg.invoice_date is not None:
+        form.invoice_date.data = reg.invoice_date
+    else:
+        form.invoice_date.data = datetime.now()
+    form.invoice_canceled.data = reg.invoice_canceled
+    
+    if request.method == 'POST':
+        invoice_number = request.form.get('invoice_number')
+        price_paid = int(request.form.get('price_paid'))
+        price_calc = int(request.form.get('price_calc'))
+        invoice_date = request.form.get('invoice_date')
+        invoice_canceled = bool(request.form.get('invoice_canceled'))
+
+        if is_duplicate_invoice_number(invoice_number, reg):
+            flash('Duplicate Invoice Number {}'.format(
+            invoice_number))
+            return render_template('update_invoice.html', reg=reg, form=form)
+
+        if int(price_paid) >= int(price_calc):
+            reg.invoice_paid = True
+        reg.price_paid = price_paid
+        reg.price_calc = price_calc
+        if invoice_number != None and invoice_number != '':          
+            reg.invoice_number = invoice_number
+
+        if invoice_date != '' and invoice_date is not None:
+            reg.invoice_date = invoice_date
+        reg.invoice_canceled = invoice_canceled
+
+        reg.price_due = price_calc - price_paid
+
+        reg.pay_type = 'paypal'
+
+        db.session.commit()
+
+        match back:
+            case 'unsent': 
+                return redirect('/invoice/unsent')
+            case 'open': 
+                return redirect('/invoice/open')
+            case 'paid': 
+                return redirect('/invoice/paid')
+            case 'canceled': 
+                return redirect('/invoice/canceled')
+            case _:
+                return redirect('/')
+
+
+    return render_template('update_invoice.html', reg=reg, form=form)
+
 
 @app.route('/users', methods=('GET', 'POST'))
+@login_required
 @roles_accepted('Admin')
 def users():
     users = User.query.all()
@@ -171,10 +319,12 @@ def users():
 
 
 @app.route('/user/create', methods=('GET', 'POST'))
+@login_required
 @roles_accepted('Admin')
 def createuser():
 
     form = CreateUserForm()
+    form.role.choices = get_roles()
     
     if request.method == 'POST':
         user = User()
@@ -196,6 +346,7 @@ def createuser():
     return render_template('createuser.html', form=form)
 
 @app.route('/user', methods=('GET', 'POST'))
+@login_required
 @roles_accepted('Admin')
 def edituser():
     user = get_user(request.args.get("userid"))
@@ -211,6 +362,7 @@ def edituser():
             fname = user.fname,
             lname = user.lname,
         )
+        form.role.choices = get_roles()
         
     elif edit_request == "Password Reset":
         form = UpdatePasswordForm(
@@ -230,7 +382,6 @@ def edituser():
         user.lname = form.lname.data
 
         db.session.commit()
-        db.session.close()
 
         return redirect('/users')
 
@@ -239,13 +390,13 @@ def edituser():
         user.set_password(form.password.data)
 
         db.session.commit()
-        db.session.close()
 
         return redirect('/users')
     
     return render_template('edituser.html', user=user, form=form, edit_request=edit_request)
 
 @app.route('/upload', methods=('GET', 'POST'))
+@login_required
 @roles_accepted('Admin')
 def upload():
     if request.method == 'POST':   
@@ -287,8 +438,78 @@ def upload():
         flash("SUCCESS!")
     return render_template('upload.html')
 
+@app.route('/registration', methods=('GET', 'POST'))
+def createprereg():
+    form = CreatePreRegForm()
+    if form.validate_on_submit() and request.method == 'POST':
+        reg = Registrations(
+            fname = form.fname.data,
+            lname = form.lname.data,
+            scaname = form.scaname.data,
+            city = form.city.data,
+            state_province = form.state_province.data,
+            zip = form.zip.data,
+            country = form.country.data,
+            phone = form.phone.data, 
+            email = form.email.data, 
+            rate_age = form.rate_age.data,
+            kingdom = form.kingdom.data, 
+            lodging = form.lodging.data, 
+            prereg_status = 'SUCCEEDED',
+            rate_mbr = form.rate_mbr.data,
+            mbr_num_exp = form.mbr_num_exp.data, 
+            mbr_num = form.mbr_num.data,
+            onsite_contact_name = form.onsite_contact_name.data, 
+            onsite_contact_sca_name = form.onsite_contact_sca_name.data, 
+            onsite_contact_kingdom = form.onsite_contact_kingdom.data, 
+            onsite_contact_group = form.onsite_contact_group.data, 
+            offsite_contact_name = form.offsite_contact_name.data, 
+            offsite_contact_phone = form.offsite_contact_phone.data,
+            prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
+            price_paid = 0,
+            atd_paid = 0,
+        )
+
+        print(form.rate_date.data)
+        if form.rate_date.data == 'Early_On':
+            reg.early_on = True
+            rate_date = '03-08-2025'
+            reg.rate_date = datetime.strptime('03-08-2025', '%m-%d-%Y'),
+        else:
+            rate_date = form.rate_date.data
+            reg.rate_date = datetime.strptime(form.rate_date.data, '%m-%d-%Y'),
+
+        if form.rate_age.data != '18+':
+            rate_category = 'CHILDREN 17 AND UNDER'
+        elif form.rate_mbr.data == 'Member':
+            rate_category = 'Pre-Registered Member'
+        elif form.rate_mbr.data == 'Non-Member':
+            rate_category = 'Pre-Registered Non-Member'
+
+        with open('rate_sheet.json') as f:
+            rate_sheet = json.load(f)
+            reg.price_calc = rate_sheet[rate_category][rate_date]
+            reg.price_due = rate_sheet[rate_category][rate_date]
+
+        print(reg.early_on)
+        db.session.add(reg)
+        db.session.commit()
+
+        regid = reg.regid
+        flash('Registration {} created for {} {}.'.format(
+            reg.regid, reg.fname, reg.lname))
+        
+        return redirect(url_for('success'))
+    return render_template('create_prereg.html', titl='New Registration', form=form)
+
+@app.route('/success')
+def success():
+    return render_template('reg_success.html')
+
+
 @app.route('/create', methods=('GET', 'POST'))
-@roles_accepted('Admin','Shift Lead','User')
+@login_required
+@roles_accepted('Admin','Troll Shift Lead','Troll User')
 def create():
     form = CreateRegForm()
     if form.validate_on_submit():
@@ -301,9 +522,21 @@ def create():
         lodging = form.lodging.data,
         rate_age = form.rate_age.data,
         rate_mbr = form.rate_mbr.data,
+        onsite_contact_name = form.onsite_contact_name.data, 
+        onsite_contact_sca_name = form.onsite_contact_sca_name.data, 
+        onsite_contact_kingdom = form.onsite_contact_kingdom.data, 
+        onsite_contact_group = form.onsite_contact_group.data, 
+        offsite_contact_name = form.offsite_contact_name.data, 
+        offsite_contact_phone = form.offsite_contact_phone.data,
+        atd_paid = 0,
         price_paid = 0)
         #mbr_num = form.mbr_num.data,
         #mbr_exp = form.mbr_exp.data)
+        reg.price_calc = calculate_price_calc(reg)
+        if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
+            reg.price_due = 0
+        else:
+            reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
 
         db.session.add(reg)
         db.session.commit()
@@ -316,7 +549,8 @@ def create():
     return render_template('create.html', title = 'New Registration', form=form)
 
 @app.route('/editreg', methods=['GET', 'POST'])
-@roles_accepted('Admin', 'Shift Lead')
+@login_required
+@roles_accepted('Admin', 'Troll Shift Lead', 'Troll User')
 def editreg():
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -328,6 +562,7 @@ def editreg():
         medallion = reg.medallion,
         price_due = reg.price_due,
         price_paid = reg.price_paid,
+        atd_paid = reg.atd_paid,
         price_calc = reg.price_calc,
         lodging = reg.lodging,
         )
@@ -347,13 +582,17 @@ def editreg():
             reg.kingdom = form.kingdom.data
             reg.rate_mbr = form.rate_mbr.data
             reg.rate_age = form.rate_age.data
-            reg.price_due= form.price_due.data
             reg.price_paid = form.price_paid.data
+            reg.atd_paid = form.atd_paid.data
             reg.price_calc = form.price_calc.data
+            if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
+                reg.price_due = 0
+            else:
+                reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
             reg.lodging = form.lodging.data
 
             db.session.commit()
-            db.session.close()
+
             return redirect(url_for('reg',regid=regid))
 
     return render_template('editreg.html', regid=reg.regid, reg=reg, form=form)
@@ -361,13 +600,13 @@ def editreg():
 
 
 @app.route('/checkin', methods=['GET', 'POST'])
-@roles_accepted('Admin','Shift Lead','User')
+@login_required
+@roles_accepted('Admin','Troll Shift Lead','Troll User')
 def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
 
     form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age)
-    price_due = 0
     price_paid = reg.price_paid
     price_calc = reg.price_calc
     kingdom = reg.kingdom
@@ -391,68 +630,59 @@ def checkin():
         kingdom = form.kingdom.data
         rate_mbr = form.rate_mbr.data
         rate_age = form.rate_age.data
-
         
-        if rate_age is not None:
-            print("Pricing Start")
-            if rate_age.__contains__('18+'):  #Adult Pricing
-                if reg.prereg_status == 'SUCCEEDED':   #Pre-reg Pricing
-                    # Calculate daily pricing for both Members and Non-Members
-                    if today <= opening_day: # Saturday or Earlier
-                        price_calc = prereg_sat_price
-                    elif  today == opening_day + 1: # Sunday
-                        price_calc = prereg_sun_price 
-                    elif  today == opening_day + 2: # Monday 
-                        price_calc = prereg_mon_price
-                    elif  today == opening_day + 3: # Tuesday
-                        price_calc = prereg_tue_price
-                    elif  today == opening_day + 4: # Wednesday
-                        price_calc = prereg_wed_price 
-                    elif  today == opening_day + 5: # Thursday
-                        price_calc = prereg_thur_price
-                    elif  today == opening_day + 6: # Friday
-                        price_calc = prereg_fri_price
-                    elif  today == opening_day + 7: # Saturday2
-                        price_calc = prereg_sat2_price
-                    else:
-                        print('Error, arival date out of range')
-                else:  # At the Door pricing
-                    # Calculate daily pricing for both Members and Non-Members
-                    if today <= opening_day: # Saturday or Earlier
-                        price_calc = door_sat_price 
-                    elif  today == opening_day + 1: # Sunday
-                        price_calc = door_sun_price 
-                    elif  today == opening_day + 2: # Monday 
-                        price_calc = door_mon_price
-                    elif  today == opening_day + 3: # Tuesday
-                        price_calc = door_tue_price
-                    elif  today == opening_day + 4: # Wednesday
-                        price_calc = door_wed_price 
-                    elif  today == opening_day + 5: # Thursday
-                        price_calc = door_thur_price
-                    elif  today == opening_day + 6: # Friday
-                        price_calc = door_fri_price
-                    elif  today == opening_day + 7: # Saturday2
-                        price_calc = door_sat2_price
-                    else:
-                        print('Error, arival date out of range')    
-                if rate_mbr == 'Non-Member':   # Add NMR to non members
-                    price_calc = price_calc + nmr
-            elif rate_age == 'tour_adult':
-                price_calc = 20
-            elif rate_age == 'tour_teen':
-                price_calc = 10
-            else:  # Youth and Royal Pricing
-                price_calc = 0
+        # if rate_age is not None:
+        #     print("Pricing Start")
+        #     if rate_age.__contains__('18+'):  #Adult Pricing
+        #         if reg.prereg_status == 'SUCCEEDED':   #Pre-reg Pricing
+        #             # Calculate daily pricing for both Members and Non-Members
+        #             if today <= opening_day: # Saturday or Earlier
+        #                 price_calc = prereg_sat_price
+        #             elif  today == opening_day + 1: # Sunday
+        #                 price_calc = prereg_sun_price 
+        #             elif  today == opening_day + 2: # Monday 
+        #                 price_calc = prereg_mon_price
+        #             elif  today == opening_day + 3: # Tuesday
+        #                 price_calc = prereg_tue_price
+        #             elif  today == opening_day + 4: # Wednesday
+        #                 price_calc = prereg_wed_price 
+        #             elif  today == opening_day + 5: # Thursday
+        #                 price_calc = prereg_thur_price
+        #             elif  today == opening_day + 6: # Friday
+        #                 price_calc = prereg_fri_price
+        #             elif  today == opening_day + 7: # Saturday2
+        #                 price_calc = prereg_sat2_price
+        #             else:
+        #                 print('Error, arival date out of range')
+        #         else:  # At the Door pricing
+        #             # Calculate daily pricing for both Members and Non-Members
+        #             if today <= opening_day: # Saturday or Earlier
+        #                 price_calc = door_sat_price 
+        #             elif  today == opening_day + 1: # Sunday
+        #                 price_calc = door_sun_price 
+        #             elif  today == opening_day + 2: # Monday 
+        #                 price_calc = door_mon_price
+        #             elif  today == opening_day + 3: # Tuesday
+        #                 price_calc = door_tue_price
+        #             elif  today == opening_day + 4: # Wednesday
+        #                 price_calc = door_wed_price 
+        #             elif  today == opening_day + 5: # Thursday
+        #                 price_calc = door_thur_price
+        #             elif  today == opening_day + 6: # Friday
+        #                 price_calc = door_fri_price
+        #             elif  today == opening_day + 7: # Saturday2
+        #                 price_calc = door_sat2_price
+        #             else:
+        #                 print('Error, arival date out of range')    
+        #         if rate_mbr == 'Non-Member':   # Add NMR to non members
+        #             price_calc = price_calc + nmr
+        #     elif rate_age == 'tour_adult':
+        #         price_calc = 20
+        #     elif rate_age == 'tour_teen':
+        #         price_calc = 10
+        #     else:  # Youth and Royal Pricing
+        #         price_calc = 0
 
-        #Calculate Price Due
-        if price_paid > price_calc:  #Account for people who showed up late.  No refund.
-            price_due = 0
-        else:
-            price_due = price_calc - price_paid 
-            print("Calculating price:", price_calc) 
-    
-            
         medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
 
         if medallion_check is not None and int(regid) != int(medallion_check.regid):
@@ -460,12 +690,18 @@ def checkin():
             dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
             flash(Markup(dup_url))
         else:
-
             reg.medallion = medallion
-            reg.price_calc = price_calc
-            reg.price_due = price_due
             reg.rate_mbr = rate_mbr
+            reg.rate_age = rate_age
             reg.kingdom = kingdom
+            reg.checkin = datetime.today()
+            reg.price_calc = calculate_price_calc(reg)
+            #Calculate Price Due
+            if price_paid + reg.atd_paid > price_calc:  #Account for people who showed up late.  No refund.
+                reg.price_due = 0
+            else:
+                reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
+                print("Calculating price:", reg.price_calc) 
 
             db.session.commit()
             db.session.close()
@@ -475,11 +711,14 @@ def checkin():
     return render_template('checkin.html', reg=reg, form=form)
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin')
 def full_export():
     regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
     return render_template('full_export_images.html', regs=regs)
 
 @app.route('/reports', methods=['GET', 'POST'])
+@login_required
 @roles_accepted('Admin')
 def reports():
     form = ReportForm()
@@ -575,6 +814,21 @@ def reports():
 
             writer.close()
 
+        if report_type == 'earlyon':
+
+            file = 'earlyon_list_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+            df = pd.read_sql("SELECT regid, invoice_paid, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true", engine)
+
+            path1 = './reports/' + file
+            path2 = '../reports/' + file
+
+            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+
+            df.to_excel(writer, sheet_name='Report' ,index = False)
+
+            writer.close()
+
         if report_type == 'ghost_report':
 
             file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
@@ -595,6 +849,8 @@ def reports():
 
     
 @app.route('/waiver', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('Admin', "Troll Shift Lead", "Troll User")
 def waiver():
     form = WaiverForm()
     regid = request.args['regid']
@@ -607,3 +863,30 @@ def waiver():
         return redirect(url_for('reg', regid=regid))
 
     return render_template('waiver.html', form=form)
+
+@app.route('/payment', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('Admin', "Cashier")
+def payment():
+    form = EditForm()
+    regid = request.args['regid']
+    reg = get_reg(regid)
+    form.fname.data = reg.fname
+    form.lname.data = reg.lname
+    form.scaname.data = reg.scaname
+    form.price_calc.data = reg.price_calc
+    form.price_due.data = reg.price_due
+    if request.method == 'POST':
+
+        reg.atd_paid = form.atd_paid.data
+        if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
+            reg.price_due = 0
+        else:
+            reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
+
+        reg.atd_pay_type = form.pay_type.data
+        db.session.commit()
+
+        return redirect(url_for('reg', regid=regid))
+
+    return render_template('payment.html', form=form)

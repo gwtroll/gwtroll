@@ -5,35 +5,106 @@
 
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
-    <p>
-        {{ form.fname.label }}<br>
-        {{ form.fname(size=32) }}
-    </p>
-    <p>
-        {{ form.lname.label }}<br>
-        {{ form.lname(size=32) }}
-    </p>
-    <p>
-        {{ form.scaname.label }}<br>
-        {{ form.scaname(size=64) }}
-    </p>
-    <p>
-        {{ form.rate_age.label }}<br>
-        {{ form.rate_age() }}
-    </p>
-    <p>
-        {{ form.kingdom.label }}<br>
-        {{ form.kingdom() }}
-    </p>
-    <p>
-        {{ form.lodging.label }}<br>
-        {{ form.lodging() }}
-    </p>
-    <p>
-        {{ form.rate_mbr.label }}<br>
-        {{ form.rate_mbr() }}
-    </p>
-    <p>{{ form.submit() }}</p>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.fname.label }}<br>
+                {{ form.fname(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col">
+ 
+            <p>
+                {{ form.lname.label }}<br>
+                {{ form.lname(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.scaname.label }}<br>
+                {{ form.scaname(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.rate_age.label }}<br>
+                {{ form.rate_age(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.rate_mbr.label }}<br>
+                {{ form.rate_mbr(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.kingdom.label }}<br>
+                {{ form.kingdom(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.lodging.label }}<br>
+                {{ form.lodging(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <h4>Onsite - Emergency Contact</h4>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.onsite_contact_name.label }}<br>
+                {{ form.onsite_contact_name(class_='form-control m-0') }}
+            </p>
+            {% if form.onsite_contact_name.errors %}{% for error in form.onsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.onsite_contact_sca_name.label }}<br>
+                {{ form.onsite_contact_sca_name(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.onsite_contact_kingdom.label }}<br>
+                {{ form.onsite_contact_kingdom(class_='form-control m-0') }}
+            </p>
+            {% if form.onsite_contact_kingdom.errors %}{% for error in form.onsite_contact_kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.onsite_contact_group.label }}<br>
+                {{ form.onsite_contact_group(class_='form-control m-0') }}
+            </p>
+            {% if form.onsite_contact_group.errors %}{% for error in form.onsite_contact_group.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <h4>Offsite - Emergency Contact</h4>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.offsite_contact_name.label }}<br>
+                {{ form.offsite_contact_name(class_='form-control m-0') }}
+            </p>
+            {% if form.offsite_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.offsite_contact_phone.label }}<br>
+                {{ form.offsite_contact_phone(class_='form-control m-0') }}
+            </p>
+            {% if form.offsite_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+
+    <p>{{ form.submit(class_='form-control m-0 btn-primary btn-lg') }}</p>
 </form>
 
 {% endblock %}

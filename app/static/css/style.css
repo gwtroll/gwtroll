@@ -56,6 +56,10 @@ html.touch #scrollgrabber {
 html.borderradius #scrollgrabber {
     border-radius: 1em;
 }
+
+.error {
+    color: red;
+}
  
 svg {fill:black; float:left}
 /* Font Definitions */
