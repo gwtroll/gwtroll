@@ -12,14 +12,16 @@ engine=db.create_engine(connstring)
 metadata = db.MetaData()
 registrations = db.Table('registrations', metadata)
 
-
-
 conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
 cur = conn.cursor()
 
+cur.execute('DELETE FROM public.users')
 
+conn.commit()
 
 cur.execute('INSERT INTO public.users (id, username, fname, lname, active, fs_uniquifier) VALUES (1, %s, %s, %s, true, %s);',("admin","admin","admin",uuid.uuid4().hex))
+
+conn.commit()
 
 cur.execute('INSERT INTO public.user_roles (id, user_id, role_id) VALUES (1, 1, 1);')
 

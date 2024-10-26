@@ -18,7 +18,6 @@ conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
 cur = conn.cursor()
 
 
-
 cur.execute('UPDATE registrations SET checkin = (checkin - %s::interval) WHERE checkin BETWEEN TO_TIMESTAMP(%s,%s) AND TO_TIMESTAMP(%s,%s);', ("5 hours", "2024-03-10 02:00:01", "YYYY-MM-DD HH24:MI:SS", "2024-03-13 01:00:00", "YYYY-MM-DD HH24:MI:SS"  ))
 
 
