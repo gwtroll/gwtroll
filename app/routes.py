@@ -913,7 +913,7 @@ def waiver():
 
 @app.route('/payment', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', "Cashier")
+@roles_accepted('Admin', "Troll User", "Troll Shift Lead")
 def payment():
     form = EditForm()
     regid = request.args['regid']
