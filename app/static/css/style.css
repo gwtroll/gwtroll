@@ -60,6 +60,21 @@ html.borderradius #scrollgrabber {
 .error {
     color: red;
 }
+
+@media print {
+    .no-print {
+        display: none;
+    }
+}
+
+.reg_card_checkedin {
+    background-color: rgba(51, 170, 51, .2); 
+    border-radius: 25px;
+}
+.reg_card_notcheckedin {
+    background-color: rgba(170, 51, 51, 0.2); 
+    border-radius: 25px;
+}
  
 svg {fill:black; float:left}
 /* Font Definitions */

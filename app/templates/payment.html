@@ -27,6 +27,14 @@
         <div class="row form-group">
             <div class="col form-group">
                 <p>
+                    {{ form.invoice_email.label }}<br>
+                    {{ form.invoice_email(class_='form-control m-0', readonly=true) }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
                     {{ form.price_calc.label }}<br>
                     {{ form.price_calc(class_='form-control', readonly=true) }}
                 </p>
@@ -43,12 +51,6 @@
                 <p>
                     {{ form.pay_type.label }}<br>
                     {{ form.pay_type(class_='form-control') }}
-                </p>
-            </div>
-            <div class="col">
-                <p>
-                    {{ form.atd_paid.label }}<br>
-                    {{ form.atd_paid(class_='form-control') }}
                 </p>
             </div>
         </div>

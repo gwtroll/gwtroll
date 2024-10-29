@@ -1,6 +1,6 @@
 from app import app, db, login
 from app.forms import *
-from app.models import Registrations, User, Role, UserRoles
+from app.models import Registrations, User, Role, UserRoles, RegLogs
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_from_directory, send_file
@@ -151,6 +151,17 @@ def query_db(query, args=(), one=False):
     conn.close()
     return (rv[0] if rv else None) if one else rv
 
+def log_reg_action(reg, action):
+    print(reg)
+    reglog = RegLogs(
+        regid = reg.regid,
+        userid = current_user.id,
+        timestamp = datetime.now(),
+        action = action
+    )
+    db.session.add(reglog)
+    db.session.commit()
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -159,7 +170,7 @@ def login():
     if form.validate_on_submit():
         user = db.session.scalar(
             sa.select(User).where(User.username == form.username.data))
-        if user is None or not user.check_password(form.password.data):
+        if user is None or not user.check_password(form.password.data) or not user.active:
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
@@ -230,21 +241,21 @@ def unsentinvoices():
 @login_required
 @roles_accepted('Admin','Invoices')
 def openinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_canceled == False, Registrations.invoice_paid == False)).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'SENT')).all()
     return render_template('invoice_list.html', regs=regs, back='open')
 
 @app.route('/invoice/paid', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Invoices')
 def paidinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_canceled == False, Registrations.invoice_paid == True)).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'PAID')).all()
     return render_template('invoice_list.html', regs=regs, back='paid')
 
 @app.route('/invoice/canceled', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Invoices')
 def canceledinvoices():
-    regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_canceled == True)).all()
+    regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'CANCELED')).all()
     return render_template('invoice_list.html', regs=regs, back='canceled')
 
 @app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
@@ -256,6 +267,7 @@ def updateinvoice(regid):
     form = UpdateInvoiceForm()
     form.price_paid.data = reg.price_paid
     form.price_calc.data = reg.price_calc
+    form.paypal_donation_amount.data = reg.paypal_donation_amount
     form.price_due.data = reg.price_due
     form.invoice_number.data = reg.invoice_number
     form.invoice_paid.data = reg.invoice_paid
@@ -264,21 +276,28 @@ def updateinvoice(regid):
     else:
         form.invoice_date.data = datetime.now()
     form.invoice_canceled.data = reg.invoice_canceled
+    form.invoice_payment_date.data = reg.invoice_payment_date
     
     if request.method == 'POST':
         invoice_number = request.form.get('invoice_number')
         price_paid = int(request.form.get('price_paid'))
         price_calc = int(request.form.get('price_calc'))
         invoice_date = request.form.get('invoice_date')
+        invoice_payment_date = request.form.get('invoice_payment_date')
         invoice_canceled = bool(request.form.get('invoice_canceled'))
 
         if is_duplicate_invoice_number(invoice_number, reg):
             flash('Duplicate Invoice Number {}'.format(
             invoice_number))
             return render_template('update_invoice.html', reg=reg, form=form)
+        
+        if invoice_number is not None and invoice_number != '':
+            reg.invoice_status = 'SENT'
+        if int(price_paid) >= int(price_calc) + int(reg.paypal_donation_amount):
+            reg.invoice_status = 'PAID'
+        if bool(request.form.get('invoice_canceled')) == True:
+            reg.invoice_status = 'CANCELED'
 
-        if int(price_paid) >= int(price_calc):
-            reg.invoice_paid = True
         reg.price_paid = price_paid
         reg.price_calc = price_calc
         if invoice_number != None and invoice_number != '':          
@@ -286,13 +305,18 @@ def updateinvoice(regid):
 
         if invoice_date != '' and invoice_date is not None:
             reg.invoice_date = invoice_date
+        if invoice_payment_date != '' and invoice_payment_date is not None:
+            reg.invoice_payment_date = invoice_payment_date
+
         reg.invoice_canceled = invoice_canceled
 
-        reg.price_due = price_calc - price_paid
+        reg.price_due = (price_calc + reg.paypal_donation_amount) - price_paid
 
         reg.pay_type = 'paypal'
 
         db.session.commit()
+
+        log_reg_action(reg, 'INVOICE UPDATED')
 
         match back:
             case 'unsent': 
@@ -361,6 +385,7 @@ def edituser():
             role = role_array,
             fname = user.fname,
             lname = user.lname,
+            active = user.active
         )
         form.role.choices = get_roles()
         
@@ -380,6 +405,7 @@ def edituser():
         user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.active = request.form.get('active')
 
         db.session.commit()
 
@@ -452,10 +478,12 @@ def createprereg():
             country = form.country.data,
             phone = form.phone.data, 
             email = form.email.data, 
+            invoice_email = form.invoice_email.data,
             rate_age = form.rate_age.data,
             kingdom = form.kingdom.data, 
             lodging = form.lodging.data, 
             prereg_status = 'SUCCEEDED',
+            invoice_status = 'UNSENT',
             rate_mbr = form.rate_mbr.data,
             mbr_num_exp = form.mbr_num_exp.data, 
             mbr_num = form.mbr_num.data,
@@ -466,6 +494,7 @@ def createprereg():
             offsite_contact_name = form.offsite_contact_name.data, 
             offsite_contact_phone = form.offsite_contact_phone.data,
             prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
+            paypal_donation = form.paypal_donation.data,
             price_paid = 0,
             atd_paid = 0,
         )
@@ -490,6 +519,13 @@ def createprereg():
             rate_sheet = json.load(f)
             reg.price_calc = rate_sheet[rate_category][rate_date]
             reg.price_due = rate_sheet[rate_category][rate_date]
+
+        if reg.paypal_donation == True:
+            reg.paypal_donation_amount = 3
+        else:
+            reg.paypal_donation_amount = 0
+
+        reg.price_due += reg.paypal_donation_amount
 
         print(reg.early_on)
         db.session.add(reg)
@@ -540,6 +576,8 @@ def create():
 
         db.session.add(reg)
         db.session.commit()
+
+        log_reg_action(reg, 'CREATE')
 
         regid = reg.regid
         flash('Registration {} created for {} {}.'.format(
@@ -593,6 +631,8 @@ def editreg():
 
             db.session.commit()
 
+            log_reg_action(reg, 'EDIT')
+
             return redirect(url_for('reg',regid=regid))
 
     return render_template('editreg.html', regid=reg.regid, reg=reg, form=form)
@@ -618,11 +658,6 @@ def checkin():
     #Calculate Total Price
 
     #today = int(datetime.today().date().strftime('%-d'))  #Get today's day to calculate pricing
-    
-    today = date.today().day
-
-    if today >= 23:
-        today = 9
 
     #Check for medallion number    
     if request.method == 'POST':
@@ -697,14 +732,16 @@ def checkin():
             reg.checkin = datetime.today()
             reg.price_calc = calculate_price_calc(reg)
             #Calculate Price Due
-            if price_paid + reg.atd_paid > price_calc:  #Account for people who showed up late.  No refund.
+            if price_paid > price_calc + reg.paypal_donation_amount:  #Account for people who showed up late.  No refund.
                 reg.price_due = 0
             else:
-                reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
+                reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
                 print("Calculating price:", reg.price_calc) 
 
             db.session.commit()
-            db.session.close()
+
+            print(reg)
+            log_reg_action(reg, 'CHECKIN')
 
             return redirect(url_for('reg', regid=regid))
 
@@ -855,14 +892,24 @@ def waiver():
     form = WaiverForm()
     regid = request.args['regid']
     reg = get_reg(regid)
+    form.paypal_donation.data = reg.paypal_donation
     if request.method == 'POST':
 
+        if reg.paypal_donation == False and bool(request.form.get('paypal_donation')) == True:
+            reg.paypal_donation_amount = 3
+        elif reg.paypal_donation == True and bool(request.form.get('paypal_donation')) == False:            
+            reg.paypal_donation_amount = 0
+        reg.paypal_donation = bool(request.form.get('paypal_donation'))
+        reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - reg.price_paid
         reg.signature = form.signature.data
+        
         db.session.commit()
+
+        log_reg_action(reg, 'WAIVER')
 
         return redirect(url_for('reg', regid=regid))
 
-    return render_template('waiver.html', form=form)
+    return render_template('waiver.html', form=form, reg=reg)
 
 @app.route('/payment', methods=['GET', 'POST'])
 @login_required
@@ -874,18 +921,26 @@ def payment():
     form.fname.data = reg.fname
     form.lname.data = reg.lname
     form.scaname.data = reg.scaname
+    form.invoice_email.data = reg.invoice_email
     form.price_calc.data = reg.price_calc
     form.price_due.data = reg.price_due
+    form.pay_type.data = reg.atd_pay_type
     if request.method == 'POST':
 
-        reg.atd_paid = form.atd_paid.data
-        if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
-            reg.price_due = 0
-        else:
-            reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
+        if request.form.get('pay_type') == '':
+            flash('Must select a Payment Type')
+            return redirect(url_for('payment', regid=regid, form=form))
 
-        reg.atd_pay_type = form.pay_type.data
+        # reg.atd_paid = form.atd_paid.data
+        # if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
+        #     reg.price_due = 0
+        # else:
+        #     reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
+
+        reg.atd_pay_type = request.form.get('pay_type')
         db.session.commit()
+
+        log_reg_action(reg, 'PAYMENT')
 
         return redirect(url_for('reg', regid=regid))
 

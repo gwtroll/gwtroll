@@ -18,7 +18,7 @@ reporttypedata = [('full_export', 'full_export'), ('full_signatue_export', 'full
 
 arrivaldata = [('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025'),('Early_On','Early On')]
 
-paymentdata = [('cash','Cash'), ('zettle','Zettle')]
+paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle')]
 
 class RequiredIfMembership(InputRequired):
     # a validator which makes a field required if
@@ -75,6 +75,7 @@ class EditUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    active = BooleanField('Active')
     submit = SubmitField('Submit')
 
 class UpdatePasswordForm(FlaskForm):
@@ -113,6 +114,7 @@ class CreatePreRegForm(FlaskForm):
     country = StringField('Country', validators=[DataRequired()])
     phone = StringField('Phone', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(),Email()])
+    invoice_email = StringField('Invoice Email', validators=[DataRequired(),Email()])
     kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
     lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
     onsite_contact_name = StringField('Legal Name', validators=[DataRequired()])
@@ -126,6 +128,8 @@ class CreatePreRegForm(FlaskForm):
     mbr_num = IntegerField('Membership #', validators=[RequiredIfMembership('rate_mbr')])
     mbr_num_exp = DateField('Exp Date', validators=[RequiredIfMembership('rate_mbr')])
     rate_date = SelectField('Arrival Date', validators=[DataRequired()], choices=arrivaldata)
+    paypal_donation = BooleanField('Please check here if you would like to donate $3 to cover your Paypal processing fees.')
+
     submit = SubmitField('Register')
 
 class CheckinForm(FlaskForm):
@@ -145,6 +149,7 @@ class EditForm(FlaskForm):
     fname = StringField('First Name')
     lname = StringField('Last Name')
     scaname = StringField('SCA Name')
+    invoice_email = StringField('Invoice Email')
     kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
     lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
     rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
@@ -165,7 +170,9 @@ class UpdateInvoiceForm(FlaskForm):
     price_due = IntegerField('Price Due')
     invoice_number = StringField('Invoice Number', validators=[RequiredIf('invoice_date')])
     invoice_paid = BooleanField('Invoice Paid')
+    paypal_donation_amount = IntegerField('PayPal Donation Amount')
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
+    invoice_payment_date = DateField('Invoice Payment Date')
     invoice_canceled = BooleanField('Invoice Canceled')
     submit = SubmitField('Update Invoice')
 
@@ -178,6 +185,9 @@ class SearchInvoiceForm(FlaskForm):
 
 class WaiverForm(FlaskForm):
     
+    paypal_donation = BooleanField('If you are paying via Paypal, please check here to donate $3 to cover your Paypal processing fees.',
+                                   render_kw={'id':'test'})
+
     signature = HiddenField(
         'signature',
         render_kw={'id':'signature'}
@@ -185,7 +195,7 @@ class WaiverForm(FlaskForm):
     
     submit = SubmitField(
         'Submit',
-        render_kw={'id':'submit'}
+        render_kw={'id':'submit','data_action':'save-svg'}
     )
 
 class ReportForm(FlaskForm):

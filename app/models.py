@@ -63,7 +63,9 @@ class Registrations(db.Model):
     invoice_number: so.Mapped[Optional[str]] 
     invoice_paid: so.Mapped[bool] = so.mapped_column(default=False)
     invoice_date: so.Mapped[Optional[datetime]]
+    invoice_payment_date: so.Mapped[Optional[datetime]]
     invoice_canceled: so.Mapped[bool] = so.mapped_column(default=False)
+    invoice_status: so.Mapped[Optional[str]]
     refund_check_num: so.Mapped[Optional[int]]
     fname: so.Mapped[str] 
     lname: so.Mapped[str] 
@@ -73,7 +75,8 @@ class Registrations(db.Model):
     zip: so.Mapped[Optional[int]] 
     country: so.Mapped[Optional[str]] 
     phone: so.Mapped[Optional[str]] 
-    email: so.Mapped[Optional[str]] 
+    email: so.Mapped[Optional[str]]
+    invoice_email: so.Mapped[Optional[str]]
     kingdom: so.Mapped[Optional[str]] 
     event_ticket: so.Mapped[Optional[str]] 
     rate_mbr: so.Mapped[Optional[str]] 
@@ -84,6 +87,8 @@ class Registrations(db.Model):
     atd_paid: so.Mapped[Optional[int]]
     atd_pay_type: so.Mapped[Optional[str]]
     price_due: so.Mapped[Optional[int]]
+    paypal_donation: so.Mapped[Optional[bool]] = so.mapped_column(default=False)
+    paypal_donation_amount: so.Mapped[Optional[int]] = so.mapped_column(default=0)
     lodging: so.Mapped[Optional[str]] 
     pay_type: so.Mapped[Optional[str]]
     prereg_status: so.Mapped[Optional[str]]
@@ -106,3 +111,11 @@ class Registrations(db.Model):
 
     def __repr__(self):
         return '<Registrations {}>'.format(self.regid)
+    
+class RegLogs(db.Model):
+    __tablename__ = 'reglogs'  
+    id = db.Column(db.Integer(), primary_key=True)
+    regid = db.Column(db.Integer(), db.ForeignKey('registrations.regid'))
+    userid = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    timestamp = db.Column(db.DateTime())
+    action = db.Column(db.String())
