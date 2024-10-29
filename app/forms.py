@@ -20,6 +20,8 @@ arrivaldata = [('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday 
 
 paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle')]
 
+preregstatusdata = [('',''),('SUCCEEDED','SUCCEEDED')]
+
 class RequiredIfMembership(InputRequired):
     # a validator which makes a field required if
     # another field is set and has a truthy value
@@ -149,17 +151,35 @@ class EditForm(FlaskForm):
     fname = StringField('First Name')
     lname = StringField('Last Name')
     scaname = StringField('SCA Name')
+    city = StringField('City')
+    state_province = StringField('State/Province')
+    zip = IntegerField('Zip Code')
+    country = StringField('Country')
+    phone = StringField('Phone')
+    email = StringField('Communication Email')
     invoice_email = StringField('Invoice Email')
     kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
     lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
     rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     rate_mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     medallion = IntegerField('Medallion #', validators=[DataRequired()])
-    price_paid = IntegerField('PayPal Paid')
     atd_paid = IntegerField('At The Door Paid')
-    pay_type = SelectField('Payment Type', validators=[DataRequired()], choices=paymentdata)
-    price_calc = IntegerField('Calculated Price')
+    price_paid = IntegerField('PreReg Paid')
+    pay_type = SelectField('Payment Type', choices=paymentdata)
+    price_calc = IntegerField('Registration Price')
     price_due = IntegerField('Price Due')
+    paypal_donation = BooleanField('PayPayl Donation Status')
+    paypal_donation_amount = IntegerField('PayPal Donation')
+    prereg_status = SelectField('PreReg Status', choices=preregstatusdata)
+    early_on = BooleanField('Early On')
+    mbr_num = IntegerField('Member Number')
+    mbr_num_exp = DateField('Member Exp Date')
+    onsite_contact_name = StringField('Name')
+    onsite_contact_sca_name = StringField('SCA Name')
+    onsite_contact_kingdom = SelectField('Kingdom',choices=kingdomdata)
+    onsite_contact_group = SelectField('Contact Group',choices=lodgingdata)
+    offsite_contact_name = StringField('Name')
+    offsite_contact_phone = StringField('Phone')
 
     #mbr_exp
     submit = SubmitField('Submit')

@@ -594,16 +594,40 @@ def editreg():
     reg = get_reg(regid)
 
     form = EditForm(
-        kingdom = reg.kingdom, 
-        rate_mbr = reg.rate_mbr, 
-        rate_age = reg.rate_age, 
-        medallion = reg.medallion,
-        price_due = reg.price_due,
-        price_paid = reg.price_paid,
-        atd_paid = reg.atd_paid,
-        price_calc = reg.price_calc,
+        regid = reg.regid,
+        fname = reg.fname,
+        lname = reg.lname,
+        scaname = reg.scaname,
+        city = reg.city,
+        state_province = reg.state_province,
+        zip = reg.zip,
+        country = reg.country,
+        phone = reg.phone,
+        email = reg.email,
+        invoice_email = reg.invoice_email,
+        kingdom = reg.kingdom,
         lodging = reg.lodging,
-        )
+        rate_age = reg.rate_age,
+        rate_mbr = reg.rate_mbr,
+        medallion = reg.medallion,
+        atd_paid = reg.atd_paid,
+        price_paid = reg.price_paid,
+        pay_type = reg.atd_pay_type,
+        price_calc = reg.price_calc,
+        price_due = reg.price_due,
+        paypal_donation = reg.paypal_donation,
+        paypal_donation_amount = reg.paypal_donation_amount,
+        prereg_status = reg.prereg_status,
+        early_on =reg.early_on,
+        mbr_num = reg.mbr_num,
+        mbr_num_exp = reg.mbr_num_exp,
+        onsite_contact_name = reg.onsite_contact_name,
+        onsite_contact_sca_name = reg.onsite_contact_sca_name,
+        onsite_contact_kingdom = reg.onsite_contact_kingdom,
+        onsite_contact_group = reg.onsite_contact_group,
+        offsite_contact_name = reg.offsite_contact_name,
+        offsite_contact_phone = reg.offsite_contact_phone
+    )
 
     if request.method == 'POST':
 
@@ -615,19 +639,60 @@ def editreg():
             flash(Markup(dup_url))
 
         else:
+            reg.fname = request.form.get('fname')
+            reg.lname = request.form.get('lname')
+            reg.scaname = request.form.get('scaname')
+            reg.city = request.form.get('city')
+            reg.state_province = request.form.get('state_province')
+            if request.form.get('zip'):
+                reg.zip = int(request.form.get('zip'))
+            else: reg.zip = None
+            reg.country = request.form.get('country')
+            reg.phone = request.form.get('phone')
+            reg.email = request.form.get('email')
+            reg.invoice_email = request.form.get('invoice_email')
+            reg.kingdom = request.form.get('kingdom')
+            reg.lodging = request.form.get('lodging')
+            reg.rate_age = request.form.get('rate_age')
+            reg.rate_mbr = request.form.get('rate_mbr')
+            if request.form.get('medallion'):
+                reg.medallion = int(request.form.get('medallion'))
+            else: reg.medallion = None
+            if request.form.get('atd_paid'):
+                reg.atd_paid = int(request.form.get('atd_paid'))
+            else: reg.atd_paid = 0
+            if request.form.get('price_paid'):
+                reg.price_paid = int(request.form.get('price_paid'))
+            else: reg.price_paid =  0
+            if request.form.get('pay_type') == '' or request.form.get('pay_type') == None:
+                reg.atd_pay_type = None
+            else: reg.atd_pay_type = request.form.get('pay_type')
+            if request.form.get('price_calc'):
+                reg.price_calc = int(request.form.get('price_calc'))
+            else: reg.price_calc = 0
+            if request.form.get('price_due'):
+                reg.price_due = int(request.form.get('price_due'))
+            else: reg.price_due = 0
+            reg.paypal_donation = bool(request.form.get('paypal_donation'))
+            if request.form.get('paypal_donation_amount'):
+                reg.paypal_donation_amount = int(request.form.get('paypal_donation_amount'))
+            else: reg.paypal_donation_amount = 0
+            reg.prereg_status = request.form.get('prereg_status')
+            reg.early_on = bool(request.form.get('early_on'))
+            if request.form.get('mbr_num'):
+                reg.mbr_num = int(request.form.get('mbr_num'))
+            else: reg.mbr_num = None
+            reg.mbr_num_exp = request.form.get('mbr_num_exp')
+            reg.onsite_contact_name = request.form.get('onsite_contact_name')
+            reg.onsite_contact_sca_name = request.form.get('onsite_contact_sca_name')
+            reg.onsite_contact_kingdom = request.form.get('onsite_contact_kingdom')
+            reg.onsite_contact_group = request.form.get('onsite_contact_group')
+            reg.offsite_contact_name = request.form.get('offsite_contact_name')
+            reg.offsite_contact_phone = request.form.get('offsite_contact_phone') 
 
-            reg.medallion = form.medallion.data
-            reg.kingdom = form.kingdom.data
-            reg.rate_mbr = form.rate_mbr.data
-            reg.rate_age = form.rate_age.data
-            reg.price_paid = form.price_paid.data
-            reg.atd_paid = form.atd_paid.data
-            reg.price_calc = form.price_calc.data
-            if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
+            reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
+            if reg.price_due < 0:  #Account for people who showed up late.  No refund.
                 reg.price_due = 0
-            else:
-                reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
-            reg.lodging = form.lodging.data
 
             db.session.commit()
 
@@ -938,6 +1003,8 @@ def payment():
         #     reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
 
         reg.atd_pay_type = request.form.get('pay_type')
+        reg.atd_paid += reg.price_due
+        reg.price_due = 0
         db.session.commit()
 
         log_reg_action(reg, 'PAYMENT')

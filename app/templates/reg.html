@@ -100,12 +100,12 @@
             </tr>
             <tr>
                 <td>{{ reg['price_paid'] }}</td>
-                <td>{{ reg['price_due'] }}</td>
+                <td>{{ reg['atd_paid'] }}</td>
             </tr>
     </table>
     <br>
     {% if reg['atd_pay_type'] %}
-    <h1 class="text-center" style="background-color: red; color: white;">{{reg['atd_pay_type'].upper()}} - ${{reg['price_due']}}</h1>
+    <h1 class="text-center" style="background-color: red; color: white;">{{reg['atd_pay_type'].upper()}} - ${{reg['atd_paid']}}</h1>
     {% endif %}
    
 
