@@ -158,8 +158,8 @@ cython_debug/
 reports/*
 
 #Migration
-migrations/
-migrations/version
+#migrations/
+#migrations/version
 
 
 # PyCharm
