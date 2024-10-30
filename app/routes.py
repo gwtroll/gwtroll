@@ -631,7 +631,10 @@ def editreg():
 
     if request.method == 'POST':
 
-        medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+        if request.form.get('medallion') != '' and request.form.get('medallion') != None:
+            medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+        else:
+            medallion_check = None
 
         if medallion_check is not None and int(regid) != int(medallion_check.regid):
             flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
@@ -682,7 +685,8 @@ def editreg():
             if request.form.get('mbr_num'):
                 reg.mbr_num = int(request.form.get('mbr_num'))
             else: reg.mbr_num = None
-            reg.mbr_num_exp = request.form.get('mbr_num_exp')
+            if request.form.get('mbr_num_exp'):
+                reg.mbr_num_exp = request.form.get('mbr_num_exp')
             reg.onsite_contact_name = request.form.get('onsite_contact_name')
             reg.onsite_contact_sca_name = request.form.get('onsite_contact_sca_name')
             reg.onsite_contact_kingdom = request.form.get('onsite_contact_kingdom')
@@ -783,7 +787,10 @@ def checkin():
         #     else:  # Youth and Royal Pricing
         #         price_calc = 0
 
-        medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+        if request.form.get('medallion') != '' and request.form.get('medallion') != None:
+            medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+        else:
+            medallion_check = None
 
         if medallion_check is not None and int(regid) != int(medallion_check.regid):
             flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
