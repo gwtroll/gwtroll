@@ -620,7 +620,7 @@ def editreg():
         prereg_status = reg.prereg_status,
         early_on =reg.early_on,
         mbr_num = reg.mbr_num,
-        mbr_num_exp = reg.mbr_num_exp,
+        mbr_num_exp = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d'),
         onsite_contact_name = reg.onsite_contact_name,
         onsite_contact_sca_name = reg.onsite_contact_sca_name,
         onsite_contact_kingdom = reg.onsite_contact_kingdom,
