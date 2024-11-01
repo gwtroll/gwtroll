@@ -125,12 +125,14 @@ class CreatePreRegForm(FlaskForm):
     onsite_contact_group = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
     offsite_contact_name = StringField('Legal Name', validators=[DataRequired()])
     offsite_contact_phone = StringField('Phone', validators=[DataRequired()])
-    rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
+    rate_age = SelectField('Age Range', validators=[DataRequired()], id='rate_age', choices=agedata)
     rate_mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     mbr_num = IntegerField('Membership #', validators=[RequiredIfMembership('rate_mbr')])
     mbr_num_exp = DateField('Exp Date', validators=[RequiredIfMembership('rate_mbr')])
     rate_date = SelectField('Arrival Date', validators=[DataRequired()], choices=arrivaldata)
-    paypal_donation = BooleanField('Please check here if you would like to donate $3 to cover your Paypal processing fees.')
+    paypal_donation = BooleanField('Please check here if you would like to donate $3 to cover your Paypal processing fees.', validators=[])
+    royal_departure_date = DateField('Departure Date', validators=[Optional()])
+    royal_title = StringField('Royal Title', validators=[Optional()])
 
     submit = SubmitField('Register')
 

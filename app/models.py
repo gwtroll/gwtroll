@@ -106,6 +106,8 @@ class Registrations(db.Model):
     medallion: so.Mapped[Optional[int]]
     signature: so.Mapped[Optional[str]]
     prereg_date_time: so.Mapped[Optional[datetime]]
+    royal_departure_date: so.Mapped[Optional[datetime]]
+    royal_title: so.Mapped[Optional[str]]
     reg_date_time: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
 

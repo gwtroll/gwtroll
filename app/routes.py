@@ -467,6 +467,7 @@ def upload():
 @app.route('/registration', methods=('GET', 'POST'))
 def createprereg():
     form = CreatePreRegForm()
+    print(form.validate_on_submit())
     if form.validate_on_submit() and request.method == 'POST':
         reg = Registrations(
             fname = form.fname.data,
@@ -497,6 +498,8 @@ def createprereg():
             paypal_donation = form.paypal_donation.data,
             price_paid = 0,
             atd_paid = 0,
+            royal_departure_date = form.royal_departure_date.data,
+            royal_title = form.royal_title.data if form.royal_title.data != '' else None
         )
 
         print(form.rate_date.data)

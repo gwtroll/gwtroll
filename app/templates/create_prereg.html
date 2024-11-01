@@ -88,11 +88,13 @@
         <th scope="row"><span style="color: red;">Proof of Membership</span> is defined as a membership card, mailing label from a Society publication showing membership # and expiration date, payment acknowledgement from the Society registry, or statement showing check payment or charge to Society registry.</th>
       </tr>
       <tr>
-        <th scope="row"><span style="color: red;">Refunds:</span> Requests for refunds must be made IN WRITING via mail or email to the Registration address above. They MUST be postmarked or dated ON OR BEFORE February 14, 2025 and MUST include a mailing address, all names, and camping information. Refunds for requests emailed or postmarked on or before February 14, 2025 will be made for any reason. Requests for refunds emailed or postmarked after February 14, 2025, but before War begins, will be at the discretion of the Gulf Wars Exchequer and the Gulf Wars Autocrat(s). There will be a processing fee of $10 (Ten Dollars) per canceled person, on ALL refunds. All refunds will be sent via check. You must include a valid mailing address with your request.<br>
-            Absolutely no refunds will be granted after  the first day of War, March 8, 2025, even if the attendee registered for a late arrival.</th>
+        <th scope="row"><span style="color: red;">Refunds:</span> Requests for refunds must be made IN WRITING via mail or email to the Registration address above. They MUST be postmarked or dated ON OR BEFORE February 14, 2025 and MUST include a mailing address, all names, and camping information. Refunds for requests emailed or postmarked on or before February 14, 2025 will be made for any reason. Requests for refunds emailed or postmarked after February 14, 2025 will be at the discretion of the Gulf Wars Exchequer and the Gulf Wars Autocrat(s). There will be a processing fee of $10 (Ten Dollars) per canceled person, on ALL refunds. All refunds will be sent via check. You must include a valid mailing address with your request.</th>
       </tr>
       <tr>
         <th scope="row" class="text-center" style="color: red;">EARLY ON - Please select 'Early On' for Arrival Date</th>
+      </tr>
+      <tr>
+        <th scope="row" class="text-center" style="color: red;">ROYALS - Please select 'Royals' for Age Range</th>
       </tr>
     </tbody>
   </table>
@@ -120,8 +122,28 @@
         <div class="col">
             <p>
                 {{ form.rate_age.label }}<br>
-                {{ form.rate_age(class_='form-control m-0') }}
+                {{ form.rate_age(class_='form-control m-0', onchange="royalCheck()") }}
             </p>
+        </div>
+    </div>
+    <div id="royals" style="display: none;">
+        <h4>Royals</h4>
+        <div class="row form-group">
+
+            <div class="col form-group">
+                <p>
+                    {{ form.royal_departure_date.label }}
+                    {{ form.royal_departure_date(class_='form-control m-0') }}
+                    {% if form.royal_departure_date.errors %}{% for error in form.royal_departure_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.royal_title.label }}<br>
+                    {{ form.royal_title(class_='form-control m-0') }}
+                    {% if form.royal_title.errors %}{% for error in form.royal_title.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
         </div>
     </div>
     <div class="row form-group">
@@ -313,4 +335,20 @@
     </tbody>
   </table>
 </div>
+
+<script>
+
+
+    function royalCheck() {
+        const rate_age = document.getElementById("rate_age").value;
+        const royals = document.getElementById("royals");
+        if (rate_age == 'Royals') {
+            royals.style.display = 'block';
+        }
+        else {
+            royals.style.display = 'none';
+        }
+    }
+    
+</script>
 {% endblock %}
