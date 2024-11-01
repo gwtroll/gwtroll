@@ -15,6 +15,8 @@ registrations = db.Table('registrations', metadata)
 conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
 cur = conn.cursor()
 
+cur.execute('DELETE FROM public.reglogs;')
+
 cur.execute('DELETE FROM public.registrations;')
 
 conn.commit()

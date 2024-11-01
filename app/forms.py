@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField
 from wtforms.fields import DateField
-from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError
+from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf
 import pandas as pd
 
 lodging_df = pd.read_csv('gwlodging.csv')
@@ -71,6 +71,11 @@ class CreateUserForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+class CreateRoleForm(FlaskForm):
+    id = IntegerField('Id', validators=[DataRequired()])
+    role_name = StringField('Role Name', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
 class EditUserForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
@@ -117,12 +122,12 @@ class CreatePreRegForm(FlaskForm):
     phone = StringField('Phone', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(),Email()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired(),Email()])
-    kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
-    lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Lodging')], choices=kingdomdata)
+    lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')], choices=lodgingdata)
     onsite_contact_name = StringField('Legal Name', validators=[DataRequired()])
     onsite_contact_sca_name = StringField('SCA Name', validators=[])
-    onsite_contact_kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
-    onsite_contact_group = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    onsite_contact_kingdom = SelectField('Kingdom', validators=[], choices=kingdomdata)
+    onsite_contact_group = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')], choices=lodgingdata)
     offsite_contact_name = StringField('Legal Name', validators=[DataRequired()])
     offsite_contact_phone = StringField('Phone', validators=[DataRequired()])
     rate_age = SelectField('Age Range', validators=[DataRequired()], id='rate_age', choices=agedata)

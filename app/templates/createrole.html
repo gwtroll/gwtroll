@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form action="" method="post">
+        <h2>Create Role</h2>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.id.label }}
+                    {{ form.id(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.role_name.label }}
+                    {{ form.role_name(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit.label }}
+                    {{ form.submit(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+    </form>
+    {% if roles %}
+    <table id="rolesTable" class="table table-striped">
+        <thread>
+            <tr>
+                <th>Role Id</th>
+                <th>Role Name</th>
+                <th></th>
+            </tr>
+        </thread>
+        <tbody>
+            {% for role in roles %}
+            <tr>
+                <td>
+                    {{role.id}}
+                </td>
+                <td>
+                    {{role.name}}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    
+
+
+{% endblock %}

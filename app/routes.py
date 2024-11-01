@@ -215,7 +215,7 @@ def index():
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Troll Shift Lead','Troll User','Cashier')
+@roles_accepted('Admin','Troll Shift Lead','Troll User','Cashier','Department Head')
 def reg(regid):
     reg = get_reg(regid)
     if request.form.get("action") == 'Edit':
@@ -232,35 +232,35 @@ def reg(regid):
     
 @app.route('/invoice/unsent', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices')
+@roles_accepted('Admin','Invoices','Department Head')
 def unsentinvoices():
     regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.invoice_date == None, Registrations.prereg_status == "SUCCEEDED")).all()
     return render_template('invoice_list.html', regs=regs, back='unsent')
 
 @app.route('/invoice/open', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices')
+@roles_accepted('Admin','Invoices','Department Head')
 def openinvoices():
     regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'SENT')).all()
     return render_template('invoice_list.html', regs=regs, back='open')
 
 @app.route('/invoice/paid', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices')
+@roles_accepted('Admin','Invoices','Department Head')
 def paidinvoices():
     regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'PAID')).all()
     return render_template('invoice_list.html', regs=regs, back='paid')
 
 @app.route('/invoice/canceled', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices')
+@roles_accepted('Admin','Invoices','Department Head')
 def canceledinvoices():
     regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'CANCELED')).all()
     return render_template('invoice_list.html', regs=regs, back='canceled')
 
 @app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices')
+@roles_accepted('Admin','Invoices','Department Head')
 def updateinvoice(regid):
     back = request.args.get('back')
     reg = get_reg(regid)
@@ -334,6 +334,19 @@ def updateinvoice(regid):
     return render_template('update_invoice.html', reg=reg, form=form)
 
 
+@app.route('/role/create', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin')
+def createrole():
+    form = CreateRoleForm()
+    all_roles = Role.query.filter(Role.id is not None).all()
+    if request.method == 'POST':
+        role = Role(id = request.form.get('id') ,name=request.form.get('role_name'))
+        db.session.add(role)
+        db.session.commit()
+        return redirect('/')
+    return render_template('createrole.html', form=form, roles=all_roles)
+
 @app.route('/users', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin')
@@ -405,7 +418,7 @@ def edituser():
         user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data
-        user.active = request.form.get('active')
+        user.active = bool(request.form.get('active'))
 
         db.session.commit()
 
@@ -467,8 +480,13 @@ def upload():
 @app.route('/registration', methods=('GET', 'POST'))
 def createprereg():
     form = CreatePreRegForm()
-    print(form.validate_on_submit())
+
+    loading_df = pd.read_csv('gwlodging.csv')
+    lodgingdata = loading_df.to_dict(orient='list')
+    form.lodging.choices = lodgingdata
+
     if form.validate_on_submit() and request.method == 'POST':
+
         reg = Registrations(
             fname = form.fname.data,
             lname = form.lname.data,
@@ -548,7 +566,7 @@ def success():
 
 @app.route('/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Troll Shift Lead','Troll User')
+@roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
 def create():
     form = CreateRegForm()
     if form.validate_on_submit():
@@ -591,7 +609,7 @@ def create():
 
 @app.route('/editreg', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', 'Troll Shift Lead')
+@roles_accepted('Admin', 'Troll Shift Lead','Department Head')
 def editreg():
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -631,6 +649,10 @@ def editreg():
         offsite_contact_name = reg.offsite_contact_name,
         offsite_contact_phone = reg.offsite_contact_phone
     )
+
+    loading_df = pd.read_csv('gwlodging.csv')
+    lodgingdata = loading_df.to_dict(orient='list')
+    form.lodging.choices = lodgingdata
 
     if request.method == 'POST':
 
@@ -713,7 +735,7 @@ def editreg():
 
 @app.route('/checkin', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin','Troll Shift Lead','Troll User')
+@roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
 def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -824,14 +846,14 @@ def checkin():
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@roles_accepted('Admin','Department Head')
 def full_export():
     regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
     return render_template('full_export_images.html', regs=regs)
 
 @app.route('/reports', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin')
+@roles_accepted('Admin','Department Head')
 def reports():
     form = ReportForm()
     s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
@@ -980,7 +1002,7 @@ def reports():
     
 @app.route('/waiver', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', "Troll Shift Lead", "Troll User")
+@roles_accepted('Admin', "Troll Shift Lead", "Troll User",'Department Head')
 def waiver():
     form = WaiverForm()
     regid = request.args['regid']
@@ -1006,7 +1028,7 @@ def waiver():
 
 @app.route('/payment', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', "Troll User", "Troll Shift Lead")
+@roles_accepted('Admin', "Troll User", "Troll Shift Lead",'Department Head')
 def payment():
     form = EditForm()
     regid = request.args['regid']
