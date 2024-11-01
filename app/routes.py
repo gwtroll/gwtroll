@@ -953,7 +953,7 @@ def reports():
 
             file = 'royal_registrations_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-            df = pd.read_sql("SELECT * FROM registrations WHERE age_rate = 'Royals'", engine)
+            df = pd.read_sql("SELECT * FROM registrations WHERE rate_age = 'Royals'", engine)
 
             path1 = './reports/' + file
             path2 = '../reports/' + file
