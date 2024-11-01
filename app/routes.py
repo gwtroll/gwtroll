@@ -840,7 +840,9 @@ def reports():
     engine=db.create_engine(connstring)
     
     file = 'test_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_")) + '.xlsx'
+    #if form.dt_start.data is not None:
     start_date = form.dt_start.data
+    #if form.dt_end.data is not None:
     end_date = form.dt_end.data
    
     if form.validate_on_submit():
@@ -956,6 +958,22 @@ def reports():
 
             df.to_excel(writer, sheet_name='Report' ,index = False)
             writer.close()
+
+        if report_type == 'royal_registrations':
+
+            file = 'royal_registrations_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+            df = pd.read_sql("SELECT * FROM registrations WHERE rate_age = 'Royals'", engine)
+
+            path1 = './reports/' + file
+            path2 = '../reports/' + file
+
+            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+
+            df.to_excel(writer, sheet_name='Report' ,index = False)
+
+            writer.close()
+
         return send_file(path2)
     return render_template('reports.html', form=form)
 

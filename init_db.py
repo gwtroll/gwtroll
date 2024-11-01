@@ -14,6 +14,8 @@ cur = conn.cursor()
 cur.execute('DROP TABLE IF EXISTS alembic_version;')
 
 cur.execute('DROP TABLE IF EXISTS registrations;')
+cur.execute('DROP TABLE IF EXISTS users;')
+cur.execute('DROP TABLE IF EXISTS roles;')
 
 cur.execute('CREATE TABLE registrations'
     '(regid SERIAL PRIMARY KEY,'

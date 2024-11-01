@@ -2,5 +2,5 @@ Show Membership Status - Done
 Show Cost Breakdown for Cashiers - Done
 Add Kingdom Field - Done
 Expand Lodging list - Done
-Prevent duplicate medallion numbers
+Prevent duplicate medallion numbers - Done
 
