@@ -286,10 +286,10 @@ def updateinvoice(regid):
         invoice_payment_date = request.form.get('invoice_payment_date')
         invoice_canceled = bool(request.form.get('invoice_canceled'))
 
-        if is_duplicate_invoice_number(invoice_number, reg):
-            flash('Duplicate Invoice Number {}'.format(
-            invoice_number))
-            return render_template('update_invoice.html', reg=reg, form=form)
+        #if is_duplicate_invoice_number(invoice_number, reg):
+        #    flash('Duplicate Invoice Number {}'.format(
+        #    invoice_number))
+        #    return render_template('update_invoice.html', reg=reg, form=form)
         
         if invoice_number is not None and invoice_number != '':
             reg.invoice_status = 'SENT'
