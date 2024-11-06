@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<h4 class="text-center">PreReg Total: {{preregcount}}</h4>
+<h4 class="text-center">{{back.upper()}} Invoice Count: {{invoicecount}}</h4>
 <input class="form-control" type="text" id="searchEmailInput" onkeyup="searchEmailFunction()" placeholder="Search Email...">
 <input class="form-control" type="text" id="searchInvoiceInput" onkeyup="searchInvoiceFunction()" placeholder="Search Invoice #...">
 

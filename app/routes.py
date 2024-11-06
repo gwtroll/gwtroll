@@ -118,10 +118,46 @@ def reg_count():
         abort(404)
     return regcount
 
+def prereg_count():
+    conn= get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status IS NOT NULL AND invoice_status != 'DUPLICATE' AND invoice_status != 'CANCELED';", [])
+    results = cur.fetchone()
+    for preregcount in results:
+        print(preregcount)
+    conn.close()
+    if preregcount is None:
+        abort(404)
+    return preregcount
+
+def unsent_count():
+    conn= get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'UNSENT';", [])
+    results = cur.fetchone()
+    for unsentcount in results:
+        print(unsentcount)
+    conn.close()
+    if unsentcount is None:
+        abort(404)
+    return unsentcount
+
+def open_count():
+    conn= get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'OPEN';", [])
+    results = cur.fetchone()
+    for opencount in results:
+        print(opencount)
+    conn.close()
+    if opencount is None:
+        abort(404)
+    return opencount
+
 def paid_count():
     conn= get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'PAID';", [])
+    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'PAID';", [])
     results = cur.fetchone()
     for paidcount in results:
         print(paidcount)
@@ -129,6 +165,18 @@ def paid_count():
     if paidcount is None:
         abort(404)
     return paidcount
+
+def canceled_count():
+    conn= get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'CANCELED';", [])
+    results = cur.fetchone()
+    for canceledcount in results:
+        print(canceledcount)
+    conn.close()
+    if canceledcount is None:
+        abort(404)
+    return canceledcount
 
 def calculate_price_calc(reg):
     today_datetime = date.today()
@@ -248,28 +296,36 @@ def reg(regid):
 @roles_accepted('Admin','Invoices','Department Head')
 def unsentinvoices():
     regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.invoice_date == None, Registrations.prereg_status == "SUCCEEDED")).all()
-    return render_template('invoice_list.html', regs=regs, back='unsent')
+    preregcount = prereg_count()
+    invoicecount = unsent_count()
+    return render_template('invoice_list.html', regs=regs, preregcount=preregcount, invoicecount=invoicecount, back='unsent')
 
 @app.route('/invoice/open', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def openinvoices():
     regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'SENT')).all()
-    return render_template('invoice_list.html', regs=regs, back='open')
+    preregcount = prereg_count()
+    invoicecount = open_count()
+    return render_template('invoice_list.html', regs=regs, preregcount=preregcount, invoicecount=invoicecount, back='open')
 
 @app.route('/invoice/paid', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def paidinvoices():
     regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'PAID')).all()
-    return render_template('invoice_list.html', regs=regs, back='paid')
+    preregcount = prereg_count()
+    invoicecount = paid_count()
+    return render_template('invoice_list.html', regs=regs, preregcount=preregcount, invoicecount=invoicecount, back='paid')
 
 @app.route('/invoice/canceled', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def canceledinvoices():
     regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'CANCELED')).all()
-    return render_template('invoice_list.html', regs=regs, back='canceled')
+    preregcount = prereg_count()
+    invoicecount = canceled_count()
+    return render_template('invoice_list.html', regs=regs, preregcount=preregcount, invoicecount=invoicecount, back='canceled')
 
 @app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
 @login_required
