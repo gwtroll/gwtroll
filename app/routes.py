@@ -133,7 +133,7 @@ def prereg_total():
 def unsent_count():
     conn= get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'UNSENT';", [])
+    cur.execute("SELECT count(DISTINCT invoice_email) FROM registrations WHERE invoice_status = 'UNSENT';", [])
     results = cur.fetchone()
     for unsentcount in results:
         print(unsentcount)
@@ -295,7 +295,6 @@ def logout():
 @login_required
 def index():
     regcount = reg_count()
-    preregtotal = prereg_total()
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
@@ -318,9 +317,9 @@ def index():
             reg = query_db(
                 "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
                 (search_value,))
-            return render_template('index.html', searchreg=reg, regcount=regcount, preregtotal=preregtotal)
+            return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
-        return render_template('index.html', regcount=regcount, preregtotal=preregtotal)
+        return render_template('index.html', regcount=regcount)
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
 @login_required
