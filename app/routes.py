@@ -157,7 +157,7 @@ def unsent_reg_count():
 def open_count():
     conn= get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'OPEN';", [])
+    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'SENT';", [])
     results = cur.fetchone()
     for opencount in results:
         print(opencount)
@@ -169,7 +169,7 @@ def open_count():
 def open_reg_count():
     conn= get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'OPEN';", [])
+    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'SENT';", [])
     results = cur.fetchone()
     for opencount in results:
         print(opencount)
