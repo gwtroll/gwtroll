@@ -79,6 +79,12 @@
                 {{ form.invoice_canceled(class_='form-control') }}
             </p>  
         </div>
+        <div class="col text-center">
+            <p>
+                {{ form.duplicate_invoice.label }}<br>
+                {{ form.duplicate_invoice(class_='form-control') }}
+            </p>  
+        </div>
     </div>
   
     <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>

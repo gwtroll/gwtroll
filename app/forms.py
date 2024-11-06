@@ -195,12 +195,13 @@ class UpdateInvoiceForm(FlaskForm):
     price_paid = IntegerField('Amount Paid')
     price_calc = IntegerField('Invoice Amount')
     price_due = IntegerField('Price Due')
-    invoice_number = StringField('Invoice Number', validators=[RequiredIf('invoice_date')])
+    invoice_number = StringField('Invoice Number', validators=[])
     invoice_paid = BooleanField('Invoice Paid')
     paypal_donation_amount = IntegerField('PayPal Donation Amount')
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
     invoice_payment_date = DateField('Invoice Payment Date')
     invoice_canceled = BooleanField('Invoice Canceled')
+    duplicate_invoice = BooleanField('Duplicate Invoice')
     submit = SubmitField('Update Invoice')
 
 class SearchInvoiceForm(FlaskForm):

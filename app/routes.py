@@ -118,6 +118,18 @@ def reg_count():
         abort(404)
     return regcount
 
+def paid_count():
+    conn= get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'PAID';", [])
+    results = cur.fetchone()
+    for paidcount in results:
+        print(paidcount)
+    conn.close()
+    if paidcount is None:
+        abort(404)
+    return paidcount
+
 def calculate_price_calc(reg):
     today_datetime = date.today()
     if today_datetime < datetime(2025,3,8).date():
@@ -187,6 +199,7 @@ def logout():
 @login_required
 def index():
     regcount = reg_count()
+    paidcount = paid_count()
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
@@ -209,9 +222,9 @@ def index():
             reg = query_db(
                 "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
                 (search_value,))
-            return render_template('index.html', searchreg=reg, regcount=regcount)
+            return render_template('index.html', searchreg=reg, regcount=regcount, paidcount=paidcount)
     else:
-        return render_template('index.html', regcount=regcount)
+        return render_template('index.html', regcount=regcount, paidcount=paidcount)
 
 @app.route('/<int:regid>', methods=('GET', 'POST'))
 @login_required
@@ -277,6 +290,7 @@ def updateinvoice(regid):
         form.invoice_date.data = datetime.now()
     form.invoice_canceled.data = reg.invoice_canceled
     form.invoice_payment_date.data = reg.invoice_payment_date
+    form.duplicate_invoice.data = True if reg.invoice_status == 'DUPLICATE' else False
     
     if request.method == 'POST':
         invoice_number = request.form.get('invoice_number')
@@ -297,6 +311,8 @@ def updateinvoice(regid):
             reg.invoice_status = 'PAID'
         if bool(request.form.get('invoice_canceled')) == True:
             reg.invoice_status = 'CANCELED'
+        if bool(request.form.get('duplicate_invoice')) == True:
+            reg.invoice_status = 'DUPLICATE'
 
         reg.price_paid = price_paid
         reg.price_calc = price_calc
