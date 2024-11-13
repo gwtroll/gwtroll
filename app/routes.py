@@ -205,7 +205,7 @@ def paid_reg_count():
 def canceled_count():
     conn= get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'CANCELED';", [])
+    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'CANCELED' OR invoice_status = 'DUPLICATE';", [])
     results = cur.fetchone()
     for canceledcount in results:
         print(canceledcount)
