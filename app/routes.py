@@ -372,7 +372,7 @@ def paidinvoices():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def canceledinvoices():
-    regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'CANCELED')).all()
+    regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", or_(Registrations.invoice_status == 'CANCELED', Registrations.invoice_status == 'DUPLICATE'))).all()
     preregtotal = prereg_total()
     invoicecount = canceled_count()
     regcount = canceled_reg_count()
