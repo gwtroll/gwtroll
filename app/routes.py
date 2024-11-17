@@ -302,14 +302,14 @@ def index():
             print(search_value)
             if search_value is not None and search_value != '':
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s order by lname, fname",
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND invoice_status != 'DUPLICATE' order by lname, fname",
                     #(search_value, search_value, search_value))
                     ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
             reg = query_db(
-                "SELECT * FROM registrations WHERE order_id = %s order by lname, fname",
+                "SELECT * FROM registrations WHERE order_id = %s AND invoice_status != 'DUPLICATE' order by lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
