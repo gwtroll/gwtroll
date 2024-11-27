@@ -1003,6 +1003,17 @@ def reports():
 
             rptquery = "SELECT * FROM registrations"
             df = pd.read_sql_query(rptquery, engine)
+            base_price_list = []
+            nmr_list = []
+            for index, row in df.iterrows():
+                if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0:
+                    base_price_list.append(row['price_calc'] - 10)
+                    nmr_list.append(10)
+                else:
+                    base_price_list.append(row['price_calc'])
+                    nmr_list.append(0)
+            df['nmr'] = nmr_list
+            df['base_price'] = base_price_list
             path1 = './reports/' + file
             path2 = '../reports/' + file
             
@@ -1118,6 +1129,28 @@ def reports():
             df.to_excel(writer, sheet_name='Report' ,index = False)
 
             writer.close()
+
+        if report_type == 'paypal_paid_export':
+
+            file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+
+            rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID'"
+            df = pd.read_sql_query(rptquery, engine)
+            base_price_list = []
+            nmr_list = []
+            for index, row in df.iterrows():
+                if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0:
+                    base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
+                    nmr_list.append(10)
+                else:
+                    base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
+                    nmr_list.append(0)
+            df['nmr'] = nmr_list
+            df['base_price'] = base_price_list
+            path1 = './reports/' + file
+            path2 = '../reports/' + file
+            
+            df.to_csv(path1)
 
         return send_file(path2)
     return render_template('reports.html', form=form)
