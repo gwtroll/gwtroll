@@ -1134,7 +1134,7 @@ def reports():
 
             file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-            rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID'"
+            rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID'"
             df = pd.read_sql_query(rptquery, engine)
             base_price_list = []
             nmr_list = []
