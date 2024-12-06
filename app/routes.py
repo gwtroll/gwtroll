@@ -969,14 +969,14 @@ def checkin():
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Department Head')
+@roles_accepted('Admin','Department Head','Invoices')
 def full_export():
     regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
     return render_template('full_export_images.html', regs=regs)
 
 @app.route('/reports', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin','Department Head')
+@roles_accepted('Admin','Department Head','Invoices')
 def reports():
     form = ReportForm()
     s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
