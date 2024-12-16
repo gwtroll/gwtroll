@@ -702,6 +702,15 @@ def create():
         lodging = form.lodging.data,
         rate_age = form.rate_age.data,
         rate_mbr = form.rate_mbr.data,
+        mbr_num = form.mbr_num.data,
+        mbr_num_exp = form.mbr_num_exp.data,
+        city = form.city.data,
+        state_province = form.state_province.data,
+        zip = form.zip.data,
+        country = form.country.data,
+        phone = form.phone.data,
+        email = form.email.data,
+        invoice_email = form.invoice_email.data,
         onsite_contact_name = form.onsite_contact_name.data, 
         onsite_contact_sca_name = form.onsite_contact_sca_name.data, 
         onsite_contact_kingdom = form.onsite_contact_kingdom.data, 
@@ -990,36 +999,37 @@ def reports():
     #if form.dt_end.data is not None:
     end_date = form.dt_end.data
    
-    if form.validate_on_submit():
-        report_type = form.report_type.data
+    report_type = form.report_type.data
 
-        if report_type == 'full_signatue_export':
-            regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
-            return render_template('full_export_images.html', regs=regs)
+    if report_type == 'full_signatue_export':
+        regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
+        return render_template('full_export_images.html', regs=regs)
+    
+    if report_type == 'full_export':
+
+        file = 'full_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+
+        rptquery = "SELECT * FROM registrations"
+        df = pd.read_sql_query(rptquery, engine)
+        base_price_list = []
+        nmr_list = []
+        for index, row in df.iterrows():
+            if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0:
+                base_price_list.append(row['price_calc'] - 10)
+                nmr_list.append(10)
+            else:
+                base_price_list.append(row['price_calc'])
+                nmr_list.append(0)
+        df['nmr'] = nmr_list
+        df['base_price'] = base_price_list
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
         
-        if report_type == 'full_export':
-
-            file = 'full_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
-
-            rptquery = "SELECT * FROM registrations"
-            df = pd.read_sql_query(rptquery, engine)
-            base_price_list = []
-            nmr_list = []
-            for index, row in df.iterrows():
-                if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0:
-                    base_price_list.append(row['price_calc'] - 10)
-                    nmr_list.append(10)
-                else:
-                    base_price_list.append(row['price_calc'])
-                    nmr_list.append(0)
-            df['nmr'] = nmr_list
-            df['base_price'] = base_price_list
-            path1 = './reports/' + file
-            path2 = '../reports/' + file
-            
-            df.to_csv(path1)
-            
-        if report_type == 'full_checkin_report':
+        df.to_csv(path1)
+        return send_file(path2)
+        
+    if report_type == 'full_checkin_report':
+        if form.validate_on_submit():
 
             file = 'full_checkin_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
@@ -1034,9 +1044,10 @@ def reports():
             df.to_excel(writer, sheet_name='Report' ,index = False)
             worksheet = writer.sheets['Report']
             writer.close()
-        
-        if report_type == 'at_door_count':
-
+            return send_file(path2)
+    
+    if report_type == 'at_door_count':
+        if form.validate_on_submit():
             file = 'at_door_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
             rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg_status is Null"
@@ -1061,98 +1072,103 @@ def reports():
             worksheet.write('C1', "Income Total")
 
             writer.close()
-        
-        if report_type == 'kingdom_count':
+            return send_file(path2)
+    
+    if report_type == 'kingdom_count':
 
-            file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-            df = pd.read_sql("SELECT kingdom, checkin::date, COUNT(regid) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", engine)
-            df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
+        df = pd.read_sql("SELECT kingdom, checkin::date, COUNT(regid) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", engine)
+        df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
 
-            path1 = './reports/' + file
-            path2 = '../reports/' + file
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
 
-            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
 
-            # df_pivot.to_excel(writer, sheet_name='Report' ,index = True)
+        # df_pivot.to_excel(writer, sheet_name='Report' ,index = True)
 
-            out = df_pivot.assign(Total=df_pivot.sum(axis=1))
-            out = pd.concat([out, out.sum().to_frame('Total').T])
-            out.to_excel(writer, sheet_name='Report', index = True)
-            workbook = writer.book
-            worksheet = writer.sheets["Report"]
+        out = df_pivot.assign(Total=df_pivot.sum(axis=1))
+        out = pd.concat([out, out.sum().to_frame('Total').T])
+        out.to_excel(writer, sheet_name='Report', index = True)
+        workbook = writer.book
+        worksheet = writer.sheets["Report"]
 
-            writer.close()
-
-        if report_type == 'earlyon':
-
-            file = 'earlyon_list_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
-
-            df = pd.read_sql("SELECT regid, invoice_paid, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true", engine)
-
-            path1 = './reports/' + file
-            path2 = '../reports/' + file
-
-            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
-
-            df.to_excel(writer, sheet_name='Report' ,index = False)
-
-            writer.close()
-
-        if report_type == 'ghost_report':
-
-            file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
-
-            rptquery = "SELECT order_id, regid, fname, lname, scaname, rate_age, lodging, prereg_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
-            rptquery = rptquery.format('%(prereg_status)s')
-            params = {'prereg_status':"SUCCEEDED"}
-            df = pd.read_sql_query(rptquery, engine, params=params)
-            path1 = './reports/' + file
-            path2 = '../reports/' + file
-
-            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
-
-            df.to_excel(writer, sheet_name='Report' ,index = False)
-            writer.close()
-
-        if report_type == 'royal_registrations':
-
-            file = 'royal_registrations_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
-
-            df = pd.read_sql("SELECT * FROM registrations WHERE rate_age = 'Royals'", engine)
-
-            path1 = './reports/' + file
-            path2 = '../reports/' + file
-
-            writer = pd.ExcelWriter(path1, engine='xlsxwriter')
-
-            df.to_excel(writer, sheet_name='Report' ,index = False)
-
-            writer.close()
-
-        if report_type == 'paypal_paid_export':
-
-            file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
-
-            rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID'"
-            df = pd.read_sql_query(rptquery, engine)
-            base_price_list = []
-            nmr_list = []
-            for index, row in df.iterrows():
-                if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0:
-                    base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
-                    nmr_list.append(10)
-                else:
-                    base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
-                    nmr_list.append(0)
-            df['nmr'] = nmr_list
-            df['base_price'] = base_price_list
-            path1 = './reports/' + file
-            path2 = '../reports/' + file
-            
-            df.to_csv(path1)
-
+        writer.close()
         return send_file(path2)
+
+    if report_type == 'earlyon':
+
+        file = 'earlyon_list_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        df = pd.read_sql("SELECT regid, invoice_paid, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true", engine)
+
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+
+        df.to_excel(writer, sheet_name='Report' ,index = False)
+
+        writer.close()
+        return send_file(path2)
+
+    if report_type == 'ghost_report':
+
+        file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        rptquery = "SELECT order_id, regid, fname, lname, scaname, rate_age, lodging, prereg_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
+        rptquery = rptquery.format('%(prereg_status)s')
+        params = {'prereg_status':"SUCCEEDED"}
+        df = pd.read_sql_query(rptquery, engine, params=params)
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+
+        df.to_excel(writer, sheet_name='Report' ,index = False)
+        writer.close()
+        return send_file(path2)
+
+    if report_type == 'royal_registrations':
+
+        file = 'royal_registrations_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        df = pd.read_sql("SELECT * FROM registrations WHERE rate_age = 'Royals'", engine)
+
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+
+        df.to_excel(writer, sheet_name='Report' ,index = False)
+
+        writer.close()
+        return send_file(path2)
+
+    if report_type == 'paypal_paid_export':
+
+        file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+
+        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID'"
+        df = pd.read_sql_query(rptquery, engine)
+        base_price_list = []
+        nmr_list = []
+        for index, row in df.iterrows():
+            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0:
+                base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
+                nmr_list.append(10)
+            else:
+                base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
+                nmr_list.append(0)
+        df['nmr'] = nmr_list
+        df['base_price'] = base_price_list
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        df.to_csv(path1)
+        return send_file(path2)
+
     return render_template('reports.html', form=form)
 
     

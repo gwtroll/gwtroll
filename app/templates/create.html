@@ -43,6 +43,22 @@
     <div class="row form-group">
         <div class="col">
             <p>
+                {{ form.mbr_num.label }}<br>
+                {{ form.mbr_num(class_='form-control m-0') }}
+                {% if form.mbr_num.errors %}{% for error in form.mbr_num.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.mbr_num_exp.label }}<br>
+                {{ form.mbr_num_exp(class_='form-control m-0') }}
+                {% if form.mbr_num_exp.errors %}{% for error in form.mbr_num_exp.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
                 {{ form.kingdom.label }}<br>
                 {{ form.kingdom(class_='form-control m-0') }}
             </p>
@@ -52,6 +68,54 @@
                 {{ form.lodging.label }}<br>
                 {{ form.lodging(class_='form-control m-0') }}
             </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.city.label }}<br>
+                {{ form.city(class_='form-control m-0') }}
+            </p>
+            {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.state_province.label }}<br>
+                {{ form.state_province(class_='form-control m-0') }}
+            </p>
+            {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.zip.label }}<br>
+                {{ form.zip(class_='form-control m-0') }}
+            </p>
+            {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                {{ form.country.label }}<br>
+                {{ form.country(class_='form-control m-0') }}
+            </p>
+            {% if form.country.errors %}{% for error in form.country.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                {{ form.phone.label }}<br>
+                {{ form.phone(class_='form-control m-0') }}
+            </p>
+            {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="col">
+            <p>
+                Communication Email<br>
+                {{ form.email(class_='form-control m-0') }}
+            </p>
+            {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
     </div>
     <h4>Onsite - Emergency Contact</h4>
