@@ -1101,7 +1101,7 @@ def reports():
 
         file = 'earlyon_list_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        df = pd.read_sql("SELECT regid, invoice_paid, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true", engine)
+        df = pd.read_sql("SELECT regid, invoice_status, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true", engine)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -1117,7 +1117,7 @@ def reports():
 
         file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = "SELECT order_id, regid, fname, lname, scaname, rate_age, lodging, prereg_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
+        rptquery = "SELECT invoice_number, regid, fname, lname, scaname, rate_age, lodging, invoice_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
         rptquery = rptquery.format('%(prereg_status)s')
         params = {'prereg_status':"SUCCEEDED"}
         df = pd.read_sql_query(rptquery, engine, params=params)
@@ -1145,6 +1145,23 @@ def reports():
 
         writer.close()
         return send_file(path2)
+
+    if report_type == 'land_pre-reg':
+
+        file = 'land_pre-reg_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        df = pd.read_sql("SELECT lodging, invoice_number, regid, fname, lname, scaname, rate_age, invoice_status FROM registrations WHERE invoice_status = 'PAID' ORDER BY lodging, invoice_number", engine)
+
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+
+        df.to_excel(writer, sheet_name='Report' ,index = False)
+
+        writer.close()
+        return send_file(path2)
+
 
     if report_type == 'paypal_paid_export':
 
