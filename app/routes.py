@@ -342,7 +342,7 @@ def reg(regid):
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def unsentinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.invoice_date == None, Registrations.prereg_status == "SUCCEEDED")).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg_status == "SUCCEEDED")).all()
     preregtotal = prereg_total()
     invoicecount = unsent_count()
     regcount = unsent_reg_count()
@@ -352,7 +352,7 @@ def unsentinvoices():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def openinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'SENT')).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'SENT')).all()
     preregtotal = prereg_total()
     invoicecount = open_count()
     regcount = open_reg_count()
@@ -362,7 +362,7 @@ def openinvoices():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def paidinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.invoice_date != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'PAID')).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'PAID')).all()
     preregtotal = prereg_total()
     invoicecount = paid_count()
     regcount = paid_reg_count()
