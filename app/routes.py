@@ -342,7 +342,7 @@ def reg(regid):
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def unsentinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number == None, or_(Registrations.invoice_status != 'CANCELED', Registrations.invoice_status != 'DUPLICATE', Registrations.invoice_status == 'SENT', Registrations.invoice_status == 'PAID'), Registrations.prereg_status == "SUCCEEDED")).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.invoice_status != 'CANCELED', Registrations.invoice_status != 'DUPLICATE', Registrations.invoice_status != 'SENT', Registrations.invoice_status != 'PAID', Registrations.prereg_status == "SUCCEEDED")).all()
     preregtotal = prereg_total()
     invoicecount = unsent_count()
     regcount = unsent_reg_count()
