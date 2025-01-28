@@ -91,32 +91,60 @@
     ITS MEANING AND SIGNFICANCE.</p>
     
     <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
-    class=SpellE>EqMIC</span> <u>Amanda Schmalz</u><span style='mso-spacerun:yes'>"
-    </span>EVENT <u>Gulf Wars </u>DATE <u>3/9-3/16/2024<o:p></o:p></u></p>
+    class=SpellE>EqMIC</span> <u>Rose de la Cumbe</u><span style='mso-spacerun:yes'>"
+    </span>EVENT <u>Gulf Wars </u>DATE <u>3/8-3/16/2025<o:p></o:p></u></p>
     
     <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><o:p>&nbsp;</o:p></p>
     
     <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+    <!-- START MINOR WAIVER -->
+     {% if reg.rate_age != '18+' and reg.rate_age != 'Royals' %}
+    <p class=MsoNormal align=center style='margin-bottom:0in;text-align:center;
+    line-height:normal'><b>MINOR'S CONSENT TO PARTICIPATE AND HOLD HARMLESS AGREEMENT<o:p></o:p></b></p>
+    <br>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'>
+    {{reg.fname}} {{reg.lname}} (hereafter referred to as “the minor”) does hereby state that the minor wishes to participate in activities sponsored by the international organization known as the Society for Creative Anachronism, Inc., a California not-for-profit corporation (hereafter “SCA”).</span></p>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'>The SCA has rules which govern and may restrict the activities in which the minor can participate. These rules include, but are not limited to: Corpora, the By-laws, the various kingdom laws and the Rules for combat related activities.</span></p>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'>The SCA makes no representations or claims as to the condition or safety of the land, structures or surroundings, whether or not owned, leased, operated or maintained by the SCA.</span></p>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'>The minor's parent(s) or guardian(s) understand that all activities are VOLUNTARY and that the minor does not have to participate. It is understood that these activities are potentially dangerous or harmful to the minor's person or property, and that by participating, the minor's parent(s) or guardian(s) voluntarily accepts and assumes the risk of injury to the minor or damage to the minor's property.</span></p>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'>It is understood that the SCA does NOT provide any insurance coverage for the minor's person or property; and minor's parent(s) or guardian(s) acknowledge that they are responsible for the minor's safety and the minor's own health care needs, and for the protection of the minor's property.</span></p>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'>In exchange for allowing the minor to participate in these SCA activities and events, the minor by and through the undersigned, agrees to release from liability, agrees to indemnify, and hold harmless the SCA, and any SCA agent, officer, or SCA employee acting within the scope of their duties, for any injury to the minor's person or damage to the minor's property.</span></p>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'>This Release shall be binding upon the minor, the parent(s) or guardian(s), any successors in interest, and/or any person(s) suing on the minor's behalf.</span></p>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'>The minor's parent(s) or guardian(s) understand that this document is complete unto itself and that any oral promises or representations made to them concerning this document and/or its terms are not binding upon the SCA, its officers, agents and/or employees.</span></p>
+    <br>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'>PARENT OR LEGAL GUARDIAN MUST SIGN BELOW:</p>
+    <p class=MsoNormal style='margin-bottom:4.0pt;line-height:normal'><span style='font-size:10.0pt'></span>I, the undersigned, state that I am the parent or legal guardian of the minor whose name appears above. I understand that the above terms and conditions apply to said minor and to myself. I further understand that said minor cannot participate under ANY circumstances in armored martial arts, any combat-related activities, combat-archery, or fencing without parental consent where such participation is allowed by kingdom law. The minor will not be able to participate in any SCA activities without entering into this agreement. This document is binding on myself, the said minor and any person suing on behalf of said minor.</span></p>
+    {% endif %}
+    <!-- END MINOR WAIVER -->
     
     </div>
-    
-
-<div id="signature-pad" class="signature-pad">
-    <div class="signature-pad--body">
+<div id="signature-pad" class="signature-pad col justify-content-center">
+    <div class="signature-pad--body col">
       <canvas width="600" style="touch-action: none; user-select: none;" height="200"></canvas>
     </div>
-    <div class="column">
-        
-        <button type="submit" class="button save" form="WaiverForm" data-action="save-svg">Submit</button>
-        
-    </div>
-    <form action="" method="post" novalidate id="WaiverForm">
-        {{ form.hidden_tag() }}
-        <p>{{ form.signature }}</p>
-
-    </form>
-    
 </div>
+
+    <div class="col-12">
+        <form action="" method="post" novalidate id="WaiverForm">
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p class="text-center">
+                        {{ form.paypal_donation.label }}<br>
+                        {{ form.paypal_donation(class_='form-control m-0') }}
+                    </p>
+                </div>
+            </div>
+            {{ form.hidden_tag() }}
+            <p>{{ form.signature }}</p>
+            {{form.submit(class_='button save form-control btn-primary btn-lg')}}
+            <!-- <div class="col-12">
+                <button type="submit" class="button save form-control btn-primary btn-lg" form="WaiverForm" data-action="save-svg">Submit</button>
+            </div> -->
+        </form>
+    </div>
+
+
 
 
   
@@ -138,8 +166,9 @@ Output:
 
 <script>
     const wrapper = document.getElementById("signature-pad");
-    const saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
-    const submitButton = wrapper.querySelector("[data-action=save-svg]");
+    const form = document.getElementById("WaiverForm")
+    const saveSVGButton = form.querySelector("[data-action=save-svg]");
+    const submitButton = form.querySelector("[data-action=save-svg]");
     var canvas = document.querySelector("canvas");
 
     var signaturePad = new SignaturePad(canvas);
@@ -154,8 +183,10 @@ Output:
     } else {
     const dataURL = signaturePad.toDataURL('image/svg+xml');
     var signature = document.getElementById('signature').value;
+    const test = document.getElementById('test')
 
     document.getElementById('signature').value = dataURL;
+    document.getElementById('test').value = test.checked
     console.log(signature)
 
     }

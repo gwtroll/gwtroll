@@ -31,7 +31,7 @@
         </tr>
         <tr>
             <td>Pre-reg Order ID: </td>
-            <td>{{ reg['order_id'] }}</td>
+            <td>{{ reg['invoice_number'] }}</td>
         </tr>
         <tr>
             <td>Age Range: </td>
@@ -48,6 +48,17 @@
         <tr>
             <td>Camp Group: </td>
             <td>{{ reg['lodging'] }}</td>
+        </tr>
+        <tr>
+            <td>Onsite Emergency Contact: </td>
+            <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
+                <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
+                Group: {{ reg.onsite_contact_group }}</td>
+        </tr>
+        <tr>
+            <td>Offsite Emergency Contact: </td>
+            <td>{{ reg.offsite_contact_name }} <br>
+                Phone: {{ reg.offsite_contact_phone }} </td>
         </tr>
         <tr>
             <td>Medallion Number: </td>
@@ -69,39 +80,86 @@
     <table>
         <tr>
             <th>Registration Price</th>
-            <th>Amount Paid</th>
-            <th>Amount Due</th>
+            <th>PayPal Donation</th>
+            <th>Total Price</th>
         </tr>
         <tr>
             <td>{{ reg['price_calc'] }}</td>
-            <td>{{ reg['price_paid'] }}</td>
-            <td>{{ reg['price_due'] }}</td>
+            <td>{{ reg['paypal_donation_amount'] }}</td>
+            <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] }}</td>
         </tr>
+        <h5>Cost - Breakdown</h5>
+        <table>
+            <tr>
+                <th>Prepaid - PayPal</th>
+                {% if reg['atd_pay_type'] %}
+                <th>At the Door ({{reg['atd_pay_type'].upper()}})</th>
+                {% else %}
+                <th>At the Door</th>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>{{ reg['price_paid'] }}</td>
+                <td>{{ reg['atd_paid'] }}</td>
+            </tr>
     </table>
+    <br>
+    {% if reg['atd_pay_type'] %}
+    <h1 class="text-center" style="background-color: red; color: white;">{{reg['atd_pay_type'].upper()}} - ${{reg['atd_paid']}}</h1>
+    {% endif %}
    
 
     {% if not reg['signature'] %}
-        <br>
+
         <form method="post">
-        <div class="btn btn-primary">
-            <input type="submit" name="action" value="waiver">
-        </div>
+            <div class="row form-group no-print">
+                <div class="col form-group">
+                    <p>
+                        <a href="/waiver">
+                            <button type="submit" name="action" value="waiver" class="form-control btn btn-success btn-lg">Waivers</button>
+                        </a>
+                    </p>
+                </div>
+            </div>
         </form>
     {% endif %}
 
     {% if (not reg['checkin']) and (reg['signature']) %}
-        <br>
+
         <form method="post">
-        <a href="/checkin">
-            <button type="submit" name="action" value="checkin" class="btn btn-primary">Check-In</button>
-        </a>
+            <div class="row form-group no-print">
+                <div class="col form-group">
+                    <p>
+                        <a href="/checkin">
+                            <button type="submit" name="action" value="checkin" class="form-control btn btn-success btn-lg">Check-In</button>
+                        </a>
+                    </p>
+                </div>
+            </div>
         </form>
     {% endif %}
+
+    {% if reg['price_due'] > 0 and reg['checkin'] and reg['signature'] and (current_user.has_role('Admin') or current_user.has_role('Cashier'))%}
+
+    <form method="post">
+        <div class="row form-group no-print">
+            <div class="col form-group">
+                <p>
+                    <a href="/payment">
+                        <button type="submit" name="action" value="payment" class="form-control btn btn-success btn-lg">Payment</button>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </form>
+{% endif %}
     
     {% if reg['checkin'] %}
-        <br>
-        <p>
-        <input value='Print' type='button' class="btn btn-primary" onclick='handlePrint()' />
+        <div class="row form-group no-print">
+            <div class="col form-group">
+                <input value='Print' type='button' class="btn btn-primary btn-lg form-control" onclick='handlePrint()' />           
+            </div>
+        </div>
         <script type="text/javascript">
         const handlePrint = () => {
             var actContents = document.body.innerHTML;
@@ -110,20 +168,17 @@
             window.print();
         }
         </script>
-        </p>
-        <br>
-        <p>
-        <a href="/">
-            <button type="submit" class="btn btn-primary">Home</button>
-        </a>
-        </p>
     {%endif%}
-
-    <br>
-    <form action="" method="post">
-    <div class="panel-body">
-        <input type="submit" name="action" value="Edit">
-    </div>
+    <form method="post">
+        <div class="row form-group no-print">
+            <div class="col form-group">
+                <p>
+                    <a href="/">
+                        <button type="submit" name="action" value="Edit" class="form-control btn btn-warning btn-lg">Edit</button>
+                    </a>              
+                </p>
+            </div>
+        </div>
     </form>
         <!-- <br>
         <form method="post">

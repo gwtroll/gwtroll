@@ -36,12 +36,20 @@
 {% if searchreg %}
 <div>
     {% for reg in searchreg %}
-        <a href="{{ url_for('reg', regid=reg['regid']) }}">
-            <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
-        </a>
-        <div>
-            <p class="text-muted">{{ reg['scaname'] }}</p>
+    {% if reg['checkin'] %}
+        <div class="row reg_card_checkedin">
+    {% else %}
+        <div class="row reg_card_notcheckedin">
+    {% endif %}
+        <div class="col">
+            <a href="{{ url_for('reg', regid=reg['regid']) }}">
+                <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
+            </a>
+            <div>
+                <p class="text-muted">{{ reg['scaname'] }}</p>
+            </div>
         </div>
+    </div>
         <hr>
     {% endfor %}
 </div>

@@ -3,59 +3,260 @@
 {% block content %}
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
-    <p>
-    <table>
-        <colgroup>
-            <col span="1" style="background-color: #D6EEEE">
-        </colgroup>
-        <tr> 
-            <td>Name: </td>
-            <td>{{ reg.fname }} {{ reg.lname }}</td>
-        </tr>
-        <tr>
-            <td>SCA Name: </td>
-            <td>{{ reg.scaname }}</td>
-        </tr>
-        <tr>
-            <td>Check-In Date: </td>
-            <td>{{ reg.checkin}}</td>
-        </tr>
-    </table>
-    <br>
-   
-        
-    <p>
-        {{ form.lodging.label }}<br>
-        {{ form.lodging() }}
-    </p>
-    <p>
-        {{ form.kingdom.label }}<br>
-        {{ form.kingdom() }}
-    </p>
-    <p>
-        {{ form.rate_mbr.label }}<br>
-        {{ form.rate_mbr() }}
-    </p>
-    <p>
-        {{ form.rate_age.label }}<br>
-        {{ form.rate_age() }}
-    </p>
-    <p>
-        {{ form.medallion.label }}<br>
-        {{ form.medallion() }}
-    </p>
-    <p>
-        {{ form.price_calc.label }}<br>
-        {{ form.price_calc() }}
-    </p>    <p>
-        {{ form.price_paid.label }}<br>
-        {{ form.price_paid() }}
-    </p>    <p>
-        {{ form.price_due.label }}<br>
-        {{ form.price_due() }}
-    </p>
-    <p>{{ form.submit() }}</p>
-    </form>
+
+
+    <h2>Personal Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.fname.label }}
+                {{ form.fname(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.lname.label }}
+                {{ form.lname(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.scaname.label }}
+                {{ form.scaname(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.rate_age.label }}
+                {{ form.rate_age(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.city.label }}
+                {{ form.city(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.state_province.label }}
+                {{ form.state_province(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.zip.label }}
+                {{ form.zip(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.country.label }}
+                {{ form.country(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.phone.label }}
+                {{ form.phone(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.email.label }}
+                {{ form.email(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Site Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.regid.label }}
+                {{ form.regid(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.medallion.label }}
+                {{ form.medallion(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.kingdom.label }}
+                {{ form.kingdom(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.lodging.label }}
+                {{ form.lodging(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.early_on.label }}
+                {{ form.early_on(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Membership</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.rate_mbr.label }}
+                {{ form.rate_mbr(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num.label }}
+                {{ form.mbr_num(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num_exp.label }}
+                {{ form.mbr_num_exp(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Onsite Emergency Contact</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.onsite_contact_name.label }}
+                {{ form.onsite_contact_name(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.onsite_contact_sca_name.label }}
+                {{ form.onsite_contact_sca_name(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.onsite_contact_kingdom.label }}
+                {{ form.onsite_contact_kingdom(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.onsite_contact_group.label }}
+                {{ form.onsite_contact_group(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Offsite Emergency Contact</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.offsite_contact_name.label }}
+                {{ form.offsite_contact_name(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.offsite_contact_phone.label }}
+                {{ form.offsite_contact_phone(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Pricing Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.paypal_donation.label }}
+                {{ form.paypal_donation(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.prereg_status.label }}
+                {{ form.prereg_status(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.price_calc.label }}
+                {{ form.price_calc(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.paypal_donation_amount.label }}
+                {{ form.paypal_donation_amount(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.price_due.label }}
+                {{ form.price_due(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Payment Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.invoice_email.label }}
+                {{ form.invoice_email(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.price_paid.label }}
+                {{ form.price_paid(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.atd_paid.label }}
+                {{ form.atd_paid(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.pay_type.label }}
+                {{ form.pay_type(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}
+            </p>
+        </div>
+    </div>
+</form>
 
    
 {% endblock %}

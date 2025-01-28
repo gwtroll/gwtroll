@@ -127,6 +127,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+launch.json
 
 # Spyder project settings
 .spyderproject
@@ -157,8 +158,8 @@ cython_debug/
 reports/*
 
 #Migration
-migrations/
-migrations/version
+#migrations/
+#migrations/version
 
 
 # PyCharm

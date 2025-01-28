@@ -12,23 +12,17 @@ engine=db.create_engine(connstring)
 metadata = db.MetaData()
 registrations = db.Table('registrations', metadata)
 
-
-
 conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
 cur = conn.cursor()
 
+cur.execute('DELETE from public.roles;')
 
-cur.execute('UPDATE registrations SET checkin = (checkin - %s::interval) WHERE checkin BETWEEN TO_TIMESTAMP(%s,%s) AND TO_TIMESTAMP(%s,%s);', ("5 hours", "2024-03-10 02:00:01", "YYYY-MM-DD HH24:MI:SS", "2024-03-13 01:00:00", "YYYY-MM-DD HH24:MI:SS"  ))
+conn.commit()
 
+cur.execute('INSERT INTO public.roles (id, name) VALUES (1, %s), (2, %s), (3, %s), (4, %s), (5, %s), (6, %s), (7, %s), (8, %s), (9, %s);',("Admin","Troll Shift Lead","Troll User","Marshal Admin","Marshal User","Land","Invoices","Cashier","Department Head"))
+#cur.execute('INSERT INTO public.roles (id, name) VALUES (%s, %s);',("9", "Royal Liasion"))
 
 conn.commit()
 conn.close()
 
-
-""" except:
-    print("Sorry, some error has occurred!")
-
-finally:
-    engine.dispose()
-
- """
+print("Roles Created")

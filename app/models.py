@@ -34,7 +34,11 @@ class User(UserMixin, db.Model):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        if password == '': 
+            if self.password_hash == None:
+                return True
+        else:
+            return check_password_hash(self.password_hash, password)
 
 #Role Data Model
 class Role(db.Model, RoleMixin):
@@ -58,9 +62,23 @@ def load_user(id):
 class Registrations(db.Model):
     regid: so.Mapped[int] = so.mapped_column(primary_key=True)
     order_id: so.Mapped[Optional[int]]
+    invoice_number: so.Mapped[Optional[str]] 
+    invoice_paid: so.Mapped[bool] = so.mapped_column(default=False)
+    invoice_date: so.Mapped[Optional[datetime]]
+    invoice_payment_date: so.Mapped[Optional[datetime]]
+    invoice_canceled: so.Mapped[bool] = so.mapped_column(default=False)
+    invoice_status: so.Mapped[Optional[str]]
+    refund_check_num: so.Mapped[Optional[int]]
     fname: so.Mapped[str] 
     lname: so.Mapped[str] 
     scaname: so.Mapped[Optional[str]] 
+    city: so.Mapped[Optional[str]] 
+    state_province: so.Mapped[Optional[str]] 
+    zip: so.Mapped[Optional[int]] 
+    country: so.Mapped[Optional[str]] 
+    phone: so.Mapped[Optional[str]] 
+    email: so.Mapped[Optional[str]]
+    invoice_email: so.Mapped[Optional[str]]
     kingdom: so.Mapped[Optional[str]] 
     event_ticket: so.Mapped[Optional[str]] 
     rate_mbr: so.Mapped[Optional[str]] 
@@ -68,17 +86,30 @@ class Registrations(db.Model):
     rate_date: so.Mapped[Optional[str]] 
     price_calc: so.Mapped[Optional[int]]
     price_paid: so.Mapped[Optional[int]]
+    atd_paid: so.Mapped[Optional[int]]
+    atd_pay_type: so.Mapped[Optional[str]]
     price_due: so.Mapped[Optional[int]]
+    paypal_donation: so.Mapped[Optional[bool]] = so.mapped_column(default=False)
+    paypal_donation_amount: so.Mapped[Optional[int]] = so.mapped_column(default=0)
     lodging: so.Mapped[Optional[str]] 
     pay_type: so.Mapped[Optional[str]]
-    prereg_status: so.Mapped[Optional[str]] 
+    prereg_status: so.Mapped[Optional[str]]
+    early_on: so.Mapped[Optional[bool]]
     mbr_num_exp: so.Mapped[Optional[str]] 
     mbr_num: so.Mapped[Optional[int]]
-    mbr_exp: so.Mapped[Optional[date]]
+    onsite_contact_name: so.Mapped[Optional[str]] 
+    onsite_contact_sca_name: so.Mapped[Optional[str]] 
+    onsite_contact_kingdom: so.Mapped[Optional[str]] 
+    onsite_contact_group: so.Mapped[Optional[str]] 
+    offsite_contact_name: so.Mapped[Optional[str]] 
+    offsite_contact_phone: so.Mapped[Optional[str]] 
     requests: so.Mapped[Optional[str]] 
     checkin: so.Mapped[Optional[datetime]]
     medallion: so.Mapped[Optional[int]]
     signature: so.Mapped[Optional[str]]
+    prereg_date_time: so.Mapped[Optional[datetime]]
+    royal_departure_date: so.Mapped[Optional[datetime]]
+    royal_title: so.Mapped[Optional[str]]
     reg_date_time: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
     chivalric_inspection: so.Mapped[Optional[bool]]
@@ -94,6 +125,15 @@ class Registrations(db.Model):
 
     def __repr__(self):
         return '<Registrations {}>'.format(self.regid)
+    
+class RegLogs(db.Model):
+    __tablename__ = 'reglogs'  
+    id = db.Column(db.Integer(), primary_key=True)
+    regid = db.Column(db.Integer(), db.ForeignKey('registrations.regid'))
+    userid = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    timestamp = db.Column(db.DateTime())
+    action = db.Column(db.String())
+
     
     
 class Bows(db.Model):
