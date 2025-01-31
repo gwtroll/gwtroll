@@ -328,17 +328,27 @@ def login():
 def martialhome():
     inspection_stats = get_inspection_stats()
     if request.method == "POST":
+        print("SEARCHED")
         if request.form.get('search_name'):
-            search_value = '%'+request.form.get('search_name')+'%'
-            reg = Registrations.query.filter(and_(or_(Registrations.fname.like(search_value), Registrations.lname.like(search_value), Registrations.scaname.like(search_value))),Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
+            search_value = request.form.get('search_name')
+            print(search_value)
+            if search_value is not None and search_value != '':
+                reg = query_db(
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND checkin IS NOT NULL order by lname, fname",
+                    #(search_value, search_value, search_value))
+                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
-            reg = Registrations.query.filter(and_(Registrations.order_id == search_value), Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
+            reg = query_db(
+                "SELECT * FROM registrations WHERE order_id = %s AND checkin IS NOT NULL order by lname, fname",
+                (search_value,))
             return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
-            reg = Registrations.query.filter(and_(Registrations.medallion == search_value), Registrations.checkin is not None).order_by(Registrations.lname, Registrations.fname).all()
+            reg = query_db(
+                "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
+                (search_value,))
             return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
     else:
         return render_template('martial_home.html', inspection_stats=inspection_stats)
@@ -358,7 +368,6 @@ def index():
         print("SEARCHED")
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
-            print('bob')
             print(search_value)
             if search_value is not None and search_value != '':
                 reg = query_db(
@@ -371,13 +380,13 @@ def index():
             reg = query_db(
                 "SELECT * FROM registrations WHERE order_id = %s AND invoice_status != 'DUPLICATE' order by lname, fname",
                 (search_value,))
-            return render_template('troll_home.html', searchreg=reg, regcount=regcount)
+            return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
             reg = query_db(
                 "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
                 (search_value,))
-            return render_template('troll_home.html', searchreg=reg, regcount=regcount)
+            return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
         return render_template('index.html', regcount=regcount)
 
@@ -615,7 +624,7 @@ def martial_reg(regid):
 
         db.session.add(reg)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('martialhome'))
     return render_template('martial_reg.html', reg=reg, form=form)
 
 @app.route('/users', methods=('GET', 'POST'))
@@ -1162,7 +1171,7 @@ def reports():
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0:
+            if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_calc'] - 10)
                 nmr_list.append(10)
             else:
@@ -1320,7 +1329,7 @@ def reports():
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0:
+            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
                 nmr_list.append(10)
             else:

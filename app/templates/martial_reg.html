@@ -84,7 +84,7 @@
                                     <b>Chivalric</b>    
                                 </td>
                                 <td>
-                                    {{form.chivalric_inspection}}
+                                    {{form.chivalric_inspection(class_='form-control')}}
                                 </td>
                                 <td>
                                     {% if reg.chivalric_inspection %}
@@ -102,7 +102,7 @@
                                     <b>Rapier</b>
                                 </td>
                                 <td>
-                                    {{form.rapier_inspection}}
+                                    {{form.rapier_inspection(class_='form-control')}}
                                 </td>
                                 <td>
                                     {% if reg.rapier_inspection %}
@@ -118,7 +118,7 @@
                         </tbody>
                     </table>
                     <br>
-                    {{form.submit}}
+                    <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>
                 </form>
                 <br>
                 <h4>Bows</h4>
@@ -141,7 +141,7 @@
                 </table>
 
                 <form action="/martial/{{reg.regid}}/addbow" method="get">
-                    <button type="submit" id="addBow">
+                    <button type="submit" id="addBow" class='form-control btn-primary btn-lg'>
                         Add Bow
                     </button>
                 </form>
@@ -165,7 +165,7 @@
                     </tbody>
                 </table>
                 <form action="/martial/{{reg.regid}}/addcrossbow" method="get">
-                    <button type="submit" id="addCrossBow">
+                    <button type="submit" id="addCrossBow" class='form-control btn-primary btn-lg'>
                         Add Crossbow
                     </button>
                 </form>
