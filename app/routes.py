@@ -1,6 +1,6 @@
 from app import app, db, login
 from app.forms import *
-from app.models import Registrations, User, Role, UserRoles, RegLogs
+from app.models import *
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_from_directory, send_file
@@ -22,6 +22,8 @@ import json
 @login.unauthorized_handler
 def unauthorized_callback():
     return redirect('/login?next=' + request.path)
+from collections import namedtuple
+from sqlalchemy import or_, and_
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
@@ -100,6 +102,19 @@ def get_user_roles(userid):
         abort(404)
     return userRoles
 
+def get_roles():
+    roles = Role.query.all()
+    if roles is None:
+        abort(404)
+    return roles
+
+def get_role_choices():
+    roles = get_roles()
+    role_choices = []
+    for r in roles:
+        role_choices.append([r.id, r.name])
+    return role_choices
+
 def get_role(roleid):
     role = Role.query.filter_by(id=roleid).first()
     if role is None:
@@ -117,6 +132,30 @@ def reg_count():
     if regcount is None:
         abort(404)
     return regcount
+
+def get_inspection_stats():
+    inspection_stats = {}
+    inspections = Registrations.query.filter(or_(Registrations.crossbows != None, Registrations.bows != None, Registrations.chivalric_inspection == True, Registrations.rapier_inspection == True)).all()
+    chivalric_inspections = 0
+    rapier_inspections = 0
+    bow_inspections = 0
+    crossbow_inspections = 0
+    for i in inspections:
+        if i.chivalric_inspection:
+            chivalric_inspections += 1
+        if i.rapier_inspection:
+            rapier_inspections += 1
+        if i.bows:
+            bow_inspections += len(i.bows)
+        if i.crossbows:
+            crossbow_inspections += len(i.crossbows)
+    inspection_stats = {
+    'chivalric_inspections':chivalric_inspections, 
+    'rapier_inspections':rapier_inspections, 
+    'bow_inspections':bow_inspections, 
+    'crossbow_inspections':crossbow_inspections}
+    return inspection_stats
+
 
 def prereg_total():
     conn= get_db_connection()
@@ -285,6 +324,35 @@ def login():
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 
+@app.route('/martialhome', methods=['GET', 'POST'])
+def martialhome():
+    inspection_stats = get_inspection_stats()
+    if request.method == "POST":
+        print("SEARCHED")
+        if request.form.get('search_name'):
+            search_value = request.form.get('search_name')
+            print(search_value)
+            if search_value is not None and search_value != '':
+                reg = query_db(
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND checkin IS NOT NULL order by lname, fname",
+                    #(search_value, search_value, search_value))
+                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+        elif request.form.get('order_id'):
+            search_value = request.form.get('order_id')
+            reg = query_db(
+                "SELECT * FROM registrations WHERE order_id = %s AND checkin IS NOT NULL order by lname, fname",
+                (search_value,))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+        elif request.form.get('medallion'):
+            search_value = request.form.get('medallion')
+            reg = query_db(
+                "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
+                (search_value,))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+    else:
+        return render_template('martial_home.html', inspection_stats=inspection_stats)
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -295,10 +363,11 @@ def logout():
 @login_required
 def index():
     regcount = reg_count()
+    print(request.method)
     if request.method == "POST":
+        print("SEARCHED")
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
-            print('bob')
             print(search_value)
             if search_value is not None and search_value != '':
                 reg = query_db(
@@ -469,6 +538,94 @@ def createrole():
         db.session.commit()
         return redirect('/')
     return render_template('createrole.html', form=form, roles=all_roles)
+    
+@app.route('/martial/<int:regid>/addbow', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_bow(regid):
+    reg = get_reg(regid)
+    form = BowForm()
+    if request.method == 'POST':
+        if request.form.get("poundage"):
+            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            bow = Bows()
+            bow.poundage = request.form.get("poundage")
+            bow.bow_inspection_martial_id = current_user.id
+            bow.bow_inspection_date = datetime.now()
+            if update_reg.bows:
+                update_reg.bows.append(bow)
+            else:
+                bows = []
+                bows.append(bow)
+                update_reg.bows = bows
+            db.session.commit()
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_bow.html', reg=reg, form=form)
+
+@app.route('/martial/<int:regid>/addcrossbow', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_crossbow(regid):
+    reg = get_reg(regid)
+    form = CrossBowForm()
+    if request.method == 'POST':
+        if request.form.get("inchpounds"):
+            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            print(request.form.get("inchpounds"))
+            crossbow = Crossbows()
+            crossbow.inchpounds = request.form.get("inchpounds")
+            crossbow.crossbow_inspection_martial_id = current_user.id
+            crossbow.crossbow_inspection_date = datetime.now()
+            if update_reg.crossbows:
+                update_reg.crossbows.append(crossbow)
+            else:
+                crossbows = []
+                crossbows.append(crossbow)
+                update_reg.crossbows = crossbows
+            db.session.commit()
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_crossbow.html', reg=reg, form=form)
+    
+@app.route('/martial/<int:regid>', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def martial_reg(regid):
+    reg = get_reg(regid)
+    form = MartialForm()
+    form.chivalric_inspection.data = reg.chivalric_inspection
+    form.rapier_inspection.data = reg.rapier_inspection
+    if reg.bows:
+        for bow in reg.bows:
+            form.bows.append_entry(bow)
+    if reg.crossbows:
+        for crossbow in reg.crossbows:
+            form.crossbows.append_entry(crossbow)
+
+    if request.method == 'POST':
+        chivalric_inspection = request.form.get('chivalric_inspection')
+        rapier_inspection = request.form.get('rapier_inspection')
+
+        reg.chivalric_inspection = bool(chivalric_inspection)
+        reg.rapier_inspection = bool(rapier_inspection)
+        if chivalric_inspection:
+            if reg.chivalric_inspection_martial_id is None:
+                reg.chivalric_inspection_martial_id = current_user.id
+                reg.chivalric_inspection_date = datetime.now()
+        else:
+            reg.chivalric_inspection_martial = None
+            reg.chivalric_inspection_date = None
+        if rapier_inspection:
+            if reg.rapier_inspection_martial_id is None:
+                reg.rapier_inspection_martial_id = current_user.id
+                reg.rapier_inspection_date = datetime.now()
+        else:
+            reg.rapier_inspection_martial = None
+            reg.rapier_inspection_date = None
+
+        # for crossbow in form.crossbows:
+        #     print(bow.data.get('inchpound'))
+
+        db.session.add(reg)
+        db.session.commit()
+        return redirect(url_for('martialhome'))
+    return render_template('martial_reg.html', reg=reg, form=form)
 
 @app.route('/users', methods=('GET', 'POST'))
 @login_required
@@ -1014,7 +1171,7 @@ def reports():
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0:
+            if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_calc'] - 10)
                 nmr_list.append(10)
             else:
@@ -1172,7 +1329,7 @@ def reports():
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0:
+            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
                 nmr_list.append(10)
             else:
