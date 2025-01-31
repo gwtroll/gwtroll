@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 from markupsafe import Markup
 import uuid
 import json
+import csv
 
 @login.unauthorized_handler
 def unauthorized_callback():
@@ -1014,7 +1015,7 @@ def reports():
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0:
+            if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_calc'] - 10)
                 nmr_list.append(10)
             else:
@@ -1172,7 +1173,7 @@ def reports():
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0:
+            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
                 nmr_list.append(10)
             else:
@@ -1185,6 +1186,91 @@ def reports():
         
         df.to_csv(path1)
         return send_file(path2)
+    
+    if report_type == 'paypal_recon_export':
+
+        invoice_nums = []
+        counts = []
+        counts_obj = {}
+        errors = []
+
+        paypal_data = {}
+        with open('test.csv','r') as paypal_file:
+            csv_reader = csv.DictReader(paypal_file)
+            # dict_from_csv = dict(list(csv_reader)[0])
+            # paypal_cols = list(dict_from_csv.keys())
+
+            for row in csv_reader:
+                for col in row:
+                    if row[col].strip().startswith('$'):
+                        row[col] = row[col].strip().replace("$","").replace("(","").replace(")","")
+                        row[col] = float(row[col].strip())
+                counts_obj[row['Invoice Number']] = row
+                invoice_nums.append("'"+str(row['Invoice Number'])+"'")
+                counts_obj[row['Invoice Number']].update({'price_paid':0,'paypal_donation_amount':0,'nmr':0,'base_price':0})
+                # paypal_data[dict_from_csv[line]['Invoice Number']] = dict_from_csv[line]
+        # print(paypal_cols)
+        # print(dict_from_csv)
+
+        invoice_nums_str = ','.join(invoice_nums)
+
+        file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID' AND invoice_number IN ({invoice_nums_str})"
+        df = pd.read_sql_query(rptquery, engine)
+        base_price_list = []
+        nmr_list = []
+        for index, row in df.iterrows():
+            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
+                nmr_list.append(10)
+                row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
+                row['nmr'] = 10
+            else:
+                base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
+                nmr_list.append(0)
+                row['base_price'] = row['price_paid'] - row['paypal_donation_amount']
+                row['nmr'] = 10
+
+            if row['invoice_number'] not in counts_obj:
+                obj = {'price_paid':row['price_paid'],'paypal_donation_amount':row['paypal_donation_amount'],'nmr':row['nmr'],'base_price':row['base_price']}
+                counts_obj[row['invoice_number']] = obj
+            else:
+                counts_obj[row['invoice_number']]['price_paid'] += row['price_paid']
+                counts_obj[row['invoice_number']]['paypal_donation_amount'] += row['paypal_donation_amount']
+                counts_obj[row['invoice_number']]['nmr'] += row['nmr']
+                counts_obj[row['invoice_number']]['base_price'] += row['base_price']
+
+        df['nmr'] = nmr_list
+        df['base_price'] = base_price_list
+
+        for obj in counts_obj:
+            expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.45,2)
+            if counts_obj[obj]['price_paid'] != counts_obj[obj][' Gross ']:
+                errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj][' Gross '],'Export':counts_obj[obj]['price_paid']})
+            if expected_fee != counts_obj[obj][' Fee ']:
+                errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj][' Fee '],'Export':expected_fee})
+            counts.append(counts_obj[obj])
+
+        
+
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+
+        # print("ERRORS")
+        # print(errors)
+        # print("COUNTS")
+        # print(counts)
+        
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+        
+        pd.DataFrame(counts).to_excel(writer, sheet_name='Report' ,index = True)
+        pd.DataFrame(errors).to_excel(writer, sheet_name='Errors' ,index = True)
+
+        writer.close()
+        return send_file(path2)
+        return 'TRUE'
+
 
     return render_template('reports.html', form=form)
 
