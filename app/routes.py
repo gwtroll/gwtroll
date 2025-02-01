@@ -1198,7 +1198,15 @@ def reports():
 
         paypal_recon_file = request.files['paypal_file']
 
-        paypal_data = {}
+        merchant_df = pd.read_csv('merchant_fees.csv')
+        merchant_dict = merchant_df.to_dict(orient='records')
+        merchant_dict_exclude = {}
+
+        for merchant in merchant_dict:
+            for col in merchant:
+                if not isinstance(merchant[col], int):
+                     merchant[col] = float(merchant[col])
+                merchant_dict_exclude[merchant['Invoice Number']] = merchant
 
         # csv_reader = csv.DictReader(paypal_recon_file)
         csv_reader = csv.DictReader(codecs.iterdecode(paypal_recon_file, 'utf-8'))
@@ -1213,7 +1221,7 @@ def reports():
                         row[col] = 0
             counts_obj[row['Invoice Number']] = row
             invoice_nums.append("'"+str(row['Invoice Number'])+"'")
-            counts_obj[row['Invoice Number']].update({'price_paid':0,'paypal_donation_amount':0,'nmr':0,'base_price':0,'expected_fee':0})
+            counts_obj[row['Invoice Number']].update({'price_paid':0,'paypal_donation_amount':0,'nmr':0,'base_price':0,'expected_fee':0,'is_merchant':False})
 
 
         invoice_nums_str = ','.join(invoice_nums)
@@ -1250,18 +1258,21 @@ def reports():
 
         for obj in counts_obj:
             if obj != '' and obj is not None:
-                if counts_obj[obj]['price_paid'] != 0:
-                    expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.49,2)
+                if int(obj) in merchant_dict_exclude:
+                    counts_obj[obj]['price_paid'] = merchant_dict_exclude[int(obj)][' Gross ']
+                    counts_obj[obj]['expected_fee'] = merchant_dict_exclude[int(obj)]['Fee']
+                    counts_obj[obj]['is_merchant'] = True
                 else:
-                    expected_fee = 0
-                counts_obj[obj]['expected_fee'] = expected_fee
-                if counts_obj[obj]['price_paid'] != counts_obj[obj][' Gross '] and counts_obj[obj]['price_paid'] != 0:
-                    errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj][' Gross '],'Export':counts_obj[obj]['price_paid']})
-                if expected_fee != counts_obj[obj][' Fee ']:
-                    errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj][' Fee '],'Export':expected_fee})
+                    if counts_obj[obj]['price_paid'] != 0:
+                        expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.49,2)
+                    else:
+                        expected_fee = 0
+                    counts_obj[obj]['expected_fee'] = expected_fee
+                    if counts_obj[obj]['price_paid'] != counts_obj[obj][' Gross '] and counts_obj[obj]['price_paid'] != 0:
+                        errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj][' Gross '],'Export':counts_obj[obj]['price_paid']})
+                    if expected_fee != counts_obj[obj][' Fee ']:
+                        errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj][' Fee '],'Export':expected_fee})
                 counts.append(counts_obj[obj])
-
-        
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
