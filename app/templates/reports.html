@@ -3,7 +3,7 @@
 {% block content %}
 
 
-<form action="" method="post" novalidate>
+<form action="" method="post" novalidate enctype="multipart/form-data">
     {{ form.hidden_tag() }}
 
     <p>
@@ -18,6 +18,8 @@
         {{ form.dt_end.label }}<br>
         {{ form.dt_end() }}
     </p>
+    <p> For PayPal Recon </p>
+    <input type="file" name="paypal_file" id="paypal_file" />  
     <p>{{ form.submit() }}</p>
     </form>
 

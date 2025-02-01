@@ -19,6 +19,7 @@ from markupsafe import Markup
 import uuid
 import json
 import csv
+import codecs
 
 @login.unauthorized_handler
 def unauthorized_callback():
@@ -1189,28 +1190,31 @@ def reports():
     
     if report_type == 'paypal_recon_export':
 
+
         invoice_nums = []
         counts = []
         counts_obj = {}
         errors = []
 
-        paypal_data = {}
-        with open('test.csv','r') as paypal_file:
-            csv_reader = csv.DictReader(paypal_file)
-            # dict_from_csv = dict(list(csv_reader)[0])
-            # paypal_cols = list(dict_from_csv.keys())
+        paypal_recon_file = request.files['paypal_file']
 
-            for row in csv_reader:
-                for col in row:
-                    if row[col].strip().startswith('$'):
-                        row[col] = row[col].strip().replace("$","").replace("(","").replace(")","")
+        paypal_data = {}
+
+        # csv_reader = csv.DictReader(paypal_recon_file)
+        csv_reader = csv.DictReader(codecs.iterdecode(paypal_recon_file, 'utf-8'))
+
+        for row in csv_reader:
+            for col in row:
+                if row[col].strip().startswith('$'):
+                    row[col] = row[col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'')
+                    if row[col].strip() != '':
                         row[col] = float(row[col].strip())
-                counts_obj[row['Invoice Number']] = row
-                invoice_nums.append("'"+str(row['Invoice Number'])+"'")
-                counts_obj[row['Invoice Number']].update({'price_paid':0,'paypal_donation_amount':0,'nmr':0,'base_price':0})
-                # paypal_data[dict_from_csv[line]['Invoice Number']] = dict_from_csv[line]
-        # print(paypal_cols)
-        # print(dict_from_csv)
+                    else: 
+                        row[col] = 0
+            counts_obj[row['Invoice Number']] = row
+            invoice_nums.append("'"+str(row['Invoice Number'])+"'")
+            counts_obj[row['Invoice Number']].update({'price_paid':0,'paypal_donation_amount':0,'nmr':0,'base_price':0})
+
 
         invoice_nums_str = ','.join(invoice_nums)
 
@@ -1245,12 +1249,13 @@ def reports():
         df['base_price'] = base_price_list
 
         for obj in counts_obj:
-            expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.45,2)
-            if counts_obj[obj]['price_paid'] != counts_obj[obj][' Gross ']:
-                errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj][' Gross '],'Export':counts_obj[obj]['price_paid']})
-            if expected_fee != counts_obj[obj][' Fee ']:
-                errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj][' Fee '],'Export':expected_fee})
-            counts.append(counts_obj[obj])
+            if obj != '' and obj is not None:
+                expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.45,2)
+                if counts_obj[obj]['price_paid'] != counts_obj[obj][' Gross ']:
+                    errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj][' Gross '],'Export':counts_obj[obj]['price_paid']})
+                if expected_fee != counts_obj[obj][' Fee ']:
+                    errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj][' Fee '],'Export':expected_fee})
+                counts.append(counts_obj[obj])
 
         
 
@@ -1269,7 +1274,6 @@ def reports():
 
         writer.close()
         return send_file(path2)
-        return 'TRUE'
 
 
     return render_template('reports.html', form=form)
