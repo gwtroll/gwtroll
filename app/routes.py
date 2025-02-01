@@ -1251,7 +1251,7 @@ def reports():
         for obj in counts_obj:
             if obj != '' and obj is not None:
                 if counts_obj[obj]['price_paid'] != 0:
-                    expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.45,2)
+                    expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.49,2)
                 counts_obj[obj]['expected_fee'] = expected_fee
                 if counts_obj[obj]['price_paid'] != counts_obj[obj][' Gross '] and counts_obj[obj]['price_paid'] != 0:
                     errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj][' Gross '],'Export':counts_obj[obj]['price_paid']})
