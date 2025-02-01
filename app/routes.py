@@ -1213,7 +1213,7 @@ def reports():
                         row[col] = 0
             counts_obj[row['Invoice Number']] = row
             invoice_nums.append("'"+str(row['Invoice Number'])+"'")
-            counts_obj[row['Invoice Number']].update({'price_paid':0,'paypal_donation_amount':0,'nmr':0,'base_price':0})
+            counts_obj[row['Invoice Number']].update({'price_paid':0,'paypal_donation_amount':0,'nmr':0,'base_price':0,'expected_fee':0})
 
 
         invoice_nums_str = ','.join(invoice_nums)
@@ -1250,8 +1250,10 @@ def reports():
 
         for obj in counts_obj:
             if obj != '' and obj is not None:
-                expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.45,2)
-                if counts_obj[obj]['price_paid'] != counts_obj[obj][' Gross ']:
+                if counts_obj[obj]['price_paid'] != 0:
+                    expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.45,2)
+                counts_obj[obj]['expected_fee'] = expected_fee
+                if counts_obj[obj]['price_paid'] != counts_obj[obj][' Gross '] and counts_obj[obj]['price_paid'] != 0:
                     errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj][' Gross '],'Export':counts_obj[obj]['price_paid']})
                 if expected_fee != counts_obj[obj][' Fee ']:
                     errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj][' Fee '],'Export':expected_fee})
