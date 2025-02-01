@@ -1234,7 +1234,7 @@ def reports():
                 base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
                 nmr_list.append(0)
                 row['base_price'] = row['price_paid'] - row['paypal_donation_amount']
-                row['nmr'] = 10
+                row['nmr'] = 0
 
             if row['invoice_number'] not in counts_obj:
                 obj = {'price_paid':row['price_paid'],'paypal_donation_amount':row['paypal_donation_amount'],'nmr':row['nmr'],'base_price':row['base_price']}
