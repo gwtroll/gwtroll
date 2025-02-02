@@ -1227,7 +1227,11 @@ def reports():
         for row in dirty_obj:
             counts_obj[row] = {}
             for col in dirty_obj[row].keys():
-                counts_obj[row][col.strip()] = dirty_obj[row][col]
+                if col in ['Gross','Fee','Net']:
+                    dirty_obj[row][col] = dirty_obj[row][col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'')
+                    counts_obj[row][col.strip()] = float(dirty_obj[row][col].strip())
+                else:
+                    counts_obj[row][col.strip()] = dirty_obj[row][col]
 
         invoice_nums_str = ','.join(invoice_nums)
 
@@ -1265,11 +1269,11 @@ def reports():
             if obj != '' and obj is not None:
                 if int(obj) in merchant_dict_exclude:
                     counts_obj[obj]['price_paid'] = merchant_dict_exclude[int(obj)]['Gross']
-                    counts_obj[obj]['expected_fee'] = -1*merchant_dict_exclude[int(obj)]['Fee']
+                    counts_obj[obj]['expected_fee'] = merchant_dict_exclude[int(obj)]['Fee']
                     counts_obj[obj]['is_merchant'] = True
                 else:
                     if counts_obj[obj]['price_paid'] != 0:
-                        expected_fee = -1*round(counts_obj[obj]['price_paid'] * 0.0199 + 0.49,2)
+                        expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.49,2)
                     else:
                         expected_fee = 0.00
                     counts_obj[obj]['expected_fee'] = expected_fee
