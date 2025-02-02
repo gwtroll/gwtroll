@@ -1222,7 +1222,7 @@ def reports():
                         row[col] = 0
             dirty_obj[row['Invoice Number']] = row
             invoice_nums.append("'"+str(row['Invoice Number'])+"'")
-            dirty_obj[row['Invoice Number']].update({'price_paid':0,'paypal_donation_amount':0,'nmr':0,'base_price':0,'expected_fee':0,'is_merchant':False})
+            dirty_obj[row['Invoice Number']].update({'price_paid':0.00,'paypal_donation_amount':0.00,'nmr':0,'base_price':0.00,'expected_fee':0.00,'is_merchant':False})
         
         for row in dirty_obj:
             counts_obj[row] = {}
@@ -1250,10 +1250,10 @@ def reports():
                 row['nmr'] = 0
 
             if row['invoice_number'] not in counts_obj:
-                obj = {'price_paid':row['price_paid'],'paypal_donation_amount':row['paypal_donation_amount'],'nmr':row['nmr'],'base_price':row['base_price']}
+                obj = {'price_paid':float(row['price_paid']),'paypal_donation_amount':row['paypal_donation_amount'],'nmr':row['nmr'],'base_price':row['base_price']}
                 counts_obj[row['invoice_number']] = obj
             else:
-                counts_obj[row['invoice_number']]['price_paid'] += row['price_paid']
+                counts_obj[row['invoice_number']]['price_paid'] += round(float(row['price_paid']),2)
                 counts_obj[row['invoice_number']]['paypal_donation_amount'] += row['paypal_donation_amount']
                 counts_obj[row['invoice_number']]['nmr'] += row['nmr']
                 counts_obj[row['invoice_number']]['base_price'] += row['base_price']
@@ -1265,13 +1265,13 @@ def reports():
             if obj != '' and obj is not None:
                 if int(obj) in merchant_dict_exclude:
                     counts_obj[obj]['price_paid'] = merchant_dict_exclude[int(obj)]['Gross']
-                    counts_obj[obj]['expected_fee'] = merchant_dict_exclude[int(obj)]['Fee']
+                    counts_obj[obj]['expected_fee'] = -1*merchant_dict_exclude[int(obj)]['Fee']
                     counts_obj[obj]['is_merchant'] = True
                 else:
                     if counts_obj[obj]['price_paid'] != 0:
-                        expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.49,2)
+                        expected_fee = -1*round(counts_obj[obj]['price_paid'] * 0.0199 + 0.49,2)
                     else:
-                        expected_fee = 0
+                        expected_fee = 0.00
                     counts_obj[obj]['expected_fee'] = expected_fee
                     if counts_obj[obj]['price_paid'] != counts_obj[obj]['Gross'] and counts_obj[obj]['price_paid'] != 0:
                         errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj]['Gross'],'Export':counts_obj[obj]['price_paid']})
