@@ -1215,23 +1215,52 @@ def reports():
         for row in csv_reader:
             for col in row:
                 if row[col].strip().startswith('$'):
-                    row[col] = row[col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'')
+                    row[col] = row[col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'').replace('"','')
                     if row[col].strip() != '':
                         row[col] = float(row[col].strip())
                     else: 
                         row[col] = 0
             dirty_obj[row['Invoice Number']] = row
             invoice_nums.append("'"+str(row['Invoice Number'])+"'")
-            dirty_obj[row['Invoice Number']].update({'price_paid':0.00,'paypal_donation_amount':0.00,'nmr':0,'base_price':0.00,'expected_fee':0.00,'is_merchant':False})
+            # dirty_obj[row['Invoice Number']].update({'price_paid':0.00,'paypal_donation_amount':0.00,'nmr':0,'base_price':0.00,'expected_fee':0.00,'is_merchant':False})
         
         for row in dirty_obj:
-            counts_obj[row] = {}
+            counts_obj[row] = {
+                'Date':None,
+                'Time':None,
+                'Name':'',
+                'From Email Address':'',
+                'Invoice Number':'',
+                'Gross':0.00,
+                'Fee':0.00,
+                'Net':0.00,
+                'Balance':0.00,
+                'price_paid':0.00,
+                'paypal_donation_amount':0.00,
+                'nmr':0,
+                'base_price':0.00,
+                'expected_fee':0.00,
+                'is_merchant':False,
+                'To Email Address':'',
+                'Transaction ID':'',
+                'CounterParty Status':'',
+                'Address Status':'',
+                'Item Title':'',
+                'Reference Txn ID':'',
+                'Receipt ID':'',
+                'Contact Phone Number':'',
+                'Subject':'',
+                'Payment Source':''
+            }
             for col in dirty_obj[row].keys():
-                if col in ['Gross','Fee','Net']:
-                    dirty_obj[row][col] = dirty_obj[row][col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'')
-                    counts_obj[row][col.strip()] = float(dirty_obj[row][col].strip())
-                else:
-                    counts_obj[row][col.strip()] = dirty_obj[row][col]
+                if col == '\ufeff"Date"':
+                    counts_obj[row]['Date'] = dirty_obj[row][col]
+                if col not in ['TimeZone','Status','Currency','Note','Card Type','Type','Transaction Event Code','Balance Impact']:
+                    if col in ['Gross','Fee','Net']:
+                        dirty_obj[row][col] = dirty_obj[row][col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'')
+                        counts_obj[row][col.strip()] = float(dirty_obj[row][col].strip())
+                    else:
+                        counts_obj[row][col.strip()] = dirty_obj[row][col]
 
         invoice_nums_str = ','.join(invoice_nums)
 
