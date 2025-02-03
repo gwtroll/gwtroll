@@ -127,7 +127,11 @@
 
     <div class="col-12">
         <form action="" method="post" novalidate id="WaiverForm">
-            <div class="row form-group">
+        {% if reg.paypal_donation == True%}
+        <div class="row form-group" hidden>
+        {% else %}
+        <div class="row form-group">
+        {% endif %}
                 <div class="col form-group">
                     <p class="text-center">
                         {{ form.paypal_donation.label }}<br>
