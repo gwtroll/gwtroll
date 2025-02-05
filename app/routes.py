@@ -300,18 +300,16 @@ def index():
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
-            print('bob')
-            print(search_value)
             if search_value is not None and search_value != '':
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND invoice_status != 'DUPLICATE' order by lname, fname",
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
                     #(search_value, search_value, search_value))
                     ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
             reg = query_db(
-                "SELECT * FROM registrations WHERE order_id = %s AND invoice_status != 'DUPLICATE' order by lname, fname",
+                "SELECT * FROM registrations WHERE order_id = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
@@ -1222,8 +1220,7 @@ def reports():
                         row[col] = 0
             dirty_obj[row['Invoice Number']] = row
             invoice_nums.append("'"+str(row['Invoice Number'])+"'")
-            # dirty_obj[row['Invoice Number']].update({'price_paid':0.00,'paypal_donation_amount':0.00,'nmr':0,'base_price':0.00,'expected_fee':0.00,'is_merchant':False})
-        
+
         for row in dirty_obj:
             counts_obj[row] = {
                 'Date':None,
@@ -1314,11 +1311,6 @@ def reports():
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
-
-        # print("ERRORS")
-        # print(errors)
-        # print("COUNTS")
-        # print(counts)
         
         writer = pd.ExcelWriter(path1, engine='xlsxwriter')
         
@@ -1327,10 +1319,22 @@ def reports():
 
         writer.close()
         return send_file(path2)
+    
+    if report_type == 'log_export':
+
+        file = 'log_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+
+        rptquery = "SELECT id, regid, userid, (SELECT username FROM users WHERE users.id = reglogs.userid), timestamp, action FROM reglogs"
+        df = pd.read_sql_query(rptquery, engine)
+
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        df.to_csv(path1)
+        return send_file(path2)
 
 
     return render_template('reports.html', form=form)
-
     
 @app.route('/waiver', methods=['GET', 'POST'])
 @login_required
