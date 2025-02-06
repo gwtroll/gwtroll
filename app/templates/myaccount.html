@@ -6,23 +6,39 @@
 <div class="row form-group">
     <div class="col form-group">
         <p>
-            Id: {{ acc.id }}
+            User Id
+        </p>
+        <p class="form-control">
+            {{ acc.id }}
         </p>
         <p>
-            Username: {{ acc.username }}
+            Username
+        </p>
+        <p class="form-control">
+            {{ acc.username }}
         </p>
         <p>
-            First Name: {{ acc.fname }}
+            First Name
+        </p>
+        <p class="form-control">
+            {{ acc.fname }}
         </p>
         <p>
-            Last Name: {{ acc.lname }}
+            Last Name
+        </p>
+        <p class="form-control">
+            {{ acc.lname }}
         </p>
         <p>
-            Checkin Count: {{ checkedincount }}
+            Checkin Count:
         </p>
-        <p>
-            <a href="/changepassword">Change Password</a>
+        <p class="form-control">
+            {{ checkedincount }}
         </p>
+
+        <form action="/changepassword">
+            <input type="submit" value="Change Password" class="btn-primary form-control m-0"/>
+        </form>
     </div>
 </div>
 

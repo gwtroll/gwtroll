@@ -88,8 +88,8 @@ class EditUserForm(FlaskForm):
 class UpdatePasswordForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Minimum Password Length  of 6 Characters')])
-    confirm = PasswordField('Confirm Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[InputRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Minimum Password Length  of 6 Characters')])
+    confirm = PasswordField('Confirm Password', validators=[InputRequired(), EqualTo('password', message='Passwords Must Match')])
     submit = SubmitField('Submit')
 
 class CreateRegForm(FlaskForm):

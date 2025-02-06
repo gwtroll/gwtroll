@@ -304,11 +304,15 @@ def changepassword():
     form = UpdatePasswordForm()
     form.id.data = current_user.id
     form.username.data = current_user.username
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         current_user.set_password(form.password.data)
         db.session.commit()
         flash("Password Successfully Changed!")
         return redirect(url_for('myaccount'))
+    elif request.method == 'POST' and not form.validate_on_submit():
+        for field in form.errors:
+            flash(form.errors[field])
+        return render_template('changepassword.html', form=form, user=current_user)
     else:
         return render_template('changepassword.html', form=form, user=current_user)
 
