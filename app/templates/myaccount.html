@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>My Account</h2>
+<div class="row form-group">
+    <div class="col form-group">
+        <p>
+            Id: {{ acc.id }}
+        </p>
+        <p>
+            Username: {{ acc.username }}
+        </p>
+        <p>
+            First Name: {{ acc.fname }}
+        </p>
+        <p>
+            Last Name: {{ acc.lname }}
+        </p>
+        <p>
+            Checkin Count: {{ checkedincount }}
+        </p>
+        <p>
+            <a href="/changepassword">Change Password</a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}

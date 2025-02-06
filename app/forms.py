@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField
 from wtforms.fields import DateField
-from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf
+from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
 
 lodging_df = pd.read_csv('gwlodging.csv')
@@ -88,7 +88,8 @@ class EditUserForm(FlaskForm):
 class UpdatePasswordForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Minimum Password Length  of 6 Characters')])
+    confirm = PasswordField('Confirm Password', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 class CreateRegForm(FlaskForm):

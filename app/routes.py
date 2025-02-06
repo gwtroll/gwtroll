@@ -292,6 +292,25 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/myaccount', methods=['GET', 'POST'])
+@login_required
+def myaccount():
+    checkedincount = len(RegLogs.query.filter(RegLogs.userid == current_user.id, RegLogs.action == 'CHECKIN').all())
+    return render_template('myaccount.html', acc=current_user, checkedincount=checkedincount)
+
+@app.route('/changepassword', methods=['GET', 'POST'])
+@login_required
+def changepassword():
+    form = UpdatePasswordForm()
+    form.id.data = current_user.id
+    form.username.data = current_user.username
+    if request.method == 'POST':
+        current_user.set_password(form.password.data)
+        db.session.commit()
+        flash("Password Successfully Changed!")
+        return redirect(url_for('myaccount'))
+    else:
+        return render_template('changepassword.html', form=form, user=current_user)
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
