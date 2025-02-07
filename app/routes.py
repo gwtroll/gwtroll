@@ -401,6 +401,13 @@ def canceledinvoices():
     regcount = canceled_reg_count()
     return render_template('invoice_list.html', regs=regs, preregtotal=preregtotal, invoicecount=invoicecount, regcount=regcount, back='canceled')
 
+@app.route('/invoice/all', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Invoices','Department Head')
+def allinvoices():
+    regs = Registrations.query.filter(Registrations.prereg_status == "SUCCEEDED").all()
+    return render_template('invoice_list.html', regs=regs, back='all')
+
 @app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
@@ -473,6 +480,8 @@ def updateinvoice(regid):
                 return redirect('/invoice/paid')
             case 'canceled': 
                 return redirect('/invoice/canceled')
+            case 'all': 
+                return redirect('/invoice/all')
             case _:
                 return redirect('/')
 
