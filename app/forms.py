@@ -177,6 +177,7 @@ class EditForm(FlaskForm):
     invoice_email = StringField('Invoice Email')
     kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
     lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    rate_date = DateField("Arrival Date")
     rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     rate_mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     medallion = IntegerField('Medallion #', validators=[DataRequired()])

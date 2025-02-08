@@ -675,7 +675,6 @@ def createprereg():
             royal_title = form.royal_title.data if form.royal_title.data != '' else None
         )
 
-        print(form.rate_date.data)
         if form.rate_date.data == 'Early_On':
             reg.early_on = True
             rate_date = '03-08-2025'
@@ -814,6 +813,12 @@ def editreg():
         offsite_contact_phone = reg.offsite_contact_phone
     )
 
+    if reg.rate_date != None:
+        try:
+            form.rate_date.data = datetime.strptime(reg.rate_date, '%Y-%m-%d %H:%M:%S')
+        except:
+            form.rate_date.data = datetime.strptime(reg.rate_date, '%Y-%m-%d')
+
     loading_df = pd.read_csv('gwlodging.csv')
     lodgingdata = loading_df.to_dict(orient='list')
     form.lodging.choices = lodgingdata
@@ -845,6 +850,7 @@ def editreg():
             reg.invoice_email = request.form.get('invoice_email')
             reg.kingdom = request.form.get('kingdom')
             reg.lodging = request.form.get('lodging')
+            reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d')
             reg.rate_age = request.form.get('rate_age')
             reg.rate_mbr = request.form.get('rate_mbr')
             if request.form.get('medallion'):
