@@ -1290,7 +1290,7 @@ def reports():
             for col in dirty_obj[row].keys():
                 if col == '\ufeff"Date"':
                     counts_obj[row]['Date'] = dirty_obj[row][col]
-                if col not in ['TimeZone','Status','Currency','Note','Card Type','Type','Transaction Event Code','Balance Impact']:
+                if col not in ['TimeZone','Status','Currency','Note','Card Type','Type','Transaction Event Code','Balance Impact','\ufeff"Date"']:
                     if col in ['Gross','Fee','Net']:
                         dirty_obj[row][col] = dirty_obj[row][col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'')
                         counts_obj[row][col.strip()] = float(dirty_obj[row][col].strip())
@@ -1342,9 +1342,9 @@ def reports():
                         expected_fee = 0.00
                     counts_obj[obj]['expected_fee'] = expected_fee
                     if counts_obj[obj]['price_paid'] != counts_obj[obj]['Gross'] and counts_obj[obj]['price_paid'] != 0:
-                        errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj]['Gross'],'Export':counts_obj[obj]['price_paid']})
+                        errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj]['Gross'],'Export':counts_obj[obj]['price_paid'],'Email':counts_obj[obj]['From Email Address']})
                     if expected_fee != counts_obj[obj]['Fee']:
-                        errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee})
+                        errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee,'Email':counts_obj[obj]['From Email Address']})
                 counts.append(counts_obj[obj])
 
         path1 = './reports/' + file
