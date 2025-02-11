@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, DecimalField, FieldList, FormField
 from wtforms.fields import DateField
-from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf
+from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
 
 lodging_df = pd.read_csv('gwlodging.csv')
@@ -14,7 +14,7 @@ agedata = [('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 
 
 mbrdata = [('Member', 'Member'), ('Non-Member', 'Non-Member')]
 
-reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg', 'land_pre-reg'), ('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report'), ('earlyon','early_on_report'), ('paypal_paid_export','paypal_paid_export')]
+reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg', 'land_pre-reg'), ('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report'), ('earlyon','early_on_report'), ('paypal_paid_export','paypal_paid_export'),('paypal_recon_export','paypal_recon_export'),('log_export','log_export')]
 
 arrivaldata = [('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025'),('Early_On','Early On')]
 
@@ -88,7 +88,8 @@ class EditUserForm(FlaskForm):
 class UpdatePasswordForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[InputRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Minimum Password Length  of 6 Characters')])
+    confirm = PasswordField('Confirm Password', validators=[InputRequired(), EqualTo('password', message='Passwords Must Match')])
     submit = SubmitField('Submit')
 
 class CreateRegForm(FlaskForm):
@@ -176,6 +177,7 @@ class EditForm(FlaskForm):
     invoice_email = StringField('Invoice Email')
     kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
     lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    rate_date = DateField("Arrival Date")
     rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     rate_mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     medallion = IntegerField('Medallion #', validators=[DataRequired()])

@@ -18,6 +18,8 @@ from urllib.parse import urlsplit
 from markupsafe import Markup
 import uuid
 import json
+import csv
+import codecs
 
 @login.unauthorized_handler
 def unauthorized_callback():
@@ -358,6 +360,29 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/myaccount', methods=['GET', 'POST'])
+@login_required
+def myaccount():
+    checkedincount = len(RegLogs.query.filter(RegLogs.userid == current_user.id, RegLogs.action == 'CHECKIN').all())
+    return render_template('myaccount.html', acc=current_user, checkedincount=checkedincount)
+
+@app.route('/changepassword', methods=['GET', 'POST'])
+@login_required
+def changepassword():
+    form = UpdatePasswordForm()
+    form.id.data = current_user.id
+    form.username.data = current_user.username
+    if request.method == 'POST' and form.validate_on_submit():
+        current_user.set_password(form.password.data)
+        db.session.commit()
+        flash("Password Successfully Changed!")
+        return redirect(url_for('myaccount'))
+    elif request.method == 'POST' and not form.validate_on_submit():
+        for field in form.errors:
+            flash(form.errors[field])
+        return render_template('changepassword.html', form=form, user=current_user)
+    else:
+        return render_template('changepassword.html', form=form, user=current_user)
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
@@ -371,14 +396,14 @@ def index():
             print(search_value)
             if search_value is not None and search_value != '':
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND invoice_status != 'DUPLICATE' order by lname, fname",
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
                     #(search_value, search_value, search_value))
                     ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
             reg = query_db(
-                "SELECT * FROM registrations WHERE order_id = %s AND invoice_status != 'DUPLICATE' order by lname, fname",
+                "SELECT * FROM registrations WHERE order_id = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
@@ -446,6 +471,13 @@ def canceledinvoices():
     invoicecount = canceled_count()
     regcount = canceled_reg_count()
     return render_template('invoice_list.html', regs=regs, preregtotal=preregtotal, invoicecount=invoicecount, regcount=regcount, back='canceled')
+
+@app.route('/invoice/all', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Invoices','Department Head')
+def allinvoices():
+    regs = Registrations.query.filter(Registrations.prereg_status == "SUCCEEDED").all()
+    return render_template('invoice_list.html', regs=regs, back='all')
 
 @app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
 @login_required
@@ -519,6 +551,8 @@ def updateinvoice(regid):
                 return redirect('/invoice/paid')
             case 'canceled': 
                 return redirect('/invoice/canceled')
+            case 'all': 
+                return redirect('/invoice/all')
             case _:
                 return redirect('/')
 
@@ -800,7 +834,6 @@ def createprereg():
             royal_title = form.royal_title.data if form.royal_title.data != '' else None
         )
 
-        print(form.rate_date.data)
         if form.rate_date.data == 'Early_On':
             reg.early_on = True
             rate_date = '03-08-2025'
@@ -939,6 +972,12 @@ def editreg():
         offsite_contact_phone = reg.offsite_contact_phone
     )
 
+    if reg.rate_date != None:
+        try:
+            form.rate_date.data = datetime.strptime(reg.rate_date, '%Y-%m-%d %H:%M:%S')
+        except:
+            form.rate_date.data = datetime.strptime(reg.rate_date, '%Y-%m-%d')
+
     loading_df = pd.read_csv('gwlodging.csv')
     lodgingdata = loading_df.to_dict(orient='list')
     form.lodging.choices = lodgingdata
@@ -970,6 +1009,7 @@ def editreg():
             reg.invoice_email = request.form.get('invoice_email')
             reg.kingdom = request.form.get('kingdom')
             reg.lodging = request.form.get('lodging')
+            reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d')
             reg.rate_age = request.form.get('rate_age')
             reg.rate_mbr = request.form.get('rate_mbr')
             if request.form.get('medallion'):
@@ -1342,9 +1382,156 @@ def reports():
         
         df.to_csv(path1)
         return send_file(path2)
+    
+    if report_type == 'paypal_recon_export':
+
+
+        invoice_nums = []
+        counts = []
+        counts_obj = {}
+        dirty_obj = {}
+        errors = []
+
+        paypal_recon_file = request.files['paypal_file']
+
+        merchant_df = pd.read_csv('merchant_fees.csv')
+        merchant_dict = merchant_df.to_dict(orient='records')
+        merchant_dict_exclude = {}
+
+        for merchant in merchant_dict:
+            for col in merchant:
+                if not isinstance(merchant[col], int):
+                     merchant[col] = float(merchant[col])
+                merchant_dict_exclude[merchant['Invoice Number']] = merchant
+
+        # csv_reader = csv.DictReader(paypal_recon_file)
+        csv_reader = csv.DictReader(codecs.iterdecode(paypal_recon_file, 'utf-8'))
+
+        for row in csv_reader:
+            for col in row:
+                if row[col].strip().startswith('$'):
+                    row[col] = row[col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'').replace('"','')
+                    if row[col].strip() != '':
+                        row[col] = float(row[col].strip())
+                    else: 
+                        row[col] = 0
+            dirty_obj[row['Invoice Number']] = row
+            invoice_nums.append("'"+str(row['Invoice Number'])+"'")
+
+        for row in dirty_obj:
+            counts_obj[row] = {
+                'Date':None,
+                'Time':None,
+                'Name':'',
+                'From Email Address':'',
+                'Invoice Number':'',
+                'Gross':0.00,
+                'Fee':0.00,
+                'Net':0.00,
+                'Balance':0.00,
+                'price_paid':0.00,
+                'paypal_donation_amount':0.00,
+                'nmr':0,
+                'base_price':0.00,
+                'expected_fee':0.00,
+                'is_merchant':False,
+                'To Email Address':'',
+                'Transaction ID':'',
+                'CounterParty Status':'',
+                'Address Status':'',
+                'Item Title':'',
+                'Reference Txn ID':'',
+                'Receipt ID':'',
+                'Contact Phone Number':'',
+                'Subject':'',
+                'Payment Source':''
+            }
+            for col in dirty_obj[row].keys():
+                if col == '\ufeff"Date"':
+                    counts_obj[row]['Date'] = dirty_obj[row][col]
+                if col not in ['TimeZone','Status','Currency','Note','Card Type','Type','Transaction Event Code','Balance Impact','\ufeff"Date"']:
+                    if col in ['Gross','Fee','Net']:
+                        dirty_obj[row][col] = dirty_obj[row][col].strip().replace("$","").replace("(","").replace(")","").replace(",","").replace("-","").replace("'",'')
+                        counts_obj[row][col.strip()] = float(dirty_obj[row][col].strip())
+                    else:
+                        counts_obj[row][col.strip()] = dirty_obj[row][col]
+
+        invoice_nums_str = ','.join(invoice_nums)
+
+        file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID' AND invoice_number IN ({invoice_nums_str})"
+        df = pd.read_sql_query(rptquery, engine)
+        base_price_list = []
+        nmr_list = []
+        for index, row in df.iterrows():
+            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
+                nmr_list.append(10)
+                row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
+                row['nmr'] = 10
+            else:
+                base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
+                nmr_list.append(0)
+                row['base_price'] = row['price_paid'] - row['paypal_donation_amount']
+                row['nmr'] = 0
+
+            if row['invoice_number'] not in counts_obj:
+                obj = {'price_paid':float(row['price_paid']),'paypal_donation_amount':row['paypal_donation_amount'],'nmr':row['nmr'],'base_price':row['base_price']}
+                counts_obj[row['invoice_number']] = obj
+            else:
+                counts_obj[row['invoice_number']]['price_paid'] += round(float(row['price_paid']),2)
+                counts_obj[row['invoice_number']]['paypal_donation_amount'] += row['paypal_donation_amount']
+                counts_obj[row['invoice_number']]['nmr'] += row['nmr']
+                counts_obj[row['invoice_number']]['base_price'] += row['base_price']
+
+        df['nmr'] = nmr_list
+        df['base_price'] = base_price_list
+
+        for obj in counts_obj:
+            if obj != '' and obj is not None:
+                if int(obj) in merchant_dict_exclude:
+                    counts_obj[obj]['price_paid'] = merchant_dict_exclude[int(obj)]['Gross']
+                    counts_obj[obj]['expected_fee'] = merchant_dict_exclude[int(obj)]['Fee']
+                    counts_obj[obj]['is_merchant'] = True
+                else:
+                    if counts_obj[obj]['price_paid'] != 0:
+                        expected_fee = round(counts_obj[obj]['price_paid'] * 0.0199 + 0.49,2)
+                    else:
+                        expected_fee = 0.00
+                    counts_obj[obj]['expected_fee'] = expected_fee
+                    if counts_obj[obj]['price_paid'] != counts_obj[obj]['Gross'] and counts_obj[obj]['price_paid'] != 0:
+                        errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj]['Gross'],'Export':counts_obj[obj]['price_paid'],'Email':counts_obj[obj]['From Email Address']})
+                    if expected_fee != counts_obj[obj]['Fee']:
+                        errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee,'Email':counts_obj[obj]['From Email Address']})
+                counts.append(counts_obj[obj])
+
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+        
+        pd.DataFrame(counts).to_excel(writer, sheet_name='Report' ,index = True)
+        pd.DataFrame(errors).to_excel(writer, sheet_name='Errors' ,index = True)
+
+        writer.close()
+        return send_file(path2)
+    
+    if report_type == 'log_export':
+
+        file = 'log_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+
+        rptquery = "SELECT id, regid, userid, (SELECT username FROM users WHERE users.id = reglogs.userid), timestamp, action FROM reglogs"
+        df = pd.read_sql_query(rptquery, engine)
+
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        df.to_csv(path1)
+        return send_file(path2)
+
 
     return render_template('reports.html', form=form)
-
     
 @app.route('/waiver', methods=['GET', 'POST'])
 @login_required

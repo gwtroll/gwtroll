@@ -15,6 +15,17 @@
 
 <input class="form-control" type="text" id="searchEmailInput" onkeyup="searchEmailFunction()" placeholder="Search Email...">
 <input class="form-control" type="text" id="searchInvoiceInput" onkeyup="searchInvoiceFunction()" placeholder="Search Invoice #...">
+{% if back == 'all' %}
+<!-- <input class="form-control" type="text" id="searchStatusInput" onkeyup="searchStatusFunction()" placeholder="Search Status..."> -->
+<select class="form-control" id="searchStatusInput" name="searchStatusInput" onchange="searchStatusFunction()">
+  <option value="-">-</option>
+  <option value="UNSENT">UNSENT</option>
+  <option value="SENT">SENT</option>
+  <option value="PAID">PAID</option>
+  <option value="CANCELED">CANCELED</option>
+  <option value="DUPLICATE">DUPLICATE</option>
+</select>
+{% endif %}
 
 <table id="invoiceTable" class="table table-striped">
     <thread>
@@ -24,6 +35,9 @@
             <th>Email</th>
             <th>First Name</th>
             <th>Last Name</th>
+            {% if back == 'all' %}
+            <th>Status</th>
+            {% endif %}
             <th>Update</th>
         </tr>
     </thread>
@@ -56,6 +70,11 @@
                 <td> 
                     {{reg.lname}}
                 </td>
+                {% if back == 'all' %}
+                <td> 
+                  {{reg.invoice_status}}
+                </td>
+                {% endif %}
                 <td>
                     <input class="form__submit form__input" type="Submit" value="Update"/>
                 </td>
@@ -105,6 +124,38 @@
               tr[i].style.display = "";
             } else {
               tr[i].style.display = "none";
+            }
+          }
+        }
+      }
+
+      function searchStatusFunction() {
+        // Declare variables
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchStatusInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("invoiceTable");
+        tr = table.getElementsByTagName("tr");
+      
+        if (filter == '-') {
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[6];
+            if (td) {
+              tr[i].style.display = "";
+            }
+          }
+        }
+        else {
+          // Loop through all table rows, and hide those who don't match the search query
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[6];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.toUpperCase().trim() == filter) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
             }
           }
         }
