@@ -101,6 +101,8 @@ class Registrations(db.Model):
     onsite_contact_group: so.Mapped[Optional[str]] 
     offsite_contact_name: so.Mapped[Optional[str]] 
     offsite_contact_phone: so.Mapped[Optional[str]] 
+    # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
+    # minor_waiver: so.Mapped[Optional[str]] 
     requests: so.Mapped[Optional[str]] 
     checkin: so.Mapped[Optional[datetime]]
     medallion: so.Mapped[Optional[int]]

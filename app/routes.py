@@ -280,8 +280,11 @@ def login():
     if form.validate_on_submit():
         user = db.session.scalar(
             sa.select(User).where(User.username == form.username.data))
-        if user is None or not user.check_password(form.password.data) or not user.active:
+        if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
+            return redirect(url_for('login'))
+        if not user.active:
+            flash('User is Inactive')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
@@ -365,7 +368,7 @@ def reg(regid):
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def unsentinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.invoice_status != 'CANCELED', Registrations.invoice_status != 'DUPLICATE', Registrations.invoice_status != 'SENT', Registrations.invoice_status != 'PAID', Registrations.prereg_status == "SUCCEEDED")).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.invoice_status != 'CANCELED', Registrations.invoice_status != 'DUPLICATE', Registrations.invoice_status != 'SENT', Registrations.invoice_status != 'PAID', Registrations.prereg_status == "SUCCEEDED")).order_by(Registrations.invoice_email).all()
     preregtotal = prereg_total()
     invoicecount = unsent_count()
     regcount = unsent_reg_count()
@@ -375,7 +378,7 @@ def unsentinvoices():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def openinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'SENT')).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'SENT')).order_by(Registrations.invoice_email).all()
     preregtotal = prereg_total()
     invoicecount = open_count()
     regcount = open_reg_count()
@@ -385,7 +388,7 @@ def openinvoices():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def paidinvoices():
-    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'PAID')).all()
+    regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg_status == "SUCCEEDED", Registrations.invoice_status == 'PAID')).order_by(Registrations.invoice_email).all()
     preregtotal = prereg_total()
     invoicecount = paid_count()
     regcount = paid_reg_count()
@@ -395,7 +398,7 @@ def paidinvoices():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def canceledinvoices():
-    regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", or_(Registrations.invoice_status == 'CANCELED', Registrations.invoice_status == 'DUPLICATE'))).all()
+    regs = Registrations.query.filter(and_(Registrations.prereg_status == "SUCCEEDED", or_(Registrations.invoice_status == 'CANCELED', Registrations.invoice_status == 'DUPLICATE'))).order_by(Registrations.invoice_email).all()
     preregtotal = prereg_total()
     invoicecount = canceled_count()
     regcount = canceled_reg_count()
@@ -405,7 +408,7 @@ def canceledinvoices():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def allinvoices():
-    regs = Registrations.query.filter(Registrations.prereg_status == "SUCCEEDED").all()
+    regs = Registrations.query.filter(Registrations.prereg_status == "SUCCEEDED").order_by(Registrations.invoice_email).all()
     return render_template('invoice_list.html', regs=regs, back='all')
 
 @app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
@@ -634,6 +637,10 @@ def upload():
 
 @app.route('/registration', methods=('GET', 'POST'))
 def createprereg():
+    # Close Pre-Reg at Midnight 02/22/2025
+    if datetime.now().date() >= datetime.strptime('02/22/2025','%m/%d/%Y').date():
+        return render_template("prereg_closed.html")
+
     form = CreatePreRegForm()
 
     loading_df = pd.read_csv('gwlodging.csv')
@@ -850,7 +857,7 @@ def editreg():
             reg.invoice_email = request.form.get('invoice_email')
             reg.kingdom = request.form.get('kingdom')
             reg.lodging = request.form.get('lodging')
-            reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d')
+            reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d') if request.form.get('rate_date') != '' else None
             reg.rate_age = request.form.get('rate_age')
             reg.rate_mbr = request.form.get('rate_mbr')
             if request.form.get('medallion'):
@@ -924,11 +931,14 @@ def checkin():
     #today = int(datetime.today().date().strftime('%-d'))  #Get today's day to calculate pricing
 
     #Check for medallion number    
+
     if request.method == 'POST':
         medallion = form.medallion.data
         kingdom = form.kingdom.data
         rate_mbr = form.rate_mbr.data
         rate_age = form.rate_age.data
+        # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
+        # minor_waiver = form.minor_waiver.data
         
         # if rate_age is not None:
         #     print("Pricing Start")
@@ -982,20 +992,26 @@ def checkin():
         #     else:  # Youth and Royal Pricing
         #         price_calc = 0
 
+        # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
+        # if form.minor_waiver.data == '-':
+        #     flash('You must select a Minor Waiver Validation')
+
         if request.form.get('medallion') != '' and request.form.get('medallion') != None:
             medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
         else:
             medallion_check = None
 
         if medallion_check is not None and int(regid) != int(medallion_check.regid):
-            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
-            dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-            flash(Markup(dup_url))
+            duplicate_name = medallion_check.fname + " " + medallion_check.lname
+            dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + f' target="_blank" rel="noopener noreferrer">{duplicate_name}</a>'
+            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " +  Markup(dup_url))
         else:
             reg.medallion = medallion
             reg.rate_mbr = rate_mbr
             reg.rate_age = rate_age
             reg.kingdom = kingdom
+            # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
+            # reg.minor_waiver = minor_waiver
             reg.checkin = datetime.today()
             reg.price_calc = calculate_price_calc(reg)
             #Calculate Price Due
@@ -1371,6 +1387,18 @@ def reports():
         df.to_csv(path1)
         return send_file(path2)
 
+    # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
+    # if report_type == 'minor_waivers':
+    #     file = 'minor_waivers_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+
+    #     rptquery = "SELECT regid, fname, lname, minor_waiver FROM registrations WHERE minor_waiver IS NOT NULL"
+    #     df = pd.read_sql_query(rptquery, engine)
+
+    #     path1 = './reports/' + file
+    #     path2 = '../reports/' + file
+        
+    #     df.to_csv(path1)
+    #     return send_file(path2)
 
     return render_template('reports.html', form=form)
     

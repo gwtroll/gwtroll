@@ -8,15 +8,17 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.fname.label }}<br>
+                {{ form.fname.label }} <span style="color: red;">*</span><br>
                 {{ form.fname(class_='form-control m-0') }}
+                {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
  
             <p>
-                {{ form.lname.label }}<br>
+                {{ form.lname.label }} <span style="color: red;">*</span><br>
                 {{ form.lname(class_='form-control m-0') }}
+                {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
@@ -29,13 +31,13 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.rate_age.label }}<br>
+                {{ form.rate_age.label }} <span style="color: red;">*</span><br>
                 {{ form.rate_age(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.rate_mbr.label }}<br>
+                {{ form.rate_mbr.label }} <span style="color: red;">*</span><br>
                 {{ form.rate_mbr(class_='form-control m-0') }}
             </p>
         </div>
@@ -65,7 +67,7 @@
         </div>
         <div class="col">
             <p>
-                {{ form.lodging.label }}<br>
+                {{ form.lodging.label }} <span style="color: red;">*</span><br>
                 {{ form.lodging(class_='form-control m-0') }}
             </p>
         </div>
@@ -105,7 +107,7 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.phone.label }}<br>
+                {{ form.phone.label }} <span style="color: red;">*</span><br>
                 {{ form.phone(class_='form-control m-0') }}
             </p>
             {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
@@ -122,7 +124,7 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.onsite_contact_name.label }}<br>
+                {{ form.onsite_contact_name.label }} <span style="color: red;">*</span><br>
                 {{ form.onsite_contact_name(class_='form-control m-0') }}
             </p>
             {% if form.onsite_contact_name.errors %}{% for error in form.onsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
@@ -137,14 +139,14 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.onsite_contact_kingdom.label }}<br>
+                {{ form.onsite_contact_kingdom.label }} <span style="color: red;">*</span><br>
                 {{ form.onsite_contact_kingdom(class_='form-control m-0') }}
             </p>
             {% if form.onsite_contact_kingdom.errors %}{% for error in form.onsite_contact_kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
-                {{ form.onsite_contact_group.label }}<br>
+                {{ form.onsite_contact_group.label }} <span style="color: red;">*</span><br>
                 {{ form.onsite_contact_group(class_='form-control m-0') }}
             </p>
             {% if form.onsite_contact_group.errors %}{% for error in form.onsite_contact_group.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
@@ -154,14 +156,14 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.offsite_contact_name.label }}<br>
+                {{ form.offsite_contact_name.label }} <span style="color: red;">*</span><br>
                 {{ form.offsite_contact_name(class_='form-control m-0') }}
             </p>
             {% if form.offsite_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
-                {{ form.offsite_contact_phone.label }}<br>
+                {{ form.offsite_contact_phone.label }} <span style="color: red;">*</span><br>
                 {{ form.offsite_contact_phone(class_='form-control m-0') }}
             </p>
             {% if form.offsite_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
