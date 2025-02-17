@@ -807,6 +807,7 @@ def createuser():
             user.roles.append(get_role(roleid))
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.medallion = form.medallion.data
         user.fs_uniquifier = uuid.uuid4().hex
         user.active = True
         user.set_password(form.password.data)
@@ -837,6 +838,7 @@ def edituser():
             role = role_array,
             fname = user.fname,
             lname = user.lname,
+            medallion = user.medallion,
             active = user.active
         )
         form.role.choices = get_role_choices()
@@ -857,6 +859,7 @@ def edituser():
         user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.medallion = form.medallion.data
         user.active = bool(request.form.get('active'))
 
         db.session.commit()

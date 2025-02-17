@@ -69,6 +69,7 @@ class CreateUserForm(FlaskForm):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
+    medallion = IntegerField('Medallion')
     submit = SubmitField('Submit')
 
 class CreateRoleForm(FlaskForm):
@@ -82,6 +83,7 @@ class EditUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    medallion = IntegerField('Medallion')
     active = BooleanField('Active')
     submit = SubmitField('Submit')
 

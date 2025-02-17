@@ -23,6 +23,8 @@ class User(UserMixin, db.Model):
 
     lname: so.Mapped[str] = so.mapped_column(sa.String(64))
 
+    medallion = db.Column(db.Integer())
+
     active = db.Column(db.Boolean())
 
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
