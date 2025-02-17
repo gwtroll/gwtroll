@@ -520,7 +520,8 @@ def canceledinvoices():
 @roles_accepted('Admin','Invoices','Department Head')
 def allinvoices():
     regs = Registrations.query.filter(Registrations.prereg_status == "SUCCEEDED").order_by(Registrations.invoice_email).all()
-    return render_template('invoice_list.html', regs=regs, back='all')
+    now = datetime.now()
+    return render_template('invoice_list.html', regs=regs, back='all', now=now)
 
 @app.route('/invoice/<int:regid>', methods=('GET', 'POST'))
 @login_required
