@@ -215,6 +215,7 @@ class UpdateInvoiceForm(FlaskForm):
     invoice_payment_date = DateField('Invoice Payment Date')
     invoice_canceled = BooleanField('Invoice Canceled')
     duplicate_invoice = BooleanField('Duplicate Invoice')
+    is_check = BooleanField('Paid Via Check')
     submit = SubmitField('Update Invoice')
 
 class SearchInvoiceForm(FlaskForm):

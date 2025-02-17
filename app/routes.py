@@ -432,6 +432,7 @@ def updateinvoice(regid):
     form.invoice_canceled.data = reg.invoice_canceled
     form.invoice_payment_date.data = reg.invoice_payment_date
     form.duplicate_invoice.data = True if reg.invoice_status == 'DUPLICATE' else False
+    form.is_check.data = True if reg.pay_type == 'check' else False
     
     if request.method == 'POST':
         invoice_number = request.form.get('invoice_number')
@@ -469,7 +470,10 @@ def updateinvoice(regid):
 
         reg.price_due = (price_calc + reg.paypal_donation_amount) - price_paid
 
-        reg.pay_type = 'paypal'
+        if form.is_check.data:
+            reg.pay_type = 'check'
+        else:
+            reg.pay_type = 'paypal'
 
         db.session.commit()
 
@@ -1318,10 +1322,12 @@ def reports():
 
         file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID' AND invoice_number IN ({invoice_nums_str})"
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND invoice_status = 'PAID' AND invoice_number IN ({invoice_nums_str})"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
-        nmr_list = []
+        nmr_list = [] 
+        checks_list = []
+
         for index, row in df.iterrows():
             if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
@@ -1363,6 +1369,23 @@ def reports():
                     if expected_fee != counts_obj[obj]['Fee']:
                         errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee,'Email':counts_obj[obj]['From Email Address']})
                 counts.append(counts_obj[obj])
+        
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'check' AND invoice_status = 'PAID'"
+        df = pd.read_sql_query(rptquery, engine)
+
+        for index, row in df.iterrows():
+            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
+                nmr_list.append(10)
+                row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
+                row['nmr'] = 10
+            else:
+                base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
+                nmr_list.append(0)
+                row['base_price'] = row['price_paid'] - row['paypal_donation_amount']
+                row['nmr'] = 0
+            checks_list.append(row)
+        
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -1371,6 +1394,7 @@ def reports():
         
         pd.DataFrame(counts).to_excel(writer, sheet_name='Report' ,index = True)
         pd.DataFrame(errors).to_excel(writer, sheet_name='Errors' ,index = True)
+        pd.DataFrame(checks_list).to_excel(writer,sheet_name='Checks',index=True)
 
         writer.close()
         return send_file(path2)

@@ -93,6 +93,12 @@
                 {{ form.duplicate_invoice(class_='form-control') }}
             </p>  
         </div>
+        <div class="col text-center">
+            <p>
+                {{ form.is_check.label }}<br>
+                {{ form.is_check(class_='form-control') }}
+            </p>  
+        </div>
     </div>
   
     <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>

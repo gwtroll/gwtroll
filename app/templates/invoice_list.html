@@ -39,7 +39,6 @@
             <th>Status</th>
             <th>Amount Due</th>
             <th>Amount Paid</th>
-            <th>Age</th>
             {% endif %}
             <th>Update</th>
         </tr>
@@ -82,9 +81,6 @@
                 </td>
                 <td> 
                   {{reg.price_paid}}
-                </td>
-                <td> 
-                  {{(now - reg.invoice_date).days}}
                 </td>
                 {% endif %}
                 <td>
