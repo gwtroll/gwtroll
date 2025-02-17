@@ -1,6 +1,6 @@
 from app import app, db, login
 from app.forms import *
-from app.models import Registrations, User, Role, UserRoles, RegLogs
+from app.models import *
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_from_directory, send_file
@@ -24,6 +24,8 @@ import codecs
 @login.unauthorized_handler
 def unauthorized_callback():
     return redirect('/login?next=' + request.path)
+from collections import namedtuple
+from sqlalchemy import or_, and_
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
@@ -84,11 +86,11 @@ def is_duplicate_invoice_number(invoice_number, reg):
     else:
         return True
 
-def get_roles():
-    roles = Role.query.all()
-    role_return = []
-    [role_return.append((role.id,role.name)) for role in roles]
-    return role_return
+# def get_roles():
+#     roles = Role.query.all()
+#     role_return = []
+#     [role_return.append((role.id,role.name)) for role in roles]
+#     return role_return
 
 def get_user(userid):
     user = User.query.filter_by(id=userid).first()
@@ -102,11 +104,48 @@ def get_user_roles(userid):
         abort(404)
     return userRoles
 
+def get_roles():
+    roles = Role.query.all()
+    if roles is None:
+        abort(404)
+    return roles
+
+def get_role_choices():
+    roles = get_roles()
+    role_choices = []
+    role_dict = {}
+    for r in roles:
+        role_dict[r.name] = r
+
+    if current_user.has_role('Admin'):
+        for r in roles:
+            role_choices.append([r.id, r.name])
+        return role_choices
+    
+    if current_user.has_role('Marshal Admin'):
+        print(role_dict['Marshal User'].id)
+        role_choices.append([role_dict['Marshal User'].id,'Marshal User'])
+
+    if current_user.has_role('Troll Shift Lead'):
+        role_choices.append([role_dict['Troll User'].id,'Troll User'])
+
+    return role_choices
+
 def get_role(roleid):
     role = Role.query.filter_by(id=roleid).first()
     if role is None:
         abort(404)
     return role
+
+def currentuser_has_permission_on_user(cuser, user):
+    if cuser.has_role('Admin'):
+        return True
+    elif cuser.has_role('Marshal Admin') and user.has_role('Marshal User'):
+        return True
+    elif cuser.has_role('Troll Shift Lead') and user.has_role('Troll User'):
+        return True
+    else:
+        return False
 
 def reg_count():
     conn= get_db_connection()
@@ -119,6 +158,45 @@ def reg_count():
     if regcount is None:
         abort(404)
     return regcount
+
+def get_inspection_stats():
+    inspection_stats = {}
+    inspections = MartialInspection.query.all()
+    ranged_inspections = Registrations.query.filter(or_(Registrations.crossbows != None, Registrations.bows != None)).all()
+
+    chivalric_inspections = 0
+    rapier_inspections = 0
+    combat_archery = 0
+    bow_inspections = 0
+    crossbow_inspections = 0
+    for i in inspections:
+
+        match i.inspection_type:
+            case 'Heavy':
+                chivalric_inspections += 1
+            case 'Heavy Spear':
+                chivalric_inspections += 1
+            case 'Rapier':
+                rapier_inspections += 1
+            case 'Rapier Spear':
+                rapier_inspections += 1
+            case 'Combat Archery':
+                combat_archery += 1
+
+    for i in ranged_inspections:
+        if i.bows:
+            bow_inspections += len(i.bows)
+        if i.crossbows:
+            crossbow_inspections += len(i.crossbows)
+
+    inspection_stats = {
+    'chivalric_inspections':chivalric_inspections, 
+    'rapier_inspections':rapier_inspections, 
+    'combat_archery_inspections':combat_archery,
+    'bow_inspections':bow_inspections, 
+    'crossbow_inspections':crossbow_inspections}
+    return inspection_stats
+
 
 def prereg_total():
     conn= get_db_connection()
@@ -290,6 +368,36 @@ def login():
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 
+@app.route('/martialhome', methods=['GET', 'POST'])
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def martialhome():
+    inspection_stats = get_inspection_stats()
+    if request.method == "POST":
+        print("SEARCHED")
+        if request.form.get('search_name'):
+            search_value = request.form.get('search_name')
+            print(search_value)
+            if search_value is not None and search_value != '':
+                reg = query_db(
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND checkin IS NOT NULL order by lname, fname",
+                    #(search_value, search_value, search_value))
+                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+        elif request.form.get('mbrnum_id'):
+            search_value = request.form.get('mbrnum_id')
+            reg = query_db(
+                "SELECT * FROM registrations WHERE mbr_num = %s AND checkin IS NOT NULL order by lname, fname",
+                (int(search_value),))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+        elif request.form.get('medallion'):
+            search_value = request.form.get('medallion')
+            reg = query_db(
+                "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
+                (search_value,))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+    else:
+        return render_template('martial_home.html', inspection_stats=inspection_stats)
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -323,9 +431,12 @@ def changepassword():
 @login_required
 def index():
     regcount = reg_count()
+    print(request.method)
     if request.method == "POST":
+        print("SEARCHED")
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
+            print(search_value)
             if search_value is not None and search_value != '':
                 reg = query_db(
                     "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
@@ -505,22 +616,189 @@ def createrole():
         db.session.commit()
         return redirect('/')
     return render_template('createrole.html', form=form, roles=all_roles)
+    
+@app.route('/martial/<int:regid>/addbow', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_bow(regid):
+    reg = get_reg(regid)
+    form = BowForm()
+    if request.method == 'POST':
+        if request.form.get("poundage"):
+            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            bow = Bows()
+            bow.poundage = request.form.get("poundage")
+            bow.bow_inspection_martial_id = current_user.id
+            bow.bow_inspection_date = datetime.now()
+            if update_reg.bows:
+                update_reg.bows.append(bow)
+            else:
+                bows = []
+                bows.append(bow)
+                update_reg.bows = bows
+            db.session.commit()
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_bow.html', reg=reg, form=form)
+
+@app.route('/martial/<int:regid>/addcrossbow', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_crossbow(regid):
+    reg = get_reg(regid)
+    form = CrossBowForm()
+    if request.method == 'POST':
+        if request.form.get("inchpounds"):
+            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            print(request.form.get("inchpounds"))
+            crossbow = Crossbows()
+            crossbow.inchpounds = request.form.get("inchpounds")
+            crossbow.crossbow_inspection_martial_id = current_user.id
+            crossbow.crossbow_inspection_date = datetime.now()
+            if update_reg.crossbows:
+                update_reg.crossbows.append(crossbow)
+            else:
+                crossbows = []
+                crossbows.append(crossbow)
+                update_reg.crossbows = crossbows
+            db.session.commit()
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_crossbow.html', reg=reg, form=form)
+
+@app.route('/martial/<int:regid>/addincident', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_incident(regid):
+    reg = get_reg(regid)
+    form = IncidentForm()
+    if request.method == 'POST':
+        incident_date = request.form.get("incident_date")
+        notes = request.form.get("notes")
+
+        new_incident = IncidentReport(
+            regid = regid,
+            report_date = datetime.now(),
+            incident_date = incident_date,
+            reporting_user_id = current_user.id,
+            notes = notes
+        )
+
+        db.session.add(new_incident)
+        db.session.commit()
+
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_crossbow.html', reg=reg, form=form)
+
+@app.route('/martial/<int:regid>', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def martial_reg(regid):
+    reg = get_reg(regid)
+    print(reg.incident_report)
+    form = MartialForm()
+    bow_form = BowForm()
+    incident_form = IncidentForm()
+    inspections = MartialInspection.query.filter(MartialInspection.regid == regid).all()
+    inspection_dict = {}
+    for inspection in inspections:
+        inspection_dict[inspection.inspection_type] = inspection
+        match inspection.inspection_type:
+            case 'Heavy':
+                form.chivalric_inspection.data = inspection.inspected
+            case 'Heavy Spear':
+                form.chivalric_spear_inspection.data = inspection.inspected
+            case 'Rapier':
+                form.rapier_inspection.data = inspection.inspected
+            case 'Rapier Spear':
+                form.rapier_spear_inspection.data = inspection.inspected
+            case 'Combat Archery':
+                form.combat_archery_inspection.data = inspection.inspected
+
+    if reg.bows:
+        for bow in reg.bows:
+            form.bows.append_entry(bow)
+    if reg.crossbows:
+        for crossbow in reg.crossbows:
+            form.crossbows.append_entry(crossbow)
+
+    if request.method == 'POST':
+        chivalric_inspection = request.form.get('chivalric_inspection')
+        chivalric_spear_inspection = request.form.get('chivalric_spear_inspection')
+        rapier_inspection = request.form.get('rapier_inspection')
+        rapier_spear_inspection = request.form.get('rapier_spear_inspection')
+        combat_archery_inspection = request.form.get('combat_archery_inspection')
+
+        if 'Heavy' not in inspection_dict and chivalric_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Heavy',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Heavy Spear' not in inspection_dict and chivalric_spear_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Heavy Spear',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Rapier' not in inspection_dict and rapier_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Rapier',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Rapier Spear' not in inspection_dict and rapier_spear_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Rapier Spear',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Combat Archery' not in inspection_dict and combat_archery_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Combat Archery',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+
+        db.session.commit()
+        return redirect(url_for('martial_reg',regid=regid))
+    return render_template('martial_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form)
 
 @app.route('/users', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead')
 def users():
+    return_users = []
     users = User.query.all()
-    return render_template('users.html', users=users)
+    if current_user.has_role('Admin'):
+        return render_template('users.html', users=users)
+    
+    for user in users:
+        if current_user.has_role('Marshal Admin') and user.has_role('Marshal User'):
+            return_users.append(user)
+
+        if current_user.has_role('Troll Shift Lead') and user.has_role('Troll User'):
+            return_users.append(user)
+
+    return render_template('users.html', users=return_users)
 
 
 @app.route('/user/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead')
 def createuser():
 
     form = CreateUserForm()
-    form.role.choices = get_roles()
+    form.role.choices = get_role_choices()
     
     if request.method == 'POST':
         user = User()
@@ -529,6 +807,7 @@ def createuser():
             user.roles.append(get_role(roleid))
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.medallion = form.medallion.data
         user.fs_uniquifier = uuid.uuid4().hex
         user.active = True
         user.set_password(form.password.data)
@@ -543,9 +822,11 @@ def createuser():
 
 @app.route('/user', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead')
 def edituser():
     user = get_user(request.args.get("userid"))
+    if not currentuser_has_permission_on_user(current_user,user):
+        return redirect('/users')
     edit_request = request.args.get("submitValue")
     if edit_request == "Edit" :
         role_array = []
@@ -557,9 +838,10 @@ def edituser():
             role = role_array,
             fname = user.fname,
             lname = user.lname,
+            medallion = user.medallion,
             active = user.active
         )
-        form.role.choices = get_roles()
+        form.role.choices = get_role_choices()
         
     elif edit_request == "Password Reset":
         form = UpdatePasswordForm(
@@ -577,6 +859,7 @@ def edituser():
         user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.medallion = form.medallion.data
         user.active = bool(request.form.get('active'))
 
         db.session.commit()

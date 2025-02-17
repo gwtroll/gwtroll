@@ -11,6 +11,7 @@
             <th>Role</th>
             <th>First Name</th>
             <th>Last Name</th>
+            <th>Medallion</th>
             <th>Active</th>
             <th></th>
         </tr>
@@ -25,16 +26,19 @@
                     {{form.username(readonly=true)}}
                 </td>
                 <td>
-                    {{form.role()}}
+                    {{form.role(class_='form-control')}}
                 </td>
                 <td>
-                    {{form.fname()}}
+                    {{form.fname(class_='form-control')}}
                 </td>
                 <td>
-                    {{form.lname()}}
+                    {{form.lname(class_='form-control')}}
                 </td>
                 <td>
-                    {{form.active()}}
+                    {{form.medallion(class_='form-control')}}
+                </td>
+                <td>
+                    {{form.active(class_='form-control')}}
                 </td>
                 <td>
                     <input class="form__submit form__input" type="submit" value="Submit" name="select_value"/>

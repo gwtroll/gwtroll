@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField
-from wtforms.fields import DateField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField
+from wtforms.fields import DateField, DateTimeLocalField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
 
@@ -69,6 +69,7 @@ class CreateUserForm(FlaskForm):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
+    medallion = IntegerField('Medallion')
     submit = SubmitField('Submit')
 
 class CreateRoleForm(FlaskForm):
@@ -82,6 +83,7 @@ class EditUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    medallion = IntegerField('Medallion')
     active = BooleanField('Active')
     submit = SubmitField('Submit')
 
@@ -244,3 +246,29 @@ class ReportForm(FlaskForm):
     dt_start = DateField('Start Date', format='%Y-%m-%d')
     dt_end = DateField('End Date', format='%Y-%m-%d')
     submit = SubmitField('Submit')
+
+class BowForm(FlaskForm):
+    id = IntegerField("Bow Id")
+    poundage = DecimalField('Poundage')
+    submit = SubmitField('Submit')
+
+class CrossBowForm(FlaskForm):
+    id = IntegerField("Crossbow Id")
+    inchpounds = DecimalField('Inch/Pound')
+    submit = SubmitField('Submit')
+
+class MartialForm(FlaskForm):
+    regid = IntegerField()
+    chivalric_inspection = BooleanField('Heavy Spear Inspection')
+    rapier_inspection = BooleanField('Rapier Inspection')
+    chivalric_spear_inspection = BooleanField('Heavy Spear Inspection')
+    rapier_spear_inspection = BooleanField('Rapier Inspection')
+    combat_archery_inspection = BooleanField('Combat Archery Inspection')
+    bows = FieldList(FormField(BowForm))
+    crossbows = FieldList(FormField(CrossBowForm))
+    submit = SubmitField('Submit')
+
+class IncidentForm(FlaskForm):
+    incident_date = DateTimeLocalField('Incident Date/Time')
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Submit Incident')
