@@ -45,6 +45,7 @@
           </li>
           </ul>
         </div>
+        {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Marshal User') %} 
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
           <li class="nav-item active">
@@ -52,7 +53,8 @@
           </li>
           </ul>
         </div>
-      {% if current_user.has_role('Admin') %} 
+        {% endif %}
+      {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Troll Shift Lead') %} 
       <div class="collapse navbar-collapse" id="navbarNav">
         <div class="dropdown">
         <button class="navbar-nav" type="button" id="adminMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expandable="true" >
@@ -61,7 +63,6 @@
         <div class="dropdown-menu">
           <a class="dropdown-item" href="/user/create">Create User</a>
           <a class="dropdown-item" href="/users">Manage Users</a>
-          <a class="dropdown-item" href="/upload">Upload</a>
         </div>
       </div>
       </div>

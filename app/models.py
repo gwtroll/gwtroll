@@ -40,6 +40,7 @@ class User(UserMixin, db.Model):
         else:
             return check_password_hash(self.password_hash, password)
 
+
 #Role Data Model
 class Role(db.Model, RoleMixin):
     __tablename__ = 'roles'
@@ -117,6 +118,7 @@ class Registrations(db.Model):
     bows = db.relationship('Bows', secondary='reg_bows')
     crossbows = db.relationship('Crossbows', secondary='reg_crossbows')
     martial_inspections = db.relationship('MartialInspection', backref='registrations')
+    incident_report = db.relationship('IncidentReport', backref='registrations')
 
     def __repr__(self):
         return '<Registrations {}>'.format(self.regid)
@@ -170,3 +172,13 @@ class RegCrossBows(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     regid = db.Column(db.Integer(), db.ForeignKey('registrations.regid', ondelete='CASCADE'))
     crossbowid = db.Column(db.Integer(), db.ForeignKey('crossbows.id', ondelete='CASCADE'))
+
+class IncidentReport(db.Model):
+    __tablename__ = 'incidentreport'
+    id = db.Column(db.Integer(), primary_key=True)
+    regid = db.Column(db.Integer, db.ForeignKey('registrations.regid'))
+    report_date = db.Column(db.DateTime())
+    incident_date = db.Column(db.DateTime())
+    reporting_user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    reporting_user = db.relationship('User', foreign_keys=[reporting_user_id])
+    notes = db.Column(db.Text())

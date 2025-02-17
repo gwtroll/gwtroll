@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, DecimalField, FieldList, FormField
-from wtforms.fields import DateField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField
+from wtforms.fields import DateField, DateTimeLocalField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
 
@@ -257,8 +257,16 @@ class CrossBowForm(FlaskForm):
 
 class MartialForm(FlaskForm):
     regid = IntegerField()
-    chivalric_inspection = BooleanField('Chivalric Inspection')
+    chivalric_inspection = BooleanField('Heavy Spear Inspection')
     rapier_inspection = BooleanField('Rapier Inspection')
+    chivalric_spear_inspection = BooleanField('Heavy Spear Inspection')
+    rapier_spear_inspection = BooleanField('Rapier Inspection')
+    combat_archery_inspection = BooleanField('Combat Archery Inspection')
     bows = FieldList(FormField(BowForm))
     crossbows = FieldList(FormField(CrossBowForm))
     submit = SubmitField('Submit')
+
+class IncidentForm(FlaskForm):
+    incident_date = DateTimeLocalField('Incident Date/Time')
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Submit Incident')
