@@ -22,28 +22,55 @@
             <td>{{ reg.medallion }}</td>
         </tr>
         <tr>
-            <td>Check-In Date: </td>
-            <td>{{ reg.checkin }}</td>
+            <td>Age Range: </td>
+            <td>{{ reg.rate_age }}</td>
         </tr>
     </table>
     <br>
-   
         
-    <form action="" method="post" novalidate>
+    <form action="" method="post">
     {{ form.hidden_tag() }}
-    <p>
-        {{ form.rate_mbr.label }}<br>
-        {{ form.rate_mbr() }}
-    </p>
-    <p>
-        {{ form.kingdom.label }}<br>
-        {{ form.kingdom() }}
-    </p>
-    <p>
-        {{ form.medallion.label }}<br>
-        {{ form.medallion() }}
-    </p>
-    <p>{{ form.submit() }}</p>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.rate_mbr.label }}
+                {{ form.rate_mbr(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.kingdom.label }}
+                {{ form.kingdom(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.medallion.label }}
+                {{ form.medallion(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    {% if reg.rate_age != '18+' and reg.rate_age != 'Royals' %}
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{form.minor_waiver.label}}
+                {{form.minor_waiver(class_='form-control m-0')}}
+                {% if form.minor_waiver.errors %}{% for error in form.minor_waiver.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>{{ form.submit(class_='form-control m-0 btn-primary') }}</p>
+        </div>
+    </div>
+    
     </form>
 
     <!-- <h5>Cost</h5>

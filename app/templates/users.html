@@ -5,6 +5,7 @@
 <table id="userTable" class="table table-striped">
     <thread>
         <tr>
+            <th>Active</th>
             <th>User Name</th>
             <th>Role</th>
             <th>First Name</th>
@@ -19,6 +20,9 @@
             <form action="/user">
                 <td style="display: none;">
                     <input type="hidden" name="userid" id="userid" value="{{user.id}}">{{user.id}}
+                </td>
+                <td>
+                    {{user.active}}
                 </td>
                 <td> 
                     {{user.username}}

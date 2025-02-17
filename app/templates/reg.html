@@ -98,6 +98,8 @@
                 <th>At the Door</th>
                 {% endif %}
             </tr>
+            <br>
+            <h5>Payments Received</h5>
             <tr>
                 <td>{{ reg['price_paid'] }}</td>
                 <td>{{ reg['atd_paid'] }}</td>
@@ -139,7 +141,7 @@
         </form>
     {% endif %}
 
-    {% if reg['price_due'] > 0 and reg['checkin'] and reg['signature'] and (current_user.has_role('Admin') or current_user.has_role('Cashier'))%}
+    {% if reg['price_due'] > 0 and reg['checkin'] and reg['signature'] %}
 
     <form method="post">
         <div class="row form-group no-print">
@@ -155,6 +157,7 @@
 {% endif %}
     
     {% if reg['checkin'] %}
+    {% if reg['atd_paid'] > 0 %}
         <div class="row form-group no-print">
             <div class="col form-group">
                 <input value='Print' type='button' class="btn btn-primary btn-lg form-control" onclick='handlePrint()' />           
@@ -168,7 +171,14 @@
             window.print();
         }
         </script>
+    {% endif %}
+        <div class="row form-group no-print">
+            <div class="col form-group">
+                <a href="/" class="btn btn btn-success btn-lg form-control" role="button">Done</a>         
+            </div>
+        </div>
     {%endif%}
+    {% if current_user.has_role('Admin') or current_user.has_role('Department Head') or current_user.has_role('Troll Shift Lead')%}
     <form method="post">
         <div class="row form-group no-print">
             <div class="col form-group">
@@ -180,6 +190,7 @@
             </div>
         </div>
     </form>
+    {% endif %}
         <!-- <br>
         <form method="post">
         <a href="/editreg">
