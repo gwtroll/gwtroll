@@ -18,7 +18,7 @@ reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg
 
 arrivaldata = [('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025'),('Early_On','Early On')]
 
-paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle')]
+paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle'),('travlers_check','Travlers Check')]
 
 preregstatusdata = [('',''),('SUCCEEDED','SUCCEEDED')]
 
