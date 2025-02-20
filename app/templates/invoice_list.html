@@ -37,6 +37,7 @@
             <th>Last Name</th>
             {% if back == 'all' %}
             <th>Status</th>
+            <th>Age Range</th>
             <th>Invoice Amount</th>
             <th>Amount Paid</th>
             {% endif %}
@@ -75,6 +76,9 @@
                 {% if back == 'all' %}
                 <td> 
                   {{reg.invoice_status}}
+                </td>
+                <td>
+                  {{reg.rate_age}}
                 </td>
                 <td> 
                   {{reg.price_calc + reg.paypal_donation_amount}}
