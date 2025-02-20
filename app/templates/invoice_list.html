@@ -37,7 +37,7 @@
             <th>Last Name</th>
             {% if back == 'all' %}
             <th>Status</th>
-            <th>Amount Due</th>
+            <th>Invoice Amount</th>
             <th>Amount Paid</th>
             {% endif %}
             <th>Update</th>
@@ -77,7 +77,7 @@
                   {{reg.invoice_status}}
                 </td>
                 <td> 
-                  {{reg.price_due}}
+                  {{reg.price_calc + reg.paypal_donation_amount}}
                 </td>
                 <td> 
                   {{reg.price_paid}}
