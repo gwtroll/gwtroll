@@ -863,7 +863,6 @@ def edituser():
             fname = user.fname,
             lname = user.lname,
             medallion = user.medallion,
-            medallion = user.medallion,
             active = user.active
         )
         form.role.choices = get_role_choices()
