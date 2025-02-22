@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="row">
     <div class="col">
-        <h1>{% block title %} Search for a Registration {% endblock %}</h1>
+        <h1>{% block title %} Search for Marshal Registration {% endblock %}</h1>
     </div>
 </div>
+{% if inspection_stats %}
 <div class="row">
         <div class="col">
             <h4>Rapier Inspections: {{inspection_stats.rapier_inspections}}</h4>
@@ -23,53 +25,44 @@
             <h4>Crossbows: {{inspection_stats.crossbow_inspections}}</h4>
         </div>
 </div>
-    <div class="row justify-content-center">
-        <div class="col-5 text-center">
-<form action="/martialhome" method="POST">
-    <div class="mb-5 d-flex position-relative">
-        <!-- Search -->
-        <div class="input-group w-50 mx-auto">
-            <input class="form-control py-2"
-                   placeholder="Search by Name" name="search_name" value=""/>
-            <button type="submit" class="btn btn-secondary">Search
-            </button>
-        </div>
-    </div>
-    <div class="mb-5 d-flex position-relative">
-        <!-- Search -->
-        <div class="input-group w-50 mx-auto">
-            <input class="form-control py-2"
-                   placeholder="Search by Member #" name="mbrnum_id" value=""/>
-            <button type="submit" class="btn btn-secondary">Search
-            </button>
-        </div>
-    </div>
-    <div class="mb-5 d-flex position-relative">
-        <!-- Search -->
-        <div class="input-group w-50 mx-auto">
-            <input class="form-control py-2"
-                   placeholder="Search by Medallion Number" name="medallion" value=""/>
-            <button type="submit" class="btn btn-secondary">Search
-            </button>
-        </div>
-    </div>
-</form>
-</div>
-<div class="col vh-50">
-{% if searchreg %}
-<div class="overflow-auto vh-50">
-    {% for reg in searchreg %}
-        <a href="{{ url_for('martial_reg', regid=reg['regid']) }}">
-            <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
-        </a>
-        <div>
-            <p class="text-muted">{{ reg['scaname'] }}</p>
-        </div>
-        <hr>
-    {% endfor %}
-</div>
 {% endif %}
-</div>
+<div class="row">
+    <div class="col">
+        <form action="/martialhome" method="POST">
+                <!-- Search -->
+                <div class="mb-5">
+                    <input class="form-control py-2"
+                        placeholder="Name" name="search_name" value=""/>
+                </div>
+                <!-- Search -->
+                <div class="mb-5">
+                    <input class="form-control py-2"
+                        placeholder="Member #" name="mbrnum_id" value=""/>
+                </div>
+                <!-- Search -->
+                <div class="mb-5">
+                    <input class="form-control py-2"
+                        placeholder="Medallion Number" name="medallion" value=""/>
+                </div>
+                <button type="submit" class="btn btn-secondary form-control">Search
+                </button>
+        </form>
+    </div>
+    <div class="col">
+    {% if searchreg %}
+        <div class="overflow-auto vh-50">
+        {% for reg in searchreg %}
+            <a href="{{ url_for('martial_reg', regid=reg['regid']) }}">
+            <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
+            </a>
+            <div>
+                <p class="text-muted">{{ reg['scaname'] }}</p>
+            </div>
+            <hr>
+        {% endfor %}
+        </div>
+    {% endif %}
+    </div>
 </div>
 </body>
 </html>

@@ -379,7 +379,8 @@ def login():
 @app.route('/martialhome', methods=['GET', 'POST'])
 @roles_accepted('Admin','Marshal Admin','Marshal User')
 def martialhome():
-    inspection_stats = get_inspection_stats()
+    # inspection_stats = get_inspection_stats()
+    inspection_stats = None
     if request.method == "POST":
         print("SEARCHED")
         if request.form.get('search_name'):
@@ -403,6 +404,8 @@ def martialhome():
                 "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
                 (search_value,))
             return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+        else:
+            return render_template('martial_home.html', inspection_stats=inspection_stats)
     else:
         return render_template('martial_home.html', inspection_stats=inspection_stats)
 
