@@ -85,31 +85,7 @@ def is_duplicate_invoice_number(invoice_number, reg):
         return False
     else:
         return True
-
-# def get_roles():
-#     roles = Role.query.all()
-#     role_return = []
-#     [role_return.append((role.id,role.name)) for role in roles]
-#     return role_return
-
-def get_user(userid):
-    user = User.query.filter_by(id=userid).first()
-    if user is None:
-        abort(404)
-    return user
-
-def get_user_roles(userid):
-    userRoles = UserRoles.query.filter_by(user_id=userid).first()
-    if userRoles is None:
-        abort(404)
-    return userRoles
-
-def get_roles():
-    roles = Role.query.all()
-    if roles is None:
-        abort(404)
-    return roles
-
+    
 def get_role_choices():
     roles = get_roles()
     role_choices = []
@@ -123,13 +99,45 @@ def get_role_choices():
         return role_choices
     
     if current_user.has_role('Marshal Admin'):
-        print(role_dict['Marshal User'].id)
         role_choices.append([role_dict['Marshal User'].id,'Marshal User'])
 
-    if current_user.has_role('Troll Shift Lead'):
+    if current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head'):
         role_choices.append([role_dict['Troll User'].id,'Troll User'])
+    
+    if current_user.has_role('Department Head'):
+        role_choices.append([role_dict['Troll Shift Lead'].id,'Troll Shift Lead'])
 
     return role_choices
+
+def currentuser_has_permission_on_user(cuser, user):
+    if cuser.has_role('Admin'):
+        return True
+    elif cuser.has_role('Marshal Admin') and user.has_role('Marshal User'):
+        return True
+    elif (cuser.has_role('Troll Shift Lead') or current_user.has_role('Department Head')) and user.has_role('Troll User'):
+        return True
+    elif current_user.has_role('Department Head') and user.has_role('Troll Shift Lead'):
+        return True
+    else:
+        return False
+
+def get_roles():
+    roles = Role.query.all()
+    if roles is None:
+        abort(404)
+    return roles
+
+def get_user(userid):
+    user = User.query.filter_by(id=userid).first()
+    if user is None:
+        abort(404)
+    return user
+
+def get_user_roles(userid):
+    userRoles = UserRoles.query.filter_by(user_id=userid).first()
+    if userRoles is None:
+        abort(404)
+    return userRoles
 
 def get_role(roleid):
     role = Role.query.filter_by(id=roleid).first()
@@ -439,20 +447,20 @@ def index():
             print(search_value)
             if search_value is not None and search_value != '':
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
                     #(search_value, search_value, search_value))
                     ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
             reg = query_db(
-                "SELECT * FROM registrations WHERE order_id = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
+                "SELECT * FROM registrations WHERE order_id = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by  checkin DESC, lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
             reg = query_db(
-                "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
+                "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
@@ -543,6 +551,8 @@ def updateinvoice(regid):
     form.invoice_canceled.data = reg.invoice_canceled
     form.invoice_payment_date.data = reg.invoice_payment_date
     form.duplicate_invoice.data = True if reg.invoice_status == 'DUPLICATE' else False
+    form.is_check.data = True if reg.pay_type == 'check' else False
+    form.notes.data = reg.notes
     
     if request.method == 'POST':
         invoice_number = request.form.get('invoice_number')
@@ -580,7 +590,12 @@ def updateinvoice(regid):
 
         reg.price_due = (price_calc + reg.paypal_donation_amount) - price_paid
 
-        reg.pay_type = 'paypal'
+        if form.is_check.data:
+            reg.pay_type = 'check'
+        else:
+            reg.pay_type = 'paypal'
+        
+        reg.notes = request.form.get('notes')
 
         db.session.commit()
 
@@ -775,7 +790,7 @@ def martial_reg(regid):
 
 @app.route('/users', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Marshal Admin','Troll Shift Lead')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
 def users():
     return_users = []
     users = User.query.all()
@@ -786,7 +801,10 @@ def users():
         if current_user.has_role('Marshal Admin') and user.has_role('Marshal User'):
             return_users.append(user)
 
-        if current_user.has_role('Troll Shift Lead') and user.has_role('Troll User'):
+        if (current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head')) and user.has_role('Troll User'):
+            return_users.append(user)
+        
+        if current_user.has_role('Department Head') and user.has_role('Troll Shift Lead'):
             return_users.append(user)
 
     return render_template('users.html', users=return_users)
@@ -794,13 +812,17 @@ def users():
 
 @app.route('/user/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Marshal Admin','Troll Shift Lead')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
 def createuser():
 
     form = CreateUserForm()
     form.role.choices = get_role_choices()
     
     if request.method == 'POST':
+        dup_user_check = User.query.filter(User.username == form.username.data).first()
+        if dup_user_check:
+            flash("Username Already Taken - Please Try Again")
+            return render_template('createuser.html', form=form)
         user = User()
         user.username = form.username.data
         for roleid in form.role.data:
@@ -822,9 +844,11 @@ def createuser():
 
 @app.route('/user', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Marshal Admin','Troll Shift Lead')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
 def edituser():
     user = get_user(request.args.get("userid"))
+    if not currentuser_has_permission_on_user(current_user,user):
+        return redirect('/users')
     if not currentuser_has_permission_on_user(current_user,user):
         return redirect('/users')
     edit_request = request.args.get("submitValue")
@@ -838,6 +862,7 @@ def edituser():
             role = role_array,
             fname = user.fname,
             lname = user.lname,
+            medallion = user.medallion,
             medallion = user.medallion,
             active = user.active
         )
@@ -859,6 +884,7 @@ def edituser():
         user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.medallion = form.medallion.data
         user.medallion = form.medallion.data
         user.active = bool(request.form.get('active'))
 
@@ -1049,6 +1075,11 @@ def create():
         else:
             reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
 
+        if form.rate_mbr == 'Member':
+            if form.mbr_num_exp.data < datetime.now().date():
+                flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data))
+                return render_template('create.html', title = 'New Registration', form=form)
+
         db.session.add(reg)
         db.session.commit()
 
@@ -1101,7 +1132,8 @@ def editreg():
         onsite_contact_kingdom = reg.onsite_contact_kingdom,
         onsite_contact_group = reg.onsite_contact_group,
         offsite_contact_name = reg.offsite_contact_name,
-        offsite_contact_phone = reg.offsite_contact_phone
+        offsite_contact_phone = reg.offsite_contact_phone,
+        notes = reg.notes
     )
 
     if reg.rate_date != None:
@@ -1116,79 +1148,113 @@ def editreg():
 
     if request.method == 'POST':
 
-        if request.form.get('medallion') != '' and request.form.get('medallion') != None:
-            medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+        if current_user.has_role('Troll Shift Lead'):
+            reg.notes = request.form.get('notes')
+            if request.form.get('medallion') != '' and request.form.get('medallion') != None:
+                medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+            else:
+                medallion_check = None
+
+            if medallion_check is not None and int(regid) != int(medallion_check.regid):
+                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
+                dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+                flash(Markup(dup_url))
+            else:
+                if request.form.get('medallion'):
+                    reg.medallion = int(request.form.get('medallion'))
+                else: reg.medallion = None
+
+                reg.rate_mbr = request.form.get('rate_mbr')
+                if request.form.get('mbr_num'):
+                    reg.mbr_num = int(request.form.get('mbr_num'))
+                else: reg.mbr_num = None
+
+                if request.form.get('mbr_num_exp'):
+                    reg.mbr_num_exp = request.form.get('mbr_num_exp')
+
+                db.session.commit()
+
+                log_reg_action(reg, 'EDIT')
+
+                return redirect(url_for('reg',regid=regid))
+            
         else:
-            medallion_check = None
 
-        if medallion_check is not None and int(regid) != int(medallion_check.regid):
-            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
-            dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-            flash(Markup(dup_url))
+            reg.notes = request.form.get('notes')
 
-        else:
-            reg.fname = request.form.get('fname')
-            reg.lname = request.form.get('lname')
-            reg.scaname = request.form.get('scaname')
-            reg.city = request.form.get('city')
-            reg.state_province = request.form.get('state_province')
-            if request.form.get('zip'):
-                reg.zip = int(request.form.get('zip'))
-            else: reg.zip = None
-            reg.country = request.form.get('country')
-            reg.phone = request.form.get('phone')
-            reg.email = request.form.get('email')
-            reg.invoice_email = request.form.get('invoice_email')
-            reg.kingdom = request.form.get('kingdom')
-            reg.lodging = request.form.get('lodging')
-            reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d') if request.form.get('rate_date') != '' else None
-            reg.rate_age = request.form.get('rate_age')
-            reg.rate_mbr = request.form.get('rate_mbr')
-            if request.form.get('medallion'):
-                reg.medallion = int(request.form.get('medallion'))
-            else: reg.medallion = None
-            if request.form.get('atd_paid'):
-                reg.atd_paid = int(request.form.get('atd_paid'))
-            else: reg.atd_paid = 0
-            if request.form.get('price_paid'):
-                reg.price_paid = int(request.form.get('price_paid'))
-            else: reg.price_paid =  0
-            if request.form.get('pay_type') == '' or request.form.get('pay_type') == None:
-                reg.atd_pay_type = None
-            else: reg.atd_pay_type = request.form.get('pay_type')
-            if request.form.get('price_calc'):
-                reg.price_calc = int(request.form.get('price_calc'))
-            else: reg.price_calc = 0
-            if request.form.get('price_due'):
-                reg.price_due = int(request.form.get('price_due'))
-            else: reg.price_due = 0
-            reg.paypal_donation = bool(request.form.get('paypal_donation'))
-            if request.form.get('paypal_donation_amount'):
-                reg.paypal_donation_amount = int(request.form.get('paypal_donation_amount'))
-            else: reg.paypal_donation_amount = 0
-            reg.prereg_status = request.form.get('prereg_status')
-            reg.early_on = bool(request.form.get('early_on'))
-            if request.form.get('mbr_num'):
-                reg.mbr_num = int(request.form.get('mbr_num'))
-            else: reg.mbr_num = None
-            if request.form.get('mbr_num_exp'):
-                reg.mbr_num_exp = request.form.get('mbr_num_exp')
-            reg.onsite_contact_name = request.form.get('onsite_contact_name')
-            reg.onsite_contact_sca_name = request.form.get('onsite_contact_sca_name')
-            reg.onsite_contact_kingdom = request.form.get('onsite_contact_kingdom')
-            reg.onsite_contact_group = request.form.get('onsite_contact_group')
-            reg.offsite_contact_name = request.form.get('offsite_contact_name')
-            reg.offsite_contact_phone = request.form.get('offsite_contact_phone') 
+            if request.form.get('medallion') != '' and request.form.get('medallion') != None:
+                medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+            else:
+                medallion_check = None
 
-            reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
-            if reg.price_due < 0:  #Account for people who showed up late.  No refund.
-                reg.price_due = 0
+            if medallion_check is not None and int(regid) != int(medallion_check.regid):
+                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
+                dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+                flash(Markup(dup_url))
 
-            db.session.commit()
+            else:
+                reg.fname = request.form.get('fname')
+                reg.lname = request.form.get('lname')
+                reg.scaname = request.form.get('scaname')
+                reg.city = request.form.get('city')
+                reg.state_province = request.form.get('state_province')
+                if request.form.get('zip'):
+                    reg.zip = int(request.form.get('zip'))
+                else: reg.zip = None
+                reg.country = request.form.get('country')
+                reg.phone = request.form.get('phone')
+                reg.email = request.form.get('email')
+                reg.invoice_email = request.form.get('invoice_email')
+                reg.kingdom = request.form.get('kingdom')
+                reg.lodging = request.form.get('lodging')
+                reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d') if (request.form.get('rate_date') != '' and request.form.get('rate_date')) else None
+                reg.rate_age = request.form.get('rate_age')
+                reg.rate_mbr = request.form.get('rate_mbr')
+                if request.form.get('medallion'):
+                    reg.medallion = int(request.form.get('medallion'))
+                else: reg.medallion = None
+                if request.form.get('atd_paid'):
+                    reg.atd_paid = int(request.form.get('atd_paid'))
+                else: reg.atd_paid = 0
+                if request.form.get('price_paid'):
+                    reg.price_paid = int(request.form.get('price_paid'))
+                else: reg.price_paid =  0
+                if request.form.get('pay_type') == '' or request.form.get('pay_type') == None:
+                    reg.atd_pay_type = None
+                else: reg.atd_pay_type = request.form.get('pay_type')
+                if request.form.get('price_calc'):
+                    reg.price_calc = int(request.form.get('price_calc'))
+                else: reg.price_calc = 0
+                if request.form.get('price_due'):
+                    reg.price_due = int(request.form.get('price_due'))
+                else: reg.price_due = 0
+                reg.paypal_donation = bool(request.form.get('paypal_donation'))
+                if request.form.get('paypal_donation_amount'):
+                    reg.paypal_donation_amount = int(request.form.get('paypal_donation_amount'))
+                else: reg.paypal_donation_amount = 0
+                reg.prereg_status = request.form.get('prereg_status')
+                reg.early_on = bool(request.form.get('early_on'))
+                if request.form.get('mbr_num'):
+                    reg.mbr_num = int(request.form.get('mbr_num'))
+                else: reg.mbr_num = None
+                if request.form.get('mbr_num_exp'):
+                    reg.mbr_num_exp = request.form.get('mbr_num_exp')
+                reg.onsite_contact_name = request.form.get('onsite_contact_name')
+                reg.onsite_contact_sca_name = request.form.get('onsite_contact_sca_name')
+                reg.onsite_contact_kingdom = request.form.get('onsite_contact_kingdom')
+                reg.onsite_contact_group = request.form.get('onsite_contact_group')
+                reg.offsite_contact_name = request.form.get('offsite_contact_name')
+                reg.offsite_contact_phone = request.form.get('offsite_contact_phone') 
 
-            log_reg_action(reg, 'EDIT')
+                reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
+                if reg.price_due < 0:  #Account for people who showed up late.  No refund.
+                    reg.price_due = 0
 
-            return redirect(url_for('reg',regid=regid))
+                db.session.commit()
+
+                log_reg_action(reg, 'EDIT')
+
+                return redirect(url_for('reg',regid=regid))
 
     return render_template('editreg.html', regid=reg.regid, reg=reg, form=form)
 
@@ -1201,7 +1267,7 @@ def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
 
-    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age)
+    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age, lodging = reg.lodging, notes=reg.notes)
     price_paid = reg.price_paid
     price_calc = reg.price_calc
     kingdom = reg.kingdom
@@ -1220,9 +1286,8 @@ def checkin():
         medallion = form.medallion.data
         kingdom = form.kingdom.data
         rate_mbr = form.rate_mbr.data
-        rate_age = form.rate_age.data
-        # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-        # minor_waiver = form.minor_waiver.data
+        lodging = form.lodging.data
+        minor_waiver = form.minor_waiver.data
         
         # if rate_age is not None:
         #     print("Pricing Start")
@@ -1277,8 +1342,9 @@ def checkin():
         #         price_calc = 0
 
         # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-        # if form.minor_waiver.data == '-':
-        #     flash('You must select a Minor Waiver Validation')
+        if form.minor_waiver.data == '-':
+            flash('You must select a Minor Waiver Validation')
+            return render_template('checkin.html', reg=reg, form=form)
 
         if request.form.get('medallion') != '' and request.form.get('medallion') != None:
             medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
@@ -1290,14 +1356,23 @@ def checkin():
             dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + f' target="_blank" rel="noopener noreferrer">{duplicate_name}</a>'
             flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " +  Markup(dup_url))
         else:
+            #Account for PreReg Non-Member and Checkin Member (No NMR Refund - View as Donation)
+            if reg.rate_mbr != 'Member' and rate_mbr == 'Member' and reg.prereg_status == 'SUCCEEDED' and reg.rate_age.__contains__('18+'):
+                nmr_donation = 10
+            else:
+                nmr_donation = 0
             reg.medallion = medallion
             reg.rate_mbr = rate_mbr
             reg.rate_age = rate_age
             reg.kingdom = kingdom
             # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-            # reg.minor_waiver = minor_waiver
+            reg.minor_waiver = minor_waiver
+            reg.lodging = lodging
             reg.checkin = datetime.today()
             reg.price_calc = calculate_price_calc(reg)
+            reg.nmr_donation = nmr_donation
+            reg.notes = form.notes.data
+
             #Calculate Price Due
             if price_paid > price_calc + reg.paypal_donation_amount:  #Account for people who showed up late.  No refund.
                 reg.price_due = 0
@@ -1307,7 +1382,6 @@ def checkin():
 
             db.session.commit()
 
-            print(reg)
             log_reg_action(reg, 'CHECKIN')
 
             return redirect(url_for('reg', regid=regid))
@@ -1601,10 +1675,12 @@ def reports():
 
         file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID' AND invoice_number IN ({invoice_nums_str})"
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND invoice_status = 'PAID' AND invoice_number IN ({invoice_nums_str})"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
-        nmr_list = []
+        nmr_list = [] 
+        checks_list = []
+
         for index, row in df.iterrows():
             if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
@@ -1646,6 +1722,23 @@ def reports():
                     if expected_fee != counts_obj[obj]['Fee']:
                         errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee,'Email':counts_obj[obj]['From Email Address']})
                 counts.append(counts_obj[obj])
+        
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'check' AND invoice_status = 'PAID'"
+        df = pd.read_sql_query(rptquery, engine)
+
+        for index, row in df.iterrows():
+            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
+                nmr_list.append(10)
+                row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
+                row['nmr'] = 10
+            else:
+                base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
+                nmr_list.append(0)
+                row['base_price'] = row['price_paid'] - row['paypal_donation_amount']
+                row['nmr'] = 0
+            checks_list.append(row)
+        
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -1654,6 +1747,7 @@ def reports():
         
         pd.DataFrame(counts).to_excel(writer, sheet_name='Report' ,index = True)
         pd.DataFrame(errors).to_excel(writer, sheet_name='Errors' ,index = True)
+        pd.DataFrame(checks_list).to_excel(writer,sheet_name='Checks',index=True)
 
         writer.close()
         return send_file(path2)
@@ -1671,18 +1765,17 @@ def reports():
         df.to_csv(path1)
         return send_file(path2)
 
-    # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-    # if report_type == 'minor_waivers':
-    #     file = 'minor_waivers_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+    if report_type == 'minor_waivers':
+        file = 'minor_waivers_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-    #     rptquery = "SELECT regid, fname, lname, minor_waiver FROM registrations WHERE minor_waiver IS NOT NULL"
-    #     df = pd.read_sql_query(rptquery, engine)
+        rptquery = "SELECT regid, fname, lname, minor_waiver FROM registrations WHERE minor_waiver IS NOT NULL"
+        df = pd.read_sql_query(rptquery, engine)
 
-    #     path1 = './reports/' + file
-    #     path2 = '../reports/' + file
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
         
-    #     df.to_csv(path1)
-    #     return send_file(path2)
+        df.to_csv(path1)
+        return send_file(path2)
 
     return render_template('reports.html', form=form)
     

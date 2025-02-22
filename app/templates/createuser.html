@@ -2,45 +2,62 @@
 
 {% block content %}
 
-<table id="createUserTable" class="table table-striped">
-    <thread>
-        <tr>
-            <th>User Name</th>
-            <th>Role</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Medallion</th>
-            <th>Password</th>
-            <th></th>
-        </tr>
-    </thread>
-    <tbody>
-        <tr>
-            <form action="" method="post">
-                <td>
-                    {{form.username(class_='form-control')}}
-                </td>
-                <td>
-                    {{form.role(class_='form-control')}}
-                </td>
-                <td>
-                    {{form.fname(class_='form-control')}}
-                </td>
-                <td>
-                    {{form.lname(class_='form-control')}}
-                </td>
-                <td>
-                    {{form.medallion(class_='form-control')}}
-                </td>
-                <td>
-                    {{form.password(class_='form-control')}}
-                </td>
-                <td>
-                    <input class="form__submit form__input" type="submit" value="Submit" name="select_value"/>
-                </td>
-            </form>
-        </tr>
-    </tbody>
-</table>
+<div class="row">
+    <div class="col">
+        <form action="" method="post">
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.username.label }}
+                        {{ form.username(class_='form-control m-0') }}
+                    </p>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.fname.label }}
+                        {{ form.fname(class_='form-control m-0') }}
+                    </p>
+                </div>
+                <div class="col form-group">
+                    <p>
+                        {{ form.lname.label }}
+                        {{ form.lname(class_='form-control m-0') }}
+                    </p>
+                </div>
+                <div class="col form-group">
+                    <p>
+                        {{ form.medallion.label }}
+                        {{ form.medallion(class_='form-control m-0') }}
+                    </p>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.password.label }}
+                        {{ form.password(class_='form-control m-0') }}
+                    </p>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.role.label }}
+                        {{ form.role(class_='form-control m-0') }}
+                    </p>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.submit(class_='form-control m-0 btn-primary') }}
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

@@ -84,14 +84,20 @@
             <th>Total Price</th>
         </tr>
         <tr>
+            {% if reg['nmr_donation'] %}
+            <td>{{ reg['price_calc'] + reg['nmr_donation'] }}</td>
+            <td>{{ reg['paypal_donation_amount'] }}</td>
+            <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] + reg['nmr_donation'] }}</td>
+            {% else %}
             <td>{{ reg['price_calc'] }}</td>
             <td>{{ reg['paypal_donation_amount'] }}</td>
             <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] }}</td>
+            {% endif %}
         </tr>
         <h5>Cost - Breakdown</h5>
         <table>
             <tr>
-                <th>Prepaid - PayPal</th>
+                <th>Prepaid</th>
                 {% if reg['atd_pay_type'] %}
                 <th>At the Door ({{reg['atd_pay_type'].upper()}})</th>
                 {% else %}
@@ -108,6 +114,19 @@
     <br>
     {% if reg['atd_pay_type'] %}
     <h1 class="text-center" style="background-color: red; color: white;">{{reg['atd_pay_type'].upper()}} - ${{reg['atd_paid']}}</h1>
+    <h1 class="text-center" style="background-color: red; color: white;">
+        {% if reg['rate_age'] == '18+' %}
+        ADULT 
+        {% if reg['rate_mbr'] != 'Member' %}
+        <br>
+        NON-MEMBER 
+        {% endif %}
+        {% endif %}
+        {% if reg['paypal_donation'] == true %}
+        <br>
+        PAYPAL DONATION
+        {% endif %}
+    </h1>
     {% endif %}
    
 

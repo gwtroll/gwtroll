@@ -54,7 +54,7 @@
           </ul>
         </div>
         {% endif %}
-      {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Troll Shift Lead') %} 
+        {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head') %} 
       <div class="collapse navbar-collapse" id="navbarNav">
         <div class="dropdown">
         <button class="navbar-nav" type="button" id="adminMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expandable="true" >

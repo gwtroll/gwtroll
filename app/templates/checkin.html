@@ -1,41 +1,64 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <table>
-        <colgroup>
-            <col span="1" style="background-color: #D6EEEE">
-        </colgroup>
-        <tr> 
-            <td>Name: </td>
-            <td>{{ reg.fname }} {{ reg.lname }}</td>
-        </tr>
-        <tr>
-            <td>SCA Name: </td>
-            <td>{{ reg.scaname }}</td>
-        </tr>
-        <tr>
-            <td>Camp Group: </td>
-            <td>{{reg.lodging }}</td>
-        </tr>
-        <tr>
-            <td>Medallion Number: </td>
-            <td>{{ reg.medallion }}</td>
-        </tr>
-        <tr>
-            <td>Age Range: </td>
-            <td>{{ reg.rate_age }}</td>
-        </tr>
-    </table>
-    <br>
-        
+
+<div class="row form-group">
+    <div class="col form-group">
+        <p>
+            <label for="name">Name</label>
+            <input type="text" class="form-control m-0" id="name" name="name" readonly value="{{ reg.fname }} {{ reg.lname }}"/>
+        </p>
+    </div>
+    <div class="col form-group">
+        <p>
+            <label for="sca_name">SCA Name</label>
+            <input type="text" class="form-control m-0" id="sca_name" name="sca_name" readonly value="{{ reg.scaname }}"/>
+        </p>
+    </div>
+    <div class="col form-group">
+        <p>
+            <label for="sca_name">Age</label>
+            <input type="text" class="form-control m-0" id="age" name="age" readonly value="{{ reg.rate_age }}"/>
+        </p>
+    </div>
+</div>
     <form action="" method="post">
     {{ form.hidden_tag() }}
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                {{ form.rate_mbr.label }}
-                {{ form.rate_mbr(class_='form-control m-0') }}
+                {{form.notes.label}}
+                {{form.notes(class_='form-control m-0')}}
             </p>
+        </div>
+    </div>
+    <br>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.rate_mbr.label }}
+                {{ form.rate_mbr(class_='form-control m-0', onchange="memberCheck()") }}
+            </p>
+        </div>
+    </div>
+    {% if reg.rate_mbr == 'Member' %}
+    <div id="membership">
+    {% else %}
+    <div id="membership" style="display: none;">
+    {% endif %}
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{form.mbr_num.label}}
+                    {{form.mbr_num(class_='form-control m-0')}}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{form.mbr_num_exp.label}}
+                    {{form.mbr_num_exp(class_='form-control m-0')}}
+                </p>
+            </div>
         </div>
     </div>
     <div class="row form-group">
@@ -43,6 +66,14 @@
             <p>
                 {{ form.kingdom.label }}
                 {{ form.kingdom(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.lodging.label }}
+                {{ form.lodging(class_='form-control m-0') }}
             </p>
         </div>
     </div>
@@ -109,4 +140,20 @@ for(var i, j = 0; i = kingdomField.options[j]; j++) {
     }
 } 
 </script> -->
+
+<script>
+
+
+    function memberCheck() {
+        const rate_mbr = document.getElementById("rate_mbr").value;
+        const membership = document.getElementById("membership");
+        if (rate_mbr == 'Member') {
+            membership.style.display = 'block';
+        }
+        else {
+            membership.style.display = 'none';
+        }
+    }
+    
+</script>
 {% endblock %}

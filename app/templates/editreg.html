@@ -4,6 +4,71 @@
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
 
+    {% if current_user.has_role('Troll Shift Lead') %}
+    <h2>Personal Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.fname.label }}
+                {{ form.fname(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.lname.label }}
+                {{ form.lname(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.scaname.label }}
+                {{ form.scaname(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.rate_age.label }}
+                {{ form.rate_age(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <h2>Membership</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.rate_mbr.label }}
+                {{ form.rate_mbr(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num.label }}
+                {{ form.mbr_num(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num_exp.label }}
+                {{ form.mbr_num_exp(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="col form-group">
+        <p>
+            {{ form.medallion.label }}
+            {{ form.medallion(class_='form-control m-0') }}
+        </p>
+    </div>
+    <h2>Notes</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.notes.label }}
+                {{ form.notes(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    {% else %}
 
     <h2>Personal Information</h2>
     <div class="row form-group">
@@ -255,6 +320,16 @@
             </p>
         </div>
     </div>
+    <h2>Notes</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.notes.label }}
+                {{ form.notes(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
     <div class="row form-group">
         <div class="col form-group">
             <p>

@@ -18,7 +18,7 @@ reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg
 
 arrivaldata = [('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025'),('Early_On','Early On')]
 
-paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle')]
+paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle'),('travlers_check','Travlers Check')]
 
 preregstatusdata = [('',''),('SUCCEEDED','SUCCEEDED')]
 
@@ -68,6 +68,7 @@ class CreateUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    medallion = IntegerField('Medallion')
     password = PasswordField('Password', validators=[DataRequired()])
     medallion = IntegerField('Medallion')
     submit = SubmitField('Submit')
@@ -134,7 +135,7 @@ class CreatePreRegForm(FlaskForm):
     phone = StringField('Phone', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(),Email()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired(),Email()])
-    kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Lodging')], choices=kingdomdata)
+    kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')], choices=kingdomdata)
     lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')], choices=lodgingdata)
     onsite_contact_name = StringField('Legal Name', validators=[DataRequired()])
     onsite_contact_sca_name = StringField('SCA Name', validators=[])
@@ -162,9 +163,11 @@ class CheckinForm(FlaskForm):
     lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
     rate_age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     rate_mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
+    mbr_num = IntegerField('Membership Number')
+    mbr_num_exp = DateField('Membership Expiration Date')
     medallion = IntegerField('Medallion #', validators=[DataRequired()])
-    # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-    # minor_waiver = SelectField('Minor Waiver', validators=[NoneOf('-', message='You must select a Minor Form Validation')], choices=[('-','-'),('Signed by Parent/Guardian','Signed by Parent/Guardian'),('Medical Authorization Form Submitted','Medical Authorization Form Submitted')])
+    minor_waiver = SelectField('Minor Waiver', validators=[NoneOf('-', message='You must select a Minor Form Validation')], choices=[('-','-'),('Signed by Parent/Guardian','Signed by Parent/Guardian'),('Medical Authorization Form Submitted','Medical Authorization Form Submitted')])
+    notes = TextAreaField('Notes')
     submit = SubmitField('Submit')
 
 class EditForm(FlaskForm):
@@ -202,6 +205,7 @@ class EditForm(FlaskForm):
     onsite_contact_group = SelectField('Contact Group',choices=lodgingdata)
     offsite_contact_name = StringField('Name')
     offsite_contact_phone = StringField('Phone')
+    notes = TextAreaField('Notes')
 
     #mbr_exp
     submit = SubmitField('Submit')
@@ -217,6 +221,8 @@ class UpdateInvoiceForm(FlaskForm):
     invoice_payment_date = DateField('Invoice Payment Date')
     invoice_canceled = BooleanField('Invoice Canceled')
     duplicate_invoice = BooleanField('Duplicate Invoice')
+    is_check = BooleanField('Paid Via Check')
+    notes = TextAreaField('Notes')
     submit = SubmitField('Update Invoice')
 
 class SearchInvoiceForm(FlaskForm):
@@ -228,7 +234,7 @@ class SearchInvoiceForm(FlaskForm):
 
 class WaiverForm(FlaskForm):
     
-    paypal_donation = BooleanField('If you are paying via Paypal, please check here to donate $3 to cover your Paypal processing fees.',
+    paypal_donation = BooleanField('Please check here if you would like to donate $3 to cover payment processing fees.',
                                    render_kw={'id':'test'})
 
     signature = HiddenField(
