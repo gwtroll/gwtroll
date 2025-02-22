@@ -23,6 +23,8 @@ class User(UserMixin, db.Model):
 
     lname: so.Mapped[str] = so.mapped_column(sa.String(64))
 
+    medallion: so.Mapped[Optional[int]]
+
     active = db.Column(db.Boolean())
 
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
@@ -101,8 +103,7 @@ class Registrations(db.Model):
     onsite_contact_group: so.Mapped[Optional[str]] 
     offsite_contact_name: so.Mapped[Optional[str]] 
     offsite_contact_phone: so.Mapped[Optional[str]] 
-    # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-    # minor_waiver: so.Mapped[Optional[str]] 
+    minor_waiver: so.Mapped[Optional[str]] 
     requests: so.Mapped[Optional[str]] 
     checkin: so.Mapped[Optional[datetime]]
     medallion: so.Mapped[Optional[int]]
@@ -110,6 +111,8 @@ class Registrations(db.Model):
     prereg_date_time: so.Mapped[Optional[datetime]]
     royal_departure_date: so.Mapped[Optional[datetime]]
     royal_title: so.Mapped[Optional[str]]
+    nmr_donation: so.Mapped[Optional[int]]
+    notes = db.Column(db.Text)
     reg_date_time: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
 
