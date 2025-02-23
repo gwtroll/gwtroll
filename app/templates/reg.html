@@ -1,105 +1,121 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-    <table>
-        <colgroup>
-            <col span="1" style="background-color: #D6EEEE">
-        </colgroup>
-        <tr> 
-            <td>Name: </td>
-            <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
-        </tr>
-        <tr>
-            <td>SCA Name: </td>
-            <td>{{ reg['scaname'] }}</td>
-        </tr>
-        <tr>
-            <td>Registration ID: </td>
-            <td>{{ reg['regid'] }}</td>
-        </tr>
-        <tr>
-            <td>Pre-reg Order ID: </td>
-            <td>{{ reg['invoice_number'] }}</td>
-        </tr>
-        <tr>
-            <td>Age Range: </td>
-            <td>{{ reg['rate_age'] }}</td>
-        </tr>
-        <tr>
-            <td>Membership: </td>
-            <td>{{ reg['rate_mbr'] }}</td>
-        </tr>
-        <tr>
-            <td>Kingdom: </td>
-            <td>{{ reg['kingdom'] }}</td>
-        </tr>
-        <tr>
-            <td>Camp Group: </td>
-            <td>{{ reg['lodging'] }}</td>
-        </tr>
-        <tr>
-            <td>Onsite Emergency Contact: </td>
-            <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
-                <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
-                Group: {{ reg.onsite_contact_group }}</td>
-        </tr>
-        <tr>
-            <td>Offsite Emergency Contact: </td>
-            <td>{{ reg.offsite_contact_name }} <br>
-                Phone: {{ reg.offsite_contact_phone }} </td>
-        </tr>
-        <tr>
-            <td>Medallion Number: </td>
-            <td>{{ reg['medallion'] }}</td>
-        </tr>
-        <tr>
-            <td>Check-In Date: </td>
-            <td>{{ reg['checkin'] }}</td>
-        </tr>
-        <tr>
-            <td>Waiver Signature: </td>
-                      
-            <td><img src="{{ reg['signature'] }}"> </td>
-        
-        </tr>
-    </table>
-    <br>
-    <h5>Cost</h5>
-    <table>
-        <tr>
-            <th>Registration Price</th>
-            <th>PayPal Donation</th>
-            <th>Total Price</th>
-        </tr>
-        <tr>
-            {% if reg['nmr_donation'] %}
-            <td>{{ reg['price_calc'] + reg['nmr_donation'] }}</td>
-            <td>{{ reg['paypal_donation_amount'] }}</td>
-            <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] + reg['nmr_donation'] }}</td>
-            {% else %}
-            <td>{{ reg['price_calc'] }}</td>
-            <td>{{ reg['paypal_donation_amount'] }}</td>
-            <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] }}</td>
-            {% endif %}
-        </tr>
-        <h5>Cost - Breakdown</h5>
+<div class="row">
+    <div class="col">
         <table>
-            <tr>
-                <th>Prepaid</th>
-                {% if reg['atd_pay_type'] %}
-                <th>At the Door ({{reg['atd_pay_type'].upper()}})</th>
-                {% else %}
-                <th>At the Door</th>
-                {% endif %}
+            <colgroup>
+                <col span="1" style="background-color: #D6EEEE">
+            </colgroup>
+            <tr> 
+                <td>Name: </td>
+                <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
             </tr>
-            <br>
-            <h5>Payments Received</h5>
             <tr>
-                <td>{{ reg['price_paid'] }}</td>
-                <td>{{ reg['atd_paid'] }}</td>
+                <td>SCA Name: </td>
+                <td>{{ reg['scaname'] }}</td>
             </tr>
-    </table>
+            <tr>
+                <td>Registration ID: </td>
+                <td>{{ reg['regid'] }}</td>
+            </tr>
+            <tr>
+                <td>Pre-reg Order ID: </td>
+                <td>{{ reg['invoice_number'] }}</td>
+            </tr>
+            <tr>
+                <td>Age Range: </td>
+                <td>{{ reg['rate_age'] }}</td>
+            </tr>
+            <tr>
+                <td>Membership: </td>
+                <td>{{ reg['rate_mbr'] }}</td>
+            </tr>
+            <tr>
+                <td>Kingdom: </td>
+                <td>{{ reg['kingdom'] }}</td>
+            </tr>
+            <tr>
+                <td>Camp Group: </td>
+                <td>{{ reg['lodging'] }}</td>
+            </tr>
+            <tr>
+                <td>Onsite Emergency Contact: </td>
+                <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
+                    <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
+                    Group: {{ reg.onsite_contact_group }}</td>
+            </tr>
+            <tr>
+                <td>Offsite Emergency Contact: </td>
+                <td>{{ reg.offsite_contact_name }} <br>
+                    Phone: {{ reg.offsite_contact_phone }} </td>
+            </tr>
+        </table>
+    </div>
+    <div class="col">
+        <table>
+            <colgroup>
+                <col span="1" style="background-color: #D6EEEE">
+            </colgroup>
+            <tr>
+                <td>Medallion Number: </td>
+                <td>{{ reg['medallion'] }}</td>
+            </tr>
+            <tr>
+                <td>Check-In Date: </td>
+                <td>{{ reg['checkin'] }}</td>
+            </tr>
+            <tr>
+                <td>Waiver Signature: </td>
+                <td><img src="{{ reg['signature'] }}" style="height: 15a0px; width:300px"> </td>
+            </tr>
+        </table>
+    </div>
+</div>
+    <div class="row">
+        <div class="col">
+            <h5>Cost</h5>
+            <table>
+                <tr>
+                    <th>Registration Price</th>
+                    <th>PayPal Donation</th>
+                    <th>Total Price</th>
+                </tr>
+                <tr>
+                    {% if reg['nmr_donation'] %}
+                    <td>{{ reg['price_calc'] + reg['nmr_donation'] }}</td>
+                    <td>{{ reg['paypal_donation_amount'] }}</td>
+                    <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] + reg['nmr_donation'] }}</td>
+                    {% else %}
+                    <td>{{ reg['price_calc'] }}</td>
+                    <td>{{ reg['paypal_donation_amount'] }}</td>
+                    <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] }}</td>
+                    {% endif %}
+                </tr>
+                <h5>Cost - Breakdown</h5>
+                <table>
+                    <tr>
+                        <th>Prepaid</th>
+                        {% if reg['atd_pay_type'] %}
+                        <th>At the Door ({{reg['atd_pay_type'].upper()}})</th>
+                        {% else %}
+                        <th>At the Door</th>
+                        {% endif %}
+                    </tr>
+                    <br>
+                    <h5>Payments Received</h5>
+                    <tr>
+                        <td>{{ reg['price_paid'] }}</td>
+                        <td>{{ reg['atd_paid'] }}</td>
+                    </tr>
+            </table>
+        </div>
+        <div class="col">
+            <h5>Notes:</h5>
+            {{ reg['notes'] }}
+        </div>
+    </div>
+
     <br>
     {% if reg['atd_pay_type'] %}
     <h1 class="text-center" style="background-color: red; color: white;">{{reg['atd_pay_type'].upper()}} - ${{reg['atd_paid']}}</h1>

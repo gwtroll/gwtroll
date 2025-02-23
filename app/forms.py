@@ -70,7 +70,6 @@ class CreateUserForm(FlaskForm):
     lname = StringField('Last Name', validators=[DataRequired()])
     medallion = IntegerField('Medallion')
     password = PasswordField('Password', validators=[DataRequired()])
-    medallion = IntegerField('Medallion')
     submit = SubmitField('Submit')
 
 class CreateRoleForm(FlaskForm):
