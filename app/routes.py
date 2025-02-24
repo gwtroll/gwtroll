@@ -1,6 +1,6 @@
 from app import app, db, login
 from app.forms import *
-from app.models import Registrations, User, Role, UserRoles, RegLogs
+from app.models import *
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_from_directory, send_file
@@ -24,6 +24,8 @@ import codecs
 @login.unauthorized_handler
 def unauthorized_callback():
     return redirect('/login?next=' + request.path)
+from collections import namedtuple
+from sqlalchemy import or_, and_
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
@@ -83,12 +85,47 @@ def is_duplicate_invoice_number(invoice_number, reg):
         return False
     else:
         return True
+    
+def get_role_choices():
+    roles = get_roles()
+    role_choices = []
+    role_dict = {}
+    for r in roles:
+        role_dict[r.name] = r
+
+    if current_user.has_role('Admin'):
+        for r in roles:
+            role_choices.append([r.id, r.name])
+        return role_choices
+    
+    if current_user.has_role('Marshal Admin'):
+        role_choices.append([role_dict['Marshal User'].id,'Marshal User'])
+
+    if current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head'):
+        role_choices.append([role_dict['Troll User'].id,'Troll User'])
+    
+    if current_user.has_role('Department Head'):
+        role_choices.append([role_dict['Troll Shift Lead'].id,'Troll Shift Lead'])
+
+    return role_choices
+
+def currentuser_has_permission_on_user(cuser, user):
+    if cuser.has_role('Admin'):
+        return True
+    elif cuser.has_role('Marshal Admin') and user.has_role('Marshal User'):
+        return True
+    elif (cuser.has_role('Troll Shift Lead') or current_user.has_role('Department Head')) and user.has_role('Troll User'):
+        return True
+    elif current_user.has_role('Department Head') and user.has_role('Troll Shift Lead'):
+        return True
+    else:
+        return False
 
 def get_roles():
     roles = Role.query.all()
-    role_return = []
-    [role_return.append((role.id,role.name)) for role in roles]
-    return role_return
+    if roles is None:
+        abort(404)
+    return roles
 
 def get_user(userid):
     user = User.query.filter_by(id=userid).first()
@@ -108,6 +145,16 @@ def get_role(roleid):
         abort(404)
     return role
 
+def currentuser_has_permission_on_user(cuser, user):
+    if cuser.has_role('Admin'):
+        return True
+    elif cuser.has_role('Marshal Admin') and user.has_role('Marshal User'):
+        return True
+    elif cuser.has_role('Troll Shift Lead') and user.has_role('Troll User'):
+        return True
+    else:
+        return False
+
 def reg_count():
     conn= get_db_connection()
     cur = conn.cursor()
@@ -119,6 +166,45 @@ def reg_count():
     if regcount is None:
         abort(404)
     return regcount
+
+def get_inspection_stats():
+    inspection_stats = {}
+    inspections = MartialInspection.query.all()
+    ranged_inspections = Registrations.query.filter(or_(Registrations.crossbows != None, Registrations.bows != None)).all()
+
+    chivalric_inspections = 0
+    rapier_inspections = 0
+    combat_archery = 0
+    bow_inspections = 0
+    crossbow_inspections = 0
+    for i in inspections:
+
+        match i.inspection_type:
+            case 'Heavy':
+                chivalric_inspections += 1
+            case 'Heavy Spear':
+                chivalric_inspections += 1
+            case 'Rapier':
+                rapier_inspections += 1
+            case 'Rapier Spear':
+                rapier_inspections += 1
+            case 'Combat Archery':
+                combat_archery += 1
+
+    for i in ranged_inspections:
+        if i.bows:
+            bow_inspections += len(i.bows)
+        if i.crossbows:
+            crossbow_inspections += len(i.crossbows)
+
+    inspection_stats = {
+    'chivalric_inspections':chivalric_inspections, 
+    'rapier_inspections':rapier_inspections, 
+    'combat_archery_inspections':combat_archery,
+    'bow_inspections':bow_inspections, 
+    'crossbow_inspections':crossbow_inspections}
+    return inspection_stats
+
 
 def prereg_total():
     conn= get_db_connection()
@@ -290,6 +376,39 @@ def login():
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 
+@app.route('/martialhome', methods=['GET', 'POST'])
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def martialhome():
+    # inspection_stats = get_inspection_stats()
+    inspection_stats = None
+    if request.method == "POST":
+        print("SEARCHED")
+        if request.form.get('search_name'):
+            search_value = request.form.get('search_name')
+            print(search_value)
+            if search_value is not None and search_value != '':
+                reg = query_db(
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND checkin IS NOT NULL order by lname, fname",
+                    #(search_value, search_value, search_value))
+                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+        elif request.form.get('mbrnum_id'):
+            search_value = request.form.get('mbrnum_id')
+            reg = query_db(
+                "SELECT * FROM registrations WHERE mbr_num = %s AND checkin IS NOT NULL order by lname, fname",
+                (int(search_value),))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+        elif request.form.get('medallion'):
+            search_value = request.form.get('medallion')
+            reg = query_db(
+                "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
+                (search_value,))
+            return render_template('martial_home.html', searchreg=reg, inspection_stats=inspection_stats)
+        else:
+            return render_template('martial_home.html', inspection_stats=inspection_stats)
+    else:
+        return render_template('martial_home.html', inspection_stats=inspection_stats)
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -323,25 +442,28 @@ def changepassword():
 @login_required
 def index():
     regcount = reg_count()
+    print(request.method)
     if request.method == "POST":
+        print("SEARCHED")
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
+            print(search_value)
             if search_value is not None and search_value != '':
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
+                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
                     #(search_value, search_value, search_value))
                     ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('order_id'):
             search_value = request.form.get('order_id')
             reg = query_db(
-                "SELECT * FROM registrations WHERE order_id = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by lname, fname",
+                "SELECT * FROM registrations WHERE order_id = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by  checkin DESC, lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
             reg = query_db(
-                "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
+                "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
@@ -433,6 +555,7 @@ def updateinvoice(regid):
     form.invoice_payment_date.data = reg.invoice_payment_date
     form.duplicate_invoice.data = True if reg.invoice_status == 'DUPLICATE' else False
     form.is_check.data = True if reg.pay_type == 'check' else False
+    form.notes.data = reg.notes
     
     if request.method == 'POST':
         invoice_number = request.form.get('invoice_number')
@@ -474,6 +597,8 @@ def updateinvoice(regid):
             reg.pay_type = 'check'
         else:
             reg.pay_type = 'paypal'
+        
+        reg.notes = request.form.get('notes')
 
         db.session.commit()
 
@@ -509,30 +634,205 @@ def createrole():
         db.session.commit()
         return redirect('/')
     return render_template('createrole.html', form=form, roles=all_roles)
+    
+@app.route('/martial/<int:regid>/addbow', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_bow(regid):
+    reg = get_reg(regid)
+    form = BowForm()
+    if request.method == 'POST':
+        if request.form.get("poundage"):
+            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            bow = Bows()
+            bow.poundage = request.form.get("poundage")
+            bow.bow_inspection_martial_id = current_user.id
+            bow.bow_inspection_date = datetime.now()
+            if update_reg.bows:
+                update_reg.bows.append(bow)
+            else:
+                bows = []
+                bows.append(bow)
+                update_reg.bows = bows
+            db.session.commit()
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_bow.html', reg=reg, form=form)
+
+@app.route('/martial/<int:regid>/addcrossbow', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_crossbow(regid):
+    reg = get_reg(regid)
+    form = CrossBowForm()
+    if request.method == 'POST':
+        if request.form.get("inchpounds"):
+            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            print(request.form.get("inchpounds"))
+            crossbow = Crossbows()
+            crossbow.inchpounds = request.form.get("inchpounds")
+            crossbow.crossbow_inspection_martial_id = current_user.id
+            crossbow.crossbow_inspection_date = datetime.now()
+            if update_reg.crossbows:
+                update_reg.crossbows.append(crossbow)
+            else:
+                crossbows = []
+                crossbows.append(crossbow)
+                update_reg.crossbows = crossbows
+            db.session.commit()
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_crossbow.html', reg=reg, form=form)
+
+@app.route('/martial/<int:regid>/addincident', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def add_incident(regid):
+    reg = get_reg(regid)
+    form = IncidentForm()
+    if request.method == 'POST':
+        incident_date = request.form.get("incident_date")
+        notes = request.form.get("notes")
+
+        new_incident = IncidentReport(
+            regid = regid,
+            report_date = datetime.now(),
+            incident_date = incident_date,
+            reporting_user_id = current_user.id,
+            notes = notes
+        )
+
+        db.session.add(new_incident)
+        db.session.commit()
+
+        return redirect(url_for('martial_reg', regid=regid))
+    return render_template('add_crossbow.html', reg=reg, form=form)
+
+@app.route('/martial/<int:regid>', methods=('GET', 'POST'))
+@roles_accepted('Admin','Marshal Admin','Marshal User')
+def martial_reg(regid):
+    reg = get_reg(regid)
+    print(reg.incident_report)
+    form = MartialForm()
+    bow_form = BowForm()
+    incident_form = IncidentForm()
+    inspections = MartialInspection.query.filter(MartialInspection.regid == regid).all()
+    inspection_dict = {}
+    for inspection in inspections:
+        inspection_dict[inspection.inspection_type] = inspection
+        match inspection.inspection_type:
+            case 'Heavy':
+                form.chivalric_inspection.data = inspection.inspected
+            case 'Heavy Spear':
+                form.chivalric_spear_inspection.data = inspection.inspected
+            case 'Rapier':
+                form.rapier_inspection.data = inspection.inspected
+            case 'Rapier Spear':
+                form.rapier_spear_inspection.data = inspection.inspected
+            case 'Combat Archery':
+                form.combat_archery_inspection.data = inspection.inspected
+
+    if reg.bows:
+        for bow in reg.bows:
+            form.bows.append_entry(bow)
+    if reg.crossbows:
+        for crossbow in reg.crossbows:
+            form.crossbows.append_entry(crossbow)
+
+    if request.method == 'POST':
+        chivalric_inspection = request.form.get('chivalric_inspection')
+        chivalric_spear_inspection = request.form.get('chivalric_spear_inspection')
+        rapier_inspection = request.form.get('rapier_inspection')
+        rapier_spear_inspection = request.form.get('rapier_spear_inspection')
+        combat_archery_inspection = request.form.get('combat_archery_inspection')
+
+        if 'Heavy' not in inspection_dict and chivalric_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Heavy',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Heavy Spear' not in inspection_dict and chivalric_spear_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Heavy Spear',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Rapier' not in inspection_dict and rapier_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Rapier',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Rapier Spear' not in inspection_dict and rapier_spear_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Rapier Spear',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Combat Archery' not in inspection_dict and combat_archery_inspection:
+            new_inspection = MartialInspection(
+                regid = regid,
+                inspection_type = 'Combat Archery',
+                inspection_date = datetime.now(),
+                inspecting_martial_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+
+        db.session.commit()
+        return redirect(url_for('martial_reg',regid=regid))
+    return render_template('martial_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form)
 
 @app.route('/users', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
 def users():
+    return_users = []
     users = User.query.all()
-    return render_template('users.html', users=users)
+    if current_user.has_role('Admin'):
+        return render_template('users.html', users=users)
+    
+    for user in users:
+        if current_user.has_role('Marshal Admin') and user.has_role('Marshal User'):
+            return_users.append(user)
+
+        if (current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head')) and user.has_role('Troll User'):
+            return_users.append(user)
+        
+        if current_user.has_role('Department Head') and user.has_role('Troll Shift Lead'):
+            return_users.append(user)
+
+    return render_template('users.html', users=return_users)
 
 
 @app.route('/user/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
 def createuser():
 
     form = CreateUserForm()
-    form.role.choices = get_roles()
+    form.role.choices = get_role_choices()
     
     if request.method == 'POST':
+        dup_user_check = User.query.filter(User.username == form.username.data).first()
+        if dup_user_check:
+            flash("Username Already Taken - Please Try Again")
+            return render_template('createuser.html', form=form)
         user = User()
         user.username = form.username.data
         for roleid in form.role.data:
             user.roles.append(get_role(roleid))
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.medallion = form.medallion.data
         user.fs_uniquifier = uuid.uuid4().hex
         user.active = True
         user.set_password(form.password.data)
@@ -547,9 +847,13 @@ def createuser():
 
 @app.route('/user', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
 def edituser():
     user = get_user(request.args.get("userid"))
+    if not currentuser_has_permission_on_user(current_user,user):
+        return redirect('/users')
+    if not currentuser_has_permission_on_user(current_user,user):
+        return redirect('/users')
     edit_request = request.args.get("submitValue")
     if edit_request == "Edit" :
         role_array = []
@@ -561,9 +865,10 @@ def edituser():
             role = role_array,
             fname = user.fname,
             lname = user.lname,
+            medallion = user.medallion,
             active = user.active
         )
-        form.role.choices = get_roles()
+        form.role.choices = get_role_choices()
         
     elif edit_request == "Password Reset":
         form = UpdatePasswordForm(
@@ -581,6 +886,8 @@ def edituser():
         user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data
+        user.medallion = form.medallion.data
+        user.medallion = form.medallion.data
         user.active = bool(request.form.get('active'))
 
         db.session.commit()
@@ -770,6 +1077,11 @@ def create():
         else:
             reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
 
+        if form.rate_mbr == 'Member':
+            if form.mbr_num_exp.data < datetime.now().date():
+                flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data))
+                return render_template('create.html', title = 'New Registration', form=form)
+
         db.session.add(reg)
         db.session.commit()
 
@@ -822,7 +1134,8 @@ def editreg():
         onsite_contact_kingdom = reg.onsite_contact_kingdom,
         onsite_contact_group = reg.onsite_contact_group,
         offsite_contact_name = reg.offsite_contact_name,
-        offsite_contact_phone = reg.offsite_contact_phone
+        offsite_contact_phone = reg.offsite_contact_phone,
+        notes = reg.notes
     )
 
     if reg.rate_date != None:
@@ -837,79 +1150,113 @@ def editreg():
 
     if request.method == 'POST':
 
-        if request.form.get('medallion') != '' and request.form.get('medallion') != None:
-            medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+        if current_user.has_role('Troll Shift Lead'):
+            reg.notes = request.form.get('notes')
+            if request.form.get('medallion') != '' and request.form.get('medallion') != None:
+                medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+            else:
+                medallion_check = None
+
+            if medallion_check is not None and int(regid) != int(medallion_check.regid):
+                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
+                dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+                flash(Markup(dup_url))
+            else:
+                if request.form.get('medallion'):
+                    reg.medallion = int(request.form.get('medallion'))
+                else: reg.medallion = None
+
+                reg.rate_mbr = request.form.get('rate_mbr')
+                if request.form.get('mbr_num'):
+                    reg.mbr_num = int(request.form.get('mbr_num'))
+                else: reg.mbr_num = None
+
+                if request.form.get('mbr_num_exp'):
+                    reg.mbr_num_exp = request.form.get('mbr_num_exp')
+
+                db.session.commit()
+
+                log_reg_action(reg, 'EDIT')
+
+                return redirect(url_for('reg',regid=regid))
+            
         else:
-            medallion_check = None
 
-        if medallion_check is not None and int(regid) != int(medallion_check.regid):
-            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
-            dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-            flash(Markup(dup_url))
+            reg.notes = request.form.get('notes')
 
-        else:
-            reg.fname = request.form.get('fname')
-            reg.lname = request.form.get('lname')
-            reg.scaname = request.form.get('scaname')
-            reg.city = request.form.get('city')
-            reg.state_province = request.form.get('state_province')
-            if request.form.get('zip'):
-                reg.zip = int(request.form.get('zip'))
-            else: reg.zip = None
-            reg.country = request.form.get('country')
-            reg.phone = request.form.get('phone')
-            reg.email = request.form.get('email')
-            reg.invoice_email = request.form.get('invoice_email')
-            reg.kingdom = request.form.get('kingdom')
-            reg.lodging = request.form.get('lodging')
-            reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d') if request.form.get('rate_date') != '' else None
-            reg.rate_age = request.form.get('rate_age')
-            reg.rate_mbr = request.form.get('rate_mbr')
-            if request.form.get('medallion'):
-                reg.medallion = int(request.form.get('medallion'))
-            else: reg.medallion = None
-            if request.form.get('atd_paid'):
-                reg.atd_paid = int(request.form.get('atd_paid'))
-            else: reg.atd_paid = 0
-            if request.form.get('price_paid'):
-                reg.price_paid = int(request.form.get('price_paid'))
-            else: reg.price_paid =  0
-            if request.form.get('pay_type') == '' or request.form.get('pay_type') == None:
-                reg.atd_pay_type = None
-            else: reg.atd_pay_type = request.form.get('pay_type')
-            if request.form.get('price_calc'):
-                reg.price_calc = int(request.form.get('price_calc'))
-            else: reg.price_calc = 0
-            if request.form.get('price_due'):
-                reg.price_due = int(request.form.get('price_due'))
-            else: reg.price_due = 0
-            reg.paypal_donation = bool(request.form.get('paypal_donation'))
-            if request.form.get('paypal_donation_amount'):
-                reg.paypal_donation_amount = int(request.form.get('paypal_donation_amount'))
-            else: reg.paypal_donation_amount = 0
-            reg.prereg_status = request.form.get('prereg_status')
-            reg.early_on = bool(request.form.get('early_on'))
-            if request.form.get('mbr_num'):
-                reg.mbr_num = int(request.form.get('mbr_num'))
-            else: reg.mbr_num = None
-            if request.form.get('mbr_num_exp'):
-                reg.mbr_num_exp = request.form.get('mbr_num_exp')
-            reg.onsite_contact_name = request.form.get('onsite_contact_name')
-            reg.onsite_contact_sca_name = request.form.get('onsite_contact_sca_name')
-            reg.onsite_contact_kingdom = request.form.get('onsite_contact_kingdom')
-            reg.onsite_contact_group = request.form.get('onsite_contact_group')
-            reg.offsite_contact_name = request.form.get('offsite_contact_name')
-            reg.offsite_contact_phone = request.form.get('offsite_contact_phone') 
+            if request.form.get('medallion') != '' and request.form.get('medallion') != None:
+                medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+            else:
+                medallion_check = None
 
-            reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
-            if reg.price_due < 0:  #Account for people who showed up late.  No refund.
-                reg.price_due = 0
+            if medallion_check is not None and int(regid) != int(medallion_check.regid):
+                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
+                dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+                flash(Markup(dup_url))
 
-            db.session.commit()
+            else:
+                reg.fname = request.form.get('fname')
+                reg.lname = request.form.get('lname')
+                reg.scaname = request.form.get('scaname')
+                reg.city = request.form.get('city')
+                reg.state_province = request.form.get('state_province')
+                if request.form.get('zip'):
+                    reg.zip = int(request.form.get('zip'))
+                else: reg.zip = None
+                reg.country = request.form.get('country')
+                reg.phone = request.form.get('phone')
+                reg.email = request.form.get('email')
+                reg.invoice_email = request.form.get('invoice_email')
+                reg.kingdom = request.form.get('kingdom')
+                reg.lodging = request.form.get('lodging')
+                reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d') if (request.form.get('rate_date') != '' and request.form.get('rate_date')) else None
+                reg.rate_age = request.form.get('rate_age')
+                reg.rate_mbr = request.form.get('rate_mbr')
+                if request.form.get('medallion'):
+                    reg.medallion = int(request.form.get('medallion'))
+                else: reg.medallion = None
+                if request.form.get('atd_paid'):
+                    reg.atd_paid = int(request.form.get('atd_paid'))
+                else: reg.atd_paid = 0
+                if request.form.get('price_paid'):
+                    reg.price_paid = int(request.form.get('price_paid'))
+                else: reg.price_paid =  0
+                if request.form.get('pay_type') == '' or request.form.get('pay_type') == None:
+                    reg.atd_pay_type = None
+                else: reg.atd_pay_type = request.form.get('pay_type')
+                if request.form.get('price_calc'):
+                    reg.price_calc = int(request.form.get('price_calc'))
+                else: reg.price_calc = 0
+                if request.form.get('price_due'):
+                    reg.price_due = int(request.form.get('price_due'))
+                else: reg.price_due = 0
+                reg.paypal_donation = bool(request.form.get('paypal_donation'))
+                if request.form.get('paypal_donation_amount'):
+                    reg.paypal_donation_amount = int(request.form.get('paypal_donation_amount'))
+                else: reg.paypal_donation_amount = 0
+                reg.prereg_status = request.form.get('prereg_status')
+                reg.early_on = bool(request.form.get('early_on'))
+                if request.form.get('mbr_num'):
+                    reg.mbr_num = int(request.form.get('mbr_num'))
+                else: reg.mbr_num = None
+                if request.form.get('mbr_num_exp'):
+                    reg.mbr_num_exp = request.form.get('mbr_num_exp')
+                reg.onsite_contact_name = request.form.get('onsite_contact_name')
+                reg.onsite_contact_sca_name = request.form.get('onsite_contact_sca_name')
+                reg.onsite_contact_kingdom = request.form.get('onsite_contact_kingdom')
+                reg.onsite_contact_group = request.form.get('onsite_contact_group')
+                reg.offsite_contact_name = request.form.get('offsite_contact_name')
+                reg.offsite_contact_phone = request.form.get('offsite_contact_phone') 
 
-            log_reg_action(reg, 'EDIT')
+                reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
+                if reg.price_due < 0:  #Account for people who showed up late.  No refund.
+                    reg.price_due = 0
 
-            return redirect(url_for('reg',regid=regid))
+                db.session.commit()
+
+                log_reg_action(reg, 'EDIT')
+
+                return redirect(url_for('reg',regid=regid))
 
     return render_template('editreg.html', regid=reg.regid, reg=reg, form=form)
 
@@ -922,7 +1269,7 @@ def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
 
-    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age)
+    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age, lodging = reg.lodging, notes=reg.notes, mbr_num=reg.mbr_num, mbr_num_exp=datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d'))
     price_paid = reg.price_paid
     price_calc = reg.price_calc
     kingdom = reg.kingdom
@@ -938,12 +1285,17 @@ def checkin():
     #Check for medallion number    
 
     if request.method == 'POST':
+        print(form.rate_mbr)
+        if form.rate_mbr.data == 'Member':
+            print(form.mbr_num_exp.data)
+            if form.mbr_num_exp.data < datetime.now().date():
+                flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data))
+                return render_template('checkin.html', reg=reg, form=form)
         medallion = form.medallion.data
         kingdom = form.kingdom.data
         rate_mbr = form.rate_mbr.data
-        rate_age = form.rate_age.data
-        # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-        # minor_waiver = form.minor_waiver.data
+        lodging = form.lodging.data
+        minor_waiver = form.minor_waiver.data
         
         # if rate_age is not None:
         #     print("Pricing Start")
@@ -998,8 +1350,9 @@ def checkin():
         #         price_calc = 0
 
         # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-        # if form.minor_waiver.data == '-':
-        #     flash('You must select a Minor Waiver Validation')
+        if form.minor_waiver.data == '-':
+            flash('You must select a Minor Waiver Validation')
+            return render_template('checkin.html', reg=reg, form=form)
 
         if request.form.get('medallion') != '' and request.form.get('medallion') != None:
             medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
@@ -1011,14 +1364,23 @@ def checkin():
             dup_url = '<a href=' + url_for('reg', regid=str(medallion_check.regid)) + f' target="_blank" rel="noopener noreferrer">{duplicate_name}</a>'
             flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " +  Markup(dup_url))
         else:
+            #Account for PreReg Non-Member and Checkin Member (No NMR Refund - View as Donation)
+            if reg.rate_mbr != 'Member' and rate_mbr == 'Member' and reg.prereg_status == 'SUCCEEDED' and reg.rate_age.__contains__('18+'):
+                nmr_donation = 10
+            else:
+                nmr_donation = 0
             reg.medallion = medallion
             reg.rate_mbr = rate_mbr
             reg.rate_age = rate_age
             reg.kingdom = kingdom
             # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-            # reg.minor_waiver = minor_waiver
+            reg.minor_waiver = minor_waiver
+            reg.lodging = lodging
             reg.checkin = datetime.today()
             reg.price_calc = calculate_price_calc(reg)
+            reg.nmr_donation = nmr_donation
+            reg.notes = form.notes.data
+
             #Calculate Price Due
             if price_paid > price_calc + reg.paypal_donation_amount:  #Account for people who showed up late.  No refund.
                 reg.price_due = 0
@@ -1028,7 +1390,6 @@ def checkin():
 
             db.session.commit()
 
-            print(reg)
             log_reg_action(reg, 'CHECKIN')
 
             return redirect(url_for('reg', regid=regid))
@@ -1412,18 +1773,17 @@ def reports():
         df.to_csv(path1)
         return send_file(path2)
 
-    # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-    # if report_type == 'minor_waivers':
-    #     file = 'minor_waivers_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+    if report_type == 'minor_waivers':
+        file = 'minor_waivers_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-    #     rptquery = "SELECT regid, fname, lname, minor_waiver FROM registrations WHERE minor_waiver IS NOT NULL"
-    #     df = pd.read_sql_query(rptquery, engine)
+        rptquery = "SELECT regid, fname, lname, minor_waiver FROM registrations WHERE minor_waiver IS NOT NULL"
+        df = pd.read_sql_query(rptquery, engine)
 
-    #     path1 = './reports/' + file
-    #     path2 = '../reports/' + file
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
         
-    #     df.to_csv(path1)
-    #     return send_file(path2)
+        df.to_csv(path1)
+        return send_file(path2)
 
     return render_template('reports.html', form=form)
     

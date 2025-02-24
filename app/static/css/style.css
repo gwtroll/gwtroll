@@ -141,3 +141,19 @@ mso-footer-margin:.5in;
 mso-paper-source:0;}
 div.WordSection1
 {page:WordSection1;}
+
+.vh-50 {
+    height: 50vh;
+  }
+
+.vh-75 {
+    height: 75vh;
+  }
+
+.minw-50 {
+    min-width: 50px;
+}
+
+.minw-100 {
+    min-width: 100px;
+}

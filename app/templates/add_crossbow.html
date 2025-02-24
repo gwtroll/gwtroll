@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                New Crossbow
+                <form action="/martial/{{reg.regid}}/addcrossbow" method="POST">
+                    {{form.inchpounds.label}}
+                    {{form.inchpounds}}
+                    {{form.submit}}
+                </form>
+            </div>
+        </div>
+        
+{% endblock %}

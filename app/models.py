@@ -23,6 +23,8 @@ class User(UserMixin, db.Model):
 
     lname: so.Mapped[str] = so.mapped_column(sa.String(64))
 
+    medallion = db.Column(db.Integer())
+
     active = db.Column(db.Boolean())
 
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
@@ -40,11 +42,14 @@ class User(UserMixin, db.Model):
         else:
             return check_password_hash(self.password_hash, password)
 
+
 #Role Data Model
 class Role(db.Model, RoleMixin):
     __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
+    def __repr__(self):
+        return '<Role {}>'.format(self.name)
     
 #UserRoles association table
 class UserRoles(db.Model):
@@ -101,8 +106,7 @@ class Registrations(db.Model):
     onsite_contact_group: so.Mapped[Optional[str]] 
     offsite_contact_name: so.Mapped[Optional[str]] 
     offsite_contact_phone: so.Mapped[Optional[str]] 
-    # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
-    # minor_waiver: so.Mapped[Optional[str]] 
+    minor_waiver: so.Mapped[Optional[str]] 
     requests: so.Mapped[Optional[str]] 
     checkin: so.Mapped[Optional[datetime]]
     medallion: so.Mapped[Optional[int]]
@@ -110,8 +114,14 @@ class Registrations(db.Model):
     prereg_date_time: so.Mapped[Optional[datetime]]
     royal_departure_date: so.Mapped[Optional[datetime]]
     royal_title: so.Mapped[Optional[str]]
+    nmr_donation: so.Mapped[Optional[int]]
+    notes = db.Column(db.Text)
     reg_date_time: so.Mapped[datetime] = so.mapped_column(
         index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
+    bows = db.relationship('Bows', secondary='reg_bows')
+    crossbows = db.relationship('Crossbows', secondary='reg_crossbows')
+    martial_inspections = db.relationship('MartialInspection', backref='registrations')
+    incident_report = db.relationship('IncidentReport', backref='registrations')
 
     def __repr__(self):
         return '<Registrations {}>'.format(self.regid)
@@ -123,3 +133,55 @@ class RegLogs(db.Model):
     userid = db.Column(db.Integer(), db.ForeignKey('users.id'))
     timestamp = db.Column(db.DateTime())
     action = db.Column(db.String())
+
+class MartialInspection(db.Model):
+    __tablename__ = 'martial_inspection' 
+    id = db.Column(db.Integer(), primary_key=True)
+    regid = db.Column(db.Integer, db.ForeignKey('registrations.regid'))
+    inspection_type = db.Column(db.String())
+    inspection_date = db.Column(db.DateTime())
+    inspecting_martial_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    inspecting_martial = db.relationship('User', foreign_keys=[inspecting_martial_id])
+    inspected = db.Column(db.Boolean())
+
+class Bows(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    poundage = db.Column(db.Double())
+    bow_inspection_date: so.Mapped[Optional[datetime]]
+    bow_inspection_martial_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    bow_inspection_martial = db.relationship('User', foreign_keys=[bow_inspection_martial_id])
+
+    def __repr__(self):
+        return '<Bow {}>'.format(self.id)
+    
+class RegBows(db.Model):
+    __tablename__ = 'reg_bows'
+    id = db.Column(db.Integer(), primary_key=True)
+    regid = db.Column(db.Integer(), db.ForeignKey('registrations.regid', ondelete='CASCADE'))
+    bowid = db.Column(db.Integer(), db.ForeignKey('bows.id', ondelete='CASCADE'))
+    
+class Crossbows(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    inchpounds = db.Column(db.Double())
+    crossbow_inspection_date: so.Mapped[Optional[datetime]]
+    crossbow_inspection_martial_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    crossbow_inspection_martial = db.relationship('User', foreign_keys=[crossbow_inspection_martial_id])
+
+    def __repr__(self):
+        return '<CrossBow {}>'.format(self.id)
+    
+class RegCrossBows(db.Model):
+    __tablename__ = 'reg_crossbows'
+    id = db.Column(db.Integer(), primary_key=True)
+    regid = db.Column(db.Integer(), db.ForeignKey('registrations.regid', ondelete='CASCADE'))
+    crossbowid = db.Column(db.Integer(), db.ForeignKey('crossbows.id', ondelete='CASCADE'))
+
+class IncidentReport(db.Model):
+    __tablename__ = 'incidentreport'
+    id = db.Column(db.Integer(), primary_key=True)
+    regid = db.Column(db.Integer, db.ForeignKey('registrations.regid'))
+    report_date = db.Column(db.DateTime())
+    incident_date = db.Column(db.DateTime())
+    reporting_user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    reporting_user = db.relationship('User', foreign_keys=[reporting_user_id])
+    notes = db.Column(db.Text())

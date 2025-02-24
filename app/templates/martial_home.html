@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col">
+        <h1>{% block title %} Search for Marshal Registration {% endblock %}</h1>
+    </div>
+</div>
+{% if inspection_stats %}
+<div class="row">
+        <div class="col">
+            <h4>Rapier Inspections: {{inspection_stats.rapier_inspections}}</h4>
+        </div>
+        <div class="col">
+            <h4>Heavy Inspections: {{inspection_stats.chivalric_inspections}}</h4>
+        </div>
+        <div class="col">
+            <h4>Comabt Archery Inspections: {{inspection_stats.combat_archery_inspections}}</h4>
+        </div>
+        <div class="col">
+            <h4>Bows: {{inspection_stats.bow_inspections}}</h4>
+        </div>
+        <div class="col">
+            <h4>Crossbows: {{inspection_stats.crossbow_inspections}}</h4>
+        </div>
+</div>
+{% endif %}
+<div class="row">
+    <div class="col">
+        <form action="/martialhome" method="POST">
+                <!-- Search -->
+                <div class="mb-5">
+                    <input class="form-control py-2"
+                        placeholder="Name" name="search_name" value=""/>
+                </div>
+                <!-- Search -->
+                <div class="mb-5">
+                    <input class="form-control py-2"
+                        placeholder="Member #" name="mbrnum_id" value=""/>
+                </div>
+                <!-- Search -->
+                <div class="mb-5">
+                    <input class="form-control py-2"
+                        placeholder="Medallion Number" name="medallion" value=""/>
+                </div>
+                <button type="submit" class="btn btn-secondary form-control">Search
+                </button>
+        </form>
+    </div>
+    <div class="col">
+    {% if searchreg %}
+        <div class="overflow-auto vh-50">
+        {% for reg in searchreg %}
+            <a href="{{ url_for('martial_reg', regid=reg['regid']) }}">
+            <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
+            </a>
+            <div>
+                <p class="text-muted">{{ reg['scaname'] }}</p>
+            </div>
+            <hr>
+        {% endfor %}
+        </div>
+    {% endif %}
+    </div>
+</div>
+</body>
+</html>
+
+{% endblock %}
