@@ -1729,7 +1729,7 @@ def reports():
                     else:
                         expected_fee = 0.00
                     counts_obj[obj]['expected_fee'] = expected_fee
-                    if counts_obj[obj]['price_paid'] != counts_obj[obj]['Gross'] and counts_obj[obj]['price_paid'] != 0:
+                    if counts_obj[obj]['price_paid'] != counts_obj[obj]['Gross']:
                         errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj]['Gross'],'Export':counts_obj[obj]['price_paid'],'Email':counts_obj[obj]['From Email Address']})
                     if expected_fee != counts_obj[obj]['Fee']:
                         errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee,'Email':counts_obj[obj]['From Email Address']})
