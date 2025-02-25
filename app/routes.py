@@ -20,6 +20,7 @@ import uuid
 import json
 import csv
 import codecs
+import requests
 
 @login.unauthorized_handler
 def unauthorized_callback():
@@ -711,6 +712,12 @@ def martial_reg(regid):
     form = MartialForm()
     bow_form = BowForm()
     incident_form = IncidentForm()
+    url = "https://amp-uat.ansteorra.org/activities/authorizations/getMemberAuthorizations/jhandel@gmail.com"
+    headers = {
+                'Authorization': 'gw_gate|giE36JsEazhckMdFCbYfE9pgdTNLE9hdp8T2ZMgwTgFUZXAUyi'
+                }
+    response = requests.request("GET", url, headers=headers)
+    fighter_auth = response.json()
     inspections = MartialInspection.query.filter(MartialInspection.regid == regid).all()
     inspection_dict = {}
     for inspection in inspections:
@@ -789,7 +796,7 @@ def martial_reg(regid):
 
         db.session.commit()
         return redirect(url_for('martial_reg',regid=regid))
-    return render_template('martial_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form)
+    return render_template('martial_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form, fighter_auth=fighter_auth)
 
 @app.route('/users', methods=('GET', 'POST'))
 @login_required
