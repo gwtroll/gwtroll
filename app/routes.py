@@ -593,7 +593,7 @@ def updateinvoice(regid):
 
         reg.price_due = (price_calc + reg.paypal_donation_amount) - price_paid
 
-        if form.is_check.data:
+        if bool(request.form.get('is_check')) == True:
             reg.pay_type = 'check'
         else:
             reg.pay_type = 'paypal'
@@ -1764,6 +1764,9 @@ def reports():
                         row['base_price'] = row['price_paid'] - row['paypal_donation_amount']
                         row['nmr'] = 0
                     row['paypal_match'] = paypal_invoice_num
+                    row['Gross'] = counts_obj[paypal_invoice_num]['Gross']
+                    row['Fee'] = counts_obj[paypal_invoice_num]['Fee']
+                    row['Net'] = counts_obj[paypal_invoice_num]['Net']
                     unmatched_invoices.append(row)
         
 
