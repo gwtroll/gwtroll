@@ -55,10 +55,6 @@
                             <td><img src="{{ reg['signature'] }}" class="img-fluid"></td>
                         
                         </tr>
-                        <tr>
-                            <td>Fighter Authorizations: </td>
-                            <td>{{ fighter_auth }}</td>
-                        </tr>
                     </tbody>
                 </table>
                 <div class="row d-flex justify-content-center">
@@ -92,6 +88,28 @@
                 </div>
             </div>
             <div class="col">
+                {% if fighter_auth %}
+                <div class="row">
+                    <h5>Fighter Authorizations (AMP)</h5>
+                    <table class="table">
+                        <thead>
+                            
+                            <th>Type</th>
+                            <th>Desc : Exp. Date</th>
+                        </thead>
+                        <tbody>
+                            {% for auth_type in fighter_auth['Authorizations'] %}
+                            {% for auth in fighter_auth['Authorizations'][auth_type] %}
+                            <tr>
+                                <td>{{ auth_type }}</td>
+                                <td>{{ auth }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
                 <div class="row d-flex justify-content-center">
                     <form action="/martial/{{reg.regid}}" method="POST">
                         <table>

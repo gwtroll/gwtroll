@@ -712,12 +712,17 @@ def martial_reg(regid):
     form = MartialForm()
     bow_form = BowForm()
     incident_form = IncidentForm()
-    url = "https://amp-uat.ansteorra.org/activities/authorizations/getMemberAuthorizations/jhandel@gmail.com"
+    # url = "https://amp-uat.ansteorra.org/activities/authorizations/getMemberAuthorizations/jhandel@gmail.com"
+    url = f"https://amp-uat.ansteorra.org/activities/authorizations/getMemberAuthorizations/{reg.email}"
     headers = {
                 'Authorization': 'gw_gate|giE36JsEazhckMdFCbYfE9pgdTNLE9hdp8T2ZMgwTgFUZXAUyi'
                 }
     response = requests.request("GET", url, headers=headers)
-    fighter_auth = response.json()
+    if response.status_code == 200:
+        fighter_auth = response.json()
+    else:
+        fighter_auth = None
+    print(response.status_code)
     inspections = MartialInspection.query.filter(MartialInspection.regid == regid).all()
     inspection_dict = {}
     for inspection in inspections:
