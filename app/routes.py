@@ -661,13 +661,16 @@ def add_bow(regid):
 @roles_accepted('Admin','Marshal Admin','Marshal User')
 def add_crossbow(regid):
     reg = get_reg(regid)
-    form = CrossBowForm()
+    form = BowForm()
     if request.method == 'POST':
-        if request.form.get("inchpounds"):
+        print('POSTED')
+        if request.form.get("poundage"):
+            print('Poundage')
+            print(request.form.get("poundage"))
             update_reg = Registrations.query.filter_by(regid=reg.regid).first()
-            print(request.form.get("inchpounds"))
+            print(request.form.get("poundage"))
             crossbow = Crossbows()
-            crossbow.inchpounds = request.form.get("inchpounds")
+            crossbow.inchpounds = request.form.get("poundage")
             crossbow.crossbow_inspection_martial_id = current_user.id
             crossbow.crossbow_inspection_date = datetime.now()
             if update_reg.crossbows:
@@ -676,6 +679,7 @@ def add_crossbow(regid):
                 crossbows = []
                 crossbows.append(crossbow)
                 update_reg.crossbows = crossbows
+            print('YEP')
             db.session.commit()
         return redirect(url_for('martial_reg', regid=regid))
     return render_template('add_crossbow.html', reg=reg, form=form)

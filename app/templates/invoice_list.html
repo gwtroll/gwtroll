@@ -26,76 +26,79 @@
   <option value="DUPLICATE">DUPLICATE</option>
 </select>
 {% endif %}
-
-<table id="invoiceTable" class="table table-striped">
-    <thread>
-        <tr>
-            <th>Invoice Number</th>
-            <th>Invoice Date</th>
-            <th>Email</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            {% if back == 'all' %}
-            <th>Status</th>
-            <th>Age Range</th>
-            <th>Invoice Amount</th>
-            <th>Amount Paid</th>
-            {% endif %}
-            <th>Update</th>
-        </tr>
-    </thread>
-    <tbody>
-      {% if regs %}
-        {%for reg in regs %}
-        <tr>
-            <form action="/invoice/{{reg.regid}}" method="GET">
-                <td style="display: none;">
-                    <input type="hidden" name="back" id="back" value="{{back}}">{{back}}
-                </td>
-                <td> 
-                    {{reg.invoice_number}}
-                </td>
-                {% if reg.invoice_date %}
-                <td> 
-                    {{reg.invoice_date.strftime('%m-%d-%Y')}}
-                </td>
-                {% else %}
-                <td> 
-                  None
-                </td>
-                {% endif %}
-                <td> 
-                    {{reg.invoice_email}}
-                </td>
-                <td> 
-                    {{reg.fname}}
-                </td>
-                <td> 
-                    {{reg.lname}}
-                </td>
-                {% if back == 'all' %}
-                <td> 
-                  {{reg.invoice_status}}
-                </td>
-                <td>
-                  {{reg.rate_age}}
-                </td>
-                <td> 
-                  {{reg.price_calc + reg.paypal_donation_amount}}
-                </td>
-                <td> 
-                  {{reg.price_paid}}
-                </td>
-                {% endif %}
-                <td>
-                    <input class="form__submit form__input" type="Submit" value="Update"/>
-                </td>
-            </form>
-        </tr>
-        {% endfor %}
-        {% endif %}
-    </tbody>
-</table>
+<div class="row">
+  <div class="col">
+    <table id="invoiceTable" class="table table-striped table-reg table-responsive">
+      <thead>
+          <tr>
+              <th>Invoice Number</th>
+              <th>Invoice Date</th>
+              <th>Email</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              {% if back == 'all' %}
+              <th>Status</th>
+              <th>Age Range</th>
+              <th>Invoice Amount</th>
+              <th>Amount Paid</th>
+              {% endif %}
+              <th>Update</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% if regs %}
+          {%for reg in regs %}
+          <tr>
+              <form action="/invoice/{{reg.regid}}" method="GET">
+                  <td style="display: none;">
+                      <input type="hidden" name="back" id="back" value="{{back}}">{{back}}
+                  </td>
+                  <td> 
+                      {{reg.invoice_number}}
+                  </td>
+                  {% if reg.invoice_date %}
+                  <td> 
+                      {{reg.invoice_date.strftime('%m-%d-%Y')}}
+                  </td>
+                  {% else %}
+                  <td> 
+                    None
+                  </td>
+                  {% endif %}
+                  <td> 
+                      {{reg.invoice_email}}
+                  </td>
+                  <td> 
+                      {{reg.fname}}
+                  </td>
+                  <td> 
+                      {{reg.lname}}
+                  </td>
+                  {% if back == 'all' %}
+                  <td> 
+                    {{reg.invoice_status}}
+                  </td>
+                  <td>
+                    {{reg.rate_age}}
+                  </td>
+                  <td> 
+                    {{reg.price_calc + reg.paypal_donation_amount}}
+                  </td>
+                  <td> 
+                    {{reg.price_paid}}
+                  </td>
+                  {% endif %}
+                  <td>
+                      <input class="form__submit form__input" type="Submit" value="Update"/>
+                  </td>
+              </form>
+          </tr>
+          {% endfor %}
+          {% endif %}
+      </tbody>
+  </table>
+  </div>
+</div>
 <script>
     function searchEmailFunction() {
       // Declare variables

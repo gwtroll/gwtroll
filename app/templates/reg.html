@@ -3,79 +3,89 @@
 {% block content %}
 <div class="row">
     <div class="col">
-        <table>
+        <table class="table table-reg table-responsive">
             <colgroup>
                 <col span="1" style="background-color: #D6EEEE">
             </colgroup>
+        <tbody>
             <tr> 
-                <td>Name: </td>
+                <th style="background-color: #D6EEEE">Name: </th>
                 <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
             </tr>
             <tr>
-                <td>SCA Name: </td>
+                <th style="background-color: #D6EEEE">SCA Name: </th>
                 <td>{{ reg['scaname'] }}</td>
             </tr>
             <tr>
-                <td>Registration ID: </td>
+                <th style="background-color: #D6EEEE">Registration ID: </th>
                 <td>{{ reg['regid'] }}</td>
             </tr>
             <tr>
-                <td>Pre-reg Order ID: </td>
+                <th style="background-color: #D6EEEE">Pre-reg Order ID: </th>
                 <td>{{ reg['invoice_number'] }}</td>
             </tr>
             <tr>
-                <td>Age Range: </td>
+                <th style="background-color: #D6EEEE">Age Range: </th>
                 <td>{{ reg['rate_age'] }}</td>
             </tr>
             <tr>
-                <td>Membership: </td>
+                <th style="background-color: #D6EEEE">Membership: </th>
                 <td>{{ reg['rate_mbr'] }}</td>
             </tr>
             <tr>
-                <td>Kingdom: </td>
+                <th style="background-color: #D6EEEE">Kingdom: </th>
                 <td>{{ reg['kingdom'] }}</td>
             </tr>
             <tr>
-                <td>Camp Group: </td>
+                <th style="background-color: #D6EEEE">Camp Group: </th>
                 <td>{{ reg['lodging'] }}</td>
             </tr>
             <tr>
-                <td>Onsite Emergency Contact: </td>
+                <th style="background-color: #D6EEEE">Onsite Emergency Contact: </th>
                 <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
                     <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
                     Group: {{ reg.onsite_contact_group }}</td>
             </tr>
             <tr>
-                <td>Offsite Emergency Contact: </td>
+                <th style="background-color: #D6EEEE">Offsite Emergency Contact: </th>
                 <td>{{ reg.offsite_contact_name }} <br>
                     Phone: {{ reg.offsite_contact_phone }} </td>
             </tr>
+        </tbody>
         </table>
     </div>
     <div class="col">
-        <table>
-            <colgroup>
-                <col span="1" style="background-color: #D6EEEE">
-            </colgroup>
-            <tr>
-                <td>Medallion Number: </td>
-                <td>{{ reg['medallion'] }}</td>
-            </tr>
-            <tr>
-                <td>Check-In Date: </td>
-                <td>{{ reg['checkin'] }}</td>
-            </tr>
-            <tr>
-                <td>Waiver Signature: </td>
-                <td><img src="{{ reg['signature'] }}" style="height: 15a0px; width:300px"> </td>
-            </tr>
+        <table class="table table-reg table-responsive">
+            <tbody>
+                <tr>
+                    <th style="background-color: #D6EEEE">Medallion Number: </th>
+                    <td>{{ reg['medallion'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Check-In Date: </th>
+                    {% if reg['checkin'] %}
+                    <td>{{ reg['checkin'].strftime('%m/%d/%Y %I:%M %p') }}</td>
+                    {% else %}
+                    <td>{{reg['checkin']}}</td>
+                    {% endif %}
+                    
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Waiver Signature: </th>
+                    {% if reg['signature'] %}
+                    <td><img src="{{ reg['signature'] }}" style="height: 15a0px; width:300px"> </td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                    
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>
     <div class="row">
         <div class="col">
-            <h5>Cost</h5>
-            <table>
+            <table class="table table-reg table-responsive">
                 <tr>
                     <th>Registration Price</th>
                     <th>PayPal Donation</th>
@@ -93,7 +103,7 @@
                     {% endif %}
                 </tr>
                 <h5>Cost - Breakdown</h5>
-                <table>
+                <table class="table table-reg table-responsive">
                     <tr>
                         <th>Prepaid</th>
                         {% if reg['atd_pay_type'] %}
@@ -119,19 +129,15 @@
     <br>
     {% if reg['atd_pay_type'] %}
     <h1 class="text-center" style="background-color: red; color: white;">{{reg['atd_pay_type'].upper()}} - ${{reg['atd_paid']}}</h1>
-    <h1 class="text-center" style="background-color: red; color: white;">
         {% if reg['rate_age'] == '18+' %}
-        ADULT 
+        <h1 class="text-center m-0" style="background-color: red; color: white;">ADULT</h1> 
         {% if reg['rate_mbr'] != 'Member' %}
-        <br>
-        NON-MEMBER 
+        <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER </h1>
         {% endif %}
         {% endif %}
         {% if reg['paypal_donation'] == true %}
-        <br>
-        PAYPAL DONATION
+        <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION</h1>
         {% endif %}
-    </h1>
     {% endif %}
    
 
@@ -184,7 +190,7 @@
     {% if reg['atd_paid'] > 0 %}
         <div class="row form-group no-print">
             <div class="col form-group">
-                <input value='Print' type='button' class="btn btn-primary btn-lg form-control" onclick='handlePrint()' />           
+                <button value='Print' type='button' class="btn btn-primary btn-lg form-control" onclick='handlePrint()'>Print</button>        
             </div>
         </div>
         <script type="text/javascript">
@@ -198,7 +204,7 @@
     {% endif %}
         <div class="row form-group no-print">
             <div class="col form-group">
-                <a href="/" class="btn btn btn-success btn-lg form-control" role="button">Done</a>         
+                <a href="/" class="btn btn-success btn-lg form-control" role="button">Done</a>         
             </div>
         </div>
     {%endif%}

@@ -1,13 +1,109 @@
+@media (1400px <= width) {
+    .container{
+        max-width: 75%;
+        min-height: 85vh;
+        background-color: #f8f9fa;
+        border-radius: 1em;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+}
+
+@media (1200px <= width <= 1400px) {
+    .container{
+        max-width: 80%;
+        min-height: 85vh;
+        background-color: #f8f9fa;
+        border-radius: 1em;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+}
+
+@media (992px <= width <= 1200px) {
+    .container{
+        max-width: 90%;
+        min-height: 85vh;
+        background-color: #f8f9fa;
+        border-radius: 1em;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+}
+
+@media (768px <= width <= 992px) {
+    .container{
+        max-width: 95%;
+        min-height: 85vh;
+        background-color: #f8f9fa;
+        border-radius: 1em;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+}
+ 
+@media (576px <= width <= 768px) {
+    .container{
+        max-width: 95%;
+        min-height: 85vh;
+        background-color: #f8f9fa;
+        border-radius: 1em;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+    .title{
+        display: none;
+    }
+}
+
+@media (width <= 576px) {
+    .container{
+        max-width: 100%;
+        min-height: 80vh;
+        background-color: #f8f9fa;
+        border-radius: 1em;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+    .title{
+        display: none;
+    }
+}
+
+@media print { body { background: transparent !important; } }
+
+.navbar-text{
+    padding-left: 1vw;
+    padding-right: 1vw;
+}
+
+body {
+    background-color: #dee2e6;
+}
+
+.table-reg, .table-reg > tbody > tr {
+    border: 2px solid #dee2e6 !important;
+    border-color: #dee2e6 !important;
+    border-radius: 1rem !important;
+}
+
+.table-reg > tbody, .table-reg > thead {
+    width: 100%;
+    display: table;
+}
+
+.nav-item{
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
 h1 {
-    border: 2px #eee solid;
+    /* border: 2px #eee solid; */
     color: brown;
     text-align: center;
     padding: 10px;
 }
-tr {
-    border-bottom: 2px solid #000000;
 
-}
 th, td {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -70,10 +166,18 @@ html.borderradius #scrollgrabber {
 .reg_card_checkedin {
     background-color: rgba(51, 170, 51, .2); 
     border-radius: 25px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 .reg_card_notcheckedin {
     background-color: rgba(170, 51, 51, 0.2); 
     border-radius: 25px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
  
 svg {fill:black; float:left}

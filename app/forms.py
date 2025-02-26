@@ -257,11 +257,6 @@ class BowForm(FlaskForm):
     poundage = DecimalField('Poundage')
     submit = SubmitField('Submit')
 
-class CrossBowForm(FlaskForm):
-    id = IntegerField("Crossbow Id")
-    inchpounds = DecimalField('Inch/Pound')
-    submit = SubmitField('Submit')
-
 class MartialForm(FlaskForm):
     regid = IntegerField()
     chivalric_inspection = BooleanField('Heavy Spear Inspection')
@@ -270,7 +265,7 @@ class MartialForm(FlaskForm):
     rapier_spear_inspection = BooleanField('Rapier Inspection')
     combat_archery_inspection = BooleanField('Combat Archery Inspection')
     bows = FieldList(FormField(BowForm))
-    crossbows = FieldList(FormField(CrossBowForm))
+    crossbows = FieldList(FormField(BowForm))
     submit = SubmitField('Submit')
 
 class IncidentForm(FlaskForm):
