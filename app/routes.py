@@ -1122,6 +1122,7 @@ def create():
         price_paid = 0)
         #mbr_num = form.mbr_num.data,
         #mbr_exp = form.mbr_exp.data)
+        reg.rate_date = datetime.now().date()
         reg.price_calc = calculate_price_calc(reg)
         if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
             reg.price_due = 0
