@@ -1129,8 +1129,8 @@ def create():
         else:
             reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
 
-        if form.rate_mbr == 'Member':
-            if form.mbr_num_exp.data < datetime.now().date():
+        if form.rate_mbr.data == 'Member':
+            if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
                 flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data))
                 return render_template('create.html', title = 'New Registration', form=form)
 
