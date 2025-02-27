@@ -22,15 +22,24 @@
             <li class="nav-item active">
                 <a class="nav-link" href="/">Home</a>
             </li>
+            {% if not current_user.has_role('Marshal Admin') and not current_user.has_role('Marshal User')  %}
             <li class="nav-item">
                 <a class="nav-link" href="/create">New</a>
             </li>
+            {% endif %}
             <li class="nav-item">
                 <a class="nav-link" href="/">Search</a>
             </li>
+            {% if current_user.has_role('Admin') or current_user.has_role('Department Head') %} 
             <li class="nav-item">
                 <a class="nav-link" href="/reports">Reports</a>
             </li>
+            {% endif %}
+            {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') %} 
+            <li class="nav-item">
+              <a class="nav-link" href="/martial/reports">Marshal Reports</a>
+            </li>
+            {% endif %}
             {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Marshal User') %} 
             <li class="nav-item">
                 <a class="nav-link" href="/martialhome">Martial</a>

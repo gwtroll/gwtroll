@@ -1320,7 +1320,9 @@ def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
 
-    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age, lodging = reg.lodging, notes=reg.notes, mbr_num=reg.mbr_num, mbr_num_exp=datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d'))
+    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age, lodging = reg.lodging, notes=reg.notes, mbr_num=reg.mbr_num)
+    if reg.mbr_num_exp is not None:
+        form.mbr_num_exp.data = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d')
     price_paid = reg.price_paid
     price_calc = reg.price_calc
     kingdom = reg.kingdom
@@ -1338,8 +1340,13 @@ def checkin():
     if request.method == 'POST':
         print(form.rate_mbr)
         if form.rate_mbr.data == 'Member':
-            print(form.mbr_num_exp.data)
-            if form.mbr_num_exp.data < datetime.now().date():
+            if form.mbr_num.data is None:
+                flash('Membership Number is Required if Member.'.format(form.mbr_num_exp.data))
+                return render_template('checkin.html', reg=reg, form=form) 
+            if form.mbr_num_exp.data is None:
+                flash('Membership Expiration Date is Required if Member.'.format(form.mbr_num_exp.data))
+                return render_template('checkin.html', reg=reg, form=form)
+            if form.mbr_num_exp.data is None or form.mbr_num_exp.data < datetime.now().date():
                 flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data))
                 return render_template('checkin.html', reg=reg, form=form)
         medallion = form.medallion.data

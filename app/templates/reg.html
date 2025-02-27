@@ -40,17 +40,6 @@
                 <th style="background-color: #D6EEEE">Camp Group: </th>
                 <td>{{ reg['lodging'] }}</td>
             </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">Onsite Emergency Contact: </th>
-                <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
-                    <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
-                    Group: {{ reg.onsite_contact_group }}</td>
-            </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">Offsite Emergency Contact: </th>
-                <td>{{ reg.offsite_contact_name }} <br>
-                    Phone: {{ reg.offsite_contact_phone }} </td>
-            </tr>
         </tbody>
         </table>
     </div>
@@ -68,7 +57,6 @@
                     {% else %}
                     <td>{{reg['checkin']}}</td>
                     {% endif %}
-                    
                 </tr>
                 <tr>
                     <th style="background-color: #D6EEEE">Waiver Signature: </th>
@@ -77,7 +65,17 @@
                     {% else %}
                     <td></td>
                     {% endif %}
-                    
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Onsite Emergency Contact: </th>
+                    <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
+                        <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
+                        Group: {{ reg.onsite_contact_group }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Offsite Emergency Contact: </th>
+                    <td>{{ reg.offsite_contact_name }} <br>
+                        Phone: {{ reg.offsite_contact_phone }} </td>
                 </tr>
             </tbody>
         </table>
