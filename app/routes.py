@@ -795,6 +795,53 @@ def martial_reg(regid):
         return redirect(url_for('martial_reg',regid=regid))
     return render_template('martial_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form)
 
+@app.route('/martial/reports', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Marshal Admin')
+def martialreports():
+    form = ReportForm()
+    form.report_type.choices = [('full_inspection_report','full_inspection_report'),('full_incident_report','full_incident_report')]
+    s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
+    conndict = dict(item.split("=") for item in s.split(" "))
+    connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
+    engine=db.create_engine(connstring)
+    
+    file = 'test_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_")) + '.xlsx'
+   
+    report_type = form.report_type.data
+
+    if report_type == 'full_inspection_report':
+
+        file = 'full_inspection_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        rptquery = "SELECT regid, (SELECT fname FROM registrations WHERE registrations.regid = martial_inspection.regid) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.regid = martial_inspection.regid) AS \"Reg_LName\", inspection_type, inspection_date, (SELECT fname FROM users WHERE users.id = martial_inspection.inspecting_martial_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = martial_inspection.inspecting_martial_id) AS \"Marshal_LName\", (SELECT medallion FROM users WHERE users.id = martial_inspection.inspecting_martial_id) AS \"Marshal_Medallion\" FROM martial_inspection"
+        df = pd.read_sql_query(rptquery, engine)
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='Report' ,index = False)
+        worksheet = writer.sheets['Report']
+        writer.close()
+        return send_file(path2)
+    
+    if report_type == 'full_incident_report':
+
+        file = 'full_incident_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        rptquery = "SELECT regid, (SELECT fname FROM registrations WHERE registrations.regid = incidentreport.regid) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.regid = incidentreport.regid) AS \"Reg_LName\", report_date, incident_date, (SELECT fname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_LName\", notes FROM incidentreport"
+        df = pd.read_sql_query(rptquery, engine)
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='Report' ,index = False)
+        worksheet = writer.sheets['Report']
+        writer.close()
+        return send_file(path2)
+    return render_template('reports.html', form=form)
+
+
 @app.route('/users', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
