@@ -93,6 +93,28 @@
                 </div>
             </div>
             <div class="col m-0">
+                {% if fighter_auth %}
+                <div class="row">
+                    <h5>Fighter Authorizations (AMP)</h5>
+                    <table class="table">
+                        <thead>
+                            
+                            <th>Type</th>
+                            <th>Desc : Exp. Date</th>
+                        </thead>
+                        <tbody>
+                            {% for auth_type in fighter_auth['Authorizations'] %}
+                            {% for auth in fighter_auth['Authorizations'][auth_type] %}
+                            <tr>
+                                <td>{{ auth_type }}</td>
+                                <td>{{ auth }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
                 <div class="row m-0">
                     <div class="col d-flex justify-content-center m-0">
                         <h4>Inspections</h4>
