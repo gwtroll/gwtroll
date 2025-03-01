@@ -593,7 +593,7 @@ def updateinvoice(regid):
 
         reg.price_due = (price_calc + reg.paypal_donation_amount) - price_paid
 
-        if form.is_check.data:
+        if bool(request.form.get('is_check')) == True:
             reg.pay_type = 'check'
         else:
             reg.pay_type = 'paypal'
@@ -1610,6 +1610,7 @@ def reports():
 
 
         invoice_nums = []
+        paypal_invoice_nums = []
         counts = []
         counts_obj = {}
         dirty_obj = {}
@@ -1640,6 +1641,7 @@ def reports():
                         row[col] = 0
             dirty_obj[row['Invoice Number']] = row
             invoice_nums.append("'"+str(row['Invoice Number'])+"'")
+            paypal_invoice_nums.append(str(row['Invoice Number']))
 
         for row in dirty_obj:
             counts_obj[row] = {
@@ -1688,8 +1690,10 @@ def reports():
         base_price_list = []
         nmr_list = [] 
         checks_list = []
+        found_invoices = []
 
         for index, row in df.iterrows():
+            found_invoices.append(row['invoice_number'])
             if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
                 nmr_list.append(10)
@@ -1725,7 +1729,7 @@ def reports():
                     else:
                         expected_fee = 0.00
                     counts_obj[obj]['expected_fee'] = expected_fee
-                    if counts_obj[obj]['price_paid'] != counts_obj[obj]['Gross'] and counts_obj[obj]['price_paid'] != 0:
+                    if counts_obj[obj]['price_paid'] != counts_obj[obj]['Gross']:
                         errors.append({"Invoice Number":obj,'Error':"GROSS DOES NOT MATCH PRICE PAID",'PayPal': counts_obj[obj]['Gross'],'Export':counts_obj[obj]['price_paid'],'Email':counts_obj[obj]['From Email Address']})
                     if expected_fee != counts_obj[obj]['Fee']:
                         errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee,'Email':counts_obj[obj]['From Email Address']})
@@ -1747,6 +1751,24 @@ def reports():
                 row['nmr'] = 0
             checks_list.append(row)
         
+        unmatched_invoices = []
+        for paypal_invoice_num in paypal_invoice_nums:
+            if paypal_invoice_num not in found_invoices and paypal_invoice_num != '':
+                rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND invoice_status = 'PAID' AND invoice_number LIKE '%%{paypal_invoice_num}%%'"
+                df = pd.read_sql_query(rptquery, engine)
+                for index, row in df.iterrows():
+                    if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                        row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
+                        row['nmr'] = 10
+                    else:
+                        row['base_price'] = row['price_paid'] - row['paypal_donation_amount']
+                        row['nmr'] = 0
+                    row['paypal_match'] = paypal_invoice_num
+                    row['Gross'] = counts_obj[paypal_invoice_num]['Gross']
+                    row['Fee'] = counts_obj[paypal_invoice_num]['Fee']
+                    row['Net'] = counts_obj[paypal_invoice_num]['Net']
+                    unmatched_invoices.append(row)
+        
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -1754,6 +1776,7 @@ def reports():
         writer = pd.ExcelWriter(path1, engine='xlsxwriter')
         
         pd.DataFrame(counts).to_excel(writer, sheet_name='Report' ,index = True)
+        pd.DataFrame(unmatched_invoices).to_excel(writer, sheet_name='Partial Match' ,index = True)
         pd.DataFrame(errors).to_excel(writer, sheet_name='Errors' ,index = True)
         pd.DataFrame(checks_list).to_excel(writer,sheet_name='Checks',index=True)
 
