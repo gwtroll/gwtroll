@@ -1591,7 +1591,14 @@ def reports():
 
         file = 'earlyon_list_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        df = pd.read_sql("SELECT regid, invoice_status, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true", engine)
+        df = pd.read_sql("SELECT regid, invoice_status, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true and invoice_status = 'PAID'", engine)
+
+        for index, row in df.iterrows():
+            row['fname'] = row['fname'].strip()
+            row['lname'] = row['lname'].strip()
+            row['scaname'] = row['scaname'].strip() if row['scaname'] is not None else row['scaname']
+
+                
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
