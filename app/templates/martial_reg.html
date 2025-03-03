@@ -2,294 +2,351 @@
 
 {% block content %}
 
-        <div class="row">
-            <div class="col">
-                <table class="table">
-                    <colgroup>
-                        <col span="1" style="background-color: #D6EEEE">
-                    </colgroup>
+<div class="row m-0 p-1">
+    <div class="col m-0">
+        <table class="table table-reg table-responsive">
+            <colgroup>
+                <col span="1" style="background-color: #D6EEEE">
+            </colgroup>
+            <tbody>
+                <tr>
+                    <th style="background-color: #D6EEEE">Name: </th>
+                    <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">SCA Name: </th>
+                    <td>{{ reg['scaname'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Age Range: </th>
+                    <td>{{ reg['rate_age'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Membership #: </th>
+                    <td>{{ reg['mbr_num'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Membership Exp: </th>
+                    <td>{{ reg['mbr_num_exp'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Kingdom: </th>
+                    <td>{{ reg['kingdom'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Camp Group: </th>
+                    <td>{{ reg['lodging'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Medallion Number: </th>
+                    <td>{{ reg['medallion'] }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Check-In Date: </th>
+                    <td>{{ reg['checkin'].strftime('%m-%d-%Y %I:%M %p') }}</td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Onsite Emergency Contact: </th>
+                    <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
+                        <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
+                        Group: {{ reg.onsite_contact_group }}
+                    </td>
+                </tr>
+                <tr>
+                    <th style="background-color: #D6EEEE">Offsite Emergency Contact: </th>
+                    <td>{{ reg.offsite_contact_name }} <br>
+                        Phone: {{ reg.offsite_contact_phone }} </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="row m-0">
+            <div class="col d-flex justify-content-center m-0">
+                <h4>Incidents</h4>
+            </div>
+        </div>
+        <div class="row m-0">
+            <div class="col d-flex justify-content-center m-0">
+                <table class="table table-reg table-responsive">
+                    <thead>
+                        <th>Reporting User</th>
+                        <th>Incident Date/Time</th>
+                        <th>Notes</th>
+                    </thead>
                     <tbody>
-                        <tr> 
-                            <td>Name: </td>
-                            <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
-                        </tr>
+                        {% for incident in reg.incident_report %}
                         <tr>
-                            <td>SCA Name: </td>
-                            <td>{{ reg['scaname'] }}</td>
+                            <td>{{ incident.reporting_user.fname }} {{ incident.reporting_user.lname }}</td>
+                            <td>{{ incident.incident_date.strftime('%m-%d-%Y %I:%M %p') }}</td>
+                            <td>{{ incident.notes }}</td>
                         </tr>
-                        <tr>
-                            <td>Registration ID: </td>
-                            <td>{{ reg['regid'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Age Range: </td>
-                            <td>{{ reg['rate_age'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Membership #: </td>
-                            <td>{{ reg['mbr_num'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Membership Exp: </td>
-                            <td>{{ reg['mbr_num_exp'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Kingdom: </td>
-                            <td>{{ reg['kingdom'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Camp Group: </td>
-                            <td>{{ reg['lodging'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Medallion Number: </td>
-                            <td>{{ reg['medallion'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Check-In Date: </td>
-                            <td>{{ reg['checkin'].strftime('%m-%d-%Y %I:%M %p') }}</td>
-                        </tr>
-                        <tr>
-                            <td>Waiver Signature: </td>
-                                    
-                            <td><img src="{{ reg['signature'] }}" class="img-fluid"></td>
-                        
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="row d-flex justify-content-center">
-                    <h4>Incidents</h4>
-                </div>
-                <div class="row d-flex justify-content-center">
-                    <table>
-                        <thead>
-                            <th>Reporting User</th>
-                            <th>Incident Date/Time</th>
-                            <th>Notes</th>
-                        </thead>
-                        <tbody>
-                            {% for incident in reg.incident_report %}
-                            <tr>
-                                <td>{{ incident.reporting_user.fname }} {{ incident.reporting_user.lname }}</td>
-                                <td>{{ incident.incident_date.strftime('%m-%d-%Y %I:%M %p') }}</td>
-                                <td>{{ incident.notes }}</td>
-                            </tr>   
                         {% endfor %}
                         <tr>
                             <td colspan="3">
-                                <button type="button" class="btn btn-primary form-control" data-toggle="modal" data-target="#incidentModal">
+                                <button type="button" class="btn btn-primary form-control" data-toggle="modal"
+                                    data-target="#incidentModal">
                                     + New Incident
                                 </button>
                             </td>
                         </tr>
-                        </tbody>
-                    </table>
-                </hr>
-                </div>
+                    </tbody>
+                </table>
             </div>
-            <div class="col">
-                <div class="row d-flex justify-content-center">
-                    <form action="/martial/{{reg.regid}}" method="POST">
-                        <table>
-                            <thead>
-                                <th>Type</th>
-                                <th>Inspected</th>
-                                <th>Martial</th>
-                                <th>Date/Time</th>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <b>Heavy</b>    
-                                    </td>
-                                    <td>
-                                        {{form.chivalric_inspection(class_='form-control')}}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Heavy'] %}
-                                            {{inspection_dict['Heavy'].inspecting_martial.fname}} {{inspection_dict['Heavy'].inspecting_martial.lname}}
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Heavy'] %}
-                                        {{inspection_dict['Heavy'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <b>Heavy Spear</b>    
-                                    </td>
-                                    <td>
-                                        {{form.chivalric_spear_inspection(class_='form-control')}}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Heavy Spear'] %}
-                                            {{inspection_dict['Heavy Spear'].inspecting_martial.fname}} {{inspection_dict['Heavy Spear'].inspecting_martial.lname}}
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Heavy Spear'] %}
-                                        {{inspection_dict['Heavy Spear'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <b>Rapier</b>
-                                    </td>
-                                    <td>
-                                        {{form.rapier_inspection(class_='form-control')}}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Rapier'] %}
-                                        {{inspection_dict['Rapier'].inspecting_martial.fname}} {{inspection_dict['Rapier'].inspecting_martial.lname}}
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Rapier'] %}
-                                        {{inspection_dict['Rapier'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
-                                    {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <b>Rapier Spear</b>
-                                    </td>
-                                    <td>
-                                        {{form.rapier_spear_inspection(class_='form-control')}}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Rapier Spear'] %}
-                                        {{inspection_dict['Rapier Spear'].inspecting_martial.fname}} {{inspection_dict['Rapier Spear'].inspecting_martial.lname}}
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Rapier Spear'] %}
-                                        {{inspection_dict['Rapier Spear'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
-                                    {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <b>Combat Archery</b>
-                                    </td>
-                                    <td>
-                                        {{form.combat_archery_inspection(class_='form-control')}}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Combat Archery'] %}
-                                        {{inspection_dict['Combat Archery'].inspecting_martial.fname}} {{inspection_dict['Combat Archery'].inspecting_martial.lname}}
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if inspection_dict['Combat Archery'] %}
-                                        {{inspection_dict['Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
-                                    {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4">
-                                        <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </form>
-                </div>
-                <div class="row d-flex justify-content-center">
-                    <h4>Bows</h4>
-                </div>
-                <div class="row d-flex justify-content-center">
-                    <table>
-                        <thead>
-                            <th>Poundage</th>
-                            <th>Martial</th>
-                            <th>Date/Time</th>
-                        </thead>
-                        <tbody>
-                            {% for bow in reg.bows %}
-                            <tr>
-                                <td>{{ bow.poundage }}</td>
-                                <td>{{ bow.bow_inspection_martial.fname}} {{bow.bow_inspection_martial.lname}}</td>
-                                <td>{{ bow.bow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
-                            </tr>   
-                        {% endfor %}
+        </div>
+        {% if fighter_auth %}
+        <div class="row m-0">
+            <div class="col d-flex justify-content-center m-0">
+                <h5>Fighter Authorizations (AMP)</h5>
+            </div>
+        </div>
+        <div class="row m-0">
+            <div class="col d-flex justify-content-center m-0">
+                <table class="table table-reg table-responsive">
+                    <thead>
+
+                        <th>Type</th>
+                        <th>Desc : Exp. Date</th>
+                    </thead>
+                    <tbody>
+                        {% for auth_type in fighter_auth['Authorizations'] %}
+                        {% for auth in fighter_auth['Authorizations'][auth_type] %}
                         <tr>
-                            <td colspan="3">
-                                <button type="button" class="btn btn-primary form-control" data-toggle="modal" data-target="#bowModal">
-                                    + Add Bow
-                                </button>
-                            </td>
+                            <td>{{ auth_type }}</td>
+                            <td>{{ auth }}</td>
                         </tr>
-                        </tbody>
-                    </table>
-                </hr>
-                </div>
-                <div class="row d-flex justify-content-center">
-                    <h4>Crossbows</h4>
-                </div>
-                <div class="row d-flex justify-content-center">
-                    <table>
+                        {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col m-0">
+        <div class="row m-0">
+            <div class="col d-flex justify-content-center m-0">
+                <h4>Inspections</h4>
+            </div>
+        </div>
+        <div class="row m-0">
+            <div class="col d-flex justify-content-center">
+                <form action="/martial/{{reg.regid}}" method="POST">
+                    <table class="table table-responsive table-reg">
                         <thead>
-                            <th>Inch/Pounds</th>
+                            <th>Type</th>
+                            <th>Inspected</th>
                             <th>Martial</th>
                             <th>Date/Time</th>
                         </thead>
                         <tbody>
-                            {% for crossbow in reg.crossbows %}
                             <tr>
-                                <td>{{ crossbow.inchpounds }}</td>
-                                <td>{{ crossbow.crossbow_inspection_martial.username}}</td>
-                                <td>{{ crossbow.crossbow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
+                                <td>
+                                    <b>Heavy</b>
+                                </td>
+                                <td>
+                                    {{form.chivalric_inspection(class_='form-control')}}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Heavy'] %}
+                                    {{inspection_dict['Heavy'].inspecting_martial.fname}}
+                                    {{inspection_dict['Heavy'].inspecting_martial.lname}}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Heavy'] %}
+                                    {{inspection_dict['Heavy'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {% endif %}
+                                </td>
                             </tr>
-                            {% endfor %}
                             <tr>
-                                <td colspan="3">
-                                    <button type="button" class="btn btn-primary form-control" data-toggle="modal" data-target="#crossbowModal">
-                                        + Add Crossbow
-                                    </button>
+                                <td>
+                                    <b>Heavy Spear</b>
+                                </td>
+                                <td>
+                                    {{form.chivalric_spear_inspection(class_='form-control')}}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Heavy Spear'] %}
+                                    {{inspection_dict['Heavy Spear'].inspecting_martial.fname}} {{inspection_dict['Heavy Spear'].inspecting_martial.lname}}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Heavy Spear'] %}
+                                    {{inspection_dict['Heavy Spear'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Rapier</b>
+                                </td>
+                                <td>
+                                    {{form.rapier_inspection(class_='form-control')}}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Rapier'] %}
+                                    {{inspection_dict['Rapier'].inspecting_martial.fname}}
+                                    {{inspection_dict['Rapier'].inspecting_martial.lname}}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Rapier'] %}
+                                    {{inspection_dict['Rapier'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Rapier Spear</b>
+                                </td>
+                                <td>
+                                    {{form.rapier_spear_inspection(class_='form-control')}}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Rapier Spear'] %}
+                                    {{inspection_dict['Rapier Spear'].inspecting_martial.fname}}
+                                    {{inspection_dict['Rapier Spear'].inspecting_martial.lname}}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Rapier Spear'] %}
+                                    {{inspection_dict['Rapier Spear'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Combat Archery</b>
+                                </td>
+                                <td>
+                                    {{form.combat_archery_inspection(class_='form-control')}}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Combat Archery'] %}
+                                    {{inspection_dict['Combat Archery'].inspecting_martial.fname}}
+                                    {{inspection_dict['Combat Archery'].inspecting_martial.lname}}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Combat Archery'] %}
+                                    {{inspection_dict['Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">
+                                    {{ form.submit(class_='form-control btn-primary btn-lg m-0') }}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
+                </form>
             </div>
         </div>
-  
-  <!-- Modal -->
-  <div class="modal fade" id="bowModal" tabindex="-1" role="dialog" aria-labelledby="bowModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="bowModalLabel">New Bow</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+        <div class="row m-0">
+            <div class="col d-flex justify-content-center m-0">
+                <h4>Bows</h4>
+            </div>
         </div>
-        <div class="modal-body">
-            <form action="/martial/{{reg.regid}}/addbow" method="POST">
-                <b>{{bow_form.poundage.label}}</b>
-                {{bow_form.poundage(class_='form-control')}}
-                {{bow_form.submit(class_='form-control btn-primary')}}
-            </form>
+        <div class="row m-0">
+            <div class="col justify-content-center m-0">
+                <table class="table">
+                    <thead>
+                        <th>Poundage</th>
+                        <th>Martial</th>
+                        <th>Date/Time</th>
+                    </thead>
+                    <tbody>
+                        {% for bow in reg.bows %}
+                        <tr>
+                            <td>{{ bow.poundage }}</td>
+                            <td>{{ bow.bow_inspection_martial.fname}} {{bow.bow_inspection_martial.lname}}</td>
+                            <td>{{ bow.bow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="3">
+                                <button type="button" class="btn btn-primary form-control" data-toggle="modal"
+                                    data-target="#bowModal">
+                                    + Add Bow
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <br>
+        <div class="row m-0">
+            <div class="col d-flex justify-content-center m-0">
+                <h4>Crossbows</h4>
+            </div>
         </div>
-      </div>
+        <div class="row m-0">
+            <div class="col justify-content-center m-0">
+                <table class="table">
+                    <thead>
+                        <th>Inch/Pounds</th>
+                        <th>Martial</th>
+                        <th>Date/Time</th>
+                    </thead>
+                    <tbody>
+                        {% for crossbow in reg.crossbows %}
+                        <tr>
+                            <td>{{ crossbow.inchpounds }}</td>
+                            <td>{{ crossbow.crossbow_inspection_martial.fname}}
+                                {{crossbow.crossbow_inspection_martial.lname}}</td>
+                            <td>{{ crossbow.crossbow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="3">
+                                <button type="button" class="btn btn-primary form-control" data-toggle="modal"
+                                    data-target="#crossbowModal">
+                                    + Add Crossbow
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
+</div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="crossbowModal" tabindex="-1" role="dialog" aria-labelledby="crossbowModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-content">
+<!-- Modal -->
+<div class="modal fade" id="bowModal" tabindex="-1" role="dialog" aria-labelledby="bowModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="crossbowModalLabel">New Crossbow</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+                <h5 class="modal-title" id="bowModalLabel">New Bow</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/martial/{{reg.regid}}/addbow" method="POST">
+                    <b>{{bow_form.poundage.label}}</b>
+                    {{bow_form.poundage(class_='form-control')}}
+                    {{bow_form.submit(class_='form-control btn-primary')}}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="crossbowModal" tabindex="-1" role="dialog" aria-labelledby="crossbowModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="crossbowModalLabel">New Crossbow</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form action="/martial/{{reg.regid}}/addcrossbow" method="POST">
@@ -299,21 +356,22 @@
                 </form>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
-          </div>
         </div>
-      </div>
+    </div>
+</div>
 
-          <!-- Incident Modal -->
-    <div class="modal fade" id="incidentModal" tabindex="-1" role="dialog" aria-labelledby="incidentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-content">
+<!-- Incident Modal -->
+<div class="modal fade" id="incidentModal" tabindex="-1" role="dialog" aria-labelledby="incidentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="incidentModalLabel">New Crossbow</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+                <h5 class="modal-title" id="incidentModalLabel">New Incident</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form action="/martial/{{reg.regid}}/addincident" method="POST">
@@ -325,11 +383,11 @@
                 </form>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
-          </div>
         </div>
-      </div>
+    </div>
+</div>
 
-        
+
 {% endblock %}

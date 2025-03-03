@@ -20,6 +20,7 @@ import uuid
 import json
 import csv
 import codecs
+import requests
 
 @login.unauthorized_handler
 def unauthorized_callback():
@@ -661,13 +662,16 @@ def add_bow(regid):
 @roles_accepted('Admin','Marshal Admin','Marshal User')
 def add_crossbow(regid):
     reg = get_reg(regid)
-    form = CrossBowForm()
+    form = BowForm()
     if request.method == 'POST':
-        if request.form.get("inchpounds"):
+        print('POSTED')
+        if request.form.get("poundage"):
+            print('Poundage')
+            print(request.form.get("poundage"))
             update_reg = Registrations.query.filter_by(regid=reg.regid).first()
-            print(request.form.get("inchpounds"))
+            print(request.form.get("poundage"))
             crossbow = Crossbows()
-            crossbow.inchpounds = request.form.get("inchpounds")
+            crossbow.inchpounds = request.form.get("poundage")
             crossbow.crossbow_inspection_martial_id = current_user.id
             crossbow.crossbow_inspection_date = datetime.now()
             if update_reg.crossbows:
@@ -676,6 +680,7 @@ def add_crossbow(regid):
                 crossbows = []
                 crossbows.append(crossbow)
                 update_reg.crossbows = crossbows
+            print('YEP')
             db.session.commit()
         return redirect(url_for('martial_reg', regid=regid))
     return render_template('add_crossbow.html', reg=reg, form=form)
@@ -711,6 +716,16 @@ def martial_reg(regid):
     form = MartialForm()
     bow_form = BowForm()
     incident_form = IncidentForm()
+    url = f"https://amp.ansteorra.org/activities/authorizations/getMemberAuthorizations/{reg.email}"
+    headers = {
+                'Authorization': 'gw_gate|VN7xw8nutVx232KFKESjnKs46Kgrr4XaHqcnkjh773pEB5Sszw'
+                }
+    response = requests.request("GET", url, headers=headers)
+    if response.status_code == 200:
+        fighter_auth = response.json()
+    else:
+        fighter_auth = None
+    print(response.status_code)
     inspections = MartialInspection.query.filter(MartialInspection.regid == regid).all()
     inspection_dict = {}
     for inspection in inspections:
@@ -789,7 +804,54 @@ def martial_reg(regid):
 
         db.session.commit()
         return redirect(url_for('martial_reg',regid=regid))
-    return render_template('martial_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form)
+    return render_template('martial_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form, fighter_auth=fighter_auth)
+
+@app.route('/martial/reports', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Marshal Admin')
+def martialreports():
+    form = ReportForm()
+    form.report_type.choices = [('full_inspection_report','full_inspection_report'),('full_incident_report','full_incident_report')]
+    s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
+    conndict = dict(item.split("=") for item in s.split(" "))
+    connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
+    engine=db.create_engine(connstring)
+    
+    file = 'test_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_")) + '.xlsx'
+   
+    report_type = form.report_type.data
+
+    if report_type == 'full_inspection_report':
+
+        file = 'full_inspection_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        rptquery = "SELECT regid, (SELECT fname FROM registrations WHERE registrations.regid = martial_inspection.regid) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.regid = martial_inspection.regid) AS \"Reg_LName\", inspection_type, inspection_date, (SELECT fname FROM users WHERE users.id = martial_inspection.inspecting_martial_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = martial_inspection.inspecting_martial_id) AS \"Marshal_LName\", (SELECT medallion FROM users WHERE users.id = martial_inspection.inspecting_martial_id) AS \"Marshal_Medallion\" FROM martial_inspection"
+        df = pd.read_sql_query(rptquery, engine)
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='Report' ,index = False)
+        worksheet = writer.sheets['Report']
+        writer.close()
+        return send_file(path2)
+    
+    if report_type == 'full_incident_report':
+
+        file = 'full_incident_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+
+        rptquery = "SELECT regid, (SELECT fname FROM registrations WHERE registrations.regid = incidentreport.regid) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.regid = incidentreport.regid) AS \"Reg_LName\", report_date, incident_date, (SELECT fname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_LName\", notes FROM incidentreport"
+        df = pd.read_sql_query(rptquery, engine)
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        writer = pd.ExcelWriter(path1, engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='Report' ,index = False)
+        worksheet = writer.sheets['Report']
+        writer.close()
+        return send_file(path2)
+    return render_template('reports.html', form=form)
+
 
 @app.route('/users', methods=('GET', 'POST'))
 @login_required
@@ -1071,14 +1133,15 @@ def create():
         price_paid = 0)
         #mbr_num = form.mbr_num.data,
         #mbr_exp = form.mbr_exp.data)
+        reg.rate_date = datetime.now().date()
         reg.price_calc = calculate_price_calc(reg)
         if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
             reg.price_due = 0
         else:
             reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
 
-        if form.rate_mbr == 'Member':
-            if form.mbr_num_exp.data < datetime.now().date():
+        if form.rate_mbr.data == 'Member':
+            if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
                 flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data))
                 return render_template('create.html', title = 'New Registration', form=form)
 
@@ -1269,7 +1332,9 @@ def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
 
-    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age, lodging = reg.lodging, notes=reg.notes, mbr_num=reg.mbr_num, mbr_num_exp=datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d'))
+    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age, lodging = reg.lodging, notes=reg.notes, mbr_num=reg.mbr_num)
+    if reg.mbr_num_exp is not None:
+        form.mbr_num_exp.data = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d')
     price_paid = reg.price_paid
     price_calc = reg.price_calc
     kingdom = reg.kingdom
@@ -1285,11 +1350,15 @@ def checkin():
     #Check for medallion number    
 
     if request.method == 'POST':
-        print(form.rate_mbr)
         if form.rate_mbr.data == 'Member':
-            print(form.mbr_num_exp.data)
-            if form.mbr_num_exp.data < datetime.now().date():
-                flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data))
+            if request.form.get('mbr_num_exp') is None:
+                flash('Membership Number is Required if Member.'.format(request.form.get('mbr_num_exp')))
+                return render_template('checkin.html', reg=reg, form=form) 
+            if request.form.get('mbr_num_exp') is None:
+                flash('Membership Expiration Date is Required if Member.'.format(request.form.get('mbr_num_exp')))
+                return render_template('checkin.html', reg=reg, form=form)
+            if request.form.get('mbr_num_exp') is None or datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
+                flash('Membership Expiration Date {} is not current.'.format(request.form.get('mbr_num_exp')))
                 return render_template('checkin.html', reg=reg, form=form)
         medallion = form.medallion.data
         kingdom = form.kingdom.data
@@ -1521,7 +1590,14 @@ def reports():
 
         file = 'earlyon_list_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        df = pd.read_sql("SELECT regid, invoice_status, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true", engine)
+        df = pd.read_sql("SELECT regid, invoice_status, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true and invoice_status = 'PAID'", engine)
+
+        for index, row in df.iterrows():
+            row['fname'] = row['fname'].strip()
+            row['lname'] = row['lname'].strip()
+            row['scaname'] = row['scaname'].strip() if row['scaname'] is not None else row['scaname']
+
+                
 
         path1 = './reports/' + file
         path2 = '../reports/' + file

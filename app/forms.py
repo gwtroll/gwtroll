@@ -3,6 +3,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, Selec
 from wtforms.fields import DateField, DateTimeLocalField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
+import datetime
 
 lodging_df = pd.read_csv('gwlodging.csv')
 lodgingdata = lodging_df.to_dict(orient='list')
@@ -257,11 +258,6 @@ class BowForm(FlaskForm):
     poundage = DecimalField('Poundage')
     submit = SubmitField('Submit')
 
-class CrossBowForm(FlaskForm):
-    id = IntegerField("Crossbow Id")
-    inchpounds = DecimalField('Inch/Pound')
-    submit = SubmitField('Submit')
-
 class MartialForm(FlaskForm):
     regid = IntegerField()
     chivalric_inspection = BooleanField('Heavy Spear Inspection')
@@ -270,10 +266,10 @@ class MartialForm(FlaskForm):
     rapier_spear_inspection = BooleanField('Rapier Inspection')
     combat_archery_inspection = BooleanField('Combat Archery Inspection')
     bows = FieldList(FormField(BowForm))
-    crossbows = FieldList(FormField(CrossBowForm))
+    crossbows = FieldList(FormField(BowForm))
     submit = SubmitField('Submit')
 
 class IncidentForm(FlaskForm):
-    incident_date = DateTimeLocalField('Incident Date/Time')
+    incident_date = DateTimeLocalField('Incident Date/Time', default=datetime.datetime.today)
     notes = TextAreaField('Notes')
     submit = SubmitField('Submit Incident')
