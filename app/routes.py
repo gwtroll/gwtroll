@@ -716,10 +716,9 @@ def martial_reg(regid):
     form = MartialForm()
     bow_form = BowForm()
     incident_form = IncidentForm()
-    # url = "https://amp-uat.ansteorra.org/activities/authorizations/getMemberAuthorizations/jhandel@gmail.com"
-    url = f"https://amp-uat.ansteorra.org/activities/authorizations/getMemberAuthorizations/{reg.email}"
+    url = f"https://amp.ansteorra.org/activities/authorizations/getMemberAuthorizations/{reg.email}"
     headers = {
-                'Authorization': 'gw_gate|giE36JsEazhckMdFCbYfE9pgdTNLE9hdp8T2ZMgwTgFUZXAUyi'
+                'Authorization': 'gw_gate|VN7xw8nutVx232KFKESjnKs46Kgrr4XaHqcnkjh773pEB5Sszw'
                 }
     response = requests.request("GET", url, headers=headers)
     if response.status_code == 200:
