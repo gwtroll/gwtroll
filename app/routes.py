@@ -455,10 +455,10 @@ def index():
                     #(search_value, search_value, search_value))
                     ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg, regcount=regcount)
-        elif request.form.get('order_id'):
-            search_value = request.form.get('order_id')
+        elif request.form.get('invoice_number'):
+            search_value = request.form.get('invoice_number')
             reg = query_db(
-                "SELECT * FROM registrations WHERE order_id = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by  checkin DESC, lname, fname",
+                "SELECT * FROM registrations WHERE invoice_number = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
                 (search_value,))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
