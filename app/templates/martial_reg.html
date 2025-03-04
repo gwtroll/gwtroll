@@ -102,16 +102,18 @@
             <div class="col d-flex justify-content-center m-0">
                 <table class="table table-reg table-responsive">
                     <thead>
-
                         <th>Type</th>
-                        <th>Desc : Exp. Date</th>
+                        <th>Desc</th>
+                        <th>Exp. Date</th>
                     </thead>
                     <tbody>
                         {% for auth_type in fighter_auth['Authorizations'] %}
                         {% for auth in fighter_auth['Authorizations'][auth_type] %}
+                        {% set auth_desc = auth.split(':') %}
                         <tr>
                             <td>{{ auth_type }}</td>
-                            <td>{{ auth }}</td>
+                            <td>{{ auth_desc[0] }}</td>
+                            <td>{{ auth_desc[1] }}</td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
