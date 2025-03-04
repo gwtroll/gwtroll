@@ -1682,6 +1682,38 @@ def reports():
         df.to_csv(path1)
         return send_file(path2)
     
+    if report_type == 'paypal_canceled_export':
+
+        file = 'paypal_cenceled_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+
+        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, price_due, paypal_donation_amount FROM registrations WHERE invoice_status = 'CANCELED'"
+        df = pd.read_sql_query(rptquery, engine)
+        base_price_list = []
+        nmr_list = []
+        for index, row in df.iterrows():
+
+            if row['price_paid'] != 0:
+                if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                    base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
+                    nmr_list.append(10)
+                else:
+                    base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
+                    nmr_list.append(0)
+            else:
+                if row['rate_mbr'] == 'Non-Member' and row['price_due'] != 0 and row['rate_age'].__contains__('18+'):
+                    base_price_list.append(row['price_due'] - 10 - row['paypal_donation_amount'])
+                    nmr_list.append(10)
+                else:
+                    base_price_list.append(row['price_due'] - row['paypal_donation_amount'])
+                    nmr_list.append(0)
+        df['nmr'] = nmr_list
+        df['base_price'] = base_price_list
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        df.to_csv(path1)
+        return send_file(path2)
+    
     if report_type == 'paypal_recon_export':
 
 
@@ -1761,7 +1793,7 @@ def reports():
 
         file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND invoice_status = 'PAID' AND invoice_number IN ({invoice_nums_str})"
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND (invoice_status = 'PAID' or invoice_status = 'CANCELED') AND invoice_number IN ({invoice_nums_str})"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = [] 
