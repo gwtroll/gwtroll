@@ -75,6 +75,20 @@
                     <p class="text-muted">Invoice Status: {{reg['invoice_status']}}</p>
                 </div>
             </div>
+            <div class="col">
+                <div>
+                    <p class="text-muted">Ready For Checkin:
+                        {% if reg['ready_for_checkin'] %}
+                        <span class="logged-in" style="color: green;">●</span>
+                        {% else %}
+                        <span class="logged-in" style="color: red;">●</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-muted">Arrival Date: {{reg['rate_date'].strftime('%m-%d-%Y')}}</p>
+                </div>
+            </div>
         </div>
             <hr>
         {% endfor %}

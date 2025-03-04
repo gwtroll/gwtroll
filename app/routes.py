@@ -443,10 +443,7 @@ def changepassword():
 @login_required
 def index():
     regcount = reg_count()
-    print(request.method)
     if request.method == "POST":
-        print("SEARCHED")
-        print(request.form.get('search_canceled'))
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
             print(search_value)
@@ -461,7 +458,6 @@ def index():
                         "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
                         #(search_value, search_value, search_value))
                         ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
-            return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('invoice_number'):
             search_value = request.form.get('invoice_number')
             if request.form.get('search_canceled'):
@@ -472,13 +468,26 @@ def index():
                 reg = query_db(
                     "SELECT * FROM registrations WHERE invoice_number LIKE %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
                     ('%' + search_value + '%',))
-            return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
             reg = query_db(
                 "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
                 (search_value,))
-            return render_template('index.html', searchreg=reg, regcount=regcount)
+        for r in reg:
+            if r['rate_date'] is not None:
+                try:
+                    arrival_date = datetime.strptime(r['rate_date'], "%Y-%m-%d %H:%M:%S")
+                except:
+                    arrival_date = datetime.strptime(r['rate_date'], "%Y-%m-%d")
+            else:
+                arrival_date = datetime.strptime('01/01/1900', '%m/%d/%Y')
+            if (arrival_date == datetime.strptime('03/08/2025','%m/%d/%Y') or arrival_date <= datetime.now()):
+                r['rate_date'] = arrival_date
+                r['ready_for_checkin'] = True
+            else:
+                r['rate_date'] = arrival_date
+                r['ready_for_checkin'] = False
+        return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
         return render_template('index.html', regcount=regcount)
 
