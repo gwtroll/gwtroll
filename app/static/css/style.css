@@ -87,7 +87,7 @@ body {
     border-radius: 1rem !important;
 }
 
-.table-reg > tbody, .table-reg > thead {
+.table-reg-display > tbody, .table-reg-display > thead {
     width: 100%;
     display: table;
 }
@@ -173,6 +173,15 @@ html.borderradius #scrollgrabber {
 }
 .reg_card_notcheckedin {
     background-color: rgba(170, 51, 51, 0.2); 
+    border-radius: 25px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.reg_card_canceled {
+    background-color: rgba(170, 158, 51, 0.2); 
     border-radius: 25px;
     padding-left: 2px;
     padding-right: 2px;

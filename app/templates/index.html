@@ -31,6 +31,15 @@
                            placeholder="Search by Medallion Number" name="medallion" value=""/>
                 </div>
             </div>
+            {% if current_user.has_role('Admin') or current_user.has_role('Department Head') or current_user.has_role('Troll Shift Lead')%}
+            <div class="row">
+                <!-- Search Canceled -->
+                <div class="col">
+                    <label for="search_canceled">Include Canceled:</label>
+                    <input type="checkbox" id="search_canceled" class="py-2" name="search_canceled" value="search_canceled">
+                </div>
+            </div>
+            {% endif %}
             <div class="row m-0">
                 <div class="col">
                     <button type="submit" class="btn btn-lg btn-primary form-control">Search
@@ -45,6 +54,8 @@
         {% for reg in searchreg %}
         {% if reg['checkin'] %}
         <div class="row reg_card_checkedin">
+        {% elif reg['invoice_status'] == 'CANCELED' %}
+        <div class="row reg_card_canceled">
         {% else %}
         <div class="row reg_card_notcheckedin">
         {% endif %}
@@ -54,6 +65,14 @@
                 </a>
                 <div>
                     <p class="text-muted">{{ reg['scaname'] }}</p>
+                </div>
+            </div>
+            <div class="col">
+                <div>
+                    <p class="text-muted">Invoice Number: {{reg['invoice_number']}}</p>
+                </div>
+                <div>
+                    <p class="text-muted">Invoice Status: {{reg['invoice_status']}}</p>
                 </div>
             </div>
         </div>

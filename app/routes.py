@@ -446,20 +446,32 @@ def index():
     print(request.method)
     if request.method == "POST":
         print("SEARCHED")
+        print(request.form.get('search_canceled'))
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
             print(search_value)
             if search_value is not None and search_value != '':
-                reg = query_db(
-                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
-                    #(search_value, search_value, search_value))
-                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+                if request.form.get('search_canceled'):
+                    reg = query_db(
+                        "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                        #(search_value, search_value, search_value))
+                        ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+                else:
+                    reg = query_db(
+                        "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                        #(search_value, search_value, search_value))
+                        ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('invoice_number'):
             search_value = request.form.get('invoice_number')
-            reg = query_db(
-                "SELECT * FROM registrations WHERE invoice_number = %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
-                (search_value,))
+            if request.form.get('search_canceled'):
+                reg = query_db(
+                    "SELECT * FROM registrations WHERE invoice_number LIKE %s AND (invoice_status NOT IN ('DUPLICATE','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                    ('%' + search_value + '%',))
+            else:
+                reg = query_db(
+                    "SELECT * FROM registrations WHERE invoice_number LIKE %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                    ('%' + search_value + '%',))
             return render_template('index.html', searchreg=reg, regcount=regcount)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
@@ -1663,7 +1675,7 @@ def reports():
 
         file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE invoice_status = 'PAID'"
+        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'PAID'"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = []
@@ -1686,7 +1698,7 @@ def reports():
 
         file = 'paypal_cenceled_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, price_due, paypal_donation_amount FROM registrations WHERE invoice_status = 'CANCELED'"
+        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, price_due, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'CANCELED'"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = []

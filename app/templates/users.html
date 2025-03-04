@@ -2,8 +2,8 @@
 
 {% block content %}
 
-<table id="userTable" class="table table-striped table-responsive table-reg">
-    <thread>
+<table id="userTable" class="table table-striped table-reg">
+    <thead>
         <tr>
             <th>Active</th>
             <th>User Name</th>
@@ -13,7 +13,7 @@
             <th>Edit</th>
             <th>Password Reset</th>
         </tr>
-    </thread>
+    </thead>
     <tbody>
         {%for user in users %}
         <tr>
@@ -40,10 +40,10 @@
                     {{user.lname}}
                 </td>
                 <td>
-                    <input class="form__submit form__input" type="Submit" value="Edit" name="submitValue"/>
+                    <input class="form__submit form__input btn-secondary form-control" type="Submit" value="Edit" name="submitValue"/>
                 </td>
                 <td>
-                    <input class="form__submit form__input" type="Submit" value="Password Reset" name="submitValue"/>
+                    <input class="form__submit form__input btn-secondary form-control" type="Submit" value="Password Reset" name="submitValue"/>
                 </td>
             </form>
         </tr>
