@@ -1613,12 +1613,9 @@ def reports():
 
         df = pd.read_sql("SELECT regid, invoice_status, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true and invoice_status = 'PAID'", engine)
 
-        for index, row in df.iterrows():
-            row['fname'] = row['fname'].strip()
-            row['lname'] = row['lname'].strip()
-            row['scaname'] = row['scaname'].strip() if row['scaname'] is not None else row['scaname']
+        df_obj = df.select_dtypes('object')
 
-                
+        df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
