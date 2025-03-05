@@ -473,6 +473,8 @@ def index():
             reg = query_db(
                 "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
                 (search_value,))
+        else:
+            return render_template('index.html', regcount=regcount)
         for r in reg:
             if r['rate_date'] is not None:
                 try:
