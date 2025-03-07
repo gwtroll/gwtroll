@@ -501,7 +501,7 @@ def reg(regid):
     if request.form.get("action") == 'Edit':
     #if request.method == 'POST' and request.path == '/editreg':
         return redirect(url_for('editreg', regid=regid))
-    elif request.method == 'POST' and reg.signature is None and request.form.get("action") == 'waiver':
+    elif request.method == 'POST' and request.form.get("action") == 'waiver':
         return redirect(url_for('waiver', regid=regid))
     elif request.method == 'POST' and request.form.get("action") == 'payment':
         return redirect(url_for('payment', regid=regid))
