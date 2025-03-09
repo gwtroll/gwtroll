@@ -1374,13 +1374,13 @@ def checkin():
 
     if request.method == 'POST':
         if form.rate_mbr.data == 'Member':
-            if request.form.get('mbr_num_exp') is None:
-                flash('Membership Number is Required if Member.'.format(request.form.get('mbr_num_exp')))
+            if request.form.get('mbr_num') is None:
+                flash('Membership Number is Required if Member.')
                 return render_template('checkin.html', reg=reg, form=form) 
-            if request.form.get('mbr_num_exp') is None:
-                flash('Membership Expiration Date is Required if Member.'.format(request.form.get('mbr_num_exp')))
+            elif request.form.get('mbr_num_exp') is None:
+                flash('Membership Expiration Date is Required if Member.')
                 return render_template('checkin.html', reg=reg, form=form)
-            if request.form.get('mbr_num_exp') is None or datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
+            elif datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
                 flash('Membership Expiration Date {} is not current.'.format(request.form.get('mbr_num_exp')))
                 return render_template('checkin.html', reg=reg, form=form)
         medallion = form.medallion.data
