@@ -115,9 +115,9 @@ def currentuser_has_permission_on_user(cuser, user):
         return True
     elif cuser.has_role('Marshal Admin') and user.has_role('Marshal User'):
         return True
-    elif (cuser.has_role('Troll Shift Lead') or current_user.has_role('Department Head')) and user.has_role('Troll User'):
+    elif (cuser.has_role('Troll Shift Lead') or cuser.has_role('Department Head')) and user.has_role('Troll User'):
         return True
-    elif current_user.has_role('Department Head') and user.has_role('Troll Shift Lead'):
+    elif cuser.has_role('Department Head') and user.has_role('Troll Shift Lead'):
         return True
     else:
         return False
@@ -145,16 +145,6 @@ def get_role(roleid):
     if role is None:
         abort(404)
     return role
-
-def currentuser_has_permission_on_user(cuser, user):
-    if cuser.has_role('Admin'):
-        return True
-    elif cuser.has_role('Marshal Admin') and user.has_role('Marshal User'):
-        return True
-    elif cuser.has_role('Troll Shift Lead') and user.has_role('Troll User'):
-        return True
-    else:
-        return False
 
 def reg_count():
     conn= get_db_connection()
