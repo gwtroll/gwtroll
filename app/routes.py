@@ -1901,6 +1901,32 @@ def reports():
         writer.close()
         return send_file(path2)
     
+    if report_type == 'atd_export':
+
+        file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+
+        rptquery = "SELECT checkin, rate_mbr, rate_age, notes, price_paid, pay_type, atd_paid, atd_pay_type, paypal_donation_amount FROM registrations WHERE checkin::date BETWEEN {} and {}"
+        rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
+        params = {'start_date':start_date, 'end_date':end_date}
+        df = pd.read_sql_query(rptquery, engine, params=params)
+
+        base_price_list = []
+        nmr_list = []
+        for index, row in df.iterrows():
+            if row['rate_mbr'] == 'Non-Member' and row['atd_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                base_price_list.append(row['atd_paid'] - 10 - row['paypal_donation_amount'])
+                nmr_list.append(10)
+            else:
+                base_price_list.append(row['atd_paid'] - row['paypal_donation_amount'])
+                nmr_list.append(0)
+        df['nmr'] = nmr_list
+        df['base_price'] = base_price_list
+        path1 = './reports/' + file
+        path2 = '../reports/' + file
+        
+        df.to_csv(path1)
+        return send_file(path2)
+    
     if report_type == 'log_export':
 
         file = 'log_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
