@@ -49,7 +49,7 @@
         {% if regs %}
           {%for reg in regs %}
           <tr>
-              <form action="/invoice/{{reg.regid}}" method="GET">
+              <form action="/invoices/{{reg.regid}}" method="GET">
                   <td style="display: none;">
                       <input type="hidden" name="back" id="back" value="{{back}}">{{back}}
                   </td>

@@ -258,7 +258,7 @@ class BowForm(FlaskForm):
     poundage = DecimalField('Poundage')
     submit = SubmitField('Submit')
 
-class MartialForm(FlaskForm):
+class MarshalForm(FlaskForm):
     regid = IntegerField()
     chivalric_inspection = BooleanField('Heavy Spear Inspection')
     rapier_inspection = BooleanField('Rapier Inspection')

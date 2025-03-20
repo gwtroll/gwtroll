@@ -120,7 +120,7 @@ class Registrations(db.Model):
         index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
     bows = db.relationship('Bows', secondary='reg_bows')
     crossbows = db.relationship('Crossbows', secondary='reg_crossbows')
-    martial_inspections = db.relationship('MartialInspection', backref='registrations')
+    marshal_inspections = db.relationship('MarshalInspection', backref='registrations')
     incident_report = db.relationship('IncidentReport', backref='registrations')
 
     def __repr__(self):
@@ -134,22 +134,22 @@ class RegLogs(db.Model):
     timestamp = db.Column(db.DateTime())
     action = db.Column(db.String())
 
-class MartialInspection(db.Model):
-    __tablename__ = 'martial_inspection' 
+class MarshalInspection(db.Model):
+    __tablename__ = 'marshal_inspection' 
     id = db.Column(db.Integer(), primary_key=True)
     regid = db.Column(db.Integer, db.ForeignKey('registrations.regid'))
     inspection_type = db.Column(db.String())
     inspection_date = db.Column(db.DateTime())
-    inspecting_martial_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
-    inspecting_martial = db.relationship('User', foreign_keys=[inspecting_martial_id])
+    inspecting_marshal_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    inspecting_marshal = db.relationship('User', foreign_keys=[inspecting_marshal_id])
     inspected = db.Column(db.Boolean())
 
 class Bows(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     poundage = db.Column(db.Double())
     bow_inspection_date: so.Mapped[Optional[datetime]]
-    bow_inspection_martial_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
-    bow_inspection_martial = db.relationship('User', foreign_keys=[bow_inspection_martial_id])
+    bow_inspection_marshal_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    bow_inspection_marshal = db.relationship('User', foreign_keys=[bow_inspection_marshal_id])
 
     def __repr__(self):
         return '<Bow {}>'.format(self.id)
@@ -164,8 +164,8 @@ class Crossbows(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     inchpounds = db.Column(db.Double())
     crossbow_inspection_date: so.Mapped[Optional[datetime]]
-    crossbow_inspection_martial_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
-    crossbow_inspection_martial = db.relationship('User', foreign_keys=[crossbow_inspection_martial_id])
+    crossbow_inspection_marshal_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    crossbow_inspection_marshal = db.relationship('User', foreign_keys=[crossbow_inspection_marshal_id])
 
     def __repr__(self):
         return '<CrossBow {}>'.format(self.id)

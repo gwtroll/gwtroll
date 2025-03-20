@@ -60,7 +60,7 @@
         <div class="row reg_card_notcheckedin">
         {% endif %}
             <div class="col">
-                <a href="{{ url_for('reg', regid=reg['regid']) }}">
+                <a href="{{ url_for('troll.reg', regid=reg['regid']) }}">
                     <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
                 </a>
                 <div>

@@ -24,7 +24,7 @@
 {% endif %}
 <div class="row">
     <div class="col">
-        <form action="/martialhome" method="POST">
+        <form action="{{ url_for('marshal.index')}}" method="POST">
                 <!-- Search -->
                 <div class="mb-5">
                     <input class="form-control py-2"
@@ -48,7 +48,7 @@
     {% if searchreg %}
         <div class="overflow-auto vh-50">
         {% for reg in searchreg %}
-            <a href="{{ url_for('martial_reg', regid=reg['regid']) }}">
+            <a href="{{ url_for('marshal.reg', regid=reg['regid']) }}">
             <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
             </a>
             <div>
