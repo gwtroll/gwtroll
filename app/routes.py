@@ -5,7 +5,6 @@ from app.utils.db_utils import *
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_file
-from werkzeug.exceptions import abort
 import os
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_security import roles_accepted
@@ -120,19 +119,6 @@ def index():
         return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
         return render_template('index.html', regcount=regcount)
-
-@app.route('/role/create', methods=('GET', 'POST'))
-@login_required
-@roles_accepted('Admin')
-def createrole():
-    form = CreateRoleForm()
-    all_roles = Role.query.filter(Role.id is not None).all()
-    if request.method == 'POST':
-        role = Role(id = request.form.get('id') ,name=request.form.get('role_name'))
-        db.session.add(role)
-        db.session.commit()
-        return redirect('/')
-    return render_template('createrole.html', form=form, roles=all_roles)
 
 @app.route('/upload', methods=('GET', 'POST'))
 @login_required

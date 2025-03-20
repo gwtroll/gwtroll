@@ -7,7 +7,7 @@ from flask_login import LoginManager
 from flask_security import Security, SQLAlchemyUserDatastore, auth_required, hash_password
 from flask_security.models import fsqla_v3 as fsqla
 
-app = Flask(__name__)
+app = Flask(__name__,static_url_path="", static_folder="static")
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

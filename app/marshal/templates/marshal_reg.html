@@ -145,7 +145,7 @@
                                     <b>Heavy</b>
                                 </td>
                                 <td>
-                                    {{form.chivalric_inspection(class_='form-control')}}
+                                    {{form.chivalric_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Heavy'] %}
@@ -164,11 +164,12 @@
                                     <b>Heavy Spear</b>
                                 </td>
                                 <td>
-                                    {{form.chivalric_spear_inspection(class_='form-control')}}
+                                    {{form.chivalric_spear_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Heavy Spear'] %}
-                                    {{inspection_dict['Heavy Spear'].inspecting_marshal.fname}} {{inspection_dict['Heavy Spear'].inspecting_marshal.lname}}
+                                    {{inspection_dict['Heavy Spear'].inspecting_marshal.fname}} 
+                                    {{inspection_dict['Heavy Spear'].inspecting_marshal.lname}}
                                     {% endif %}
                                 </td>
                                 <td>
@@ -182,7 +183,7 @@
                                     <b>Rapier</b>
                                 </td>
                                 <td>
-                                    {{form.rapier_inspection(class_='form-control')}}
+                                    {{form.rapier_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Rapier'] %}
@@ -201,7 +202,7 @@
                                     <b>Rapier Spear</b>
                                 </td>
                                 <td>
-                                    {{form.rapier_spear_inspection(class_='form-control')}}
+                                    {{form.rapier_spear_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Rapier Spear'] %}
@@ -220,7 +221,7 @@
                                     <b>Combat Archery</b>
                                 </td>
                                 <td>
-                                    {{form.combat_archery_inspection(class_='form-control')}}
+                                    {{form.combat_archery_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Combat Archery'] %}
@@ -236,7 +237,7 @@
                             </tr>
                             <tr>
                                 <td colspan="4">
-                                    {{ form.submit(class_='form-control btn-primary btn-lg m-0') }}
+                                    {{ form.submit(class_='form-control btn btn-primary btn-lg m-0') }}
                                 </td>
                             </tr>
                         </tbody>

@@ -95,14 +95,14 @@ def createprereg():
             reg.regid, reg.fname, reg.lname))
         
         return redirect(url_for('registration.success'))
-    return render_template('create_prereg.html', titl='New Registration', form=form)
+    return render_template('create_prereg.html', form=form)
 
 @bp.route('/success')
 def success():
     return render_template('reg_success.html')
 
 
-@bp.route('/create/atd', methods=('GET', 'POST'))
+@bp.route('/create', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
 def createatd():
@@ -153,12 +153,12 @@ def createatd():
 
         log_reg_action(reg, 'CREATE')
 
-        regid = reg.regid
+
         flash('Registration {} created for {} {}.'.format(
             reg.regid, reg.fname, reg.lname))
 
-        return redirect(url_for('troll.reg', regid=regid))
-    return render_template('create.html', title = 'New Registration', form=form)
+        return redirect(url_for('troll.reg', regid=reg.regid))
+    return render_template('create.html', form=form)
 
 @bp.route('/edit', methods=['GET', 'POST'])
 @login_required

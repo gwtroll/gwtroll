@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col">
+            <form action="" method="post">
+                <div class="row form-group">
+                    <div class="col form-group">
+                        <p>
+                            {{ form.id.label }}
+                            {{ form.id(class_='form-control m-0', readonly=true) }}
+                        </p>
+                    </div>
+                    <div class="col form-group">
+                        <p>
+                            {{ form.username.label }}
+                            {{ form.username(class_='form-control m-0', readonly=true) }}
+                        </p>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col form-group">
+                        <p>
+                            {{ form.password.label }}
+                            {{ form.password(class_='form-control m-0') }}
+                        </p>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col form-group">
+                        <p>
+                            <input class="form__submit form__input btn btn-primary form-control m-0" type="submit" value="Password Reset" name="select_value"/>
+                        </p>
+                    </div>
+                </div>
+            </form>
+    </div>
+</div>
+
+
+{% endblock %}

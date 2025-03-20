@@ -64,7 +64,7 @@ def createuser():
 
     return render_template('createuser.html', form=form)
 
-@bp.route('/<userid>', methods=('GET', 'POST'))
+@bp.route('/<userid>/edit', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
 def edituser(userid):
@@ -73,30 +73,23 @@ def edituser(userid):
         return redirect('/users')
     if not currentuser_has_permission_on_user(current_user,user):
         return redirect('/users')
-    edit_request = request.args.get("submitValue")
-    if edit_request == "Edit" :
-        role_array = []
-        for role in user.roles:
-            role_array.append(role.id)
-        form = EditUserForm(
-            id = user.id, 
-            username = user.username, 
-            role = role_array,
-            fname = user.fname,
-            lname = user.lname,
-            medallion = user.medallion,
-            active = user.active
-        )
-        form.role.choices = get_role_choices()
-        
-    elif edit_request == "Password Reset":
-        form = UpdatePasswordForm(
-            id = user.id, 
-            username = user.username, 
-            password = ''
-        )
 
-    if request.method == 'POST' and edit_request == 'Edit':
+    role_array = []
+    for role in user.roles:
+        role_array.append(role.id)
+
+    form = EditUserForm(
+        id = user.id, 
+        username = user.username, 
+        role = role_array,
+        fname = user.fname,
+        lname = user.lname,
+        medallion = user.medallion,
+        active = user.active
+    )
+    form.role.choices = get_role_choices()
+
+    if request.method == 'POST':
         role_array = []
         for roleid in form.role.data:
             role_array.append(get_role(roleid))
@@ -112,8 +105,27 @@ def edituser(userid):
         db.session.commit()
 
         return redirect('/users')
+    
+    return render_template('edituser.html', user=user, form=form)
 
-    if request.method == 'POST'  and edit_request == 'Password Reset':
+@bp.route('/<userid>/pwreset', methods=('GET', 'POST'))
+@login_required
+@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
+def pwresetuser(userid):
+    user = get_user(userid)
+    if not currentuser_has_permission_on_user(current_user,user):
+        return redirect('/users')
+    if not currentuser_has_permission_on_user(current_user,user):
+        return redirect('/users')
+    edit_request = request.args.get("submitValue")
+        
+    form = UpdatePasswordForm(
+        id = user.id, 
+        username = user.username, 
+        password = ''
+    )
+
+    if request.method == 'POST':
         user = get_user(form.id.data)
         user.set_password(form.password.data)
 
@@ -121,4 +133,4 @@ def edituser(userid):
 
         return redirect('/users')
     
-    return render_template('edituser.html', user=user, form=form, edit_request=edit_request)
+    return render_template('pwresetuser.html', user=user, form=form, edit_request=edit_request)
