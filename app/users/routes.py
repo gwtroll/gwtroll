@@ -43,7 +43,7 @@ def createuser():
     if request.method == 'POST':
         dup_user_check = User.query.filter(User.username == form.username.data).first()
         if dup_user_check:
-            flash("Username Already Taken - Please Try Again")
+            flash("Username Already Taken - Please Try Again",'error')
             return render_template('createuser.html', form=form)
         user = User()
         user.username = form.username.data

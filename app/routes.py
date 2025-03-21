@@ -53,10 +53,10 @@ def login():
         user = db.session.scalar(
             sa.select(User).where(User.username == form.username.data))
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+            flash('Invalid username or password','error')
             return redirect(url_for('login'))
         if not user.active:
-            flash('User is Inactive')
+            flash('User is Inactive','error')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))

@@ -147,7 +147,7 @@ def createatd():
 
         if form.rate_mbr.data == 'Member':
             if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
-                flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data))
+                flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data),'error')
                 return render_template('create.html', title = 'New Registration', form=form)
 
         db.session.add(reg)
@@ -226,9 +226,9 @@ def editreg():
                 medallion_check = None
 
             if medallion_check is not None and int(regid) != int(medallion_check.regid):
-                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
+                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid),'error')
                 dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-                flash(Markup(dup_url))
+                flash(Markup(dup_url),'error')
             else:
                 if request.form.get('medallion'):
                     reg.medallion = int(request.form.get('medallion'))
@@ -258,9 +258,9 @@ def editreg():
                 medallion_check = None
 
             if medallion_check is not None and int(regid) != int(medallion_check.regid):
-                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid) )
+                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid),'error')
                 dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-                flash(Markup(dup_url))
+                flash(Markup(dup_url),'error')
 
             else:
                 reg.fname = request.form.get('fname')

@@ -64,13 +64,13 @@ def checkin():
     if request.method == 'POST':
         if form.rate_mbr.data == 'Member':
             if request.form.get('mbr_num') is None:
-                flash('Membership Number is Required if Member.')
+                flash('Membership Number is Required if Member.','error')
                 return render_template('checkin.html', reg=reg, form=form) 
             elif request.form.get('mbr_num_exp') is None:
-                flash('Membership Expiration Date is Required if Member.')
+                flash('Membership Expiration Date is Required if Member.','error')
                 return render_template('checkin.html', reg=reg, form=form)
             elif datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
-                flash('Membership Expiration Date {} is not current.'.format(request.form.get('mbr_num_exp')))
+                flash('Membership Expiration Date {} is not current.'.format(request.form.get('mbr_num_exp')),'error')
                 return render_template('checkin.html', reg=reg, form=form)
         medallion = form.medallion.data
         kingdom = form.kingdom.data
@@ -79,7 +79,7 @@ def checkin():
         minor_waiver = form.minor_waiver.data
         
         if form.minor_waiver.data == '-':
-            flash('You must select a Minor Waiver Validation')
+            flash('You must select a Minor Waiver Validation','error')
             return render_template('checkin.html', reg=reg, form=form)
 
         if request.form.get('medallion') != '' and request.form.get('medallion') != None:
@@ -90,7 +90,7 @@ def checkin():
         if medallion_check is not None and int(regid) != int(medallion_check.regid):
             duplicate_name = medallion_check.fname + " " + medallion_check.lname
             dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.regid)) + f' target="_blank" rel="noopener noreferrer">{duplicate_name}</a>'
-            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " +  Markup(dup_url))
+            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " +  Markup(dup_url),'error')
         else:
             #Account for PreReg Non-Member and Checkin Member (No NMR Refund - View as Donation)
             if reg.rate_mbr != 'Member' and rate_mbr == 'Member' and reg.prereg_status == 'SUCCEEDED' and reg.rate_age.__contains__('18+'):
@@ -120,7 +120,11 @@ def checkin():
 
             log_reg_action(reg, 'CHECKIN')
 
-            return redirect(url_for('troll.reg', regid=regid))
+            if reg.price_due > 0:
+                return redirect(url_for('troll.payment', regid=regid))
+            else:
+                flash(f"{reg.fname} {reg.lname} successfully checked in!")
+                return redirect(url_for('index', regid=regid))
 
     return render_template('checkin.html', reg=reg, form=form)
 
@@ -146,7 +150,7 @@ def waiver():
 
         log_reg_action(reg, 'WAIVER')
 
-        return redirect(url_for('troll.reg', regid=regid))
+        return redirect(url_for('troll.checkin', regid=regid))
 
     return render_template('waiver.html', form=form, reg=reg)
 
@@ -167,7 +171,7 @@ def payment():
     if request.method == 'POST':
 
         if request.form.get('pay_type') == '':
-            flash('Must select a Payment Type')
+            flash('Must select a Payment Type','error')
             return redirect(url_for('troll.payment', regid=regid, form=form))
 
         # reg.atd_paid = form.atd_paid.data

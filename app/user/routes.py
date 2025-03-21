@@ -25,7 +25,7 @@ def changepassword():
         return redirect(url_for('user.myaccount'))
     elif request.method == 'POST' and not form.validate_on_submit():
         for field in form.errors:
-            flash(form.errors[field])
+            flash(form.errors[field],'error')
         return render_template('changepassword.html', form=form, user=current_user)
     else:
         return render_template('changepassword.html', form=form, user=current_user)
