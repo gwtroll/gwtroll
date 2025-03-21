@@ -1,8 +1,7 @@
-from flask import render_template
 from app.troll import bp
 
 from flask_login import current_user, login_user, logout_user, login_required
-from flask import render_template, request, url_for, flash, redirect
+from flask import render_template, request, url_for, flash, redirect, jsonify
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
@@ -10,6 +9,11 @@ from app.utils.db_utils import *
 from flask_security import roles_accepted
 import json
 from markupsafe import Markup
+
+import base64
+import numpy as np
+import cv2
+from pyzbar import pyzbar
 
 @bp.route('/<int:regid>', methods=('GET', 'POST'))
 @login_required
@@ -27,6 +31,11 @@ def reg(regid):
         return redirect(url_for('troll.checkin', regid=regid))
     else:
         return render_template('reg.html', reg=reg)
+    
+@bp.route('/fastpass')
+def fastpass():
+        return render_template('fastpass.html')
+
 
 @bp.route('/checkin', methods=['GET', 'POST'])
 @login_required

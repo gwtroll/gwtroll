@@ -6,6 +6,7 @@ from flask import render_template, request, url_for, flash, redirect
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
+from app.utils.email_utils import *
 
 from flask_security import roles_accepted
 import json
@@ -90,16 +91,17 @@ def createprereg():
         db.session.add(reg)
         db.session.commit()
 
-        regid = reg.regid
+        send_confirmation_email(reg.email,reg)
+
         flash('Registration {} created for {} {}.'.format(
             reg.regid, reg.fname, reg.lname))
         
-        return redirect(url_for('registration.success'))
+        return redirect(url_for('registration.success', regid=reg.regid))
     return render_template('create_prereg.html', form=form)
 
-@bp.route('/success')
-def success():
-    return render_template('reg_success.html')
+@bp.route('/<regid>/success')
+def success(regid):
+    return render_template('reg_success.html', regid=regid)
 
 
 @bp.route('/create', methods=('GET', 'POST'))

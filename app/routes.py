@@ -1,4 +1,4 @@
-from app import app, db, login
+from app import app, db, login, mail
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
@@ -14,6 +14,7 @@ from datetime import datetime
 import re
 import csv
 import codecs
+from flask_mail import Message
 
 #Import pricing from CSV and set global variables
 price_df = pd.read_csv('gwpricing.csv')
@@ -125,42 +126,50 @@ def index():
 @roles_accepted('Admin')
 def upload():
     if request.method == 'POST':   
-        f = request.files['file'] 
-        f.save(f.filename)
+        # msg = Message(
+        #     subject="Hello",
+        #     sender="carl.cox.primary@gmail.com",
+        #     recipients=["carl.cox.primary@gmail.com"],
+        # )
+        # msg.html = "<b>testing</b>"
+        # mail.send(msg)
+        # f = request.files['file'] 
+        # f.save(f.filename)
 
-        s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
-        conndict = dict(item.split("=") for item in s.split(" "))
-        connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
-        engine=db.create_engine(connstring)
-        metadata = db.MetaData()
-        registrations = db.Table('registrations', metadata)
+        # s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
+        # conndict = dict(item.split("=") for item in s.split(" "))
+        # connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
+        # engine=db.create_engine(connstring)
+        # metadata = db.MetaData()
+        # registrations = db.Table('registrations', metadata)
 
-        root_path = os.path.dirname(os.path.dirname( __file__ ))
-        df = pd.read_csv(os.path.join(root_path,f.filename))
-
-
-        # Rename columns from CSV to match DB - order is important
-        df.columns = ['event_id','event_name','order_id','reg_date_time','medallion','fname','lname','scaname_bad','acc_member_id','acc_exp_date','event_ticket','price_paid','order_price','lodging','pay_type','prereg_status','kingdom','regid','scaname','mbr_num_exp','requests','waiver1','waiver2']
-        df = df.drop(columns=['event_id','event_name','scaname_bad','acc_member_id','acc_exp_date','order_price','waiver1','waiver2']) # Remove unwanted columns from the import
-
-        df[['rate_age']] = df['event_ticket'].str.extract('(Child|18\+|Heirs|K\/Q|Royals)', expand=True) # Split rate, age and arival date from single field
-        df[['rate_mbr']] = df['event_ticket'].str.extract('(Member|Non-Member)', expand=True) # Split rate, age and arival date from single field
-        df[['rate_date']] = df['event_ticket'].str.extract('Arriving (\d+)', expand=True) # Split rate, age and arival date from single field
-
-        df[['mbr_num']] = df['mbr_num_exp'].str.extract('^(\d{4,})', expand=True) # Extract member number 
-        df['lodging'] = df['lodging'].str.extract('(.*)\s\(\$') # Remove price from camping groups
+        # root_path = os.path.dirname(os.path.dirname( __file__ ))
+        # df = pd.read_csv(os.path.join(root_path,f.filename))
 
 
-        # Import data to DB
-        df.to_sql('registrations', engine, if_exists= 'append', index=False)
+        # # Rename columns from CSV to match DB - order is important
+        # df.columns = ['event_id','event_name','order_id','reg_date_time','medallion','fname','lname','scaname_bad','acc_member_id','acc_exp_date','event_ticket','price_paid','order_price','lodging','pay_type','prereg_status','kingdom','regid','scaname','mbr_num_exp','requests','waiver1','waiver2']
+        # df = df.drop(columns=['event_id','event_name','scaname_bad','acc_member_id','acc_exp_date','order_price','waiver1','waiver2']) # Remove unwanted columns from the import
 
-        # Adjust regid for at-the-door registrations
-        conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
-        cur = conn.cursor()
-        cur.execute ('ALTER SEQUENCE registrations_regid_seq RESTART WITH 60001;')
-        conn.commit()
-        conn.close()
+        # df[['rate_age']] = df['event_ticket'].str.extract('(Child|18\+|Heirs|K\/Q|Royals)', expand=True) # Split rate, age and arival date from single field
+        # df[['rate_mbr']] = df['event_ticket'].str.extract('(Member|Non-Member)', expand=True) # Split rate, age and arival date from single field
+        # df[['rate_date']] = df['event_ticket'].str.extract('Arriving (\d+)', expand=True) # Split rate, age and arival date from single field
+
+        # df[['mbr_num']] = df['mbr_num_exp'].str.extract('^(\d{4,})', expand=True) # Extract member number 
+        # df['lodging'] = df['lodging'].str.extract('(.*)\s\(\$') # Remove price from camping groups
+
+
+        # # Import data to DB
+        # df.to_sql('registrations', engine, if_exists= 'append', index=False)
+
+        # # Adjust regid for at-the-door registrations
+        # conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
+        # cur = conn.cursor()
+        # cur.execute ('ALTER SEQUENCE registrations_regid_seq RESTART WITH 60001;')
+        # conn.commit()
+        # conn.close()
         flash("SUCCESS!")
+        return redirect(url_for('index'))
     return render_template('upload.html')
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))

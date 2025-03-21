@@ -6,13 +6,20 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_security import Security, SQLAlchemyUserDatastore, auth_required, hash_password
 from flask_security.models import fsqla_v3 as fsqla
+from flask_mail import Mail
+from flask_qrcode import QRcode
+
 
 app = Flask(__name__,static_url_path="", static_folder="static")
+
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
+qrcode = QRcode(app)
+
+mail = Mail(app)
 
 from app import routes, models
 from app.models import Role, User
