@@ -5,30 +5,29 @@
     {{ form.hidden_tag() }}
     <div class="row">
         <div class="col">
-            <table>
-                <colgroup>
-                    <col span="1" style="background-color: #D6EEEE">
-                </colgroup>
-                <tr> 
-                    <td>Name: </td>
-                    <td>{{ reg.fname }} {{ reg.lname }}</td>
-                </tr>
-                <tr>
-                    <td>SCA Name: </td>
-                    <td>{{ reg.scaname }}</td>
-                </tr>
-                <tr>
-                    <td>Registration Type: </td>
-                    <td>{{ reg.rate_age }}</td>
-                </tr>
-                <tr>
-                    <td>Invoice Email: </td>
-                    <td>{{ reg.invoice_email }}</td>
-                </tr>
-                <tr>
-                    <td>Communication Email: </td>
-                    <td>{{ reg.email }}</td>
-                </tr>
+            <table class="table table-reg table-reg-display table-responsive">
+                <tbody>
+                    <tr> 
+                        <td style="background-color: #D6EEEE">Name: </td>
+                        <td>{{ reg.fname }} {{ reg.lname }}</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #D6EEEE">SCA Name: </td>
+                        <td>{{ reg.scaname }}</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #D6EEEE">Registration Type: </td>
+                        <td>{{ reg.rate_age }}</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #D6EEEE">Invoice Email: </td>
+                        <td>{{ reg.invoice_email }}</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #D6EEEE">Communication Email: </td>
+                        <td>{{ reg.email }}</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
         <div class="col">
@@ -87,29 +86,28 @@
             </p>
         </div>
     </div>
-</div>
     <div class="row">
         <div class="col text-center">
             <p>
                 {{ form.invoice_canceled.label }}<br>
-                {{ form.invoice_canceled(class_='form-control') }}
+                {{ form.invoice_canceled(class_='form-check-input big-checkbox') }}
             </p>  
         </div>
         <div class="col text-center">
             <p>
                 {{ form.duplicate_invoice.label }}<br>
-                {{ form.duplicate_invoice(class_='form-control') }}
+                {{ form.duplicate_invoice(class_='form-check-input big-checkbox') }}
             </p>  
         </div>
         <div class="col text-center">
             <p>
                 {{ form.is_check.label }}<br>
-                {{ form.is_check(class_='form-control') }}
+                {{ form.is_check(class_='form-check-input big-checkbox') }}
             </p>  
         </div>
     </div>
-  
-    <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>
+    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+</div>
     </form>
 
    

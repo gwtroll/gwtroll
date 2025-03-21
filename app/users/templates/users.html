@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12">
+
+        <table id="userTable"
+        data-toggle="table"
+        data-filter-control="true"
+        data-sortable="true"
+        data-pagination="true"
+        data-show-columns="true"
+        data-show-columns-toggle-all="true"
+        data-toolbar="#toolbar"
+        data-show-toggle="true"
+        data-show-fullscreen="true"
+        data-show-export="true"
+        data-export-types="['csv', 'excel', 'pdf']"
+        data-minimum-count-columns="2"
+        data-show-pagination-switch="true"
+        data-page-list="[10, 25, 50, 100, all]"
+        data-response-handler="responseHandler"
+        data-detail-view="true"
+        data-detail-view-icon="false"
+        data-mobile-responsive="true"
+        data-check-on-init="true"
+        data-classes="table table-striped table-responsive">
+
+            <thead>
+                <th data-field="userid">User ID</th>
+                <th data-field="active" data-filter-control="select">Active</th>
+                <th data-field="user_name" data-filter-control="input">User Name</th>
+                <th data-field="role" data-filter-control="input">Role</th>
+                <th data-field="fname" data-filter-control="input">First Name</th>
+                <th data-field="lname" data-filter-control="input">Last Name</th>
+                <th data-field="edit">Edit</th>
+                <th data-field="pwreset">Password Reset</th>
+            </thead>
+            <tbody>
+                {%for user in users %}
+                <tr>
+                        <td>
+                            {{user.id}}
+                        </td>
+                        <td>
+                            {{user.active}}
+                        </td>
+                        <td> 
+                            {{user.username}}
+                        </td>
+                        <td> 
+                        {% for role in user.roles %}
+                            {{role.name}}
+                            <br/>
+                        {% endfor %}
+                        </td>
+                        <td> 
+                            {{user.fname}}
+                        </td>
+                        <td> 
+                            {{user.lname}}
+                        </td>
+                        <td>
+                            <a class="btn btn-primary" href="{{url_for('users.edituser', userid=user.id)}}" role="button">Edit</a>
+                        </td>
+                        <td>
+                            <a class="btn btn-primary" href="{{url_for('users.pwresetuser', userid=user.id)}}" role="button">Password Reset</a>
+                        </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

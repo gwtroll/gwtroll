@@ -131,12 +131,12 @@
         </div>
         <div class="row m-0">
             <div class="col d-flex justify-content-center">
-                <form action="/martial/{{reg.regid}}" method="POST">
+                <form action="/marshal/{{reg.regid}}" method="POST">
                     <table class="table table-responsive table-reg">
                         <thead>
                             <th>Type</th>
                             <th>Inspected</th>
-                            <th>Martial</th>
+                            <th>Marshal</th>
                             <th>Date/Time</th>
                         </thead>
                         <tbody>
@@ -145,12 +145,12 @@
                                     <b>Heavy</b>
                                 </td>
                                 <td>
-                                    {{form.chivalric_inspection(class_='form-control')}}
+                                    {{form.chivalric_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Heavy'] %}
-                                    {{inspection_dict['Heavy'].inspecting_martial.fname}}
-                                    {{inspection_dict['Heavy'].inspecting_martial.lname}}
+                                    {{inspection_dict['Heavy'].inspecting_marshal.fname}}
+                                    {{inspection_dict['Heavy'].inspecting_marshal.lname}}
                                     {% endif %}
                                 </td>
                                 <td>
@@ -164,11 +164,12 @@
                                     <b>Heavy Spear</b>
                                 </td>
                                 <td>
-                                    {{form.chivalric_spear_inspection(class_='form-control')}}
+                                    {{form.chivalric_spear_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Heavy Spear'] %}
-                                    {{inspection_dict['Heavy Spear'].inspecting_martial.fname}} {{inspection_dict['Heavy Spear'].inspecting_martial.lname}}
+                                    {{inspection_dict['Heavy Spear'].inspecting_marshal.fname}} 
+                                    {{inspection_dict['Heavy Spear'].inspecting_marshal.lname}}
                                     {% endif %}
                                 </td>
                                 <td>
@@ -182,12 +183,12 @@
                                     <b>Rapier</b>
                                 </td>
                                 <td>
-                                    {{form.rapier_inspection(class_='form-control')}}
+                                    {{form.rapier_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Rapier'] %}
-                                    {{inspection_dict['Rapier'].inspecting_martial.fname}}
-                                    {{inspection_dict['Rapier'].inspecting_martial.lname}}
+                                    {{inspection_dict['Rapier'].inspecting_marshal.fname}}
+                                    {{inspection_dict['Rapier'].inspecting_marshal.lname}}
                                     {% endif %}
                                 </td>
                                 <td>
@@ -201,12 +202,12 @@
                                     <b>Rapier Spear</b>
                                 </td>
                                 <td>
-                                    {{form.rapier_spear_inspection(class_='form-control')}}
+                                    {{form.rapier_spear_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Rapier Spear'] %}
-                                    {{inspection_dict['Rapier Spear'].inspecting_martial.fname}}
-                                    {{inspection_dict['Rapier Spear'].inspecting_martial.lname}}
+                                    {{inspection_dict['Rapier Spear'].inspecting_marshal.fname}}
+                                    {{inspection_dict['Rapier Spear'].inspecting_marshal.lname}}
                                     {% endif %}
                                 </td>
                                 <td>
@@ -220,12 +221,12 @@
                                     <b>Combat Archery</b>
                                 </td>
                                 <td>
-                                    {{form.combat_archery_inspection(class_='form-control')}}
+                                    {{form.combat_archery_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
                                     {% if inspection_dict['Combat Archery'] %}
-                                    {{inspection_dict['Combat Archery'].inspecting_martial.fname}}
-                                    {{inspection_dict['Combat Archery'].inspecting_martial.lname}}
+                                    {{inspection_dict['Combat Archery'].inspecting_marshal.fname}}
+                                    {{inspection_dict['Combat Archery'].inspecting_marshal.lname}}
                                     {% endif %}
                                 </td>
                                 <td>
@@ -236,7 +237,7 @@
                             </tr>
                             <tr>
                                 <td colspan="4">
-                                    {{ form.submit(class_='form-control btn-primary btn-lg m-0') }}
+                                    {{ form.submit(class_='form-control btn btn-primary btn-lg m-0') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -254,14 +255,14 @@
                 <table class="table">
                     <thead>
                         <th>Poundage</th>
-                        <th>Martial</th>
+                        <th>Marshal</th>
                         <th>Date/Time</th>
                     </thead>
                     <tbody>
                         {% for bow in reg.bows %}
                         <tr>
                             <td>{{ bow.poundage }}</td>
-                            <td>{{ bow.bow_inspection_martial.fname}} {{bow.bow_inspection_martial.lname}}</td>
+                            <td>{{ bow.bow_inspection_marshal.fname}} {{bow.bow_inspection_marshal.lname}}</td>
                             <td>{{ bow.bow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
                         </tr>
                         {% endfor %}
@@ -288,15 +289,15 @@
                 <table class="table">
                     <thead>
                         <th>Inch/Pounds</th>
-                        <th>Martial</th>
+                        <th>Marshal</th>
                         <th>Date/Time</th>
                     </thead>
                     <tbody>
                         {% for crossbow in reg.crossbows %}
                         <tr>
                             <td>{{ crossbow.inchpounds }}</td>
-                            <td>{{ crossbow.crossbow_inspection_martial.fname}}
-                                {{crossbow.crossbow_inspection_martial.lname}}</td>
+                            <td>{{ crossbow.crossbow_inspection_marshal.fname}}
+                                {{crossbow.crossbow_inspection_marshal.lname}}</td>
                             <td>{{ crossbow.crossbow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
                         </tr>
                         {% endfor %}
@@ -326,7 +327,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/martial/{{reg.regid}}/addbow" method="POST">
+                <form action="/marshal/{{reg.regid}}/addbow" method="POST">
                     <b>{{bow_form.poundage.label}}</b>
                     {{bow_form.poundage(class_='form-control')}}
                     {{bow_form.submit(class_='form-control btn-primary')}}
@@ -351,7 +352,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/martial/{{reg.regid}}/addcrossbow" method="POST">
+                <form action="/marshal/{{reg.regid}}/addcrossbow" method="POST">
                     <b>{{bow_form.poundage.label}}</b>
                     {{bow_form.poundage(class_='form-control')}}
                     {{bow_form.submit(class_='form-control btn-primary')}}
@@ -376,7 +377,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/martial/{{reg.regid}}/addincident" method="POST">
+                <form action="/marshal/{{reg.regid}}/addincident" method="POST">
                     <b>{{incident_form.incident_date.label}}</b>
                     {{incident_form.incident_date(class_='form-control')}}
                     <b>{{incident_form.notes.label}}</b>

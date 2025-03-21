@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<h1>{% block title %} Edit Registration {% endblock %}</h1>
+
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
 
@@ -181,8 +183,8 @@
         </div>
         <div class="col form-group">
             <p class="text-center">
-                {{ form.early_on.label }}
-                {{ form.early_on(class_='form-control m-0') }}
+                {{ form.early_on.label(class_='form-check-label') }}
+                {{ form.early_on(class_='form-check-input big-checkbox') }}
             </p>
         </div>
     </div>
@@ -260,7 +262,7 @@
         <div class="col form-group">
             <p class="text-center">
                 {{ form.paypal_donation.label }}
-                {{ form.paypal_donation(class_='form-control m-0') }}
+                {{ form.paypal_donation(class_='form-check-input big-checkbox') }}
             </p>
         </div>
         <div class="col form-group">

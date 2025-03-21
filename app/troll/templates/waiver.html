@@ -152,14 +152,14 @@
         {% endif %}
                 <div class="col form-group">
                     <p class="text-center">
-                        {{ form.paypal_donation.label }}<br>
-                        {{ form.paypal_donation(class_='form-control m-0') }}
+                        {{ form.paypal_donation.label(class_='form-check-label') }}
+                        {{ form.paypal_donation(class_='form-check-input big-checkbox') }}
                     </p>
                 </div>
             </div>
             {{ form.hidden_tag() }}
             <p>{{ form.signature }}</p>
-            {{form.submit(class_='button save form-control btn-primary btn-lg')}}
+            {{form.submit(class_='btn save form-control btn-primary btn-lg')}}
             <!-- <div class="col-12">
                 <button type="submit" class="button save form-control btn-primary btn-lg" form="WaiverForm" data-action="save-svg">Submit</button>
             </div> -->
