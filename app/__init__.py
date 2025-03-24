@@ -9,7 +9,6 @@ from flask_security.models import fsqla_v3 as fsqla
 from flask_mail import Mail
 from flask_qrcode import QRcode
 
-
 app = Flask(__name__,static_url_path="", static_folder="static")
 
 app.config.from_object(Config)

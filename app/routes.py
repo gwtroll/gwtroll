@@ -108,7 +108,8 @@ def index():
                 try:
                     arrival_date = datetime.strptime(r['rate_date'], "%Y-%m-%d %H:%M:%S")
                 except:
-                    arrival_date = datetime.strptime(r['rate_date'], "%Y-%m-%d")
+                    arrival_date = datetime.strptime(r['rate_date'], "%m-%d-%Y")
+
             else:
                 arrival_date = datetime.strptime('01/01/1900', '%m/%d/%Y')
             if (arrival_date == datetime.strptime('03/08/2025','%m/%d/%Y') or arrival_date <= datetime.now()):

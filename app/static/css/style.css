@@ -156,6 +156,7 @@ html.borderradius #scrollgrabber {
 }
 
 .error {
+    margin-top: 0;
     color: red;
 }
 

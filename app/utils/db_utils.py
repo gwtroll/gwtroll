@@ -152,11 +152,11 @@ def log_reg_action(reg, action):
 def calculate_price_calc(reg):
     today_datetime = date.today()
     if today_datetime < datetime(2025,3,8).date():
-        today_date = datetime(2025,3,8).strftime('%m-%d-%Y')
+        today_date = datetime(2025,3,8).strftime('%Y-%m-%d')
     elif today_datetime > datetime(2025,3,15).date():
-        today_date = datetime(2025,3,15).strftime('%m-%d-%Y')
+        today_date = datetime(2025,3,15).strftime('%Y-%m-%d')
     else:
-        today_date = today_datetime.strftime('%m-%d-%Y')
+        today_date = today_datetime.strftime('%Y-%m-%d')
 
     with open('rate_sheet.json') as f:
         rate_sheet = json.load(f)

@@ -6,6 +6,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
+import json
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -126,6 +127,15 @@ class Registrations(db.Model):
     def __repr__(self):
         return '<Registrations {}>'.format(self.regid)
     
+    def toJSON(self):
+        data_dict = {}
+        print(self.__dict__)
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                print(self.__dict__[key])
+                data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict)
+    
 class RegLogs(db.Model):
     __tablename__ = 'reglogs'  
     id = db.Column(db.Integer(), primary_key=True)
@@ -185,3 +195,10 @@ class IncidentReport(db.Model):
     reporting_user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
     reporting_user = db.relationship('User', foreign_keys=[reporting_user_id])
     notes = db.Column(db.Text())
+
+class PriceSheet(db.Model):
+    __tablename__ = 'pricesheet'
+    arrival_date = db.Column(db.Date(), primary_key=True)
+    prereg_price = db.Column(db.Integer())
+    atd_price = db.Column(db.Integer())
+    nmr = db.Column(db.Integer())

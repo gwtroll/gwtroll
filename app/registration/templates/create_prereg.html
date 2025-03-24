@@ -1,5 +1,6 @@
 {% extends 'base_restricted.html' %}
 
+
 {% block content %}
 <div style="background-color: rgb(255, 255, 255); padding: 10px; border-radius: 1em;">
 <h1>{% block title %} Gulf Wars XXXIII – March 8-16, 2025 {% endblock %}</h1>
@@ -107,8 +108,32 @@
       </tr>
     </tbody>
   </table>
+
 <form action="" method="POST" novalidate>
     {{ form.hidden_tag() }}
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                Registrations on same invoice:
+            </p>
+            {% if reg_names %}
+            {% for reg in reg_names %}
+            <p>
+                {{reg.fname}} {{reg.lname}}
+            </p>
+            {% endfor %}
+            {% endif %}
+            {% if additional_registrations %}
+            {% for reg in additional_registrations %}
+            <p>
+                <input type="hidden" value="{{reg}}" name="additional_registration-{{loop.index}}" id="additional_registration-{{loop.index}}">
+            </p>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
     <div class="row form-group">
         <div class="col form-group">
             <p>
@@ -117,10 +142,12 @@
             <p>
                 {{ form.invoice_email.label }}
                 {{ form.invoice_email(class_='form-control m-0') }}
+                {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
     </div>
+
     <div class="row form-group">
         <div class="col form-group">
             <p>
@@ -160,15 +187,15 @@
             <p>
                 {{ form.fname.label }}<br>
                 {{ form.fname(class_='form-control m-0') }}
+                {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
                 {{ form.lname.label }}<br>
                 {{ form.lname(class_='form-control m-0') }}
+                {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
@@ -182,15 +209,16 @@
             <p>
                 {{ form.city.label }}<br>
                 {{ form.city(class_='form-control m-0') }}
+                {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
                 {{ form.state_province.label }}<br>
                 {{ form.state_province(class_='form-control m-0') }}
+                {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
     </div>
     <div class="row form-group">
@@ -198,15 +226,16 @@
             <p>
                 {{ form.zip.label }}<br>
                 {{ form.zip(class_='form-control m-0') }}
+                {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
         <div class="col">
             <p>
                 {{ form.country.label }}<br>
                 {{ form.country(class_='form-control m-0') }}
+                {% if form.country.errors %}{% for error in form.country.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.country.errors %}{% for error in form.country.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
     </div>
     <div class="row form-group">
@@ -214,15 +243,17 @@
             <p>
                 {{ form.phone.label }}<br>
                 {{ form.phone(class_='form-control m-0') }}
+                {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
         <div class="col">
             <p>
                 Communication Email<br>
                 {{ form.email(class_='form-control m-0') }}
+                {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
     </div>
     <div class="row form-group">
@@ -230,15 +261,17 @@
             <p>
                 {{ form.kingdom.label }}<br>
                 {{ form.kingdom(class_='form-control m-0') }}
+                {% if form.kingdom.errors %}{% for error in form.kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.kingdom.errors %}{% for error in form.kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
         <div class="col">
             <p>
                 {{ form.lodging.label }}<br>
                 {{ form.lodging(class_='form-control m-0') }}
+                {% if form.lodging.errors %}{% for error in form.lodging.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.lodging.errors %}{% for error in form.lodging.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
     </div>
     <div class="row form-group">
@@ -269,8 +302,9 @@
             <p>
                 {{ form.onsite_contact_name.label }}<br>
                 {{ form.onsite_contact_name(class_='form-control m-0') }}
+                {% if form.onsite_contact_name.errors %}{% for error in form.onsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.onsite_contact_name.errors %}{% for error in form.onsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
         <div class="col">
             <p>
@@ -284,15 +318,17 @@
             <p>
                 {{ form.onsite_contact_kingdom.label }}<br>
                 {{ form.onsite_contact_kingdom(class_='form-control m-0') }}
+                {% if form.onsite_contact_kingdom.errors %}{% for error in form.onsite_contact_kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.onsite_contact_kingdom.errors %}{% for error in form.onsite_contact_kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
         <div class="col">
             <p>
                 {{ form.onsite_contact_group.label }}<br>
                 {{ form.onsite_contact_group(class_='form-control m-0') }}
+                {% if form.onsite_contact_group.errors %}{% for error in form.onsite_contact_group.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.onsite_contact_group.errors %}{% for error in form.onsite_contact_group.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
     </div>
     <h4>Offsite - Emergency Contact</h4>
@@ -301,15 +337,17 @@
             <p>
                 {{ form.offsite_contact_name.label }}<br>
                 {{ form.offsite_contact_name(class_='form-control m-0') }}
+                {% if form.offsite_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.offsite_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
         <div class="col">
             <p>
                 {{ form.offsite_contact_phone.label }}<br>
                 {{ form.offsite_contact_phone(class_='form-control m-0') }}
+                {% if form.offsite_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.offsite_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
         </div>
     </div>
     <div class="row form-group">
@@ -320,8 +358,21 @@
             </p>
         </div>
     </div>
-    <p>{{ form.submit(class_='form-control btn-primary btn-lg  m-0') }}</p>
+
+    <div id="new-reg-div"></div>
+    <div class="row">
+        <div class="col">
+            <button type="submit" name="action" value="Complete" class="form-control btn-primary btn btn-lg custom-input-space">Complete</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button type="submit" name="action" value="Submit_Another" class="form-control btn-secondary btn btn-lg custom-input-space">Submit Another Registration</button>
+        </div>
+    </div>
+
 </form>
+
 
 <table class="table">
     <tbody>
@@ -353,7 +404,6 @@
 </div>
 
 <script>
-
 
     function royalCheck() {
         const rate_age = document.getElementById("rate_age").value;

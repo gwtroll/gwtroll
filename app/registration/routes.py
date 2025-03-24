@@ -12,96 +12,203 @@ from flask_security import roles_accepted
 import json
 from markupsafe import Markup
 
+import json
+
+def create_prereg(data):
+    reg = Registrations(
+        fname = data.fname.data,
+        lname = data.lname.data,
+        scaname = data.scaname.data,
+        city = data.city.data,
+        state_province = data.state_province.data,
+        zip = data.zip.data,
+        country = data.country.data,
+        phone = data.phone.data, 
+        email = data.email.data, 
+        invoice_email = data.invoice_email.data,
+        rate_age = data.rate_age.data,
+        kingdom = data.kingdom.data, 
+        lodging = data.lodging.data, 
+        prereg_status = 'SUCCEEDED',
+        invoice_status = 'UNSENT',
+        rate_mbr = data.rate_mbr.data,
+        mbr_num_exp = datetime.strftime(data.mbr_num_exp.data, '%Y-%m-%d') if data.mbr_num_exp.data is not None else None, 
+        mbr_num = data.mbr_num.data,
+        onsite_contact_name = data.onsite_contact_name.data, 
+        onsite_contact_sca_name = data.onsite_contact_sca_name.data, 
+        onsite_contact_kingdom = data.onsite_contact_kingdom.data, 
+        onsite_contact_group = data.onsite_contact_group.data, 
+        offsite_contact_name = data.offsite_contact_name.data, 
+        offsite_contact_phone = data.offsite_contact_phone.data,
+        prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
+        paypal_donation = data.paypal_donation.data if data.paypal_donation.data is not None else False,
+        price_paid = 0,
+        atd_paid = 0,
+        royal_departure_date = data.royal_departure_date.data,
+        royal_title = data.royal_title.data if data.royal_title.data != '' else None
+    )
+
+    if data.rate_date.data == 'Early_On':
+        reg.early_on = True
+        rate_date = '03-08-2025'
+        # reg.rate_date = datetime.strptime('03-08-2025', '%m-%d-%Y'),
+        reg.rate_date = rate_date
+    else:
+        rate_date = data.rate_date.data
+        # reg.rate_date = datetime.strptime(data.rate_date.data, '%m-%d-%Y'),
+        reg.rate_date = rate_date
+
+    if data.rate_age.data != '18+':
+        rate_category = 'CHILDREN 17 AND UNDER'
+    elif data.rate_mbr.data == 'Member':
+        rate_category = 'Pre-Registered Member'
+    elif data.rate_mbr.data == 'Non-Member':
+        rate_category = 'Pre-Registered Non-Member'
+
+    with open('rate_sheet.json') as f:
+        rate_sheet = json.load(f)
+        reg.price_calc = rate_sheet[rate_category][rate_date]
+        reg.price_due = rate_sheet[rate_category][rate_date]
+
+    if reg.paypal_donation == True:
+        reg.paypal_donation_amount = 3
+    else:
+        reg.paypal_donation_amount = 0
+
+    reg.price_due += reg.paypal_donation_amount
+
+    return reg
+
+def JSONtoDict(string_data):
+    data_dict = {}
+    pairs = string_data.replace('{','').replace('}','').replace('"','').split(', ')
+    for pair in pairs:
+        new_pair = pair.split(': ')
+        data_dict[new_pair[0]] = new_pair[1]
+    return data_dict
+
+def DicttoReg(dict):
+    reg = Registrations(
+        fname = dict['fname'],
+        lname = dict['lname'],
+        scaname = dict['scaname'] if dict['scaname'] != 'null' else None,
+        city = dict['city'],
+        state_province = dict['state_province'],
+        zip = int(dict['zip']),
+        country = dict['country'],
+        phone = dict['phone'], 
+        email = dict['email'], 
+        invoice_email = dict['invoice_email'],
+        rate_age = dict['rate_age'],
+        kingdom = dict['kingdom'], 
+        lodging = dict['lodging'], 
+        prereg_status = 'SUCCEEDED',
+        invoice_status = 'UNSENT',
+        rate_mbr = dict['rate_mbr'],
+        mbr_num_exp = dict['mbr_num_exp'] if dict['mbr_num_exp'] != 'null' else None, 
+        mbr_num = int(dict['mbr_num']) if dict['mbr_num'] != 'null' else None,
+        onsite_contact_name = dict['onsite_contact_name'], 
+        onsite_contact_sca_name = dict['onsite_contact_sca_name'], 
+        onsite_contact_kingdom = dict['onsite_contact_kingdom'], 
+        onsite_contact_group = dict['onsite_contact_group'], 
+        offsite_contact_name = dict['offsite_contact_name'], 
+        offsite_contact_phone = dict['offsite_contact_phone'],
+        prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
+        paypal_donation = bool(dict['paypal_donation']),
+        price_paid = 0,
+        atd_paid = 0,
+        royal_departure_date = dict['royal_departure_date'] if dict['royal_departure_date'] != 'null' else None,
+        royal_title = dict['royal_title'] if dict['royal_title'] != 'null' else None
+    )
+
+    if dict['rate_date'] == 'Early_On':
+        reg.early_on = True
+        rate_date = '03-08-2025'
+        # reg.rate_date = datetime.strptime('03-08-2025', '%m-%d-%Y'),
+        reg.rate_date = rate_date
+    else:
+        rate_date = dict['rate_date']
+        # reg.rate_date = datetime.strptime(data.rate_date.data, '%m-%d-%Y'),
+        reg.rate_date = rate_date
+
+    if dict['rate_age'] != '18+':
+        rate_category = 'CHILDREN 17 AND UNDER'
+    elif dict['rate_mbr'] == 'Member':
+        rate_category = 'Pre-Registered Member'
+    elif dict['rate_mbr'] == 'Non-Member':
+        rate_category = 'Pre-Registered Non-Member'
+
+    with open('rate_sheet.json') as f:
+        rate_sheet = json.load(f)
+        reg.price_calc = rate_sheet[rate_category][rate_date]
+        reg.price_due = rate_sheet[rate_category][rate_date]
+
+    if reg.paypal_donation == True:
+        reg.paypal_donation_amount = 3
+    else:
+        reg.paypal_donation_amount = 0
+
+    reg.price_due += reg.paypal_donation_amount
+
+    return reg
+        
 
 @bp.route('/', methods=('GET', 'POST'))
 def createprereg():
     # Close Pre-Reg at Midnight 02/22/2025
-    if datetime.now().date() >= datetime.strptime('02/22/2025','%m/%d/%Y').date():
-        return render_template("prereg_closed.html")
+    # if datetime.now().date() >= datetime.strptime('02/22/2025','%m/%d/%Y').date():
+    #     return render_template("prereg_closed.html")
 
     form = CreatePreRegForm()
-
     loading_df = pd.read_csv('gwlodging.csv')
     lodgingdata = loading_df.to_dict(orient='list')
     form.lodging.choices = lodgingdata
 
     if form.validate_on_submit() and request.method == 'POST':
-
-        reg = Registrations(
-            fname = form.fname.data,
-            lname = form.lname.data,
-            scaname = form.scaname.data,
-            city = form.city.data,
-            state_province = form.state_province.data,
-            zip = form.zip.data,
-            country = form.country.data,
-            phone = form.phone.data, 
-            email = form.email.data, 
-            invoice_email = form.invoice_email.data,
-            rate_age = form.rate_age.data,
-            kingdom = form.kingdom.data, 
-            lodging = form.lodging.data, 
-            prereg_status = 'SUCCEEDED',
-            invoice_status = 'UNSENT',
-            rate_mbr = form.rate_mbr.data,
-            mbr_num_exp = form.mbr_num_exp.data, 
-            mbr_num = form.mbr_num.data,
-            onsite_contact_name = form.onsite_contact_name.data, 
-            onsite_contact_sca_name = form.onsite_contact_sca_name.data, 
-            onsite_contact_kingdom = form.onsite_contact_kingdom.data, 
-            onsite_contact_group = form.onsite_contact_group.data, 
-            offsite_contact_name = form.offsite_contact_name.data, 
-            offsite_contact_phone = form.offsite_contact_phone.data,
-            prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
-            paypal_donation = form.paypal_donation.data,
-            price_paid = 0,
-            atd_paid = 0,
-            royal_departure_date = form.royal_departure_date.data,
-            royal_title = form.royal_title.data if form.royal_title.data != '' else None
-        )
-
-        if form.rate_date.data == 'Early_On':
-            reg.early_on = True
-            rate_date = '03-08-2025'
-            reg.rate_date = datetime.strptime('03-08-2025', '%m-%d-%Y'),
-        else:
-            rate_date = form.rate_date.data
-            reg.rate_date = datetime.strptime(form.rate_date.data, '%m-%d-%Y'),
-
-        if form.rate_age.data != '18+':
-            rate_category = 'CHILDREN 17 AND UNDER'
-        elif form.rate_mbr.data == 'Member':
-            rate_category = 'Pre-Registered Member'
-        elif form.rate_mbr.data == 'Non-Member':
-            rate_category = 'Pre-Registered Non-Member'
-
-        with open('rate_sheet.json') as f:
-            rate_sheet = json.load(f)
-            reg.price_calc = rate_sheet[rate_category][rate_date]
-            reg.price_due = rate_sheet[rate_category][rate_date]
-
-        if reg.paypal_donation == True:
-            reg.paypal_donation_amount = 3
-        else:
-            reg.paypal_donation_amount = 0
-
-        reg.price_due += reg.paypal_donation_amount
-
-        print(reg.early_on)
-        db.session.add(reg)
-        db.session.commit()
-
-        send_confirmation_email(reg.email,reg)
-
-        flash('Registration {} created for {} {}.'.format(
-            reg.regid, reg.fname, reg.lname))
         
-        return redirect(url_for('registration.success', regid=reg.regid))
+        if request.form.get("action") == 'Submit_Another':
+            additional_registrations = []
+            reg_names = []
+            print(request.form.keys())
+            if 'additional_registration-1' in request.form.keys():
+                for key in request.form.keys():
+                    if 'additional_registration' in key:
+                        reg_names.append(JSONtoDict(request.form.get(key)))
+                        additional_registrations.append(request.form.get(key))
+            new_reg = create_prereg(form)
+            additional_registrations.append(new_reg.toJSON())
+            reg_names.append(new_reg)
+            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=reg_names)
+        else:
+            additional_registrations = []
+            if 'additional_registration-1' in request.form.keys():
+                for key in request.form.keys():
+                    if 'additional_registration' in key:
+                        additional_registrations.append(DicttoReg(JSONtoDict(request.form.get(key))))
+                        
+            for add_reg in additional_registrations:
+                db.session.add(add_reg)
+
+            reg = create_prereg(form)
+
+            db.session.add(reg)
+            db.session.commit()
+
+            for add_reg in additional_registrations:
+                # send_confirmation_email(add_reg.email,add_reg)
+                flash('Registration {} created for {} {}.'.format(
+                add_reg.regid, add_reg.fname, add_reg.lname))
+            # send_confirmation_email(reg.email,reg)
+            flash('Registration {} created for {} {}.'.format(
+            reg.regid, reg.fname, reg.lname))
+
+
+            return redirect(url_for('registration.success'))
     return render_template('create_prereg.html', form=form)
 
-@bp.route('/<regid>/success')
-def success(regid):
-    return render_template('reg_success.html', regid=regid)
+@bp.route('/success')
+def success():
+    return render_template('reg_success.html')
 
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -210,7 +317,7 @@ def editreg():
         try:
             form.rate_date.data = datetime.strptime(reg.rate_date, '%Y-%m-%d %H:%M:%S')
         except:
-            form.rate_date.data = datetime.strptime(reg.rate_date, '%Y-%m-%d')
+            form.rate_date.data = datetime.strptime(reg.rate_date, "%m-%d-%Y")
 
     loading_df = pd.read_csv('gwlodging.csv')
     lodgingdata = loading_df.to_dict(orient='list')
