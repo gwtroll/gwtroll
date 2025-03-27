@@ -1,8 +1,8 @@
-from datetime import datetime, timezone, date, timedelta
+from datetime import datetime
 from typing import Optional
-from flask_security import SQLAlchemyUserDatastore, UserMixin, RoleMixin, UserMixin, login_required
-from flask_login import LoginManager
+from flask_security import UserMixin, RoleMixin, UserMixin
 import sqlalchemy as sa
+from sqlalchemy import Computed
 import sqlalchemy.orm as so
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -64,82 +64,111 @@ def load_user(id):
     return User.query.filter_by(fs_uniquifier=id).first()
 
 class Registrations(db.Model):
-    regid: so.Mapped[int] = so.mapped_column(primary_key=True)
-    order_id: so.Mapped[Optional[int]]
-    invoice_number: so.Mapped[Optional[str]] 
-    invoice_paid: so.Mapped[bool] = so.mapped_column(default=False)
-    invoice_date: so.Mapped[Optional[datetime]]
-    invoice_payment_date: so.Mapped[Optional[datetime]]
-    invoice_canceled: so.Mapped[bool] = so.mapped_column(default=False)
-    invoice_status: so.Mapped[Optional[str]]
-    refund_check_num: so.Mapped[Optional[int]]
-    fname: so.Mapped[str] 
-    lname: so.Mapped[str] 
-    scaname: so.Mapped[Optional[str]] 
-    city: so.Mapped[Optional[str]] 
-    state_province: so.Mapped[Optional[str]] 
-    zip: so.Mapped[Optional[int]] 
-    country: so.Mapped[Optional[str]] 
-    phone: so.Mapped[Optional[str]] 
-    email: so.Mapped[Optional[str]]
-    invoice_email: so.Mapped[Optional[str]]
-    kingdom: so.Mapped[Optional[str]] 
-    event_ticket: so.Mapped[Optional[str]] 
-    rate_mbr: so.Mapped[Optional[str]] 
-    rate_age: so.Mapped[Optional[str]] 
-    rate_date: so.Mapped[Optional[str]] 
-    price_calc: so.Mapped[Optional[int]]
-    price_paid: so.Mapped[Optional[int]]
-    atd_paid: so.Mapped[Optional[int]]
-    atd_pay_type: so.Mapped[Optional[str]]
-    price_due: so.Mapped[Optional[int]]
-    paypal_donation: so.Mapped[Optional[bool]] = so.mapped_column(default=False)
-    paypal_donation_amount: so.Mapped[Optional[int]] = so.mapped_column(default=0)
-    lodging: so.Mapped[Optional[str]] 
-    pay_type: so.Mapped[Optional[str]]
-    prereg_status: so.Mapped[Optional[str]]
-    early_on: so.Mapped[Optional[bool]]
-    mbr_num_exp: so.Mapped[Optional[str]] 
-    mbr_num: so.Mapped[Optional[int]]
-    onsite_contact_name: so.Mapped[Optional[str]] 
-    onsite_contact_sca_name: so.Mapped[Optional[str]] 
-    onsite_contact_kingdom: so.Mapped[Optional[str]] 
-    onsite_contact_group: so.Mapped[Optional[str]] 
-    offsite_contact_name: so.Mapped[Optional[str]] 
-    offsite_contact_phone: so.Mapped[Optional[str]] 
-    minor_waiver: so.Mapped[Optional[str]] 
-    requests: so.Mapped[Optional[str]] 
-    checkin: so.Mapped[Optional[datetime]]
-    medallion: so.Mapped[Optional[int]]
-    signature: so.Mapped[Optional[str]]
-    prereg_date_time: so.Mapped[Optional[datetime]]
-    royal_departure_date: so.Mapped[Optional[datetime]]
-    royal_title: so.Mapped[Optional[str]]
-    nmr_donation: so.Mapped[Optional[int]]
+    id = db.Column(db.Integer(), primary_key=True, unique=True)
+    #Basic
+    fname = db.Column(db.String())
+    lname = db.Column(db.String())
+    scaname = db.Column(db.String())
+    city = db.Column(db.String())
+    state_province = db.Column(db.String())
+    zip = db.Column(db.Integer())
+    country = db.Column(db.String())
+    phone = db.Column(db.String())
+    email = db.Column(db.String())
+    invoice_email = db.Column(db.String())
+    age = db.Column(db.String())
+    kingdom = db.Column(db.String())
+    emergency_contact_name = db.Column(db.String())
+    emergency_contact_phone = db.Column(db.String())
+    royal_departure_date = db.Column(db.Date())
+    royal_title = db.Column(db.String())
+
+    #Membership
+    mbr = db.Column(db.Boolean(), default=False)
+    mbr_num_exp = db.Column(db.String())
+    mbr_num = db.Column(db.Integer())
+    
+    #Prereg/Reg
+    reg_date_time = db.Column(db.DateTime(), default=lambda: datetime.now().replace(microsecond=0).isoformat())
+    prereg = db.Column(db.Boolean(), default=False)
+    prereg_date_time = db.Column(db.DateTime())
+    expected_arrival_date = db.Column(db.Date())
+    lodging = db.Column(db.String())
+    early_on = db.Column(db.String())
     notes = db.Column(db.Text)
-    reg_date_time: so.Mapped[datetime] = so.mapped_column(
-        index=True, default=lambda: datetime.now().replace(microsecond=0).isoformat())
+    duplicate = db.Column(db.Boolean, default=False)
+    
+    #Pricing
+    registration_price = db.Column(db.Integer(), default=0)
+    nmr_price = db.Column(db.Integer(), default=0)
+    paypal_donation = db.Column(db.Integer(), default=0)
+    nmr_donation = db.Column(db.Integer(), default=0)
+    total_due = db.Column(db.Integer(), Computed(registration_price+nmr_price+paypal_donation))
+    balance = db.Column(db.Integer(), default=0)
+
+    #Troll
+    minor_waiver = db.Column(db.String())
+    checkin = db.Column(db.DateTime())
+    medallion = db.Column(db.Integer())
+    signature = db.Column(db.String())
+    actual_arrival_date = db.Column(db.Date())
+    
+    #Relationships
+    invoice_number = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
+    invoice = db.relationship("Invoice", back_populates="regs")
+    payment_id = db.Column(db.Integer(), db.ForeignKey('payment.id'))
+    payment = db.relationship("Payment", back_populates="regs")
     bows = db.relationship('Bows', secondary='reg_bows')
     crossbows = db.relationship('Crossbows', secondary='reg_crossbows')
     marshal_inspections = db.relationship('MarshalInspection', backref='registrations')
     incident_report = db.relationship('IncidentReport', backref='registrations')
 
     def __repr__(self):
-        return '<Registrations {}>'.format(self.regid)
+        return '<Registrations {}>'.format(self.id)
     
     def toJSON(self):
         data_dict = {}
         print(self.__dict__)
         for key in self.__dict__:
             if not key.startswith("_"):
-                print(self.__dict__[key])
-                data_dict[key] = self.__dict__[key]
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key],'%Y-%m-%d')
+                else:
+                    print(self.__dict__[key])
+                    data_dict[key] = self.__dict__[key]
         return json.dumps(data_dict)
+    
+class Invoice(db.Model):
+    __tablename__ = 'invoice'
+    invoice_number = db.Column(db.Integer(), primary_key=True)
+    invoice_email = db.Column(db.String(),nullable=False)
+    invoice_date = db.Column(db.DateTime(),nullable=False)
+    invoice_status = db.Column(db.String(),nullable=False)
+    registration_total = db.Column(db.Integer(), default=0)
+    nmr_total = db.Column(db.Integer(), default=0)
+    donation_total = db.Column(db.Integer(), default=0)
+    invoice_total = db.Column(db.Integer(), Computed(registration_total+nmr_total+donation_total))
+    balance = db.Column(db.Integer())
+    notes = db.Column(db.Text())
+    regs = db.relationship("Registrations", back_populates="invoice")
+    payments = db.relationship("Payment", back_populates="invoice")
+
+
+class Payment(db.Model):
+    __tablename__ = 'payment'
+    id = db.Column(db.Integer(), primary_key=True)
+    type = db.Column(db.String(), nullable=False)
+    check_num = db.Column(db.Integer())
+    payment_date = db.Column(db.DateTime(), nullable=False)
+    amount = db.Column(db.Integer(), nullable=False)
+    invoice_number  = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
+    invoice = db.relationship("Invoice", back_populates="payments")
+    regs = db.relationship("Registrations", back_populates="payment")
     
 class RegLogs(db.Model):
     __tablename__ = 'reglogs'  
     id = db.Column(db.Integer(), primary_key=True)
-    regid = db.Column(db.Integer(), db.ForeignKey('registrations.regid'))
+    regid = db.Column(db.Integer(), db.ForeignKey('registrations.id'))
     userid = db.Column(db.Integer(), db.ForeignKey('users.id'))
     timestamp = db.Column(db.DateTime())
     action = db.Column(db.String())
@@ -147,7 +176,7 @@ class RegLogs(db.Model):
 class MarshalInspection(db.Model):
     __tablename__ = 'marshal_inspection' 
     id = db.Column(db.Integer(), primary_key=True)
-    regid = db.Column(db.Integer, db.ForeignKey('registrations.regid'))
+    regid = db.Column(db.Integer, db.ForeignKey('registrations.id'))
     inspection_type = db.Column(db.String())
     inspection_date = db.Column(db.DateTime())
     inspecting_marshal_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
@@ -167,7 +196,7 @@ class Bows(db.Model):
 class RegBows(db.Model):
     __tablename__ = 'reg_bows'
     id = db.Column(db.Integer(), primary_key=True)
-    regid = db.Column(db.Integer(), db.ForeignKey('registrations.regid', ondelete='CASCADE'))
+    regid = db.Column(db.Integer(), db.ForeignKey('registrations.id', ondelete='CASCADE'))
     bowid = db.Column(db.Integer(), db.ForeignKey('bows.id', ondelete='CASCADE'))
     
 class Crossbows(db.Model):
@@ -183,13 +212,13 @@ class Crossbows(db.Model):
 class RegCrossBows(db.Model):
     __tablename__ = 'reg_crossbows'
     id = db.Column(db.Integer(), primary_key=True)
-    regid = db.Column(db.Integer(), db.ForeignKey('registrations.regid', ondelete='CASCADE'))
+    regid = db.Column(db.Integer(), db.ForeignKey('registrations.id', ondelete='CASCADE'))
     crossbowid = db.Column(db.Integer(), db.ForeignKey('crossbows.id', ondelete='CASCADE'))
 
 class IncidentReport(db.Model):
     __tablename__ = 'incidentreport'
     id = db.Column(db.Integer(), primary_key=True)
-    regid = db.Column(db.Integer, db.ForeignKey('registrations.regid'))
+    regid = db.Column(db.Integer, db.ForeignKey('registrations.id'))
     report_date = db.Column(db.DateTime())
     incident_date = db.Column(db.DateTime())
     reporting_user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))

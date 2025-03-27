@@ -4,7 +4,7 @@ from flask import url_for
 import base64, binascii
 
 def send_confirmation_email(recipient, reg):
-    qrcode_str = qrcode(url_for('troll.reg', regid=reg.regid))
+    qrcode_str = qrcode(url_for('troll.reg', regid=reg.id))
     msg = Message(
         subject="Gulf Wars Fast Pass",
         sender="carl.cox.primary@gmail.com",
@@ -25,9 +25,9 @@ def send_confirmation_email(recipient, reg):
     "Salim Al'Kahlil<br/>" \
     "Testing SMTP Deputy</p>" \
     "<br/><br/>" \
-    "<p>RegID: "+str(reg.regid)+"<br/>" \
+    "<p>RegID: "+str(reg.id)+"<br/>" \
     "Name: "+reg.fname+" "+reg.lname+"<br/>" \
-    "Arrival Date: "+reg.rate_date+"</p>" \
+    "Arrival Date: "+reg.expected_arrival_date+"</p>" \
     "<img src=\"cid:fastpass\" alt=\"Fast Pass QR Code\">"
     
     mail.send(msg)

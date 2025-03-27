@@ -109,7 +109,7 @@
     </tbody>
   </table>
 
-<form action="" method="POST" novalidate>
+<form id='preregform' action="" method="POST" novalidate>
     {{ form.hidden_tag() }}
 
     <div class="row form-group">
@@ -151,14 +151,14 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                {{ form.rate_date.label }}
-                {{ form.rate_date(class_='form-control m-0') }}
+                {{ form.expected_arrival_date.label }}
+                {{ form.expected_arrival_date(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.rate_age.label }}<br>
-                {{ form.rate_age(class_='form-control m-0', onchange="royalCheck()") }}
+                {{ form.age.label }}<br>
+                {{ form.age(class_='form-control m-0', onchange="royalCheck()") }}
             </p>
         </div>
     </div>
@@ -277,8 +277,8 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.rate_mbr.label }}<br>
-                {{ form.rate_mbr(class_='form-control m-0') }}
+                {{ form.mbr.label }}<br>
+                {{ form.mbr(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col">
@@ -296,56 +296,21 @@
             </p>
         </div>
     </div>
-    <h4>Onsite - Emergency Contact</h4>
+    <h4>Emergency Contact</h4>
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.onsite_contact_name.label }}<br>
-                {{ form.onsite_contact_name(class_='form-control m-0') }}
-                {% if form.onsite_contact_name.errors %}{% for error in form.onsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                {{ form.emergency_contact_name.label }}<br>
+                {{ form.emergency_contact_name(class_='form-control m-0') }}
+                {% if form.emergency_contact_name.errors %}{% for error in form.emergency_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
 
         </div>
         <div class="col">
             <p>
-                {{ form.onsite_contact_sca_name.label }}<br>
-                {{ form.onsite_contact_sca_name(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.onsite_contact_kingdom.label }}<br>
-                {{ form.onsite_contact_kingdom(class_='form-control m-0') }}
-                {% if form.onsite_contact_kingdom.errors %}{% for error in form.onsite_contact_kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-
-        </div>
-        <div class="col">
-            <p>
-                {{ form.onsite_contact_group.label }}<br>
-                {{ form.onsite_contact_group(class_='form-control m-0') }}
-                {% if form.onsite_contact_group.errors %}{% for error in form.onsite_contact_group.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-
-        </div>
-    </div>
-    <h4>Offsite - Emergency Contact</h4>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.offsite_contact_name.label }}<br>
-                {{ form.offsite_contact_name(class_='form-control m-0') }}
-                {% if form.offsite_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-
-        </div>
-        <div class="col">
-            <p>
-                {{ form.offsite_contact_phone.label }}<br>
-                {{ form.offsite_contact_phone(class_='form-control m-0') }}
-                {% if form.offsite_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                {{ form.emergency_contact_phone.label }}<br>
+                {{ form.emergency_contact_phone(class_='form-control m-0') }}
+                {% if form.emergency_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
 
         </div>
@@ -405,10 +370,34 @@
 
 <script>
 
+    document.onload = clearform()
+
+    function clearform() {
+        document.getElementById('expected_arrival_date').selectedIndex = 0
+        document.getElementById('age').selectedIndex = 0
+        document.getElementById('fname').value = ''
+        document.getElementById('lname').value = ''
+        document.getElementById('scaname').value = ''
+        document.getElementById('city').value = ''
+        document.getElementById('state_province').value = ''
+        document.getElementById('zip').value = ''
+        document.getElementById('country').value = ''
+        document.getElementById('phone').value = ''
+        document.getElementById('email').value = ''
+        document.getElementById('mbr_num').value = ''
+        document.getElementById('mbr_num_exp').value = ''
+        document.getElementById('emergency_contact_name').value = ''
+        document.getElementById('emergency_contact_phone').value = ''
+        document.getElementById('paypal_donation').checked = false
+        document.getElementById('kingdom').selectedIndex = 0
+        document.getElementById('lodging').selectedIndex = 0
+        document.getElementById('mbr').selectedIndex = 0
+    }
+
     function royalCheck() {
-        const rate_age = document.getElementById("rate_age").value;
+        const age = document.getElementById("age").value;
         const royals = document.getElementById("royals");
-        if (rate_age == 'Royals') {
+        if (age == 'Royals') {
             royals.style.display = 'block';
         }
         else {

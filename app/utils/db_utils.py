@@ -6,6 +6,7 @@ import psycopg2
 import psycopg2.extras
 from sqlalchemy import or_, and_
 import json
+import ast
 
 def get_db_connection():
     conn = psycopg2.connect(os.environ
@@ -30,10 +31,22 @@ def query_db(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 def get_reg(regid):
-    reg = Registrations.query.filter_by(regid=regid).first()
+    reg = Registrations.query.filter_by(id=regid).first()
     if reg is None:
         abort(404)
     return reg
+
+def get_regs(regids):
+    regs = Registrations.query.filter(Registrations.id.in_(ast.literal_eval(regids))).all()
+    if regs is None:
+        abort(404)
+    return regs
+
+def get_inv(invnumber):
+    inv = Invoice.query.filter(Invoice.invoice_number==int(invnumber)).first()
+    if inv is None:
+        abort(404)
+    return inv
 
 def reg_count():
     conn= get_db_connection()
@@ -141,7 +154,7 @@ def get_role_choices():
 def log_reg_action(reg, action):
     print(reg)
     reglog = RegLogs(
-        regid = reg.regid,
+        regid = reg.id,
         userid = current_user.id,
         timestamp = datetime.now(),
         action = action
@@ -150,7 +163,7 @@ def log_reg_action(reg, action):
     db.session.commit()
 
 def calculate_price_calc(reg):
-    today_datetime = date.today()
+    today_datetime = datetime.today()
     if today_datetime < datetime(2025,3,8).date():
         today_date = datetime(2025,3,8).strftime('%Y-%m-%d')
     elif today_datetime > datetime(2025,3,15).date():
@@ -160,19 +173,36 @@ def calculate_price_calc(reg):
 
     with open('rate_sheet.json') as f:
         rate_sheet = json.load(f)
-        if reg.rate_age.__contains__('18+'):
-            if reg.prereg_status == 'SUCCEEDED' and reg.rate_mbr == 'Member':
+        if reg.age.__contains__('18+'):
+            if reg.prereg == True and reg.mbr == 'Member':
                 price_calc = rate_sheet['Pre-Registered Member'][today_date]
-            elif reg.prereg_status != 'SUCCEEDED' and reg.rate_mbr == 'Member':
+            elif reg.prereg != True and reg.mbr == 'Member':
                 price_calc = rate_sheet['At the Door Member'][today_date]
-            elif reg.prereg_status == 'SUCCEEDED' and reg.rate_mbr != 'Member':
+            elif reg.prereg == True and reg.mbr != 'Member':
                 price_calc = rate_sheet['Pre-Registered Non-Member'][today_date]
-            elif reg.prereg_status != 'SUCCEEDED' and reg.rate_mbr != 'Member':
+            elif reg.prereg != True and reg.mbr != 'Member':
                 price_calc = rate_sheet['At the Door Non-Member'][today_date]               
         else:
             price_calc = 0
 
     return price_calc
+
+def get_prereg_pricesheet_day(date):
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
+    return pricesheet.prereg_price, pricesheet.nmr
+
+def get_atd_pricesheet_day(date):
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
+    if pricesheet == None:
+        return 999, 999
+    return pricesheet.atf_price, pricesheet.nmr
+
+def recalculate_reg_balance(reg):
+    total_payments = 0
+    for payment in reg.payments:
+        total_payments += payment.amount
+    new_balance = reg.total_due - total_payments
+    return new_balance
 
 def prereg_total():
     conn= get_db_connection()

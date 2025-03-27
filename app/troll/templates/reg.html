@@ -18,7 +18,7 @@
             </tr>
             <tr>
                 <th style="background-color: #D6EEEE">Registration ID: </th>
-                <td>{{ reg['regid'] }}</td>
+                <td>{{ reg['id'] }}</td>
             </tr>
             <tr>
                 <th style="background-color: #D6EEEE">Invoice Number: </th>
@@ -26,11 +26,11 @@
             </tr>
             <tr>
                 <th style="background-color: #D6EEEE">Age Range: </th>
-                <td>{{ reg['rate_age'] }}</td>
+                <td>{{ reg['age'] }}</td>
             </tr>
             <tr>
                 <th style="background-color: #D6EEEE">Membership: </th>
-                <td>{{ reg['rate_mbr'] }}</td>
+                <td>{{ reg['mbr'] }}</td>
             </tr>
             <tr>
                 <th style="background-color: #D6EEEE">Kingdom: </th>
@@ -67,56 +67,33 @@
                     {% endif %}
                 </tr>
                 <tr>
-                    <th style="background-color: #D6EEEE">Onsite Emergency Contact: </th>
-                    <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
-                        <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
-                        Group: {{ reg.onsite_contact_group }}</td>
-                </tr>
-                <tr>
-                    <th style="background-color: #D6EEEE">Offsite Emergency Contact: </th>
-                    <td>{{ reg.offsite_contact_name }} <br>
-                        Phone: {{ reg.offsite_contact_phone }} </td>
+                    <th style="background-color: #D6EEEE">Emergency Contact: </th>
+                    <td>{{ reg.emergency_contact_name }} <br>
+                        Phone: {{ reg.emergency_contact_phone }} </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
+<h5>Cost</h5>
     <div class="row">
         <div class="col">
             <table class="table table-reg table-reg-display table-responsive">
                 <tr>
-                    <th>Registration Price</th>
+                    <th>Registration</th>
+                    <th>NMR</th>
                     <th>PayPal Donation</th>
                     <th>Total Price</th>
+                    <th>Balance</th>
                 </tr>
                 <tr>
-                    {% if reg['nmr_donation'] %}
-                    <td>{{ reg['price_calc'] + reg['nmr_donation'] }}</td>
-                    <td>{{ reg['paypal_donation_amount'] }}</td>
-                    <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] + reg['nmr_donation'] }}</td>
-                    {% else %}
-                    <td>{{ reg['price_calc'] }}</td>
-                    <td>{{ reg['paypal_donation_amount'] }}</td>
-                    <td>{{ reg['price_calc'] + reg['paypal_donation_amount'] }}</td>
-                    {% endif %}
+                    <td>{{ reg['registration_price'] }}</td>
+                    <td>{{ reg['nmr_price'] }}</td>
+                    <td>{{ reg['paypal_donation'] }}</td>
+                    <td>{{ reg['total_due']}}</td>
+                    <td>{{ reg['balance']}}</td>
                 </tr>
-                <h5>Cost - Breakdown</h5>
-                <table class="table table-reg table-reg-display table-responsive">
-                    <tr>
-                        <th>Prepaid</th>
-                        {% if reg['atd_pay_type'] %}
-                        <th>At the Door ({{reg['atd_pay_type'].upper()}})</th>
-                        {% else %}
-                        <th>At the Door</th>
-                        {% endif %}
-                    </tr>
-                    <br>
-                    <h5>Payments Received</h5>
-                    <tr>
-                        <td>{{ reg['price_paid'] }}</td>
-                        <td>{{ reg['atd_paid'] }}</td>
-                    </tr>
-            </table>
+            </table>   
         </div>
         <div class="col">
             <h5>Notes:</h5>
@@ -124,18 +101,53 @@
         </div>
     </div>
 
+    <h5>Payments</h5>
+    <div class="row">
+        <div class="col">
+            <table class="table table-reg table-reg-display table-responsive">
+                <tr>
+                    <th>Payment Type</th>
+                    <th>Amount</th>
+                </tr>
+            
+                {% if reg.invoice.payments %}
+                {% for payment in reg.invoice.payments %}
+                <tr>
+                    <td>{{ payment.type }}</td>
+                    <td>{{ payment.amount  }}</td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+                {% if reg.payment %}
+                <tr>
+                    <td>{{ reg.payment.type }}</td>
+                    <td>{{ reg.payment.amount }}</td>
+                </tr>
+                {% endif %}
+            </table>   
+        </div>
+    </div>
+
     <br>
-    {% if reg['atd_pay_type'] %}
-    <h1 class="text-center" style="background-color: red; color: white;">{{reg['atd_pay_type'].upper()}} - ${{reg['atd_paid']}}</h1>
-        {% if reg['rate_age'] == '18+' %}
+    {% if reg.payment and not reg.invoice.payments %}
+    <h1 class="text-center" style="background-color: red; color: white;">{{reg.payment.type}} - ${{reg.payment.amount}}</h1>
+        {% if reg['age'] == '18+' %}
         <h1 class="text-center m-0" style="background-color: red; color: white;">ADULT</h1> 
-        {% if reg['rate_mbr'] != 'Member' %}
+        {% if reg['mbr'] == false %}
         <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER </h1>
         {% endif %}
         {% endif %}
-        {% if reg['paypal_donation'] == true %}
+        {% if reg['paypal_donation'] > 0 %}
         <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION</h1>
         {% endif %}
+
+    {% elif reg.payment and reg.invoice.payments %}
+    <h1 class="text-center" style="background-color: red; color: white;">{{reg.payment.type}} - ${{reg.payment.amount}}</h1>
+        {% if reg['age'] == '18+' %}
+        <h1 class="text-center m-0" style="background-color: red; color: white;">OTHER: ${{reg.payment.amount}}</h1> 
+        {% endif %}
+
+
     {% endif %}
    
 
@@ -169,7 +181,7 @@
         </form>
     {% endif %}
 
-    {% if reg['price_due'] > 0 and reg['checkin'] and reg['signature'] %}
+    {% if reg['balance'] > 0 and reg['checkin'] and reg['signature'] %}
 
     <form method="post">
         <div class="row form-group no-print">
@@ -185,7 +197,7 @@
 {% endif %}
     
     {% if reg['checkin'] %}
-    {% if reg['atd_paid'] > 0 %}
+    {% if reg['payment'] %}
         <div class="row form-group no-print">
             <div class="col form-group">
                 <button value='Print' type='button' class="btn btn-primary btn-lg form-control custom-input-space" onclick='handlePrint()'>Print</button>        

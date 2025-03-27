@@ -70,7 +70,7 @@
         <div class="row reg_card_notcheckedin">
         {% endif %}
             <div class="col">
-                <a href="{{ url_for('troll.reg', regid=reg['regid']) }}">
+                <a href="{{ url_for('troll.reg', regid=reg['id']) }}">
                     <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
                 </a>
                 <div>
@@ -96,7 +96,7 @@
                     </p>
                 </div>
                 <div>
-                    <p class="text-muted">Arrival Date: {{reg['rate_date'].strftime('%m-%d-%Y')}}</p>
+                    <p class="text-muted">Expected Arrival: {{reg['expected_arrival_date'].strftime('%m-%d-%Y')}}</p>
                 </div>
             </div>
         </div>

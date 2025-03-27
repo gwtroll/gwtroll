@@ -31,14 +31,14 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.rate_age.label }} <span style="color: red;">*</span><br>
-                {{ form.rate_age(class_='form-control m-0') }}
+                {{ form.age.label }} <span style="color: red;">*</span><br>
+                {{ form.age(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.rate_mbr.label }} <span style="color: red;">*</span><br>
-                {{ form.rate_mbr(class_='form-control m-0') }}
+                {{ form.mbr.label }} <span style="color: red;">*</span><br>
+                {{ form.mbr(class_='form-control m-0') }}
             </p>
         </div>
     </div>
@@ -120,53 +120,21 @@
             {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
     </div>
-    <h4>Onsite - Emergency Contact</h4>
+    <h4>Emergency Contact</h4>
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.onsite_contact_name.label }} <span style="color: red;">*</span><br>
-                {{ form.onsite_contact_name(class_='form-control m-0') }}
+                {{ form.emergency_contact_name.label }} <span style="color: red;">*</span><br>
+                {{ form.emergency_contact_name(class_='form-control m-0') }}
             </p>
-            {% if form.onsite_contact_name.errors %}{% for error in form.onsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            {% if form.emergency_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
-                {{ form.onsite_contact_sca_name.label }}<br>
-                {{ form.onsite_contact_sca_name(class_='form-control m-0') }}
+                {{ form.emergency_contact_phone.label }} <span style="color: red;">*</span><br>
+                {{ form.emergency_contact_phone(class_='form-control m-0') }}
             </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.onsite_contact_kingdom.label }} <span style="color: red;">*</span><br>
-                {{ form.onsite_contact_kingdom(class_='form-control m-0') }}
-            </p>
-            {% if form.onsite_contact_kingdom.errors %}{% for error in form.onsite_contact_kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-        </div>
-        <div class="col">
-            <p>
-                {{ form.onsite_contact_group.label }} <span style="color: red;">*</span><br>
-                {{ form.onsite_contact_group(class_='form-control m-0') }}
-            </p>
-            {% if form.onsite_contact_group.errors %}{% for error in form.onsite_contact_group.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-        </div>
-    </div>
-    <h4>Offsite - Emergency Contact</h4>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.offsite_contact_name.label }} <span style="color: red;">*</span><br>
-                {{ form.offsite_contact_name(class_='form-control m-0') }}
-            </p>
-            {% if form.offsite_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-        </div>
-        <div class="col">
-            <p>
-                {{ form.offsite_contact_phone.label }} <span style="color: red;">*</span><br>
-                {{ form.offsite_contact_phone(class_='form-control m-0') }}
-            </p>
-            {% if form.offsite_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            {% if form.emergency_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
     </div>
 

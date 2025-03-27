@@ -48,7 +48,7 @@ def add_bow(regid):
     form = BowForm()
     if request.method == 'POST':
         if request.form.get("poundage"):
-            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            update_reg = Registrations.query.filter_by(regid=reg.id).first()
             bow = Bows()
             bow.poundage = request.form.get("poundage")
             bow.bow_inspection_marshal_id = current_user.id
@@ -73,7 +73,7 @@ def add_crossbow(regid):
         if request.form.get("poundage"):
             print('Poundage')
             print(request.form.get("poundage"))
-            update_reg = Registrations.query.filter_by(regid=reg.regid).first()
+            update_reg = Registrations.query.filter_by(regid=reg.id).first()
             print(request.form.get("poundage"))
             crossbow = Crossbows()
             crossbow.inchpounds = request.form.get("poundage")
@@ -131,7 +131,7 @@ def reg(regid):
     else:
         fighter_auth = None
     print(response.status_code)
-    inspections = MarshalInspection.query.filter(MarshalInspection.regid == regid).all()
+    inspections = MarshalInspection.query.filter(MarshalInspection.id == regid).all()
     inspection_dict = {}
     for inspection in inspections:
         inspection_dict[inspection.inspection_type] = inspection
@@ -230,7 +230,7 @@ def reports():
 
         file = 'full_inspection_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = "SELECT regid, (SELECT fname FROM registrations WHERE registrations.regid = marshal_inspection.regid) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.regid = marshal_inspection.regid) AS \"Reg_LName\", inspection_type, inspection_date, (SELECT fname FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_LName\", (SELECT medallion FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_Medallion\" FROM marshal_inspection"
+        rptquery = "SELECT id, (SELECT fname FROM registrations WHERE registrations.id = marshal_inspection.id) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.id = marshal_inspection.id) AS \"Reg_LName\", inspection_type, inspection_date, (SELECT fname FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_LName\", (SELECT medallion FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_Medallion\" FROM marshal_inspection"
         df = pd.read_sql_query(rptquery, engine)
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -245,7 +245,7 @@ def reports():
 
         file = 'full_incident_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = "SELECT regid, (SELECT fname FROM registrations WHERE registrations.regid = incidentreport.regid) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.regid = incidentreport.regid) AS \"Reg_LName\", report_date, incident_date, (SELECT fname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_LName\", notes FROM incidentreport"
+        rptquery = "SELECT id, (SELECT fname FROM registrations WHERE registrations.id = incidentreport.id) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.id = incidentreport.id) AS \"Reg_LName\", report_date, incident_date, (SELECT fname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_LName\", notes FROM incidentreport"
         df = pd.read_sql_query(rptquery, engine)
         path1 = './reports/' + file
         path2 = '../reports/' + file

@@ -29,8 +29,8 @@
         </div>
         <div class="col form-group">
             <p>
-                {{ form.rate_age.label }}
-                {{ form.rate_age(class_='form-control m-0', readonly=true) }}
+                {{ form.age.label }}
+                {{ form.age(class_='form-control m-0', readonly=true) }}
             </p>
         </div>
     </div>
@@ -38,8 +38,8 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                {{ form.rate_mbr.label }}
-                {{ form.rate_mbr(class_='form-control m-0') }}
+                {{ form.mbr.label }}
+                {{ form.mbr(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col form-group">
@@ -94,8 +94,8 @@
         </div>
         <div class="col form-group">
             <p>
-                {{ form.rate_age.label }}
-                {{ form.rate_age(class_='form-control m-0') }}
+                {{ form.age.label }}
+                {{ form.age(class_='form-control m-0') }}
             </p>
         </div>
     </div>
@@ -177,8 +177,8 @@
     <div class="row form-group">
         <div class="col form-group">
             <p class="text-center">
-                {{ form.rate_date.label }}
-                {{ form.rate_date(class_='form-control m-0') }}
+                {{ form.expected_arrival_date.label }}
+                {{ form.expected_arrival_date(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col form-group">
@@ -193,8 +193,8 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                {{ form.rate_mbr.label }}
-                {{ form.rate_mbr(class_='form-control m-0') }}
+                {{ form.mbr.label }}
+                {{ form.mbr(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col form-group">
@@ -211,48 +211,18 @@
         </div>
     </div>
 
-    <h2>Onsite Emergency Contact</h2>
+    <h2>Emergency Contact</h2>
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                {{ form.onsite_contact_name.label }}
-                {{ form.onsite_contact_name(class_='form-control m-0') }}
+                {{ form.emergency_contact_name.label }}
+                {{ form.emergency_contact_name(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col form-group">
             <p>
-                {{ form.onsite_contact_sca_name.label }}
-                {{ form.onsite_contact_sca_name(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.onsite_contact_kingdom.label }}
-                {{ form.onsite_contact_kingdom(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.onsite_contact_group.label }}
-                {{ form.onsite_contact_group(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-
-    <h2>Offsite Emergency Contact</h2>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.offsite_contact_name.label }}
-                {{ form.offsite_contact_name(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.offsite_contact_phone.label }}
-                {{ form.offsite_contact_phone(class_='form-control m-0') }}
+                {{ form.emergency_contact_phone.label }}
+                {{ form.emergency_contact_phone(class_='form-control m-0') }}
             </p>
         </div>
     </div>
@@ -267,8 +237,8 @@
         </div>
         <div class="col form-group">
             <p>
-                {{ form.prereg_status.label }}
-                {{ form.prereg_status(class_='form-control m-0') }}
+                {{ form.prereg.label }}
+                {{ form.prereg(class_='form-check-input big-checkbox') }}
             </p>
         </div>
     </div>

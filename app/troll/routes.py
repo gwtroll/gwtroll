@@ -44,14 +44,13 @@ def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
 
-    form = CheckinForm(kingdom = reg.kingdom, rate_mbr = reg.rate_mbr, medallion = reg.medallion, rate_age = reg.rate_age, lodging = reg.lodging, notes=reg.notes, mbr_num=reg.mbr_num)
+    form = CheckinForm(kingdom = reg.kingdom, mbr = reg.mbr, medallion = reg.medallion, age = reg.age, lodging = reg.lodging, notes=reg.notes, mbr_num=reg.mbr_num)
     if reg.mbr_num_exp is not None:
         form.mbr_num_exp.data = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d')
-    price_paid = reg.price_paid
-    price_calc = reg.price_calc
+
     kingdom = reg.kingdom
-    rate_mbr = reg.rate_mbr
-    rate_age = reg.rate_age
+    mbr = reg.mbr
+    age = reg.age
 
     #if form.validate_on_submit():
         #print(form)
@@ -62,7 +61,7 @@ def checkin():
     #Check for medallion number    
 
     if request.method == 'POST':
-        if form.rate_mbr.data == 'Member':
+        if form.mbr.data == 'Member':
             if request.form.get('mbr_num') is None:
                 flash('Membership Number is Required if Member.','error')
                 return render_template('checkin.html', reg=reg, form=form) 
@@ -74,7 +73,7 @@ def checkin():
                 return render_template('checkin.html', reg=reg, form=form)
         medallion = form.medallion.data
         kingdom = form.kingdom.data
-        rate_mbr = form.rate_mbr.data
+        mbr = form.mbr.data
         lodging = form.lodging.data
         minor_waiver = form.minor_waiver.data
         
@@ -87,40 +86,40 @@ def checkin():
         else:
             medallion_check = None
 
-        if medallion_check is not None and int(regid) != int(medallion_check.regid):
+        if medallion_check is not None and int(regid) != int(medallion_check.id):
             duplicate_name = medallion_check.fname + " " + medallion_check.lname
-            dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.regid)) + f' target="_blank" rel="noopener noreferrer">{duplicate_name}</a>'
+            dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.id)) + f' target="_blank" rel="noopener noreferrer">{duplicate_name}</a>'
             flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " +  Markup(dup_url),'error')
         else:
             #Account for PreReg Non-Member and Checkin Member (No NMR Refund - View as Donation)
-            if reg.rate_mbr != 'Member' and rate_mbr == 'Member' and reg.prereg_status == 'SUCCEEDED' and reg.rate_age.__contains__('18+'):
-                nmr_donation = 10
+            if reg.mbr != True and mbr == 'Member' and reg.prereg == True and reg.age.__contains__('18+'):
+                reg.nmr_donation = 10
+                reg.nmr_price = 0
             else:
-                nmr_donation = 0
+                reg.nmr_donation = 0
             reg.medallion = medallion
-            reg.rate_mbr = rate_mbr
-            reg.rate_age = rate_age
+            reg.mbr = True if mbr == 'Member' else False
+            reg.age = age
             reg.kingdom = kingdom
             # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
             reg.minor_waiver = minor_waiver
             reg.lodging = lodging
             reg.checkin = datetime.today()
-            reg.price_calc = calculate_price_calc(reg)
-            reg.nmr_donation = nmr_donation
+
             reg.notes = form.notes.data
 
             #Calculate Price Due
-            if price_paid > price_calc + reg.paypal_donation_amount:  #Account for people who showed up late.  No refund.
-                reg.price_due = 0
-            else:
-                reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
-                print("Calculating price:", reg.price_calc) 
+            # if price_paid > price_calc + reg.paypal_donation_amount:  #Account for people who showed up late.  No refund.
+            #     reg.price_due = 0
+            # else:
+            #     reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
+            #     print("Calculating price:", reg.price_calc) 
 
             db.session.commit()
 
             log_reg_action(reg, 'CHECKIN')
 
-            if reg.price_due > 0:
+            if reg.balance > 0:
                 return redirect(url_for('troll.payment', regid=regid))
             else:
                 flash(f"{reg.fname} {reg.lname} successfully checked in!")
@@ -135,15 +134,13 @@ def waiver():
     form = WaiverForm()
     regid = request.args['regid']
     reg = get_reg(regid)
-    form.paypal_donation.data = reg.paypal_donation
+    form.paypal_donation.data = True if reg.paypal_donation > 0 else False
     if request.method == 'POST':
+        if bool(request.form.get('paypal_donation')) == True:
+            reg.paypal_donation = 3
+        else:
+            reg.paypal_donation = 0
 
-        if reg.paypal_donation == False and bool(request.form.get('paypal_donation')) == True:
-            reg.paypal_donation_amount = 3
-        elif reg.paypal_donation == True and bool(request.form.get('paypal_donation')) == False:            
-            reg.paypal_donation_amount = 0
-        reg.paypal_donation = bool(request.form.get('paypal_donation'))
-        reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - reg.price_paid
         reg.signature = form.signature.data
         
         db.session.commit()
@@ -158,19 +155,15 @@ def waiver():
 @login_required
 @roles_accepted('Admin', "Troll User", "Troll Shift Lead",'Department Head')
 def payment():
-    form = EditForm()
+    form = PayRegistrationForm()
     regid = request.args['regid']
     reg = get_reg(regid)
-    form.fname.data = reg.fname
-    form.lname.data = reg.lname
-    form.scaname.data = reg.scaname
-    form.invoice_email.data = reg.invoice_email
-    form.price_calc.data = reg.price_calc
-    form.price_due.data = reg.price_due
-    form.pay_type.data = reg.atd_pay_type
+
+    form.total_due.data = reg.balance
+
     if request.method == 'POST':
 
-        if request.form.get('pay_type') == '':
+        if request.form.get('payment_type') == '':
             flash('Must select a Payment Type','error')
             return redirect(url_for('troll.payment', regid=regid, form=form))
 
@@ -179,10 +172,18 @@ def payment():
         #     reg.price_due = 0
         # else:
         #     reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
+        pay = Payment(
+            type = request.form.get('payment_type'),
+            payment_date = datetime.now().date(),
+            amount = reg.balance
+        )
 
-        reg.atd_pay_type = request.form.get('pay_type')
-        reg.atd_paid += reg.price_due
-        reg.price_due = 0
+        db.session.add(pay)
+        db.session.commit()
+
+        reg.payment_id = pay.id
+        reg.balance = recalculate_reg_balance(reg)
+
         db.session.commit()
 
         log_reg_action(reg, 'PAYMENT')

@@ -15,7 +15,6 @@
                     <th>Registration</th>
                     <th>NMR</th>
                     <th>PayPal Donation</th>
-                    <th>Mark Duplicate</th>
                 </thead>
                 <tbody>
                     {% if regs %}
@@ -29,7 +28,6 @@
                         <td>{{ reg.registration_price }}</td>
                         <td>{{ reg.nmr_price }}</td>
                         <td>{{ reg.paypal_donation }}</td>
-                        <td><a href=""><button class="btn btn-danger" type="button">Mark Duplicate</button></a></td>
                     </tr>
                     {% endfor %}
                     {% endif %}
@@ -45,15 +43,15 @@
             </p>
         </div>
     </div>
+    <br>
     <div class="row">
-        <div class="col text-center">
+        <div class="col">
             <p>
-                {{ form.invoice_status.label }}<br>
-                {{ form.invoice_status(class_='form-control') }}
-            </p>  
+                {{ form.invoice_email.label }}<br>
+                {{ form.invoice_email(class_='form-control', readonly=true) }}
+            </p>
         </div>
     </div>
-    <h4>Invoice Information</h4>
     <div class="row">
         <div class="col">
             <p>
@@ -77,39 +75,19 @@
         </div>
         <div class="col">
             <p>
+                {{ form.registration_amount.label }}<br>
+                {{ form.registration_amount(class_='form-control', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
                 {{ form.invoice_amount.label }}<br>
                 {{ form.invoice_amount(class_='form-control', readonly=true) }}
             </p>
         </div>
     </div>
-    <h4>Payment Information</h4>
-    <div class="row">
-        <div class="col">
-            <p>
-                {{ form.payment_date.label }}<br>
-                {{ form.payment_date(class_='form-control') }}
-            </p>
-        </div>
-        <div class="col">
-            <p>
-                {{ form.payment_amount.label }}<br>
-                {{ form.payment_amount(class_='form-control') }}
-            </p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <p>
-                {{ form.payment_type.label }}<br>
-                {{ form.payment_type(class_='form-control') }}
-            </p>
-        </div>
-        <div class="col">
-            <p>
-                {{ form.check_num.label }}<br>
-                {{ form.check_num(class_='form-control') }}
-            </p>
-        </div>
     <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
 </div>
     </form>

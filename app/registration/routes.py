@@ -1,7 +1,7 @@
 from flask import render_template
 from app.registration import bp
 
-from flask_login import current_user, login_user, logout_user, login_required
+from flask_login import current_user, login_required
 from flask import render_template, request, url_for, flash, redirect
 from app.forms import *
 from app.models import *
@@ -9,10 +9,7 @@ from app.utils.db_utils import *
 from app.utils.email_utils import *
 
 from flask_security import roles_accepted
-import json
 from markupsafe import Markup
-
-import json
 
 def create_prereg(data):
     reg = Registrations(
@@ -26,56 +23,32 @@ def create_prereg(data):
         phone = data.phone.data, 
         email = data.email.data, 
         invoice_email = data.invoice_email.data,
-        rate_age = data.rate_age.data,
-        kingdom = data.kingdom.data, 
+        age = data.age.data,
+        kingdom = data.kingdom.data,
+        emergency_contact_name = data.emergency_contact_name.data, 
+        emergency_contact_phone = data.emergency_contact_phone.data, 
         lodging = data.lodging.data, 
-        prereg_status = 'SUCCEEDED',
-        invoice_status = 'UNSENT',
-        rate_mbr = data.rate_mbr.data,
+        mbr = True if data.mbr.data == 'Member' else False,
         mbr_num_exp = datetime.strftime(data.mbr_num_exp.data, '%Y-%m-%d') if data.mbr_num_exp.data is not None else None, 
         mbr_num = data.mbr_num.data,
-        onsite_contact_name = data.onsite_contact_name.data, 
-        onsite_contact_sca_name = data.onsite_contact_sca_name.data, 
-        onsite_contact_kingdom = data.onsite_contact_kingdom.data, 
-        onsite_contact_group = data.onsite_contact_group.data, 
-        offsite_contact_name = data.offsite_contact_name.data, 
-        offsite_contact_phone = data.offsite_contact_phone.data,
+        prereg = True,
         prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
-        paypal_donation = data.paypal_donation.data if data.paypal_donation.data is not None else False,
-        price_paid = 0,
-        atd_paid = 0,
+        paypal_donation = 3 if data.paypal_donation.data == True else 0,
         royal_departure_date = data.royal_departure_date.data,
         royal_title = data.royal_title.data if data.royal_title.data != '' else None
     )
 
-    if data.rate_date.data == 'Early_On':
+    if data.expected_arrival_date.data == 'Early_On':
         reg.early_on = True
-        rate_date = '03-08-2025'
-        # reg.rate_date = datetime.strptime('03-08-2025', '%m-%d-%Y'),
-        reg.rate_date = rate_date
+        reg.expected_arrival_date = datetime.strptime('03-08-2025', '%m-%d-%Y')
     else:
-        rate_date = data.rate_date.data
-        # reg.rate_date = datetime.strptime(data.rate_date.data, '%m-%d-%Y'),
-        reg.rate_date = rate_date
+        reg.expected_arrival_date = datetime.strptime(data.expected_arrival_date.data, '%m-%d-%Y')
 
-    if data.rate_age.data != '18+':
-        rate_category = 'CHILDREN 17 AND UNDER'
-    elif data.rate_mbr.data == 'Member':
-        rate_category = 'Pre-Registered Member'
-    elif data.rate_mbr.data == 'Non-Member':
-        rate_category = 'Pre-Registered Non-Member'
-
-    with open('rate_sheet.json') as f:
-        rate_sheet = json.load(f)
-        reg.price_calc = rate_sheet[rate_category][rate_date]
-        reg.price_due = rate_sheet[rate_category][rate_date]
-
-    if reg.paypal_donation == True:
-        reg.paypal_donation_amount = 3
-    else:
-        reg.paypal_donation_amount = 0
-
-    reg.price_due += reg.paypal_donation_amount
+    if data.age.data == '18+':
+        registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
+        reg.registration_price = registration_price
+        if not reg.mbr:
+            reg.nmr_price = nmr_price
 
     return reg
 
@@ -91,64 +64,41 @@ def DicttoReg(dict):
     reg = Registrations(
         fname = dict['fname'],
         lname = dict['lname'],
-        scaname = dict['scaname'] if dict['scaname'] != 'null' else None,
+        scaname = dict['scaname'],
         city = dict['city'],
         state_province = dict['state_province'],
         zip = int(dict['zip']),
         country = dict['country'],
-        phone = dict['phone'], 
-        email = dict['email'], 
+        phone = dict['phone'],  
+        email = dict['email'],  
         invoice_email = dict['invoice_email'],
-        rate_age = dict['rate_age'],
-        kingdom = dict['kingdom'], 
+        age = dict['age'],
+        kingdom = dict['kingdom'],
+        emergency_contact_name = dict['emergency_contact_name'],  
+        emergency_contact_phone = dict['emergency_contact_phone'],  
         lodging = dict['lodging'], 
-        prereg_status = 'SUCCEEDED',
-        invoice_status = 'UNSENT',
-        rate_mbr = dict['rate_mbr'],
+        mbr = bool(dict['mbr']),
         mbr_num_exp = dict['mbr_num_exp'] if dict['mbr_num_exp'] != 'null' else None, 
         mbr_num = int(dict['mbr_num']) if dict['mbr_num'] != 'null' else None,
-        onsite_contact_name = dict['onsite_contact_name'], 
-        onsite_contact_sca_name = dict['onsite_contact_sca_name'], 
-        onsite_contact_kingdom = dict['onsite_contact_kingdom'], 
-        onsite_contact_group = dict['onsite_contact_group'], 
-        offsite_contact_name = dict['offsite_contact_name'], 
-        offsite_contact_phone = dict['offsite_contact_phone'],
-        prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
-        paypal_donation = bool(dict['paypal_donation']),
-        price_paid = 0,
-        atd_paid = 0,
+        prereg = bool(dict['prereg']),
+        prereg_date_time = dict['prereg_date_time'],
+        paypal_donation = int(dict['paypal_donation']),
         royal_departure_date = dict['royal_departure_date'] if dict['royal_departure_date'] != 'null' else None,
-        royal_title = dict['royal_title'] if dict['royal_title'] != 'null' else None
+        royal_title = dict['royal_title'] if dict['royal_title'] != 'null' else None,
+        expected_arrival_date = dict['expected_arrival_date']
     )
 
-    if dict['rate_date'] == 'Early_On':
+    if dict['expected_arrival_date'] == 'Early_On':
         reg.early_on = True
-        rate_date = '03-08-2025'
-        # reg.rate_date = datetime.strptime('03-08-2025', '%m-%d-%Y'),
-        reg.rate_date = rate_date
+        reg.expected_arrival_date = datetime.strptime('03-08-2025', '%Y-%m-%d')
     else:
-        rate_date = dict['rate_date']
-        # reg.rate_date = datetime.strptime(data.rate_date.data, '%m-%d-%Y'),
-        reg.rate_date = rate_date
+        reg.expected_arrival_date = datetime.strptime(dict['expected_arrival_date'], '%Y-%m-%d')
 
-    if dict['rate_age'] != '18+':
-        rate_category = 'CHILDREN 17 AND UNDER'
-    elif dict['rate_mbr'] == 'Member':
-        rate_category = 'Pre-Registered Member'
-    elif dict['rate_mbr'] == 'Non-Member':
-        rate_category = 'Pre-Registered Non-Member'
-
-    with open('rate_sheet.json') as f:
-        rate_sheet = json.load(f)
-        reg.price_calc = rate_sheet[rate_category][rate_date]
-        reg.price_due = rate_sheet[rate_category][rate_date]
-
-    if reg.paypal_donation == True:
-        reg.paypal_donation_amount = 3
-    else:
-        reg.paypal_donation_amount = 0
-
-    reg.price_due += reg.paypal_donation_amount
+    if dict['age'] == '18+':
+        registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
+        reg.registration_price = registration_price
+        if not reg.mbr:
+            reg.nmr_price = nmr_price
 
     return reg
         
@@ -179,6 +129,7 @@ def createprereg():
             additional_registrations.append(new_reg.toJSON())
             reg_names.append(new_reg)
             return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=reg_names)
+            # return redirect(url_for('registration.createprereg', form=form, additional_registrations=additional_registrations, reg_names=reg_names))
         else:
             additional_registrations = []
             if 'additional_registration-1' in request.form.keys():
@@ -197,10 +148,10 @@ def createprereg():
             for add_reg in additional_registrations:
                 # send_confirmation_email(add_reg.email,add_reg)
                 flash('Registration {} created for {} {}.'.format(
-                add_reg.regid, add_reg.fname, add_reg.lname))
+                add_reg.id, add_reg.fname, add_reg.lname))
             # send_confirmation_email(reg.email,reg)
             flash('Registration {} created for {} {}.'.format(
-            reg.regid, reg.fname, reg.lname))
+            reg.id, reg.fname, reg.lname))
 
 
             return redirect(url_for('registration.success'))
@@ -209,7 +160,6 @@ def createprereg():
 @bp.route('/success')
 def success():
     return render_template('reg_success.html')
-
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
@@ -224,8 +174,8 @@ def createatd():
         scaname = form.scaname.data,
         kingdom = form.kingdom.data,
         lodging = form.lodging.data,
-        rate_age = form.rate_age.data,
-        rate_mbr = form.rate_mbr.data,
+        age = form.age.data,
+        mbr = True if form.mbr.data == 'Member' else False,
         mbr_num = form.mbr_num.data,
         mbr_num_exp = form.mbr_num_exp.data,
         city = form.city.data,
@@ -235,24 +185,24 @@ def createatd():
         phone = form.phone.data,
         email = form.email.data,
         invoice_email = form.invoice_email.data,
-        onsite_contact_name = form.onsite_contact_name.data, 
-        onsite_contact_sca_name = form.onsite_contact_sca_name.data, 
-        onsite_contact_kingdom = form.onsite_contact_kingdom.data, 
-        onsite_contact_group = form.onsite_contact_group.data, 
-        offsite_contact_name = form.offsite_contact_name.data, 
-        offsite_contact_phone = form.offsite_contact_phone.data,
-        atd_paid = 0,
-        price_paid = 0)
+        emergency_contact_name = form.emergency_contact_name.data, 
+        emergency_contact_phone = form.emergency_contact_phone.data,)
         #mbr_num = form.mbr_num.data,
         #mbr_exp = form.mbr_exp.data)
-        reg.rate_date = datetime.now().date()
-        reg.price_calc = calculate_price_calc(reg)
-        if reg.price_paid + reg.atd_paid > reg.price_calc:  #Account for people who showed up late.  No refund.
-            reg.price_due = 0
+        reg.expected_arrival_date = datetime.now().date()
+        reg.actual_arrival_date = datetime.now().date()
+        registration_price, nmr_price = get_atd_pricesheet_day(reg.actual_arrival_date)
+        reg.registration_price = registration_price
+        if reg.mbr != True:
+            reg.nmr_price = nmr_price
         else:
-            reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
+            reg.nmr_price = 0
+        
+        reg.paypal_donation = 0
+        
+        reg.balance = recalculate_reg_balance(reg)
 
-        if form.rate_mbr.data == 'Member':
+        if form.mbr.data == 'Member':
             if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
                 flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data),'error')
                 return render_template('create.html', title = 'New Registration', form=form)
@@ -264,9 +214,9 @@ def createatd():
 
 
         flash('Registration {} created for {} {}.'.format(
-            reg.regid, reg.fname, reg.lname))
+            reg.id, reg.fname, reg.lname))
 
-        return redirect(url_for('troll.reg', regid=reg.regid))
+        return redirect(url_for('troll.reg', regid=reg.id))
     return render_template('create.html', form=form)
 
 @bp.route('/edit', methods=['GET', 'POST'])
@@ -277,7 +227,7 @@ def editreg():
     reg = get_reg(regid)
 
     form = EditForm(
-        regid = reg.regid,
+        regid = reg.id,
         fname = reg.fname,
         lname = reg.lname,
         scaname = reg.scaname,
@@ -290,8 +240,8 @@ def editreg():
         invoice_email = reg.invoice_email,
         kingdom = reg.kingdom,
         lodging = reg.lodging,
-        rate_age = reg.rate_age,
-        rate_mbr = reg.rate_mbr,
+        age = reg.age,
+        mbr = reg.mbr,
         medallion = reg.medallion,
         atd_paid = reg.atd_paid,
         price_paid = reg.price_paid,
@@ -300,24 +250,20 @@ def editreg():
         price_due = reg.price_due,
         paypal_donation = reg.paypal_donation,
         paypal_donation_amount = reg.paypal_donation_amount,
-        prereg_status = reg.prereg_status,
+        prereg = reg.prereg,
         early_on =reg.early_on,
         mbr_num = reg.mbr_num,
         mbr_num_exp = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d') if reg.mbr_num_exp is not None else None,
-        onsite_contact_name = reg.onsite_contact_name,
-        onsite_contact_sca_name = reg.onsite_contact_sca_name,
-        onsite_contact_kingdom = reg.onsite_contact_kingdom,
-        onsite_contact_group = reg.onsite_contact_group,
-        offsite_contact_name = reg.offsite_contact_name,
-        offsite_contact_phone = reg.offsite_contact_phone,
+        emergency_contact_name = reg.emergency_contact_name,
+        emergency_contact_phone = reg.emergency_contact_phone,
         notes = reg.notes
     )
 
-    if reg.rate_date != None:
+    if reg.expected_arrival_date != None:
         try:
-            form.rate_date.data = datetime.strptime(reg.rate_date, '%Y-%m-%d %H:%M:%S')
+            form.expected_arrival_date.data = datetime.strptime(reg.expected_arrival_date, '%Y-%m-%d %H:%M:%S')
         except:
-            form.rate_date.data = datetime.strptime(reg.rate_date, "%m-%d-%Y")
+            form.expected_arrival_date.data = datetime.strptime(reg.expected_arrival_date, "%m-%d-%Y")
 
     loading_df = pd.read_csv('gwlodging.csv')
     lodgingdata = loading_df.to_dict(orient='list')
@@ -332,16 +278,16 @@ def editreg():
             else:
                 medallion_check = None
 
-            if medallion_check is not None and int(regid) != int(medallion_check.regid):
-                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid),'error')
-                dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+            if medallion_check is not None and int(regid) != int(medallion_check.id):
+                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.id),'error')
+                dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.id)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
                 flash(Markup(dup_url),'error')
             else:
                 if request.form.get('medallion'):
                     reg.medallion = int(request.form.get('medallion'))
                 else: reg.medallion = None
 
-                reg.rate_mbr = request.form.get('rate_mbr')
+                reg.mbr = request.form.get('mbr')
                 if request.form.get('mbr_num'):
                     reg.mbr_num = int(request.form.get('mbr_num'))
                 else: reg.mbr_num = None
@@ -364,9 +310,9 @@ def editreg():
             else:
                 medallion_check = None
 
-            if medallion_check is not None and int(regid) != int(medallion_check.regid):
-                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.regid),'error')
-                dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.regid)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+            if medallion_check is not None and int(regid) != int(medallion_check.id):
+                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.id),'error')
+                dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.id)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
                 flash(Markup(dup_url),'error')
 
             else:
@@ -384,9 +330,9 @@ def editreg():
                 reg.invoice_email = request.form.get('invoice_email')
                 reg.kingdom = request.form.get('kingdom')
                 reg.lodging = request.form.get('lodging')
-                reg.rate_date = datetime.strptime(request.form.get('rate_date'), '%Y-%m-%d') if (request.form.get('rate_date') != '' and request.form.get('rate_date')) else None
-                reg.rate_age = request.form.get('rate_age')
-                reg.rate_mbr = request.form.get('rate_mbr')
+                reg.expected_arrival_date = datetime.strptime(request.form.get('expected_arrival_date'), '%Y-%m-%d') if (request.form.get('expected_arrival_date') != '' and request.form.get('expected_arrival_date')) else None
+                reg.age = request.form.get('age')
+                reg.mbr = request.form.get('mbr')
                 if request.form.get('medallion'):
                     reg.medallion = int(request.form.get('medallion'))
                 else: reg.medallion = None
@@ -409,19 +355,15 @@ def editreg():
                 if request.form.get('paypal_donation_amount'):
                     reg.paypal_donation_amount = int(request.form.get('paypal_donation_amount'))
                 else: reg.paypal_donation_amount = 0
-                reg.prereg_status = request.form.get('prereg_status')
+                reg.prereg = request.form.get('prereg')
                 reg.early_on = bool(request.form.get('early_on'))
                 if request.form.get('mbr_num'):
                     reg.mbr_num = int(request.form.get('mbr_num'))
                 else: reg.mbr_num = None
                 if request.form.get('mbr_num_exp'):
                     reg.mbr_num_exp = request.form.get('mbr_num_exp')
-                reg.onsite_contact_name = request.form.get('onsite_contact_name')
-                reg.onsite_contact_sca_name = request.form.get('onsite_contact_sca_name')
-                reg.onsite_contact_kingdom = request.form.get('onsite_contact_kingdom')
-                reg.onsite_contact_group = request.form.get('onsite_contact_group')
-                reg.offsite_contact_name = request.form.get('offsite_contact_name')
-                reg.offsite_contact_phone = request.form.get('offsite_contact_phone') 
+                reg.emergency_contact_name = request.form.get('emergency_contact_name')
+                reg.emergency_contact_phone = request.form.get('emergency_contact_phone') 
 
                 reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
                 if reg.price_due < 0:  #Account for people who showed up late.  No refund.
@@ -433,4 +375,4 @@ def editreg():
 
                 return redirect(url_for('troll.reg',regid=regid))
 
-    return render_template('editreg.html', regid=reg.regid, reg=reg, form=form)
+    return render_template('editreg.html', regid=reg.id, reg=reg, form=form)

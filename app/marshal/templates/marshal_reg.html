@@ -19,7 +19,7 @@
                 </tr>
                 <tr>
                     <th style="background-color: #D6EEEE">Age Range: </th>
-                    <td>{{ reg['rate_age'] }}</td>
+                    <td>{{ reg['age'] }}</td>
                 </tr>
                 <tr>
                     <th style="background-color: #D6EEEE">Membership #: </th>
@@ -46,16 +46,9 @@
                     <td>{{ reg['checkin'].strftime('%m-%d-%Y %I:%M %p') }}</td>
                 </tr>
                 <tr>
-                    <th style="background-color: #D6EEEE">Onsite Emergency Contact: </th>
-                    <td>{{ reg.onsite_contact_name }} ({{ reg.onsite_contact_sca_name }})
-                        <br>Kingdom: {{ reg.onsite_contact_kingdom }}<br>
-                        Group: {{ reg.onsite_contact_group }}
-                    </td>
-                </tr>
-                <tr>
                     <th style="background-color: #D6EEEE">Offsite Emergency Contact: </th>
-                    <td>{{ reg.offsite_contact_name }} <br>
-                        Phone: {{ reg.offsite_contact_phone }} </td>
+                    <td>{{ reg.emergency_contact_name }} <br>
+                        Phone: {{ reg.emergency_contact_phone }} </td>
                 </tr>
             </tbody>
         </table>
@@ -131,7 +124,7 @@
         </div>
         <div class="row m-0">
             <div class="col d-flex justify-content-center">
-                <form action="/marshal/{{reg.regid}}" method="POST">
+                <form action="/marshal/{{reg.id}}" method="POST">
                     <table class="table table-responsive table-reg">
                         <thead>
                             <th>Type</th>
@@ -327,7 +320,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/marshal/{{reg.regid}}/addbow" method="POST">
+                <form action="/marshal/{{reg.id}}/addbow" method="POST">
                     <b>{{bow_form.poundage.label}}</b>
                     {{bow_form.poundage(class_='form-control')}}
                     {{bow_form.submit(class_='form-control btn-primary')}}
@@ -352,7 +345,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/marshal/{{reg.regid}}/addcrossbow" method="POST">
+                <form action="/marshal/{{reg.id}}/addcrossbow" method="POST">
                     <b>{{bow_form.poundage.label}}</b>
                     {{bow_form.poundage(class_='form-control')}}
                     {{bow_form.submit(class_='form-control btn-primary')}}
@@ -377,7 +370,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/marshal/{{reg.regid}}/addincident" method="POST">
+                <form action="/marshal/{{reg.id}}/addincident" method="POST">
                     <b>{{incident_form.incident_date.label}}</b>
                     {{incident_form.incident_date(class_='form-control')}}
                     <b>{{incident_form.notes.label}}</b>

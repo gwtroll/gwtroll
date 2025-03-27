@@ -18,7 +18,7 @@
     <div class="col form-group">
         <p>
             <label for="sca_name">Age</label>
-            <input type="text" class="form-control m-0" id="age" name="age" readonly value="{{ reg.rate_age }}"/>
+            <input type="text" class="form-control m-0" id="age" name="age" readonly value="{{ reg.age }}"/>
         </p>
     </div>
 </div>
@@ -36,12 +36,12 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                {{ form.rate_mbr.label }}
-                {{ form.rate_mbr(class_='form-control m-0', onchange="memberCheck()") }}
+                {{ form.mbr.label }}
+                {{ form.mbr(class_='form-control m-0', onchange="memberCheck()") }}
             </p>
         </div>
     </div>
-    {% if reg.rate_mbr == 'Member' %}
+    {% if reg.mbr == 'Member' %}
     <div id="membership">
     {% else %}
     <div id="membership" style="display: none;">
@@ -85,7 +85,7 @@
             </p>
         </div>
     </div>
-    {% if reg.rate_age != '18+' and reg.rate_age != 'Royals' %}
+    {% if reg.age != '18+' and reg.age != 'Royals' %}
     <div class="row form-group">
         <div class="col form-group">
             <p>
@@ -121,8 +121,8 @@
 
 {% block script %}
 <!-- <script>
-let mbrField = document.getElementById("rate_mbr");
-let mbr = '{{ rate_mbr }}';
+let mbrField = document.getElementById("mbr");
+let mbr = '{{ mbr }}';
 
 for(var i, j = 0; i = mbrField.options[j]; j++) {
     if(i.value == mbr) {
@@ -145,9 +145,9 @@ for(var i, j = 0; i = kingdomField.options[j]; j++) {
 
 
     function memberCheck() {
-        const rate_mbr = document.getElementById("rate_mbr").value;
+        const mbr = document.getElementById("mbr").value;
         const membership = document.getElementById("membership");
-        if (rate_mbr == 'Member') {
+        if (mbr == 'Member') {
             membership.style.display = 'block';
         }
         else {

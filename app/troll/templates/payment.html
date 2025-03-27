@@ -5,52 +5,19 @@
     <form action="" method="POST" novalidate>
         {{ form.hidden_tag() }}
         <div class="row form-group">
+        <div class="row form-group">
             <div class="col form-group">
                 <p>
-                    {{ form.fname.label }}<br>
-                    {{ form.fname(class_='form-control m-0', readonly=true) }}
-                </p>
-            </div>
-            <div class="col">
-                <p>
-                    {{ form.lname.label }}<br>
-                    {{ form.lname(class_='form-control m-0', readonly=true) }}
-                </p>
-            </div>
-            <div class="col">
-                <p>
-                    {{ form.scaname.label }}<br>
-                    {{ form.scaname(class_='form-control m-0', readonly=true) }}
+                    {{ form.total_due.label }}<br>
+                    {{ form.total_due(class_='form-control', readonly=true) }}
                 </p>
             </div>
         </div>
         <div class="row form-group">
             <div class="col form-group">
                 <p>
-                    {{ form.invoice_email.label }}<br>
-                    {{ form.invoice_email(class_='form-control m-0', readonly=true) }}
-                </p>
-            </div>
-        </div>
-        <div class="row form-group">
-            <div class="col form-group">
-                <p>
-                    {{ form.price_calc.label }}<br>
-                    {{ form.price_calc(class_='form-control', readonly=true) }}
-                </p>
-            </div>
-            <div class="col">
-                <p>
-                    {{ form.price_due.label }}<br>
-                    {{ form.price_due(class_='form-control', readonly=true) }}
-                </p>
-            </div>
-        </div>
-        <div class="row form-group">
-            <div class="col form-group">
-                <p>
-                    {{ form.pay_type.label }}<br>
-                    {{ form.pay_type(class_='form-control') }}
+                    {{ form.payment_type.label }}<br>
+                    {{ form.payment_type(class_='form-control') }}
                 </p>
             </div>
         </div>

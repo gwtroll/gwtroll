@@ -78,23 +78,23 @@ def index():
             if search_value is not None and search_value != '':
                 if request.form.get('search_canceled'):
                     reg = query_db(
-                        "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                        "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
                         #(search_value, search_value, search_value))
                         ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
                 else:
                     reg = query_db(
-                        "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND (invoice_status NOT IN ('DUPLICATE','CANCELED','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                        "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
                         #(search_value, search_value, search_value))
                         ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
         elif request.form.get('invoice_number'):
             search_value = request.form.get('invoice_number')
             if request.form.get('search_canceled'):
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE invoice_number LIKE %s AND (invoice_status NOT IN ('DUPLICATE','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                    "SELECT * FROM registrations WHERE invoice_number LIKE %s AND duplicate = false order by checkin DESC, lname, fname",
                     ('%' + search_value + '%',))
             else:
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE invoice_number LIKE %s AND (invoice_status NOT IN ('DUPLICATE','CANCELED','SENT','UNSENT') OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                    "SELECT * FROM registrations WHERE invoice_number LIKE %s AND duplicate = false OR invoice_status IS NULL) order by checkin DESC, lname, fname",
                     ('%' + search_value + '%',))
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
@@ -103,75 +103,16 @@ def index():
                 (search_value,))
         else:
             return render_template('index.html', regcount=regcount)
-        for r in reg:
-            if r['rate_date'] is not None:
-                try:
-                    arrival_date = datetime.strptime(r['rate_date'], "%Y-%m-%d %H:%M:%S")
-                except:
-                    arrival_date = datetime.strptime(r['rate_date'], "%m-%d-%Y")
 
-            else:
-                arrival_date = datetime.strptime('01/01/1900', '%m/%d/%Y')
             if (arrival_date == datetime.strptime('03/08/2025','%m/%d/%Y') or arrival_date <= datetime.now()):
-                r['rate_date'] = arrival_date
+                r['expected_arrival_date'] = arrival_date
                 r['ready_for_checkin'] = True
             else:
-                r['rate_date'] = arrival_date
+                r['expected_arrival_date'] = arrival_date
                 r['ready_for_checkin'] = False
         return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
         return render_template('index.html', regcount=regcount)
-
-@app.route('/upload', methods=('GET', 'POST'))
-@login_required
-@roles_accepted('Admin')
-def upload():
-    if request.method == 'POST':   
-        # msg = Message(
-        #     subject="Hello",
-        #     sender="carl.cox.primary@gmail.com",
-        #     recipients=["carl.cox.primary@gmail.com"],
-        # )
-        # msg.html = "<b>testing</b>"
-        # mail.send(msg)
-        # f = request.files['file'] 
-        # f.save(f.filename)
-
-        # s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
-        # conndict = dict(item.split("=") for item in s.split(" "))
-        # connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
-        # engine=db.create_engine(connstring)
-        # metadata = db.MetaData()
-        # registrations = db.Table('registrations', metadata)
-
-        # root_path = os.path.dirname(os.path.dirname( __file__ ))
-        # df = pd.read_csv(os.path.join(root_path,f.filename))
-
-
-        # # Rename columns from CSV to match DB - order is important
-        # df.columns = ['event_id','event_name','order_id','reg_date_time','medallion','fname','lname','scaname_bad','acc_member_id','acc_exp_date','event_ticket','price_paid','order_price','lodging','pay_type','prereg_status','kingdom','regid','scaname','mbr_num_exp','requests','waiver1','waiver2']
-        # df = df.drop(columns=['event_id','event_name','scaname_bad','acc_member_id','acc_exp_date','order_price','waiver1','waiver2']) # Remove unwanted columns from the import
-
-        # df[['rate_age']] = df['event_ticket'].str.extract('(Child|18\+|Heirs|K\/Q|Royals)', expand=True) # Split rate, age and arival date from single field
-        # df[['rate_mbr']] = df['event_ticket'].str.extract('(Member|Non-Member)', expand=True) # Split rate, age and arival date from single field
-        # df[['rate_date']] = df['event_ticket'].str.extract('Arriving (\d+)', expand=True) # Split rate, age and arival date from single field
-
-        # df[['mbr_num']] = df['mbr_num_exp'].str.extract('^(\d{4,})', expand=True) # Extract member number 
-        # df['lodging'] = df['lodging'].str.extract('(.*)\s\(\$') # Remove price from camping groups
-
-
-        # # Import data to DB
-        # df.to_sql('registrations', engine, if_exists= 'append', index=False)
-
-        # # Adjust regid for at-the-door registrations
-        # conn = psycopg2.connect(os.environ["AZURE_POSTGRESQL_CONNECTIONSTRING"])
-        # cur = conn.cursor()
-        # cur.execute ('ALTER SEQUENCE registrations_regid_seq RESTART WITH 60001;')
-        # conn.commit()
-        # conn.close()
-        flash("SUCCESS!")
-        return redirect(url_for('index'))
-    return render_template('upload.html')
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required
@@ -211,7 +152,7 @@ def reports():
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_calc'] != 0 and row['rate_age'].__contains__('18+'):
+            if row['mbr'] == 'Non-Member' and row['price_calc'] != 0 and row['age'].__contains__('18+'):
                 base_price_list.append(row['price_calc'] - 10)
                 nmr_list.append(10)
             else:
@@ -247,13 +188,13 @@ def reports():
         if form.validate_on_submit():
             file = 'at_door_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg_status is Null"
+            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg is false"
             rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
             params = {'start_date':start_date, 'end_date':end_date}
             df = pd.read_sql_query(rptquery, engine, params=params)
-            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg_status = {}"
-            rptquery = rptquery.format('%(start_date)s', '%(end_date)s', '%(prereg_status)s')
-            params = {'start_date':start_date, 'end_date':end_date, 'prereg_status':"SUCCEEDED"}
+            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg = {}"
+            rptquery = rptquery.format('%(start_date)s', '%(end_date)s', '%(prereg)s')
+            params = {'start_date':start_date, 'end_date':end_date, 'prereg':True}
             df = df.merge(pd.read_sql_query(rptquery, engine, params=params), how='outer')
 
             path1 = './reports/' + file
@@ -318,9 +259,9 @@ def reports():
 
         file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = "SELECT invoice_number, regid, fname, lname, scaname, rate_age, lodging, invoice_status, checkin FROM registrations WHERE prereg_status = {} AND checkin IS NULL ORDER BY lodging"
-        rptquery = rptquery.format('%(prereg_status)s')
-        params = {'prereg_status':"SUCCEEDED"}
+        rptquery = "SELECT invoice_number, regid, fname, lname, scaname, age, lodging, invoice_status, checkin FROM registrations WHERE prereg = {} AND checkin IS NULL ORDER BY lodging"
+        rptquery = rptquery.format('%(prereg)s')
+        params = {'prereg':True}
         df = pd.read_sql_query(rptquery, engine, params=params)
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -335,7 +276,7 @@ def reports():
 
         file = 'royal_registrations_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        df = pd.read_sql("SELECT * FROM registrations WHERE rate_age = 'Royals'", engine)
+        df = pd.read_sql("SELECT * FROM registrations WHERE age = 'Royals'", engine)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -351,7 +292,7 @@ def reports():
 
         file = 'land_pre-reg_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        df = pd.read_sql("SELECT lodging, invoice_number, regid, fname, lname, scaname, rate_age, invoice_status FROM registrations WHERE invoice_status = 'PAID' ORDER BY lodging, invoice_number", engine)
+        df = pd.read_sql("SELECT lodging, invoice_number, regid, fname, lname, scaname, age, invoice_status FROM registrations WHERE invoice_status = 'PAID' ORDER BY lodging, invoice_number", engine)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -368,12 +309,12 @@ def reports():
 
         file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'PAID'"
+        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'PAID'"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+            if row['mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
                 nmr_list.append(10)
             else:
@@ -391,21 +332,21 @@ def reports():
 
         file = 'paypal_cenceled_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, price_due, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'CANCELED'"
+        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, price_due, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'CANCELED'"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
 
             if row['price_paid'] != 0:
-                if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                if row['mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['age'].__contains__('18+'):
                     base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
                     nmr_list.append(10)
                 else:
                     base_price_list.append(row['price_paid'] - row['paypal_donation_amount'])
                     nmr_list.append(0)
             else:
-                if row['rate_mbr'] == 'Non-Member' and row['price_due'] != 0 and row['rate_age'].__contains__('18+'):
+                if row['mbr'] == 'Non-Member' and row['price_due'] != 0 and row['age'].__contains__('18+'):
                     base_price_list.append(row['price_due'] - 10 - row['paypal_donation_amount'])
                     nmr_list.append(10)
                 else:
@@ -498,7 +439,7 @@ def reports():
 
         file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND (invoice_status = 'PAID' or invoice_status = 'CANCELED') AND invoice_number IN ({invoice_nums_str})"
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND (invoice_status = 'PAID' or invoice_status = 'CANCELED') AND invoice_number IN ({invoice_nums_str})"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = [] 
@@ -507,7 +448,7 @@ def reports():
 
         for index, row in df.iterrows():
             found_invoices.append(row['invoice_number'])
-            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+            if row['mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
                 nmr_list.append(10)
                 row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
@@ -548,11 +489,11 @@ def reports():
                         errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee,'Email':counts_obj[obj]['From Email Address']})
                 counts.append(counts_obj[obj])
         
-        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'check' AND invoice_status = 'PAID'"
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'check' AND invoice_status = 'PAID'"
         df = pd.read_sql_query(rptquery, engine)
 
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+            if row['mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['age'].__contains__('18+'):
                 base_price_list.append(row['price_paid'] - 10 - row['paypal_donation_amount'])
                 nmr_list.append(10)
                 row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
@@ -567,10 +508,10 @@ def reports():
         unmatched_invoices = []
         for paypal_invoice_num in paypal_invoice_nums:
             if paypal_invoice_num not in found_invoices and paypal_invoice_num != '':
-                rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND invoice_status = 'PAID' AND invoice_number LIKE '%%{paypal_invoice_num}%%'"
+                rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND invoice_status = 'PAID' AND invoice_number LIKE '%%{paypal_invoice_num}%%'"
                 df = pd.read_sql_query(rptquery, engine)
                 for index, row in df.iterrows():
-                    if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):
+                    if row['mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['age'].__contains__('18+'):
                         row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
                         row['nmr'] = 10
                     else:
@@ -600,7 +541,7 @@ def reports():
 
         file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        rptquery = "SELECT checkin, rate_mbr, rate_age, notes, price_paid, pay_type, atd_paid, atd_pay_type, paypal_donation_amount FROM registrations WHERE checkin::date BETWEEN {} and {}"
+        rptquery = "SELECT checkin, mbr, age, notes, price_paid, pay_type, atd_paid, atd_pay_type, paypal_donation_amount FROM registrations WHERE checkin::date BETWEEN {} and {}"
         rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
         params = {'start_date':start_date, 'end_date':end_date}
         df = pd.read_sql_query(rptquery, engine, params=params)
@@ -608,7 +549,7 @@ def reports():
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
-            if row['rate_mbr'] == 'Non-Member' and row['atd_paid'] != 0 and row['rate_age'].__contains__('18+'):
+            if row['mbr'] == 'Non-Member' and row['atd_paid'] != 0 and row['age'].__contains__('18+'):
                 base_price_list.append(row['atd_paid'] - 10 - row['paypal_donation_amount'])
                 nmr_list.append(10)
             else:

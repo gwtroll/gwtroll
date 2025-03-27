@@ -7,10 +7,10 @@
     <b>Total PreRegs: {{preregtotal}}</b>
   </div>
   <div class="col text-center">
-    <b>{{back.upper()}} Reg Total: {{regcount}}</b>
+    <b>PAID Reg Total: {{regcount}}</b>
   </div>
   <div class="col text-center">
-    <b>{{back.upper()}} Invoice Count: {{invoicecount}}</b>
+    <b>PAID Invoice Count: {{invoicecount}}</b>
   </div>
 </div>
 
@@ -42,10 +42,6 @@
               <th data-field="invoice_number" data-filter-control="input">Invoice Number</th>
               <th data-field="invoice_date" data-filter-control="select">Invoice Date</th>
               <th data-field="email" data-filter-control="input">Email</th>
-              {% if back == 'all' %}
-              <th data-field="status" data-filter-control="select">Status</th>
-              <th data-field="invoice_amount" data-filter-control="input">Invoice Amount</th>
-              {% endif %}
               <th data-field="update">Update</th>
           </tr>
       </thead>
@@ -68,17 +64,8 @@
                   <td> 
                       {{invoices[invoice]['invoice_email']}}
                   </td>
-                  {% if back == 'all' %}
-                  <td> 
-                    {{invoices[invoice]['invoice_status']}}
-                  </td>
-                  <td> 
-                    {{invoices[invoice]['invoice_total']}}
-                  </td>
-                  {% endif %}
                   <td>
-                    <p>{{invoices[invoice]['registrations']}}</p>
-                    <a class="btn btn-primary" href="{{url_for('invoices.update', back=back, regids=[invoices[invoice]['registrations']])}}" role="button">Update</a>
+                    <a class="btn btn-primary" href="{{url_for('invoices.update', invnumber=invoices[invoice]['invoice_number'])}}" role="button">Update Invoice</a>
                   </td>
           </tr>
           {% endfor %}
