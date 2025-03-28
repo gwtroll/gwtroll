@@ -101,8 +101,8 @@
         </div>
     </div>
 
-    <h5>Payments</h5>
-    <div class="row">
+    <h5 class="no-print">Payments</h5>
+    <div class="row no-print">
         <div class="col">
             <table class="table table-reg table-reg-display table-responsive">
                 <tr>
@@ -110,27 +110,23 @@
                     <th>Amount</th>
                 </tr>
             
-                {% if reg.invoice.payments %}
-                {% for payment in reg.invoice.payments %}
+                {% if reg.payments %}
+                {% for payment in reg.payments %}
                 <tr>
                     <td>{{ payment.type }}</td>
-                    <td>{{ payment.amount  }}</td>
+                    <td>{{ payment.amount }}</td>
                 </tr>
                 {% endfor %}
-                {% endif %}
-                {% if reg.payment %}
-                <tr>
-                    <td>{{ reg.payment.type }}</td>
-                    <td>{{ reg.payment.amount }}</td>
-                </tr>
                 {% endif %}
             </table>   
         </div>
     </div>
 
     <br>
-    {% if reg.payment and not reg.invoice.payments %}
-    <h1 class="text-center" style="background-color: red; color: white;">{{reg.payment.type}} - ${{reg.payment.amount}}</h1>
+    {% if atd_payments %}
+    {% for pay in atd_payments %}
+    {% if reg.invoice == None %}
+    <h1 class="text-center" style="background-color: red; color: white;">{{pay.type}} - ${{pay.amount}}</h1>
         {% if reg['age'] == '18+' %}
         <h1 class="text-center m-0" style="background-color: red; color: white;">ADULT</h1> 
         {% if reg['mbr'] == false %}
@@ -140,15 +136,15 @@
         {% if reg['paypal_donation'] > 0 %}
         <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION</h1>
         {% endif %}
-
-    {% elif reg.payment and reg.invoice.payments %}
-    <h1 class="text-center" style="background-color: red; color: white;">{{reg.payment.type}} - ${{reg.payment.amount}}</h1>
+    {% else %}
+    <h1 class="text-center" style="background-color: red; color: white;">{{pay.type}} - ${{pay.amount}}</h1>
         {% if reg['age'] == '18+' %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">OTHER: ${{reg.payment.amount}}</h1> 
+        <h1 class="text-center m-0" style="background-color: red; color: white;">OTHER: ${{pay.amount}}</h1> 
         {% endif %}
-
-
     {% endif %}
+    {% endfor %}
+    {% endif %}
+    
    
 
     {% if not reg['signature'] %}
@@ -197,7 +193,7 @@
 {% endif %}
     
     {% if reg['checkin'] %}
-    {% if reg['payment'] %}
+    {% if atd_payment %}
         <div class="row form-group no-print">
             <div class="col form-group">
                 <button value='Print' type='button' class="btn btn-primary btn-lg form-control custom-input-space" onclick='handlePrint()'>Print</button>        

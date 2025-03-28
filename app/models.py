@@ -100,8 +100,11 @@ class Registrations(db.Model):
     
     #Pricing
     registration_price = db.Column(db.Integer(), default=0)
+    registration_balance = db.Column(db.Integer(), default=0)
     nmr_price = db.Column(db.Integer(), default=0)
+    nmr_balance = db.Column(db.Integer(), default=0)
     paypal_donation = db.Column(db.Integer(), default=0)
+    paypal_donation_balance = db.Column(db.Integer(), default=0)
     nmr_donation = db.Column(db.Integer(), default=0)
     total_due = db.Column(db.Integer(), Computed(registration_price+nmr_price+paypal_donation))
     balance = db.Column(db.Integer(), default=0)
@@ -116,8 +119,7 @@ class Registrations(db.Model):
     #Relationships
     invoice_number = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
     invoice = db.relationship("Invoice", back_populates="regs")
-    payment_id = db.Column(db.Integer(), db.ForeignKey('payment.id'))
-    payment = db.relationship("Payment", back_populates="regs")
+    payments = db.relationship("Payment", back_populates="reg")
     bows = db.relationship('Bows', secondary='reg_bows')
     crossbows = db.relationship('Crossbows', secondary='reg_crossbows')
     marshal_inspections = db.relationship('MarshalInspection', backref='registrations')
@@ -160,10 +162,14 @@ class Payment(db.Model):
     type = db.Column(db.String(), nullable=False)
     check_num = db.Column(db.Integer())
     payment_date = db.Column(db.DateTime(), nullable=False)
+    registration_amount = db.Column(db.Integer(), default=0)
+    nmr_amount = db.Column(db.Integer(), default=0)
+    paypal_donation_amount = db.Column(db.Integer(), default=0)
     amount = db.Column(db.Integer(), nullable=False)
     invoice_number  = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
     invoice = db.relationship("Invoice", back_populates="payments")
-    regs = db.relationship("Registrations", back_populates="payment")
+    reg_id  = db.Column(db.Integer(), db.ForeignKey('registrations.id'))
+    reg = db.relationship("Registrations", back_populates="payments")
     
 class RegLogs(db.Model):
     __tablename__ = 'reglogs'  
@@ -231,3 +237,13 @@ class PriceSheet(db.Model):
     prereg_price = db.Column(db.Integer())
     atd_price = db.Column(db.Integer())
     nmr = db.Column(db.Integer())
+
+class Kingdom(db.Model):
+    __tablename__ = 'kingdom'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(), nullable=False)
+
+class Lodging(db.Model):
+    __lodging__ = 'lodging'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(), nullable=False)

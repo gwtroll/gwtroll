@@ -34,6 +34,7 @@ def create_prereg(data):
         prereg = True,
         prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
         paypal_donation = 3 if data.paypal_donation.data == True else 0,
+        paypal_donation_balance = 3 if data.paypal_donation.data == True else 0,
         royal_departure_date = data.royal_departure_date.data,
         royal_title = data.royal_title.data if data.royal_title.data != '' else None
     )
@@ -47,8 +48,15 @@ def create_prereg(data):
     if data.age.data == '18+':
         registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
         reg.registration_price = registration_price
+        reg.registration_balance = registration_price
         if not reg.mbr:
             reg.nmr_price = nmr_price
+            reg.nmr_balance = nmr_price
+        else:
+            reg.nmr_price = 0
+            reg.nmr_balance = 0
+    
+        reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
 
     return reg
 
@@ -83,6 +91,7 @@ def DicttoReg(dict):
         prereg = bool(dict['prereg']),
         prereg_date_time = dict['prereg_date_time'],
         paypal_donation = int(dict['paypal_donation']),
+        paypal_donation_balance = int(dict['paypal_donation_balance']),
         royal_departure_date = dict['royal_departure_date'] if dict['royal_departure_date'] != 'null' else None,
         royal_title = dict['royal_title'] if dict['royal_title'] != 'null' else None,
         expected_arrival_date = dict['expected_arrival_date']
@@ -97,8 +106,15 @@ def DicttoReg(dict):
     if dict['age'] == '18+':
         registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
         reg.registration_price = registration_price
+        reg.registration_balance = registration_price
         if not reg.mbr:
             reg.nmr_price = nmr_price
+            reg.nmr_balance = nmr_price
+        else:
+            reg.nmr_price = 0
+            reg.nmr_balance = 0
+    
+        reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
 
     return reg
         
@@ -187,20 +203,22 @@ def createatd():
         invoice_email = form.invoice_email.data,
         emergency_contact_name = form.emergency_contact_name.data, 
         emergency_contact_phone = form.emergency_contact_phone.data,)
-        #mbr_num = form.mbr_num.data,
-        #mbr_exp = form.mbr_exp.data)
         reg.expected_arrival_date = datetime.now().date()
         reg.actual_arrival_date = datetime.now().date()
         registration_price, nmr_price = get_atd_pricesheet_day(reg.actual_arrival_date)
         reg.registration_price = registration_price
+        reg.registration_balance = registration_price
         if reg.mbr != True:
             reg.nmr_price = nmr_price
+            reg.nmr_balance = nmr_price
         else:
             reg.nmr_price = 0
+            reg.nmr_balance = 0
         
         reg.paypal_donation = 0
+        reg.paypal_donation_balance = 0
         
-        reg.balance = recalculate_reg_balance(reg)
+        reg.balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
 
         if form.mbr.data == 'Member':
             if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():

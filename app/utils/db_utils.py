@@ -199,9 +199,13 @@ def get_atd_pricesheet_day(date):
 
 def recalculate_reg_balance(reg):
     total_payments = 0
-    for payment in reg.payments:
-        total_payments += payment.amount
-    new_balance = reg.total_due - total_payments
+    total_due = reg.registration_price + reg.nmr_price + reg.paypal_donation
+    if len(reg.payments) > 0:
+        for payment in reg.payments:
+            total_payments += payment.amount
+        new_balance = total_due - total_payments
+    else:
+        new_balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
     return new_balance
 
 def prereg_total():

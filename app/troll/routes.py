@@ -20,6 +20,10 @@ from pyzbar import pyzbar
 @roles_accepted('Admin','Troll Shift Lead','Troll User','Cashier','Department Head')
 def reg(regid):
     reg = get_reg(regid)
+    atd_payments = []
+    for pay in reg.payments:
+        if pay.type.upper() != 'PAYPAL' and pay.type.upper() != 'CHECK':
+            atd_payments.append(pay)
     if request.form.get("action") == 'Edit':
     #if request.method == 'POST' and request.path == '/editreg':
         return redirect(url_for('registration.editreg', regid=regid))
@@ -30,7 +34,7 @@ def reg(regid):
     elif request.method == 'POST'and request.form.get("action") == 'checkin':
         return redirect(url_for('troll.checkin', regid=regid))
     else:
-        return render_template('reg.html', reg=reg)
+        return render_template('reg.html', reg=reg, atd_payments=atd_payments)
     
 @bp.route('/fastpass')
 def fastpass():
@@ -44,13 +48,17 @@ def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
 
-    form = CheckinForm(kingdom = reg.kingdom, mbr = reg.mbr, medallion = reg.medallion, age = reg.age, lodging = reg.lodging, notes=reg.notes, mbr_num=reg.mbr_num)
+    form = CheckinForm(
+        kingdom = reg.kingdom, 
+        mbr = 'Member' if reg.mbr else 'Non-Member', 
+        medallion = reg.medallion, 
+        age = reg.age, 
+        lodging = reg.lodging, 
+        notes=reg.notes, 
+        mbr_num=reg.mbr_num
+    )
     if reg.mbr_num_exp is not None:
         form.mbr_num_exp.data = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d')
-
-    kingdom = reg.kingdom
-    mbr = reg.mbr
-    age = reg.age
 
     #if form.validate_on_submit():
         #print(form)
@@ -74,6 +82,7 @@ def checkin():
         medallion = form.medallion.data
         kingdom = form.kingdom.data
         mbr = form.mbr.data
+        age = form.age.data
         lodging = form.lodging.data
         minor_waiver = form.minor_waiver.data
         
@@ -94,9 +103,13 @@ def checkin():
             #Account for PreReg Non-Member and Checkin Member (No NMR Refund - View as Donation)
             if reg.mbr != True and mbr == 'Member' and reg.prereg == True and reg.age.__contains__('18+'):
                 reg.nmr_donation = 10
-                reg.nmr_price = 0
             else:
                 reg.nmr_donation = 0
+
+            if reg.mbr == True and mbr != 'Member' and reg.age.__contains__('18+'):
+                reg.nmr_price = 10
+                reg.nmr_balance = 10
+
             reg.medallion = medallion
             reg.mbr = True if mbr == 'Member' else False
             reg.age = age
@@ -105,15 +118,18 @@ def checkin():
             reg.minor_waiver = minor_waiver
             reg.lodging = lodging
             reg.checkin = datetime.today()
+            reg.actual_arrival_date = datetime.today().date()
 
             reg.notes = form.notes.data
 
             #Calculate Price Due
-            # if price_paid > price_calc + reg.paypal_donation_amount:  #Account for people who showed up late.  No refund.
-            #     reg.price_due = 0
-            # else:
-            #     reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
-            #     print("Calculating price:", reg.price_calc) 
+            if reg.age == '18+':
+                registration_price, nmr_price = get_atd_pricesheet_day(reg.actual_arrival_date)
+                if reg.registration_price < registration_price:
+                    reg.registration_balance = registration_price - reg.registration_price
+                    reg.registration_price = registration_price
+            
+            reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
 
             db.session.commit()
 
@@ -136,12 +152,13 @@ def waiver():
     reg = get_reg(regid)
     form.paypal_donation.data = True if reg.paypal_donation > 0 else False
     if request.method == 'POST':
-        if bool(request.form.get('paypal_donation')) == True:
+        if reg.paypal_donation != 3 and bool(request.form.get('paypal_donation')) == True:
             reg.paypal_donation = 3
-        else:
-            reg.paypal_donation = 0
+            reg.paypal_donation_balance = 3
 
         reg.signature = form.signature.data
+
+        reg.balance = recalculate_reg_balance(reg)
         
         db.session.commit()
 
@@ -175,15 +192,12 @@ def payment():
         pay = Payment(
             type = request.form.get('payment_type'),
             payment_date = datetime.now().date(),
-            amount = reg.balance
+            amount = reg.balance,
+            reg_id = reg.id
         )
 
         db.session.add(pay)
-        db.session.commit()
-
-        reg.payment_id = pay.id
         reg.balance = recalculate_reg_balance(reg)
-
         db.session.commit()
 
         log_reg_action(reg, 'PAYMENT')

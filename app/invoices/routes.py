@@ -36,13 +36,7 @@ def open():
     # preregtotal = prereg_total()
     # invoicecount = unsent_count()
     # regcount = unsent_reg_count()
-    invoices = {}
-    for inv in all_inv:
-        if inv.invoice_email not in invoices:
-            invoices[inv.invoice_email] = {'invoice_email':inv.invoice_email,'invoice_number':inv.invoice_number, 'invoice_status':inv.invoice_status, 'invoice_date':inv.invoice_date, 'registrations':[]}
-        for reg in inv.regs:
-            invoices[inv.invoice_email]['registrations'].append(reg.id)
-    return render_template('open_list.html', invoices=invoices)
+    return render_template('open_list.html', invoices=all_inv)
 
 @bp.route('/paid', methods=('GET', 'POST'))
 @login_required
@@ -53,13 +47,7 @@ def paid():
     # preregtotal = prereg_total()
     # invoicecount = unsent_count()
     # regcount = unsent_reg_count()
-    invoices = {}
-    for inv in all_inv:
-        if inv.invoice_email not in invoices:
-            invoices[inv.invoice_email] = {'invoice_email':inv.invoice_email,'invoice_number':inv.invoice_number, 'invoice_status':inv.invoice_status, 'invoice_date':inv.invoice_date, 'registrations':[]}
-        for reg in inv.regs:
-            invoices[inv.invoice_email]['registrations'].append(reg.id)
-    return render_template('paid_list.html', invoices=invoices)
+    return render_template('paid_list.html', invoices=all_inv)
 
 @bp.route('/canceled', methods=('GET', 'POST'))
 @login_required
@@ -146,7 +134,7 @@ def update():
 
         log_reg_action(reg, 'INVOICE UPDATED')
 
-    return render_template('update_invoice.html', form=form, regs=regs)
+    return render_template('update_invoice.html', form=form, regs=regs, inv=inv)
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
@@ -231,31 +219,69 @@ def createpayment():
         notes = request.form.get('notes')
         
         if payment_amount is not None:
-            pay = Payment(
-                type = payment_type,
-                check_num = check_num if check_num != '' else None,
-                payment_date = payment_date,
-                amount = payment_amount,
-                invoice_number  = invoice_number
-            )
-            
-            inv.balance = inv.balance - pay.amount
+            payment_balance = payment_amount
+            for reg in regs:
+                regid = reg.id
+                reg_balance = reg.balance
+                if payment_balance > 0:
+                    pay = Payment(
+                        type = payment_type,
+                        check_num = check_num if check_num != '' else None,
+                        payment_date = payment_date,
+                        # amount = payment_amount,
+                        reg_id = regid,
+                        invoice_number  = invoice_number
+                    )
+                    if reg_balance <= payment_balance:
+                        payment_balance = payment_balance - reg_balance
+                        pay.amount = reg_balance
+                        pay.registration_amount = reg.registration_balance
+                        pay.nmr_amount = reg.nmr_balance
+                        pay.paypal_donation_amount = reg.paypal_donation_balance
+                        reg.registration_balance = 0
+                        reg.nmr_balance = 0
+                        reg.paypal_donation_balance = 0
+                    else:
+                        # reg.balance = reg.balance - payment_balance
+                        pay.amount = payment_balance
+
+                        if payment_balance <= reg.registration_balance:
+                            reg.registration_balance -= payment_balance
+                            pay.registration_amount = payment_balance
+                            payment_balance = 0
+                        else:
+                            payment_balance -= reg.registration_balance
+                            reg.registration_balance = 0
+                            pay.registration_amount =  reg.registration_balance
+                        
+                        if payment_balance <= reg.nmr_balance:
+                            reg.nmr_balance -= payment_balance
+                            pay.nmr_amount = payment_balance
+                            payment_balance = 0
+                        else:
+                            payment_balance -= reg.nmr_balance
+                            reg.nmr_balance = 0
+                            pay.nmr_amount =  reg.nmr_balance
+
+                        if payment_balance <= reg.paypal_donation_balance:
+                            reg.paypal_donation_balance -= payment_balance
+                            pay.paypal_donation_amount = payment_balance
+                            payment_balance = 0
+                        else:
+                            payment_balance -= reg.paypal_donation_balance
+                            reg.paypal_donation_balance = 0
+                            pay.paypal_donation_amount =  reg.paypal_donation_balance
+
+                    db.session.add(pay)
+                    reg.notes = notes
+                    reg.balance = recalculate_reg_balance(reg)
+            inv.balance = inv.balance - payment_amount
             if inv.balance <= 0:
                 inv.invoice_status = 'PAID'
             inv.notes = notes
 
-            db.session.add(pay)
             db.session.commit()
 
-        payment_balance = payment_amount
-        for reg in regs:
-            
-            if reg.balance < payment_balance:
-                payment_balance = payment_balance - reg.balance
-                reg.balance = 0
-            else:
-                reg.balance = reg.balance - payment_balance
-                payment_balance = 0
             log_reg_action(reg, 'INVOICE PAID')
         return redirect(url_for('invoices.open'))
 

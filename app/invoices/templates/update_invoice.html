@@ -57,6 +57,14 @@
     <div class="row">
         <div class="col">
             <p>
+                {{ form.invoice_email.label }}<br>
+                {{ form.invoice_email(class_='form-control', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
                 {{ form.invoice_date.label }}<br>
                 {{ form.invoice_date(class_='form-control') }}
             </p>
@@ -83,6 +91,33 @@
         </div>
     </div>
     <h4>Payment Information</h4>
+    <h5>Applied Payments</h5>
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>PayID</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Registration</th>
+                </thead>
+                <tbody>
+                    {% if inv %}
+                    {% for pay in inv.payments %}
+                    <tr> 
+                        <td>{{ pay.id }}</td>
+                        <td>{{ pay.type }}</td>
+                        <td>{{ pay.payment_date }}</td>
+                        <td>{{ pay.amount }}</td>
+                        <td>{{ pay.reg.fname }} {{ pay.reg.lname }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <p>

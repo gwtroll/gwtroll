@@ -16,28 +16,6 @@ import csv
 import codecs
 from flask_mail import Message
 
-#Import pricing from CSV and set global variables
-price_df = pd.read_csv('gwpricing.csv')
-
-prereg_sat_price = int(price_df.loc[price_df['arrday'] == 'saturday', 'prereg_price'].values[0])
-prereg_sun_price = int(price_df.loc[price_df['arrday'] == 'sunday', 'prereg_price'].values[0])
-prereg_mon_price = int(price_df.loc[price_df['arrday'] == 'monday', 'prereg_price'].values[0])
-prereg_tue_price = int(price_df.loc[price_df['arrday'] == 'tuesday', 'prereg_price'].values[0])
-prereg_wed_price = int(price_df.loc[price_df['arrday'] == 'wednesday', 'prereg_price'].values[0])
-prereg_thur_price = int(price_df.loc[price_df['arrday'] == 'thursday', 'prereg_price'].values[0])
-prereg_fri_price = int(price_df.loc[price_df['arrday'] == 'friday', 'prereg_price'].values[0])
-prereg_sat2_price = int(price_df.loc[price_df['arrday'] == 'saturday2', 'prereg_price'].values[0])
-door_sat_price = int(price_df.loc[price_df['arrday'] == 'saturday', 'door_price'].values[0])
-door_sun_price = int(price_df.loc[price_df['arrday'] == 'sunday', 'door_price'].values[0])
-door_mon_price = int(price_df.loc[price_df['arrday'] == 'monday', 'door_price'].values[0])
-door_tue_price = int(price_df.loc[price_df['arrday'] == 'tuesday', 'door_price'].values[0])
-door_wed_price = int(price_df.loc[price_df['arrday'] == 'wednesday', 'door_price'].values[0])
-door_thur_price = int(price_df.loc[price_df['arrday'] == 'thursday', 'door_price'].values[0])
-door_fri_price = int(price_df.loc[price_df['arrday'] == 'friday', 'door_price'].values[0])
-door_sat2_price = int(price_df.loc[price_df['arrday'] == 'saturday2', 'door_price'].values[0])
-nmr = int(price_df.loc[price_df['arrday'] == 'saturday', 'nmr'].values[0])
-opening_day = str(price_df.loc[price_df['arrday'] == 'saturday', 'arrdate'].values[0])
-opening_day = int(re.search("\/(\d+)\/", opening_day).group(1)) # Remove month and year so just the day is left
 regcount = 0
 
 @login.unauthorized_handler
@@ -86,6 +64,7 @@ def index():
                         "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
                         #(search_value, search_value, search_value))
                         ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+
         elif request.form.get('invoice_number'):
             search_value = request.form.get('invoice_number')
             if request.form.get('search_canceled'):
@@ -104,12 +83,12 @@ def index():
         else:
             return render_template('index.html', regcount=regcount)
 
-            if (arrival_date == datetime.strptime('03/08/2025','%m/%d/%Y') or arrival_date <= datetime.now()):
-                r['expected_arrival_date'] = arrival_date
-                r['ready_for_checkin'] = True
-            else:
-                r['expected_arrival_date'] = arrival_date
-                r['ready_for_checkin'] = False
+            # if (arrival_date == datetime.strptime('03/08/2025','%m/%d/%Y') or arrival_date <= datetime.now()):
+            #     r['expected_arrival_date'] = arrival_date
+            #     r['ready_for_checkin'] = True
+            # else:
+            #     r['expected_arrival_date'] = arrival_date
+            #     r['ready_for_checkin'] = False
         return render_template('index.html', searchreg=reg, regcount=regcount)
     else:
         return render_template('index.html', regcount=regcount)
