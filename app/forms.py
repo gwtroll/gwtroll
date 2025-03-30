@@ -222,6 +222,8 @@ class UpdateInvoiceForm(FlaskForm):
     invoice_canceled = BooleanField('Invoice Canceled')
     duplicate_invoice = BooleanField('Duplicate Invoice')
     is_check = BooleanField('Paid Via Check')
+    is_refund = BooleanField('Is Refund')
+    refund_check_num = IntegerField('Refund Check Number')
     notes = TextAreaField('Notes')
     submit = SubmitField('Update Invoice')
 

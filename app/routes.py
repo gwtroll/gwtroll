@@ -555,6 +555,8 @@ def updateinvoice(regid):
     back = request.args.get('back')
     reg = get_reg(regid)
     form = UpdateInvoiceForm()
+    form.refund_check_num.data = reg.refund_check_num
+    form.is_refund.data = True if reg.invoice_status == 'CANCELED_REFUND' else False
     form.price_paid.data = reg.price_paid
     form.price_calc.data = reg.price_calc
     form.paypal_donation_amount.data = reg.paypal_donation_amount
@@ -578,6 +580,7 @@ def updateinvoice(regid):
         invoice_date = request.form.get('invoice_date')
         invoice_payment_date = request.form.get('invoice_payment_date')
         invoice_canceled = bool(request.form.get('invoice_canceled'))
+        refund_check_num = request.form.get('refund_check_num')
 
         #if is_duplicate_invoice_number(invoice_number, reg):
         #    flash('Duplicate Invoice Number {}'.format(
@@ -592,11 +595,16 @@ def updateinvoice(regid):
             reg.invoice_status = 'CANCELED'
         if bool(request.form.get('duplicate_invoice')) == True:
             reg.invoice_status = 'DUPLICATE'
+        if bool(request.form.get('is_refund')) == True:
+            reg.invoice_status = 'CANCELED_REFUND'
 
         reg.price_paid = price_paid
         reg.price_calc = price_calc
         if invoice_number != None and invoice_number != '':          
             reg.invoice_number = invoice_number
+
+        if refund_check_num != None and refund_check_num != '':          
+            reg.refund_check_num = refund_check_num
 
         if invoice_date != '' and invoice_date is not None:
             reg.invoice_date = invoice_date
@@ -1673,7 +1681,7 @@ def reports():
 
         file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'PAID'"
+        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount, notes FROM registrations WHERE (invoice_status = 'PAID' or invoice_status = 'CANCELED_REFUND')"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = []
@@ -1696,7 +1704,7 @@ def reports():
 
         file = 'paypal_cenceled_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, price_due, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'CANCELED'"
+        rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, price_due, paypal_donation_amount, notes FROM registrations WHERE (invoice_status = 'CANCELED' or invoice_status = 'CANCELED_REFUND')"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = []
@@ -1803,7 +1811,7 @@ def reports():
 
         file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND (invoice_status = 'PAID' or invoice_status = 'CANCELED') AND invoice_number IN ({invoice_nums_str})"
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND (invoice_status = 'PAID' or invoice_status = 'CANCELED' or invoice_status = 'CANCELED_REFUND') AND invoice_number IN ({invoice_nums_str})"
         df = pd.read_sql_query(rptquery, engine)
         base_price_list = []
         nmr_list = [] 
@@ -1853,7 +1861,7 @@ def reports():
                         errors.append({"Invoice Number":obj,'Error':"EXPECTED FEE DOES NOT MATCH PAYPAL",'PayPal': counts_obj[obj]['Fee'],'Export':expected_fee,'Email':counts_obj[obj]['From Email Address']})
                 counts.append(counts_obj[obj])
         
-        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'check' AND invoice_status = 'PAID'"
+        rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'check' AND (invoice_status = 'PAID' OR invoice_status = 'CANCELED_REFUND')"
         df = pd.read_sql_query(rptquery, engine)
 
         for index, row in df.iterrows():
@@ -1872,7 +1880,7 @@ def reports():
         unmatched_invoices = []
         for paypal_invoice_num in paypal_invoice_nums:
             if paypal_invoice_num not in found_invoices and paypal_invoice_num != '':
-                rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND invoice_status = 'PAID' AND invoice_number LIKE '%%{paypal_invoice_num}%%'"
+                rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, rate_mbr, rate_age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND (invoice_status = 'PAID' or invoice_status = 'CANCELED_REFUND') AND invoice_number LIKE '%%{paypal_invoice_num}%%'"
                 df = pd.read_sql_query(rptquery, engine)
                 for index, row in df.iterrows():
                     if row['rate_mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['rate_age'].__contains__('18+'):

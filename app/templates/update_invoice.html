@@ -108,6 +108,21 @@
             </p>  
         </div>
     </div>
+
+    <div class="row">
+        <div class="col text-center">
+            <p>
+                {{ form.refund_check_num.label }}<br>
+                {{ form.refund_check_num(class_='form-control') }}
+            </p>  
+        </div>
+        <div class="col text-center">
+            <p>
+                {{ form.is_refund.label }}<br>
+                {{ form.is_refund(class_='form-control') }}
+            </p>  
+        </div>
+    </div>
   
     <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>
     </form>
