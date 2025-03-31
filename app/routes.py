@@ -1844,7 +1844,7 @@ def reports():
         df['base_price'] = base_price_list
 
         for obj in counts_obj:
-            if obj != '' and obj is not None:
+            if obj != '' and obj is not None and obj.isdigit():
                 if int(obj) in merchant_dict_exclude:
                     counts_obj[obj]['price_paid'] = merchant_dict_exclude[int(obj)]['Gross']
                     counts_obj[obj]['expected_fee'] = merchant_dict_exclude[int(obj)]['Fee']
