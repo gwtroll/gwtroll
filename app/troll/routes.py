@@ -40,7 +40,6 @@ def reg(regid):
 def fastpass():
         return render_template('fastpass.html')
 
-
 @bp.route('/checkin', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
@@ -57,6 +56,8 @@ def checkin():
         notes=reg.notes, 
         mbr_num=reg.mbr_num
     )
+    form.lodging.choices = get_lodging_choices()
+    # form.kingdom.choices = get_kingdom_choices()
     if reg.mbr_num_exp is not None:
         form.mbr_num_exp.data = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d')
 
@@ -193,7 +194,8 @@ def payment():
             type = request.form.get('payment_type'),
             payment_date = datetime.now().date(),
             amount = reg.balance,
-            reg_id = reg.id
+            reg_id = reg.id,
+            event_id = reg.event_id
         )
 
         db.session.add(pay)

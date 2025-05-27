@@ -276,5 +276,3 @@ class Event(db.Model):
     end_date = db.Column(db.Date(), nullable=False)
     location = db.Column(db.String(), nullable=False)
     description = db.Column(db.Text(), nullable=False)
-    users = db.relationship('User', backref='event', lazy=True)
-    registrations = db.relationship('Registrations', backref='event', lazy=True)

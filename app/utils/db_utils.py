@@ -151,6 +151,38 @@ def get_role_choices():
 
     return role_choices
 
+def get_lodging_choices():
+    if current_user.event_id == None: 
+        lodgings = Lodging.query.all()
+    else:
+        lodgings = Lodging.query.filter(Lodging.event_id == current_user.event_id).all()
+    lodging_choices = [('-', '-')]
+    lodging_dict = {}
+    for l in lodgings:
+        lodging_dict[l.name] = l
+        if current_user.event_id == l.event_id:
+            lodging_choices.append([l.id, l.name])
+        elif current_user.event_id == None:
+            lodging_choices.append([l.id, l.name])
+    
+    return lodging_choices
+
+def get_event_choices():
+    events = Event.query.all()
+    event_choices = []
+    event_dict = {}
+    if current_user.event_id == None:
+        event_choices.append((0, 'Select Event'))
+    for e in events:
+        event_dict[e.name] = e
+
+        if current_user.event_id == e.id:
+            event_choices.append([e.id, e.name+" "+str(e.year)])
+        elif current_user.event_id == None:
+            event_choices.append([e.id, e.name+" "+str(e.year)])
+    
+    return event_choices
+
 def log_reg_action(reg, action):
     print(reg)
     reglog = RegLogs(

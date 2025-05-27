@@ -27,7 +27,7 @@ def send_confirmation_email(recipient, reg):
     "<br/><br/>" \
     "<p>RegID: "+str(reg.id)+"<br/>" \
     "Name: "+reg.fname+" "+reg.lname+"<br/>" \
-    "Arrival Date: "+reg.expected_arrival_date+"</p>" \
+    "Arrival Date: "+str(reg.expected_arrival_date)+"</p>" \
     "<img src=\"cid:fastpass\" alt=\"Fast Pass QR Code\">"
     
     mail.send(msg)

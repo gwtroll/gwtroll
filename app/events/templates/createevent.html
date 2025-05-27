@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form action="" method="post">
+        <h2>Create Event</h2>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.event_name.label }}
+                    {{ form.event_name(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.event_start.label }}
+                    {{ form.event_start(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.event_end.label }}
+                    {{ form.event_end(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.event_location.label }}
+                    {{ form.event_location(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.event_description.label }}
+                    {{ form.event_description(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit(class_='btn btn-primary btn-lg form-control m-0') }}
+                </p>
+            </div>
+        </div>
+    </form>
+    
+{% endblock %}

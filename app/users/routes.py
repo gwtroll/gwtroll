@@ -15,7 +15,10 @@ from app.utils.db_utils import *
 @roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
 def users():
     return_users = []
-    users = User.query.order_by(User.lname).all()
+    if current_user.event_id:
+        users = User.query.filter(User.event_id==current_user.event_id).order_by(User.lname).all()
+    else:
+        users = User.query.order_by(User.lname).all()
     if current_user.has_role('Admin'):
         return render_template('users.html', users=users)
     
@@ -39,6 +42,7 @@ def createuser():
 
     form = CreateUserForm()
     form.role.choices = get_role_choices()
+    form.event.choices = get_event_choices()
     
     if request.method == 'POST':
         dup_user_check = User.query.filter(User.username == form.username.data).first()
@@ -54,6 +58,7 @@ def createuser():
         user.medallion = form.medallion.data
         user.fs_uniquifier = uuid.uuid4().hex
         user.active = True
+        user.event_id = form.event.data if form.event.data != 0 else None
         user.set_password(form.password.data)
 
         db.session.add(user)
@@ -85,9 +90,11 @@ def edituser(userid):
         fname = user.fname,
         lname = user.lname,
         medallion = user.medallion,
-        active = user.active
+        active = user.active,
+        event = user.event_id
     )
     form.role.choices = get_role_choices()
+    form.event.choices = get_event_choices()
 
     if request.method == 'POST':
         role_array = []
@@ -101,6 +108,7 @@ def edituser(userid):
         user.medallion = form.medallion.data
         user.medallion = form.medallion.data
         user.active = bool(request.form.get('active'))
+        user.event_id = form.event.data if form.event.data != 0 else None
 
         db.session.commit()
 

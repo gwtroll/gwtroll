@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <a href="{{ url_for('lodging.createlodging') }}" class="btn btn-primary">Create New Lodging</a>
+    <a href="{{ url_for('lodging.uploadlodging') }}" class="btn btn-primary">Upload Lodging</a>
+
+    {% if lodgings %}
+    <table id="userTable"
+    data-toggle="table"
+    data-filter-control="true"
+    data-sortable="true"
+    data-pagination="true"
+    data-show-columns="true"
+    data-show-columns-toggle-all="true"
+    data-toolbar="#toolbar"
+    data-show-toggle="true"
+    data-show-fullscreen="true"
+    data-show-export="true"
+    data-export-types="['csv', 'excel', 'pdf']"
+    data-minimum-count-columns="2"
+    data-show-pagination-switch="true"
+    data-page-list="[10, 25, 50, 100, all]"
+    data-response-handler="responseHandler"
+    data-detail-view="true"
+    data-detail-view-icon="false"
+    data-mobile-responsive="true"
+    data-check-on-init="true"
+    data-classes="table table-striped table-responsive">
+
+        <thead>
+            <th data-field="lodgingid">ID</th>
+            <th data-field="name" data-filter-control="input">Name</th>
+            <th data-field="event" data-filter-control="select">Event</th>
+            <th data-field="edit">Edit</th>
+            <th data-field="delete">Delete</th>
+        </thead>
+        <tbody>
+            {% for lodging in lodgings %}
+            <tr>
+                <td>
+                    {{lodging.id}}
+                </td>
+                <td>
+                    {{lodging.name}}
+                </td>
+                <td>
+                    {{lodging.event.name}}
+                </td>
+                <td>
+                    <a class="btn btn-primary" href="{{url_for('lodging.editlodging', lodgingid=lodging.id)}}" role="button">Edit</a>
+                </td>
+                <td>
+                    <a class="btn btn-danger" href="{{url_for('lodging.deletelodging', lodgingid=lodging.id)}}" role="button">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+{% endblock %}

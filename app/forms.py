@@ -1,12 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField
 from wtforms.fields import DateField, DateTimeLocalField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
 import datetime
-
-lodging_df = pd.read_csv('gwlodging.csv')
-lodgingdata = lodging_df.to_dict(orient='list')
 
 kingdom_df = pd.read_csv('gwkingdoms.csv')
 kingdomdata = kingdom_df.to_dict(orient='list')
@@ -69,6 +66,7 @@ class CreateUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    event = SelectField('Event', validators=[])
     medallion = IntegerField('Medallion')
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Submit')
@@ -78,12 +76,22 @@ class CreateRoleForm(FlaskForm):
     role_name = StringField('Role Name', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+class CreateEventForm(FlaskForm):
+    event_name = StringField('Event Name', validators=[DataRequired()])
+    event_year = IntegerField('Event Year', validators=[DataRequired()])
+    event_description = TextAreaField('Event Description', validators=[DataRequired()])
+    event_start = DateField('Event Start', format='%Y-%m-%d', validators=[DataRequired()])
+    event_end = DateField('Event End', format='%Y-%m-%d', validators=[DataRequired()])
+    event_location = StringField('Event Location', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
 class EditUserForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    event = SelectField('Event', validators=[])
     medallion = IntegerField('Medallion')
     active = BooleanField('Active')
     submit = SubmitField('Submit')
@@ -101,7 +109,7 @@ class CreateRegForm(FlaskForm):
     lname = StringField('Last Name', validators=[DataRequired()])
     scaname = StringField('SCA Name', validators=[])
     kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
-    lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    lodging = SelectField('Camping Group', validators=[DataRequired()])
     age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     mbr_num = IntegerField('Membership #', validators=[RequiredIfMembership('mbr')])
@@ -132,7 +140,7 @@ class CreatePreRegForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(),Email()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired(),Email()])
     kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')], choices=kingdomdata)
-    lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')], choices=lodgingdata)
+    lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')])
     emergency_contact_name = StringField('Legal Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
     age = SelectField('Age Range', validators=[DataRequired()], id='age', choices=agedata)
@@ -152,7 +160,7 @@ class CheckinForm(FlaskForm):
     lname = StringField('Last Name')
     scaname = StringField('SCA Name')
     kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
-    lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    lodging = SelectField('Camping Group', validators=[DataRequired()])
     age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     mbr_num = IntegerField('Membership Number')
@@ -175,7 +183,7 @@ class EditForm(FlaskForm):
     email = StringField('Communication Email')
     invoice_email = StringField('Invoice Email')
     kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
-    lodging = SelectField('Camping Group', validators=[DataRequired()], choices=lodgingdata)
+    lodging = SelectField('Camping Group', validators=[DataRequired()])
     expected_arrival_date = DateField("Arrival Date")
     age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
@@ -286,3 +294,13 @@ class IncidentForm(FlaskForm):
     incident_date = DateTimeLocalField('Incident Date/Time', default=datetime.datetime.today)
     notes = TextAreaField('Notes')
     submit = SubmitField('Submit Incident')
+
+class LodgingForm(FlaskForm):
+    name = StringField('Lodging Name', validators=[DataRequired()])
+    event = SelectField('Event', validators=[DataRequired()])
+    submit = SubmitField('Create Lodging')
+
+class StandardUploadForm(FlaskForm):
+    file = FileField('Upload File', validators=[DataRequired()])
+    event = SelectField('Event', validators=[DataRequired()])
+    submit = SubmitField('Submit Upload')

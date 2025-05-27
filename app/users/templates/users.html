@@ -34,6 +34,7 @@
                 <th data-field="role" data-filter-control="input">Role</th>
                 <th data-field="fname" data-filter-control="input">First Name</th>
                 <th data-field="lname" data-filter-control="input">Last Name</th>
+                <th data-field="event" data-filter-control="select">Event</th>
                 <th data-field="edit">Edit</th>
                 <th data-field="pwreset">Password Reset</th>
             </thead>
@@ -60,6 +61,9 @@
                         </td>
                         <td> 
                             {{user.lname}}
+                        </td>
+                        <td>
+                            {{user.event.name}}
                         </td>
                         <td>
                             <a class="btn btn-primary" href="{{url_for('users.edituser', userid=user.id)}}" role="button">Edit</a>

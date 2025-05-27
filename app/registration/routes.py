@@ -126,9 +126,7 @@ def createprereg():
     #     return render_template("prereg_closed.html")
 
     form = CreatePreRegForm()
-    loading_df = pd.read_csv('gwlodging.csv')
-    lodgingdata = loading_df.to_dict(orient='list')
-    form.lodging.choices = lodgingdata
+    form.lodging.choices = get_lodging_choices()
 
     if form.validate_on_submit() and request.method == 'POST':
         
@@ -162,10 +160,10 @@ def createprereg():
             db.session.commit()
 
             for add_reg in additional_registrations:
-                # send_confirmation_email(add_reg.email,add_reg)
+                send_confirmation_email(add_reg.email,add_reg)
                 flash('Registration {} created for {} {}.'.format(
                 add_reg.id, add_reg.fname, add_reg.lname))
-            # send_confirmation_email(reg.email,reg)
+            send_confirmation_email(reg.email,reg)
             flash('Registration {} created for {} {}.'.format(
             reg.id, reg.fname, reg.lname))
 
@@ -182,6 +180,8 @@ def success():
 @roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
 def createatd():
     form = CreateRegForm()
+    form.lodging.choices = get_lodging_choices()
+    # form.kingdom.choices = get_kingdom_choices()
     if form.validate_on_submit():
 
         reg = Registrations(
@@ -277,15 +277,17 @@ def editreg():
         notes = reg.notes
     )
 
+    form.lodging.choices = get_lodging_choices()
+    # form.kingdom.choices = get_kingdom_choices()
+
     if reg.expected_arrival_date != None:
         try:
             form.expected_arrival_date.data = datetime.strptime(reg.expected_arrival_date, '%Y-%m-%d %H:%M:%S')
         except:
             form.expected_arrival_date.data = datetime.strptime(reg.expected_arrival_date, "%m-%d-%Y")
 
-    loading_df = pd.read_csv('gwlodging.csv')
-    lodgingdata = loading_df.to_dict(orient='list')
-    form.lodging.choices = lodgingdata
+    form.lodging.choices = get_lodging_choices()
+    # form.kingdom.choices = get_kingdom_choices()
 
     if request.method == 'POST':
 
