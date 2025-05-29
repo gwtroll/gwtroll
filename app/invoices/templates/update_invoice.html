@@ -29,7 +29,7 @@
                         <td>{{ reg.registration_price }}</td>
                         <td>{{ reg.nmr_price }}</td>
                         <td>{{ reg.paypal_donation }}</td>
-                        <td><a href=""><button class="btn btn-danger" type="button">Mark Duplicate</button></a></td>
+                        <td><a href="{{url_for('registration.duplicate', regid=reg.id)}}"><button class="btn btn-danger" type="button">Mark Duplicate</button></a></td>
                     </tr>
                     {% endfor %}
                     {% endif %}

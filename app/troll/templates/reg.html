@@ -34,11 +34,11 @@
             </tr>
             <tr>
                 <th style="background-color: #D6EEEE">Kingdom: </th>
-                <td>{{ reg['kingdom'] }}</td>
+                <td>{{ reg['kingdom']['name'] }}</td>
             </tr>
             <tr>
                 <th style="background-color: #D6EEEE">Camp Group: </th>
-                <td>{{ reg['lodging'] }}</td>
+                <td>{{ reg['lodging']['name'] }}</td>
             </tr>
         </tbody>
         </table>
@@ -193,7 +193,7 @@
 {% endif %}
     
     {% if reg['checkin'] %}
-    {% if atd_payment %}
+    {% if atd_payments %}
         <div class="row form-group no-print">
             <div class="col form-group">
                 <button value='Print' type='button' class="btn btn-primary btn-lg form-control custom-input-space" onclick='handlePrint()'>Print</button>        

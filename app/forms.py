@@ -5,9 +5,6 @@ from wtforms.validators import DataRequired, Email, InputRequired, Optional, Val
 import pandas as pd
 import datetime
 
-kingdom_df = pd.read_csv('gwkingdoms.csv')
-kingdomdata = kingdom_df.to_dict(orient='list')
-
 agedata = [('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 12'), ('0-5', 'Child 0 - 5'),('Royals','Royals')]
 
 mbrdata = [('Member', 'Member'), ('Non-Member', 'Non-Member')]
@@ -108,7 +105,7 @@ class CreateRegForm(FlaskForm):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     scaname = StringField('SCA Name', validators=[])
-    kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
+    kingdom = SelectField('Kingdom', validators=[DataRequired()])
     lodging = SelectField('Camping Group', validators=[DataRequired()])
     age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
@@ -139,7 +136,7 @@ class CreatePreRegForm(FlaskForm):
     phone = StringField('Phone', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(),Email()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired(),Email()])
-    kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')], choices=kingdomdata)
+    kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')])
     lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')])
     emergency_contact_name = StringField('Legal Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
@@ -159,7 +156,7 @@ class CheckinForm(FlaskForm):
     fname = StringField('First Name')
     lname = StringField('Last Name')
     scaname = StringField('SCA Name')
-    kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
+    kingdom = SelectField('Kingdom', validators=[DataRequired()])
     lodging = SelectField('Camping Group', validators=[DataRequired()])
     age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
@@ -182,21 +179,38 @@ class EditForm(FlaskForm):
     phone = StringField('Phone')
     email = StringField('Communication Email')
     invoice_email = StringField('Invoice Email')
-    kingdom = SelectField('Kingdom', validators=[DataRequired()], choices=kingdomdata)
-    lodging = SelectField('Camping Group', validators=[DataRequired()])
-    expected_arrival_date = DateField("Arrival Date")
     age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
-    mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
-    medallion = IntegerField('Medallion #', validators=[DataRequired()])
-    total_due = IntegerField('Total Due')
-    paypal_donation = IntegerField('PayPal Donation')
-    prereg = BooleanField('PreReg')
-    early_on = BooleanField('Early On')
-    mbr_num = IntegerField('Member Number')
-    mbr_num_exp = DateField('Member Exp Date')
     emergency_contact_name = StringField('Name')
     emergency_contact_phone = StringField('Phone')
+    mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
+    mbr_num = IntegerField('Member Number')
+    mbr_num_exp = DateField('Member Exp Date')
+    
+    reg_date_time = DateTimeField('Registration Date/Time')
+    prereg = BooleanField('PreReg')
+    prereg_date_time = DateTimeField('PreReg Date/Time')
+    expected_arrival_date = DateField("Arrival Date")
+    early_on = BooleanField('Early On')
     notes = TextAreaField('Notes')
+    duplicate = BooleanField('Duplicate Registration')
+
+    registration_price = IntegerField('Registration Price', validators=[DataRequired()])
+    registration_balance = IntegerField('Registration Balance', validators=[DataRequired()])
+    nmr_price = IntegerField('NMR Price', validators=[DataRequired()])
+    nmr_balance = IntegerField('NMR Balance', validators=[DataRequired()])
+    paypal_donation = IntegerField('PayPal Donation', validators=[DataRequired()])
+    paypal_donation_balance = IntegerField('PayPal Donation Balance', validators=[DataRequired()])
+    nmr_donation = IntegerField('NMR Donation', validators=[DataRequired()])
+    total_due = IntegerField('Total Due', validators=[DataRequired()])
+    balance = IntegerField('Balance', validators=[DataRequired()])
+
+    minor_waiver = StringField('Minor Waiver', validators=[NoneOf('-', message='You must select a Minor Form Validation')])
+    checkin = DateTimeField('Checkin Date/Time')
+    medallion = IntegerField('Medallion #', validators=[DataRequired()])
+    actual_arrival_date = DateField('Actual Arrival Date')
+
+    kingdom = SelectField('Kingdom', validators=[DataRequired()])
+    lodging = SelectField('Camping Group', validators=[DataRequired()])
 
     #mbr_exp
     submit = SubmitField('Submit')
@@ -299,6 +313,10 @@ class LodgingForm(FlaskForm):
     name = StringField('Lodging Name', validators=[DataRequired()])
     event = SelectField('Event', validators=[DataRequired()])
     submit = SubmitField('Create Lodging')
+
+class KingdomForm(FlaskForm):
+    name = StringField('Kingdom Name', validators=[DataRequired()])
+    submit = SubmitField('Create Lodging')  
 
 class StandardUploadForm(FlaskForm):
     file = FileField('Upload File', validators=[DataRequired()])

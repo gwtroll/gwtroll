@@ -167,6 +167,17 @@ def get_lodging_choices():
     
     return lodging_choices
 
+def get_kingdom_choices():
+    if current_user.event_id == None: 
+        kingdoms = Kingdom.query.all()
+    kingdom_choices = [('-', '-')]
+    kingdom_dict = {}
+    for l in kingdoms:
+        kingdom_dict[l.name] = l
+        kingdom_choices.append([l.id, l.name])
+    
+    return kingdom_choices
+
 def get_event_choices():
     events = Event.query.all()
     event_choices = []

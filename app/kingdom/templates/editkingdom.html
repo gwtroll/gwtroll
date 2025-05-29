@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form action="" method="post">
+        <h2>Edit Kingdom</h2>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.name.label }}
+                    {{ form.name(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit.label }}
+                    {{ form.submit(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+    </form>
+
+    
+{% endblock %}

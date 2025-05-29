@@ -24,10 +24,10 @@ def create_prereg(data):
         email = data.email.data, 
         invoice_email = data.invoice_email.data,
         age = data.age.data,
-        kingdom = data.kingdom.data,
+        kingdom_id = data.kingdom.data,
         emergency_contact_name = data.emergency_contact_name.data, 
         emergency_contact_phone = data.emergency_contact_phone.data, 
-        lodging = data.lodging.data, 
+        lodging_id = data.lodging.data, 
         mbr = True if data.mbr.data == 'Member' else False,
         mbr_num_exp = datetime.strftime(data.mbr_num_exp.data, '%Y-%m-%d') if data.mbr_num_exp.data is not None else None, 
         mbr_num = data.mbr_num.data,
@@ -81,10 +81,10 @@ def DicttoReg(dict):
         email = dict['email'],  
         invoice_email = dict['invoice_email'],
         age = dict['age'],
-        kingdom = dict['kingdom'],
+        kingdom_id = dict['kingdom_id'],
         emergency_contact_name = dict['emergency_contact_name'],  
         emergency_contact_phone = dict['emergency_contact_phone'],  
-        lodging = dict['lodging'], 
+        lodging_id = dict['lodging_id'], 
         mbr = bool(dict['mbr']),
         mbr_num_exp = dict['mbr_num_exp'] if dict['mbr_num_exp'] != 'null' else None, 
         mbr_num = int(dict['mbr_num']) if dict['mbr_num'] != 'null' else None,
@@ -127,13 +127,13 @@ def createprereg():
 
     form = CreatePreRegForm()
     form.lodging.choices = get_lodging_choices()
+    form.kingdom.choices = get_kingdom_choices()
 
     if form.validate_on_submit() and request.method == 'POST':
         
         if request.form.get("action") == 'Submit_Another':
             additional_registrations = []
             reg_names = []
-            print(request.form.keys())
             if 'additional_registration-1' in request.form.keys():
                 for key in request.form.keys():
                     if 'additional_registration' in key:
@@ -175,21 +175,41 @@ def createprereg():
 def success():
     return render_template('reg_success.html')
 
+@bp.route('/markduplicate', methods=('GET', 'POST'))
+def duplicate():
+    regid = request.args.get('regid')
+    regids = []
+
+    reg = get_reg(regid)
+    reg.duplicate = True
+    db.session.commit()
+
+    if current_user.event_id:
+        all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.event_id == current_user.event_id)).order_by(Registrations.invoice_email).all()
+    else:
+        all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
+
+    for r in all_regs:
+        regids.append(r.id)
+        
+    if len(regids) == 0:
+        return redirect(url_for('invoices.unsent'))
+
+    return redirect(url_for('invoices.createinvoice', regids=[regids]))
+
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
 def createatd():
     form = CreateRegForm()
     form.lodging.choices = get_lodging_choices()
-    # form.kingdom.choices = get_kingdom_choices()
+    form.kingdom.choices = get_kingdom_choices()
     if form.validate_on_submit():
 
         reg = Registrations(
         fname = form.fname.data,
         lname = form.lname.data,
         scaname = form.scaname.data,
-        kingdom = form.kingdom.data,
-        lodging = form.lodging.data,
         age = form.age.data,
         mbr = True if form.mbr.data == 'Member' else False,
         mbr_num = form.mbr_num.data,
@@ -203,6 +223,7 @@ def createatd():
         invoice_email = form.invoice_email.data,
         emergency_contact_name = form.emergency_contact_name.data, 
         emergency_contact_phone = form.emergency_contact_phone.data,)
+
         reg.expected_arrival_date = datetime.now().date()
         reg.actual_arrival_date = datetime.now().date()
         registration_price, nmr_price = get_atd_pricesheet_day(reg.actual_arrival_date)
@@ -220,6 +241,18 @@ def createatd():
         
         reg.balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
 
+        if form.kingdom.data == '-':
+            flash('Please select a Kingdom.','error')
+            return render_template('create.html', title = 'New Registration', form=form)
+        else:
+            reg.kingdom_id = form.kingdom.data
+
+        if form.lodging.data == '-':
+            flash('Please select a Camping Group.','error')
+            return render_template('create.html', title = 'New Registration', form=form)
+        else:
+            reg.lodging_id = form.lodging.data
+
         if form.mbr.data == 'Member':
             if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
                 flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data),'error')
@@ -229,7 +262,6 @@ def createatd():
         db.session.commit()
 
         log_reg_action(reg, 'CREATE')
-
 
         flash('Registration {} created for {} {}.'.format(
             reg.id, reg.fname, reg.lname))
@@ -245,6 +277,7 @@ def editreg():
     reg = get_reg(regid)
 
     form = EditForm(
+
         regid = reg.id,
         fname = reg.fname,
         lname = reg.lname,
@@ -256,38 +289,25 @@ def editreg():
         phone = reg.phone,
         email = reg.email,
         invoice_email = reg.invoice_email,
-        kingdom = reg.kingdom,
-        lodging = reg.lodging,
+        kingdom = reg.kingdom_id,
+        lodging = reg.lodging_id,
         age = reg.age,
-        mbr = reg.mbr,
+        expected_arrival_date = reg.expected_arrival_date,
+        mbr = 'Member' if reg.mbr else 'Non-Member',
         medallion = reg.medallion,
-        atd_paid = reg.atd_paid,
-        price_paid = reg.price_paid,
-        pay_type = reg.atd_pay_type,
-        price_calc = reg.price_calc,
-        price_due = reg.price_due,
+        total_due = reg.total_due,
         paypal_donation = reg.paypal_donation,
-        paypal_donation_amount = reg.paypal_donation_amount,
         prereg = reg.prereg,
-        early_on =reg.early_on,
+        early_on = reg.early_on,
         mbr_num = reg.mbr_num,
-        mbr_num_exp = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d') if reg.mbr_num_exp is not None else None,
+        mbr_num_exp = reg.mbr_num_exp if reg.mbr_num_exp is not None else None,
         emergency_contact_name = reg.emergency_contact_name,
         emergency_contact_phone = reg.emergency_contact_phone,
         notes = reg.notes
     )
 
     form.lodging.choices = get_lodging_choices()
-    # form.kingdom.choices = get_kingdom_choices()
-
-    if reg.expected_arrival_date != None:
-        try:
-            form.expected_arrival_date.data = datetime.strptime(reg.expected_arrival_date, '%Y-%m-%d %H:%M:%S')
-        except:
-            form.expected_arrival_date.data = datetime.strptime(reg.expected_arrival_date, "%m-%d-%Y")
-
-    form.lodging.choices = get_lodging_choices()
-    # form.kingdom.choices = get_kingdom_choices()
+    form.kingdom.choices = get_kingdom_choices()
 
     if request.method == 'POST':
 

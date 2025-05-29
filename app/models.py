@@ -80,7 +80,6 @@ class Registrations(db.Model):
     email = db.Column(db.String())
     invoice_email = db.Column(db.String())
     age = db.Column(db.String())
-    kingdom = db.Column(db.String())
     emergency_contact_name = db.Column(db.String())
     emergency_contact_phone = db.Column(db.String())
     royal_departure_date = db.Column(db.Date())
@@ -96,7 +95,6 @@ class Registrations(db.Model):
     prereg = db.Column(db.Boolean(), default=False)
     prereg_date_time = db.Column(db.DateTime())
     expected_arrival_date = db.Column(db.Date())
-    lodging = db.Column(db.String())
     early_on = db.Column(db.String())
     notes = db.Column(db.Text)
     duplicate = db.Column(db.Boolean, default=False)
@@ -127,6 +125,10 @@ class Registrations(db.Model):
     crossbows = db.relationship('Crossbows', secondary='reg_crossbows')
     marshal_inspections = db.relationship('MarshalInspection', backref='registrations')
     incident_report = db.relationship('IncidentReport', backref='registrations')
+    kingdom_id = db.Column(db.Integer(), db.ForeignKey('kingdom.id'))
+    kingdom = db.relationship("Kingdom", backref="regs")
+    lodging_id = db.Column(db.Integer(), db.ForeignKey('lodging.id'))
+    lodging = db.relationship("Lodging", backref="regs")
 
     #Event
     event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))

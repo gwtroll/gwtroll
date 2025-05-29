@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form action="" method="post">
+        <h2>Delete Kingdom</h2>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Kingdom Name
+                    <input type="text" class="form-control m-0" name="name" value="{{ kingdom.name }}" readonly>
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    <button type="submit" class="form-control m-0 btn btn-danger">Delete Kingdom</button>
+                </p>
+            </div>
+        </div>
+    </form>
+
+    
+{% endblock %}

@@ -24,6 +24,7 @@ def reg(regid):
     for pay in reg.payments:
         if pay.type.upper() != 'PAYPAL' and pay.type.upper() != 'CHECK':
             atd_payments.append(pay)
+    print(atd_payments)
     if request.form.get("action") == 'Edit':
     #if request.method == 'POST' and request.path == '/editreg':
         return redirect(url_for('registration.editreg', regid=regid))
@@ -48,16 +49,16 @@ def checkin():
     reg = get_reg(regid)
 
     form = CheckinForm(
-        kingdom = reg.kingdom, 
+        kingdom = reg.kingdom_id, 
         mbr = 'Member' if reg.mbr else 'Non-Member', 
         medallion = reg.medallion, 
         age = reg.age, 
-        lodging = reg.lodging, 
+        lodging = reg.lodging_id, 
         notes=reg.notes, 
         mbr_num=reg.mbr_num
     )
     form.lodging.choices = get_lodging_choices()
-    # form.kingdom.choices = get_kingdom_choices()
+    form.kingdom.choices = get_kingdom_choices()
     if reg.mbr_num_exp is not None:
         form.mbr_num_exp.data = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d')
 
@@ -114,10 +115,10 @@ def checkin():
             reg.medallion = medallion
             reg.mbr = True if mbr == 'Member' else False
             reg.age = age
-            reg.kingdom = kingdom
+            reg.kingdom_id = kingdom
             # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
             reg.minor_waiver = minor_waiver
-            reg.lodging = lodging
+            reg.lodging_id = lodging
             reg.checkin = datetime.today()
             reg.actual_arrival_date = datetime.today().date()
 

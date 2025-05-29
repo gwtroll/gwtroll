@@ -159,6 +159,7 @@ def update():
 @roles_accepted('Admin','Invoices','Department Head')
 def createinvoice():
     regids = request.args.get('regids')
+    print('regids', regids)
     regs = get_regs(regids)
     paypal_donation = 0
     registration_price = 0

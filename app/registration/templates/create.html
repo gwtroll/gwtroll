@@ -127,14 +127,14 @@
                 {{ form.emergency_contact_name.label }} <span style="color: red;">*</span><br>
                 {{ form.emergency_contact_name(class_='form-control m-0') }}
             </p>
-            {% if form.emergency_contact_name.errors %}{% for error in form.offsite_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            {% if form.emergency_contact_name.errors %}{% for error in form.emergency_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
                 {{ form.emergency_contact_phone.label }} <span style="color: red;">*</span><br>
                 {{ form.emergency_contact_phone(class_='form-control m-0') }}
             </p>
-            {% if form.emergency_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            {% if form.emergency_contact_phone.errors %}{% for error in form.emergency_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
     </div>
 
