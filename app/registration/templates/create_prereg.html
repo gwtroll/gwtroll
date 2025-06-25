@@ -115,7 +115,7 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                Registrations on same invoice:
+                <b>Registrations on same Invoice:</b>
             </p>
             {% if reg_names %}
             {% for reg in reg_names %}
@@ -310,7 +310,7 @@
             <p>
                 {{ form.emergency_contact_phone.label }}<br>
                 {{ form.emergency_contact_phone(class_='form-control m-0') }}
-                {% if form.emergency_contact_phone.errors %}{% for error in form.offsite_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                {% if form.emergency_contact_phone.errors %}{% for error in form.emergency_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
 
         </div>

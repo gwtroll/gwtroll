@@ -48,7 +48,7 @@ def add_bow(regid):
     form = BowForm()
     if request.method == 'POST':
         if request.form.get("poundage"):
-            update_reg = Registrations.query.filter_by(regid=reg.id).first()
+            update_reg = Registrations.query.filter_by(id=reg.id).first()
             bow = Bows()
             bow.poundage = request.form.get("poundage")
             bow.bow_inspection_marshal_id = current_user.id
@@ -73,7 +73,7 @@ def add_crossbow(regid):
         if request.form.get("poundage"):
             print('Poundage')
             print(request.form.get("poundage"))
-            update_reg = Registrations.query.filter_by(regid=reg.id).first()
+            update_reg = Registrations.query.filter_by(id=reg.id).first()
             print(request.form.get("poundage"))
             crossbow = Crossbows()
             crossbow.inchpounds = request.form.get("poundage")
@@ -117,7 +117,6 @@ def incident(regid):
 @roles_accepted('Admin','Marshal Admin','Marshal User')
 def reg(regid):
     reg = get_reg(regid)
-    print(reg.incident_report)
     form = MarshalForm()
     bow_form = BowForm()
     incident_form = IncidentForm()
@@ -131,7 +130,7 @@ def reg(regid):
     else:
         fighter_auth = None
     print(response.status_code)
-    inspections = MarshalInspection.query.filter(MarshalInspection.id == regid).all()
+    inspections = MarshalInspection.query.filter(MarshalInspection.regid == regid).all()
     inspection_dict = {}
     for inspection in inspections:
         inspection_dict[inspection.inspection_type] = inspection
@@ -161,6 +160,8 @@ def reg(regid):
         rapier_spear_inspection = request.form.get('rapier_spear_inspection')
         combat_archery_inspection = request.form.get('combat_archery_inspection')
 
+        print(chivalric_inspection, chivalric_spear_inspection, rapier_inspection, rapier_spear_inspection, combat_archery_inspection)
+
         if 'Heavy' not in inspection_dict and chivalric_inspection:
             new_inspection = MarshalInspection(
                 regid = regid,
@@ -169,6 +170,7 @@ def reg(regid):
                 inspecting_marshal_id = current_user.id,
                 inspected = True
             )
+            print('Adding Heavy Inspection')
             db.session.add(new_inspection)
         if 'Heavy Spear' not in inspection_dict and chivalric_spear_inspection:
             new_inspection = MarshalInspection(

@@ -128,9 +128,10 @@ def createprereg():
     form = CreatePreRegForm()
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
+    print("Form Created")
 
     if form.validate_on_submit() and request.method == 'POST':
-        
+        print("Form Validated")
         if request.form.get("action") == 'Submit_Another':
             additional_registrations = []
             reg_names = []
@@ -167,8 +168,11 @@ def createprereg():
             flash('Registration {} created for {} {}.'.format(
             reg.id, reg.fname, reg.lname))
 
-
             return redirect(url_for('registration.success'))
+    elif request.method == 'POST' and not form.validate_on_submit():
+        print(request.form)
+        form.fname.data = request.form.get('fname')
+        form.lname.data = request.form.get('lname')
     return render_template('create_prereg.html', form=form)
 
 @bp.route('/success')

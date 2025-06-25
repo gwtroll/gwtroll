@@ -48,7 +48,7 @@
     {% if searchreg %}
         <div class="overflow-auto vh-50">
         {% for reg in searchreg %}
-            <a href="{{ url_for('marshal.reg', regid=reg['regid']) }}">
+            <a href="{{ url_for('marshal.reg', regid=reg['id']) }}">
             <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
             </a>
             <div>

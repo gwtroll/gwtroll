@@ -35,7 +35,7 @@
                 </tr>
                 <tr>
                     <th style="background-color: #D6EEEE">Camp Group: </th>
-                    <td>{{ reg['lodging'] }}</td>
+                    <td>{{ reg['lodging']['name'] }}</td>
                 </tr>
                 <tr>
                     <th style="background-color: #D6EEEE">Medallion Number: </th>
@@ -75,8 +75,8 @@
                         {% endfor %}
                         <tr>
                             <td colspan="3">
-                                <button type="button" class="btn btn-primary form-control" data-toggle="modal"
-                                    data-target="#incidentModal">
+                                <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal"
+                                data-bs-target="#incidentModal">
                                     + New Incident
                                 </button>
                             </td>
@@ -261,8 +261,8 @@
                         {% endfor %}
                         <tr>
                             <td colspan="3">
-                                <button type="button" class="btn btn-primary form-control" data-toggle="modal"
-                                    data-target="#bowModal">
+                                <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal"
+                                    data-bs-target="#bowModal">
                                     + Add Bow
                                 </button>
                             </td>
@@ -296,8 +296,8 @@
                         {% endfor %}
                         <tr>
                             <td colspan="3">
-                                <button type="button" class="btn btn-primary form-control" data-toggle="modal"
-                                    data-target="#crossbowModal">
+                                <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal"
+                                    data-bs-target="#crossbowModal">
                                     + Add Crossbow
                                 </button>
                             </td>
@@ -315,19 +315,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="bowModalLabel">New Bow</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form action="/marshal/{{reg.id}}/addbow" method="POST">
                     <b>{{bow_form.poundage.label}}</b>
                     {{bow_form.poundage(class_='form-control')}}
-                    {{bow_form.submit(class_='form-control btn-primary')}}
+                    {{bow_form.submit(class_='form-control btn btn-primary')}}
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -340,19 +338,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="crossbowModalLabel">New Crossbow</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form action="/marshal/{{reg.id}}/addcrossbow" method="POST">
                     <b>{{bow_form.poundage.label}}</b>
                     {{bow_form.poundage(class_='form-control')}}
-                    {{bow_form.submit(class_='form-control btn-primary')}}
+                    {{bow_form.submit(class_='form-control btn btn-primary')}}
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -365,9 +361,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="incidentModalLabel">New Incident</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form action="/marshal/{{reg.id}}/addincident" method="POST">
@@ -375,11 +369,11 @@
                     {{incident_form.incident_date(class_='form-control')}}
                     <b>{{incident_form.notes.label}}</b>
                     {{incident_form.notes(class_='form-control')}}
-                    {{incident_form.submit(class_='form-control btn-primary')}}
+                    {{incident_form.submit(class_='form-control btn btn-primary')}}
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

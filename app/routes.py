@@ -69,11 +69,11 @@ def index():
             search_value = request.form.get('invoice_number')
             if request.form.get('search_canceled'):
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE invoice_number LIKE %s AND duplicate = false order by checkin DESC, lname, fname",
+                    "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
                     ('%' + search_value + '%',))
             else:
                 reg = query_db(
-                    "SELECT * FROM registrations WHERE invoice_number LIKE %s AND duplicate = false OR invoice_status IS NULL) order by checkin DESC, lname, fname",
+                    "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
                     ('%' + search_value + '%',))
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
