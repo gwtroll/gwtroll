@@ -322,3 +322,43 @@ class StandardUploadForm(FlaskForm):
     file = FileField('Upload File', validators=[DataRequired()])
     event = SelectField('Event', validators=[DataRequired()])
     submit = SubmitField('Submit Upload')
+
+class MerchantForm(FlaskForm):
+    
+    business_name = StringField('Business Name', validators=[DataRequired()])
+    sca_name = StringField('SCA Name', validators=[DataRequired()])
+    fname = StringField('First Name', validators=[DataRequired()])
+    lname = StringField('Last Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone', validators=[DataRequired()])
+    text_permission = BooleanField('Permission to Text', default=False, validators=[Optional()])
+    city = StringField('City', validators=[DataRequired()])
+    state_province = StringField('State/Province', validators=[DataRequired()])
+    zip = IntegerField('Zip Code', validators=[DataRequired()])
+    frontage_width = IntegerField('Frontage Width (in feet)', validators=[DataRequired()])
+    frontage_depth = IntegerField('Frontage Depth (in feet)', validators=[DataRequired()])
+    # space_fee = IntegerField('Space Fee', validators=[DataRequired()])
+    additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
+    # processing_fee = IntegerField('Processing Fee', validators=[DataRequired()])
+    # merchant_fee = IntegerField('Merchant Fee', validators=[DataRequired()])
+    electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
+    food_merchant_agreement = BooleanField('FOOD MERCHANTS: I agree to send menu and pricing to merchancrat@gulfwars.org along with a copy of your food safety certification.', validators=[Optional()]) 
+    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', choices=arrivaldata, validators=[DataRequired()])
+    service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
+    last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
+    vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])
+    vehicle_license_plate = StringField('Vehicle License Plate', validators=[Optional()])
+    vehicle_state = StringField('Vehicle State', validators=[Optional()])
+    trailer_length = IntegerField('Trailer Length (in feet)', validators=[Optional()])  
+    trailer_license_plate = StringField('Trailer License Plate', validators=[Optional()])
+    trailer_state = StringField('Trailer State', validators=[Optional()])
+
+    signature = HiddenField(
+        'signature',
+        render_kw={'id':'signature'}
+    )
+    
+    submit = SubmitField(
+        'Submit Merchant Application',
+        render_kw={'id':'submit','data_action':'save-svg'}
+    )

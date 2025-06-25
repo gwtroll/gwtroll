@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Edit Registration {% endblock %}</h1>
+
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    {% if current_user.has_role('Troll Shift Lead') %}
+    <h2>Personal Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.fname.label }}
+                {{ form.fname(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.lname.label }}
+                {{ form.lname(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.scaname.label }}
+                {{ form.scaname(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.age.label }}
+                {{ form.age(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <h2>Membership</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.mbr.label }}
+                {{ form.mbr(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num.label }}
+                {{ form.mbr_num(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num_exp.label }}
+                {{ form.mbr_num_exp(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="col form-group">
+        <p>
+            {{ form.medallion.label }}
+            {{ form.medallion(class_='form-control m-0') }}
+        </p>
+    </div>
+    <h2>Notes</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.notes.label }}
+                {{ form.notes(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    {% else %}
+
+    <h2>Personal Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.fname.label }}
+                {{ form.fname(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.lname.label }}
+                {{ form.lname(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.scaname.label }}
+                {{ form.scaname(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.age.label }}
+                {{ form.age(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.city.label }}
+                {{ form.city(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.state_province.label }}
+                {{ form.state_province(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.zip.label }}
+                {{ form.zip(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.country.label }}
+                {{ form.country(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.phone.label }}
+                {{ form.phone(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.email.label }}
+                {{ form.email(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Site Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.regid.label }}
+                {{ form.regid(class_='form-control m-0', readonly=true) }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.medallion.label }}
+                {{ form.medallion(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.kingdom.label }}
+                {{ form.kingdom(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.lodging.label }}
+                {{ form.lodging(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.expected_arrival_date.label }}
+                {{ form.expected_arrival_date(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.early_on.label(class_='form-check-label') }}
+                {{ form.early_on(class_='form-check-input big-checkbox') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Membership</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.mbr.label }}
+                {{ form.mbr(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num.label }}
+                {{ form.mbr_num(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num_exp.label }}
+                {{ form.mbr_num_exp(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Emergency Contact</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.emergency_contact_name.label }}
+                {{ form.emergency_contact_name(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.emergency_contact_phone.label }}
+                {{ form.emergency_contact_phone(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Pricing Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.paypal_donation.label }}
+                {{ form.paypal_donation(class_='form-check-input big-checkbox') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.prereg.label }}
+                {{ form.prereg(class_='form-check-input big-checkbox') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.total_due.label }}
+                {{ form.total_due(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.paypal_donation.label }}
+                {{ form.paypal_donation(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.balance.label }}
+                {{ form.balance(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Notes</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.notes.label }}
+                {{ form.notes(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}
+            </p>
+        </div>
+    </div>
+</form>
+
+   
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

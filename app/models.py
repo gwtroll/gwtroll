@@ -278,3 +278,44 @@ class Event(db.Model):
     end_date = db.Column(db.Date(), nullable=False)
     location = db.Column(db.String(), nullable=False)
     description = db.Column(db.Text(), nullable=False)
+
+
+class Merchant(db.Model):
+    __tablename__ = 'merchant'
+    id = db.Column(db.Integer(), primary_key=True)
+    business_name = db.Column(db.String(), nullable=False)
+    sca_name = db.Column(db.String(), nullable=False)
+    fname = db.Column(db.String(), nullable=False)
+    lname = db.Column(db.String(), nullable=False)
+    email = db.Column(db.String(), nullable=False)
+    phone = db.Column(db.String(), nullable=False)
+    text_permission = db.Column(db.Boolean(), default=False)
+    city = db.Column(db.String())
+    state_province = db.Column(db.String())
+    zip = db.Column(db.Integer())
+    frontage_width = db.Column(db.Integer(), nullable=False)
+    frontage_depth = db.Column(db.Integer(), nullable=False)
+    space_fee = db.Column(db.Double(), nullable=False)
+    additional_space_information = db.Column(db.Text())
+    processing_fee = db.Column(db.Integer(), nullable=False)
+    merchant_fee = db.Column(db.Double(), nullable=False)
+    electricity_request = db.Column(db.Text(), nullable=True)
+    food_merchant_agreement = db.Column(db.Boolean(), default=False)
+    estimated_date_of_arrival = db.Column(db.Date(), nullable=True)
+    service_animal = db.Column(db.Boolean(), default=False)
+    last_3_years = db.Column(db.Boolean(), default=False)
+    vehicle_length = db.Column(db.Integer(), nullable=True)
+    vehicle_license_plate = db.Column(db.String(), nullable=True)
+    vehicle_state = db.Column(db.String(), nullable=True)
+    trailer_length = db.Column(db.Integer(), nullable=True)
+    trailer_license_plate = db.Column(db.String(), nullable=True)
+    trailer_state = db.Column(db.String(), nullable=True)
+
+    # LEGAL
+    signature = db.Column(db.String(), nullable=True)
+
+    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    event = db.relationship("Event", backref='merchants')
+
+    def __repr__(self):
+        return '<Merchant {}>'.format(self.name)
