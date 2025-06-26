@@ -185,6 +185,7 @@ def createinvoice():
         
         if invoice_number is not None:
             inv = Invoice(
+                invoice_type = 'REGISTRATION',
                 invoice_number = invoice_number,
                 invoice_email = invoice_email,
                 invoice_date = invoice_date,

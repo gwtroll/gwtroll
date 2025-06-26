@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField
 from wtforms.fields import DateField, DateTimeLocalField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
@@ -326,6 +326,7 @@ class StandardUploadForm(FlaskForm):
 class MerchantForm(FlaskForm):
     
     business_name = StringField('Business Name', validators=[DataRequired()])
+    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')], validators=[DataRequired()])
     sca_name = StringField('SCA Name', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -337,10 +338,10 @@ class MerchantForm(FlaskForm):
     zip = IntegerField('Zip Code', validators=[DataRequired()])
     frontage_width = IntegerField('Frontage Width (in feet)', validators=[DataRequired()])
     frontage_depth = IntegerField('Frontage Depth (in feet)', validators=[DataRequired()])
-    # space_fee = IntegerField('Space Fee', validators=[DataRequired()])
+    space_fee = FloatField('Space Fee', validators=[DataRequired()])
     additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
-    # processing_fee = IntegerField('Processing Fee', validators=[DataRequired()])
-    # merchant_fee = IntegerField('Merchant Fee', validators=[DataRequired()])
+    processing_fee = IntegerField('Processing Fee', validators=[DataRequired()])
+    merchant_fee = FloatField('Merchant Fee', validators=[DataRequired()])
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: I agree to send menu and pricing to merchancrat@gulfwars.org along with a copy of your food safety certification.', validators=[Optional()]) 
     estimated_date_of_arrival = SelectField('Estimated Date of Arrival', choices=arrivaldata, validators=[DataRequired()])
@@ -352,6 +353,7 @@ class MerchantForm(FlaskForm):
     trailer_length = IntegerField('Trailer Length (in feet)', validators=[Optional()])  
     trailer_license_plate = StringField('Trailer License Plate', validators=[Optional()])
     trailer_state = StringField('Trailer State', validators=[Optional()])
+    notes = TextAreaField('Notes', validators=[Optional()])
 
     signature = HiddenField(
         'signature',

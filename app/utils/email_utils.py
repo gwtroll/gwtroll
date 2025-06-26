@@ -60,3 +60,59 @@ def send_merchant_confirmation_email(recipient, merchant):
     "<img src=\"cid:fastpass\" alt=\"Fast Pass QR Code\">"
     
     mail.send(msg)
+
+def send_merchant_approval_email(recipient, merchant):
+    qrcode_str = qrcode(url_for('troll.reg', regid=merchant.id))
+    msg = Message(
+        subject="Gulf Wars - Merchant Approval",
+        sender="carl.cox.primary@gmail.com",
+        recipients=[recipient],
+    )
+
+    print(qrcode_str)
+
+    qrcode_str = qrcode_str[22:]
+    image = base64.b64decode(qrcode_str, validate=True)
+
+    msg.attach('fastpass.png','image/png',image, 'inline', headers=[['Content-ID','<fastpass>'],])
+    
+    msg.html = "<p>Greetings,</p>" \
+    "<p>You have been approved to merchant ay Gulf Wars!</p>" \
+    "<p>In Service,<br/>" \
+    "Salim Al'Kahlil<br/>" \
+    "Testing SMTP Deputy</p>" \
+    "<br/><br/>" \
+    "<p>RegID: "+str(merchant.id)+"<br/>" \
+    "Name: "+merchant.fname+" "+merchant.lname+"<br/>" \
+    "Arrival Date: "+str(merchant.estimated_date_of_arrival)+"</p>" \
+    "<img src=\"cid:fastpass\" alt=\"Fast Pass QR Code\">"
+    
+    mail.send(msg)
+
+def send_merchant_denial_email(recipient, merchant):
+    qrcode_str = qrcode(url_for('troll.reg', regid=merchant.id))
+    msg = Message(
+        subject="Gulf Wars - Merchant Denied",
+        sender="carl.cox.primary@gmail.com",
+        recipients=[recipient],
+    )
+
+    print(qrcode_str)
+
+    qrcode_str = qrcode_str[22:]
+    image = base64.b64decode(qrcode_str, validate=True)
+
+    msg.attach('fastpass.png','image/png',image, 'inline', headers=[['Content-ID','<fastpass>'],])
+    
+    msg.html = "<p>Greetings,</p>" \
+    "<p>You have been denied to merchant ay Gulf Wars!</p>" \
+    "<p>In Service,<br/>" \
+    "Salim Al'Kahlil<br/>" \
+    "Testing SMTP Deputy</p>" \
+    "<br/><br/>" \
+    "<p>RegID: "+str(merchant.id)+"<br/>" \
+    "Name: "+merchant.fname+" "+merchant.lname+"<br/>" \
+    "Arrival Date: "+str(merchant.estimated_date_of_arrival)+"</p>" \
+    "<img src=\"cid:fastpass\" alt=\"Fast Pass QR Code\">"
+    
+    mail.send(msg)

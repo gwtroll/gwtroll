@@ -11,115 +11,87 @@ from app.utils.email_utils import *
 from flask_security import roles_accepted
 from markupsafe import Markup
 
-def create_prereg(data):
-    reg = Registrations(
-        fname = data.fname.data,
-        lname = data.lname.data,
-        scaname = data.scaname.data,
-        city = data.city.data,
-        state_province = data.state_province.data,
-        zip = data.zip.data,
-        country = data.country.data,
-        phone = data.phone.data, 
-        email = data.email.data, 
-        invoice_email = data.invoice_email.data,
-        age = data.age.data,
-        kingdom_id = data.kingdom.data,
-        emergency_contact_name = data.emergency_contact_name.data, 
-        emergency_contact_phone = data.emergency_contact_phone.data, 
-        lodging_id = data.lodging.data, 
-        mbr = True if data.mbr.data == 'Member' else False,
-        mbr_num_exp = datetime.strftime(data.mbr_num_exp.data, '%Y-%m-%d') if data.mbr_num_exp.data is not None else None, 
-        mbr_num = data.mbr_num.data,
-        prereg = True,
-        prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
-        paypal_donation = 3 if data.paypal_donation.data == True else 0,
-        paypal_donation_balance = 3 if data.paypal_donation.data == True else 0,
-        royal_departure_date = data.royal_departure_date.data,
-        royal_title = data.royal_title.data if data.royal_title.data != '' else None
+@bp.route('/', methods=('GET',))
+def merchants():
+    merchants = Merchant.query.all()
+    return render_template('merchant_list.html', merchants=merchants)
+
+@bp.route('/<int:merch_id>', methods=('GET','POST'))
+def update(merch_id):
+    merchant = Merchant.query.get_or_404(merch_id)
+    form = MerchantForm(
+        business_name = merchant.business_name,
+        sca_name = merchant.sca_name,
+        fname = merchant.fname,
+        lname = merchant.lname,
+        email = merchant.email,
+        phone = merchant.phone,
+        text_permission = merchant.text_permission,
+        city = merchant.city,
+        state_province = merchant.state_province,
+        zip = merchant.zip,
+        frontage_width = merchant.frontage_width,
+        frontage_depth = merchant.frontage_depth,
+        space_fee = merchant.space_fee,
+        additional_space_information = merchant.additional_space_information,
+        processing_fee = merchant.processing_fee,
+        merchant_fee = merchant.merchant_fee,
+        electricity_request = merchant.electricity_request,
+        # food_merchant_agreement = merchant.food_merchant_agreement,
+        estimated_date_of_arrival = merchant.estimated_date_of_arrival,
+        service_animal = merchant.service_animal,
+        last_3_years = merchant.last_3_years,
+        vehicle_length = merchant.vehicle_length,
+        vehicle_license_plate = merchant.vehicle_license_plate,
+        vehicle_state = merchant.vehicle_state,
+        trailer_length = merchant.trailer_length, 
+        trailer_license_plate = merchant.trailer_license_plate,
+        trailer_state = merchant.trailer_state,
+        notes = merchant.notes,
+        status = merchant.status,
     )
 
-    if data.expected_arrival_date.data == 'Early_On':
-        reg.early_on = True
-        reg.expected_arrival_date = datetime.strptime('03-08-2025', '%m-%d-%Y')
-    else:
-        reg.expected_arrival_date = datetime.strptime(data.expected_arrival_date.data, '%m-%d-%Y')
+    if request.method == 'POST':
+        old_status = merchant.status
+        if form.validate_on_submit():
+            merchant.status = form.status.data
+            merchant.business_name = form.business_name.data
+            merchant.sca_name = form.sca_name.data
+            merchant.fname = form.fname.data
+            merchant.lname = form.lname.data
+            merchant.email = form.email.data
+            merchant.phone = form.phone.data
+            merchant.text_permission = bool(form.text_permission.data)
+            merchant.city = form.city.data
+            merchant.state_province = form.state_province.data
+            merchant.zip = form.zip.data
+            merchant.frontage_width = int(form.frontage_width.data)
+            merchant.frontage_depth = int(form.frontage_depth.data)
+            merchant.additional_space_information = form.additional_space_information.data
+            merchant.electricity_request = form.electricity_request.data
+            merchant.vehicle_length = int(form.vehicle_length.data)
+            merchant.vehicle_license_plate = form.vehicle_license_plate.data
+            merchant.vehicle_state = form.vehicle_state.data
+            merchant.trailer_length = int(form.trailer_length.data)
+            merchant.trailer_license_plate = form.trailer_license_plate.data
+            merchant.trailer_state = form.trailer_state.data
+            merchant.notes = form.notes.data
+            merchant.space_fee = int(form.frontage_width.data) * int(form.frontage_depth.data) * .10
+            merchant.processing_fee = int(form.processing_fee.data)
+            merchant.merchant_fee = merchant.processing_fee + merchant.space_fee
+            db.session.commit()
+            if old_status != merchant.status:
+                if merchant.status == 'APPROVED':
+                    send_merchant_approval_email(merchant.email, merchant)
+                elif merchant.status == 'DENIED':
+                    send_merchant_denial_email(merchant.email, merchant)
+            return render_template('merchant_list.html', merchants=Merchant.query.all())
+        print(form.errors)
+        flash('There was an error with your submission. Please check the form and try again.', 'error')
+    return render_template('edit_merchant.html', form=form, merchant=merchant)
 
-    if data.age.data == '18+':
-        registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
-        reg.registration_price = registration_price
-        reg.registration_balance = registration_price
-        if not reg.mbr:
-            reg.nmr_price = nmr_price
-            reg.nmr_balance = nmr_price
-        else:
-            reg.nmr_price = 0
-            reg.nmr_balance = 0
-    
-        reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
 
-    return reg
-
-def JSONtoDict(string_data):
-    data_dict = {}
-    pairs = string_data.replace('{','').replace('}','').replace('"','').split(', ')
-    for pair in pairs:
-        new_pair = pair.split(': ')
-        data_dict[new_pair[0]] = new_pair[1]
-    return data_dict
-
-def DicttoReg(dict):
-    reg = Registrations(
-        fname = dict['fname'],
-        lname = dict['lname'],
-        scaname = dict['scaname'],
-        city = dict['city'],
-        state_province = dict['state_province'],
-        zip = int(dict['zip']),
-        country = dict['country'],
-        phone = dict['phone'],  
-        email = dict['email'],  
-        invoice_email = dict['invoice_email'],
-        age = dict['age'],
-        kingdom_id = dict['kingdom_id'],
-        emergency_contact_name = dict['emergency_contact_name'],  
-        emergency_contact_phone = dict['emergency_contact_phone'],  
-        lodging_id = dict['lodging_id'], 
-        mbr = bool(dict['mbr']),
-        mbr_num_exp = dict['mbr_num_exp'] if dict['mbr_num_exp'] != 'null' else None, 
-        mbr_num = int(dict['mbr_num']) if dict['mbr_num'] != 'null' else None,
-        prereg = bool(dict['prereg']),
-        prereg_date_time = dict['prereg_date_time'],
-        paypal_donation = int(dict['paypal_donation']),
-        paypal_donation_balance = int(dict['paypal_donation_balance']),
-        royal_departure_date = dict['royal_departure_date'] if dict['royal_departure_date'] != 'null' else None,
-        royal_title = dict['royal_title'] if dict['royal_title'] != 'null' else None,
-        expected_arrival_date = dict['expected_arrival_date']
-    )
-
-    if dict['expected_arrival_date'] == 'Early_On':
-        reg.early_on = True
-        reg.expected_arrival_date = datetime.strptime('03-08-2025', '%Y-%m-%d')
-    else:
-        reg.expected_arrival_date = datetime.strptime(dict['expected_arrival_date'], '%Y-%m-%d')
-
-    if dict['age'] == '18+':
-        registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
-        reg.registration_price = registration_price
-        reg.registration_balance = registration_price
-        if not reg.mbr:
-            reg.nmr_price = nmr_price
-            reg.nmr_balance = nmr_price
-        else:
-            reg.nmr_price = 0
-            reg.nmr_balance = 0
-    
-        reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
-
-    return reg
-        
-
-@bp.route('/', methods=('GET', 'POST'))
+@bp.route('/registration', methods=('GET', 'POST'))
 def createprereg():
     # Close Merchants at Midnight MM/DD/YYYY
     # if datetime.now().date() >= datetime.strptime('02/22/2025','%m/%d/%Y').date():
@@ -179,101 +151,101 @@ def createprereg():
 
 @bp.route('/success')
 def success():
-    return render_template('reg_success.html')
+    return render_template('merchant_success.html')
 
-@bp.route('/markduplicate', methods=('GET', 'POST'))
-def duplicate():
-    regid = request.args.get('regid')
-    regids = []
+# @bp.route('/markduplicate', methods=('GET', 'POST'))
+# def duplicate():
+#     regid = request.args.get('regid')
+#     regids = []
 
-    reg = get_reg(regid)
-    reg.duplicate = True
-    db.session.commit()
+#     reg = get_reg(regid)
+#     reg.duplicate = True
+#     db.session.commit()
 
-    if current_user.event_id:
-        all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.event_id == current_user.event_id)).order_by(Registrations.invoice_email).all()
-    else:
-        all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
+#     if current_user.event_id:
+#         all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.event_id == current_user.event_id)).order_by(Registrations.invoice_email).all()
+#     else:
+#         all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
 
-    for r in all_regs:
-        regids.append(r.id)
+#     for r in all_regs:
+#         regids.append(r.id)
         
-    if len(regids) == 0:
-        return redirect(url_for('invoices.unsent'))
+#     if len(regids) == 0:
+#         return redirect(url_for('invoices.unsent'))
 
-    return redirect(url_for('invoices.createinvoice', regids=[regids]))
+#     return redirect(url_for('invoices.createinvoice', regids=[regids]))
 
-@bp.route('/create', methods=('GET', 'POST'))
-@login_required
-@roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
-def createatd():
-    form = CreateRegForm()
-    form.lodging.choices = get_lodging_choices()
-    form.kingdom.choices = get_kingdom_choices()
-    if form.validate_on_submit():
+# @bp.route('/create', methods=('GET', 'POST'))
+# @login_required
+# @roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
+# def createatd():
+#     form = CreateRegForm()
+#     form.lodging.choices = get_lodging_choices()
+#     form.kingdom.choices = get_kingdom_choices()
+#     if form.validate_on_submit():
 
-        reg = Registrations(
-        fname = form.fname.data,
-        lname = form.lname.data,
-        scaname = form.scaname.data,
-        age = form.age.data,
-        mbr = True if form.mbr.data == 'Member' else False,
-        mbr_num = form.mbr_num.data,
-        mbr_num_exp = form.mbr_num_exp.data,
-        city = form.city.data,
-        state_province = form.state_province.data,
-        zip = form.zip.data,
-        country = form.country.data,
-        phone = form.phone.data,
-        email = form.email.data,
-        invoice_email = form.invoice_email.data,
-        emergency_contact_name = form.emergency_contact_name.data, 
-        emergency_contact_phone = form.emergency_contact_phone.data,)
+#         reg = Registrations(
+#         fname = form.fname.data,
+#         lname = form.lname.data,
+#         scaname = form.scaname.data,
+#         age = form.age.data,
+#         mbr = True if form.mbr.data == 'Member' else False,
+#         mbr_num = form.mbr_num.data,
+#         mbr_num_exp = form.mbr_num_exp.data,
+#         city = form.city.data,
+#         state_province = form.state_province.data,
+#         zip = form.zip.data,
+#         country = form.country.data,
+#         phone = form.phone.data,
+#         email = form.email.data,
+#         invoice_email = form.invoice_email.data,
+#         emergency_contact_name = form.emergency_contact_name.data, 
+#         emergency_contact_phone = form.emergency_contact_phone.data,)
 
-        reg.expected_arrival_date = datetime.now().date()
-        reg.actual_arrival_date = datetime.now().date()
-        registration_price, nmr_price = get_atd_pricesheet_day(reg.actual_arrival_date)
-        reg.registration_price = registration_price
-        reg.registration_balance = registration_price
-        if reg.mbr != True:
-            reg.nmr_price = nmr_price
-            reg.nmr_balance = nmr_price
-        else:
-            reg.nmr_price = 0
-            reg.nmr_balance = 0
+#         reg.expected_arrival_date = datetime.now().date()
+#         reg.actual_arrival_date = datetime.now().date()
+#         registration_price, nmr_price = get_atd_pricesheet_day(reg.actual_arrival_date)
+#         reg.registration_price = registration_price
+#         reg.registration_balance = registration_price
+#         if reg.mbr != True:
+#             reg.nmr_price = nmr_price
+#             reg.nmr_balance = nmr_price
+#         else:
+#             reg.nmr_price = 0
+#             reg.nmr_balance = 0
         
-        reg.paypal_donation = 0
-        reg.paypal_donation_balance = 0
+#         reg.paypal_donation = 0
+#         reg.paypal_donation_balance = 0
         
-        reg.balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
+#         reg.balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
 
-        if form.kingdom.data == '-':
-            flash('Please select a Kingdom.','error')
-            return render_template('create.html', title = 'New Registration', form=form)
-        else:
-            reg.kingdom_id = form.kingdom.data
+#         if form.kingdom.data == '-':
+#             flash('Please select a Kingdom.','error')
+#             return render_template('create.html', title = 'New Registration', form=form)
+#         else:
+#             reg.kingdom_id = form.kingdom.data
 
-        if form.lodging.data == '-':
-            flash('Please select a Camping Group.','error')
-            return render_template('create.html', title = 'New Registration', form=form)
-        else:
-            reg.lodging_id = form.lodging.data
+#         if form.lodging.data == '-':
+#             flash('Please select a Camping Group.','error')
+#             return render_template('create.html', title = 'New Registration', form=form)
+#         else:
+#             reg.lodging_id = form.lodging.data
 
-        if form.mbr.data == 'Member':
-            if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
-                flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data),'error')
-                return render_template('create.html', title = 'New Registration', form=form)
+#         if form.mbr.data == 'Member':
+#             if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
+#                 flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data),'error')
+#                 return render_template('create.html', title = 'New Registration', form=form)
 
-        db.session.add(reg)
-        db.session.commit()
+#         db.session.add(reg)
+#         db.session.commit()
 
-        log_reg_action(reg, 'CREATE')
+#         log_reg_action(reg, 'CREATE')
 
-        flash('Registration {} created for {} {}.'.format(
-            reg.id, reg.fname, reg.lname))
+#         flash('Registration {} created for {} {}.'.format(
+#             reg.id, reg.fname, reg.lname))
 
-        return redirect(url_for('troll.reg', regid=reg.id))
-    return render_template('create.html', form=form)
+#         return redirect(url_for('troll.reg', regid=reg.id))
+#     return render_template('create.html', form=form)
 
 @bp.route('/edit', methods=['GET', 'POST'])
 @login_required

@@ -87,7 +87,7 @@ class Registrations(db.Model):
 
     #Membership
     mbr = db.Column(db.Boolean(), default=False)
-    mbr_num_exp = db.Column(db.String())
+    mbr_num_exp = db.Column(db.Date())
     mbr_num = db.Column(db.Integer())
     
     #Prereg/Reg
@@ -152,6 +152,7 @@ class Registrations(db.Model):
 class Invoice(db.Model):
     __tablename__ = 'invoice'
     invoice_number = db.Column(db.Integer(), primary_key=True)
+    invoice_type = db.Column(db.String(), nullable=False)
     invoice_email = db.Column(db.String(),nullable=False)
     invoice_date = db.Column(db.DateTime(),nullable=False)
     invoice_status = db.Column(db.String(),nullable=False)
@@ -283,6 +284,7 @@ class Event(db.Model):
 class Merchant(db.Model):
     __tablename__ = 'merchant'
     id = db.Column(db.Integer(), primary_key=True)
+    status = db.Column(db.String(), nullable=False, default='PENDING')
     business_name = db.Column(db.String(), nullable=False)
     sca_name = db.Column(db.String(), nullable=False)
     fname = db.Column(db.String(), nullable=False)
@@ -310,6 +312,7 @@ class Merchant(db.Model):
     trailer_length = db.Column(db.Integer(), nullable=True)
     trailer_license_plate = db.Column(db.String(), nullable=True)
     trailer_state = db.Column(db.String(), nullable=True)
+    notes = db.Column(db.Text(), nullable=True)
 
     # LEGAL
     signature = db.Column(db.String(), nullable=True)
