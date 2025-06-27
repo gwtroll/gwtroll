@@ -196,7 +196,7 @@ def payment():
             payment_date = datetime.now().date(),
             amount = reg.balance,
             reg_id = reg.id,
-            event_id = reg.event_id
+            # event_id = reg.event_id
         )
 
         db.session.add(pay)

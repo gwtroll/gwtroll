@@ -65,7 +65,7 @@ class CreateUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
-    event = SelectField('Event', validators=[])
+    # event = SelectField('Event', validators=[])
     medallion = IntegerField('Medallion')
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Submit')
@@ -75,14 +75,14 @@ class CreateRoleForm(FlaskForm):
     role_name = StringField('Role Name', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
-class CreateEventForm(FlaskForm):
-    event_name = StringField('Event Name', validators=[DataRequired()])
-    event_year = IntegerField('Event Year', validators=[DataRequired()])
-    event_description = TextAreaField('Event Description', validators=[DataRequired()])
-    event_start = DateField('Event Start', format='%Y-%m-%d', validators=[DataRequired()])
-    event_end = DateField('Event End', format='%Y-%m-%d', validators=[DataRequired()])
-    event_location = StringField('Event Location', validators=[DataRequired()])
-    submit = SubmitField('Submit')
+# class CreateEventForm(FlaskForm):
+#     event_name = StringField('Event Name', validators=[DataRequired()])
+#     event_year = IntegerField('Event Year', validators=[DataRequired()])
+#     event_description = TextAreaField('Event Description', validators=[DataRequired()])
+#     event_start = DateField('Event Start', format='%Y-%m-%d', validators=[DataRequired()])
+#     event_end = DateField('Event End', format='%Y-%m-%d', validators=[DataRequired()])
+#     event_location = StringField('Event Location', validators=[DataRequired()])
+#     submit = SubmitField('Submit')
 
 class EditUserForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
@@ -90,7 +90,7 @@ class EditUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
-    event = SelectField('Event', validators=[])
+    # event = SelectField('Event', validators=[])
     medallion = IntegerField('Medallion')
     active = BooleanField('Active')
     submit = SubmitField('Submit')
@@ -322,7 +322,7 @@ class IncidentForm(FlaskForm):
 
 class LodgingForm(FlaskForm):
     name = StringField('Lodging Name', validators=[DataRequired()])
-    event = SelectField('Event', validators=[DataRequired()])
+    # event = SelectField('Event', validators=[DataRequired()])
     submit = SubmitField('Create Lodging')
 
 class KingdomForm(FlaskForm):
@@ -331,7 +331,7 @@ class KingdomForm(FlaskForm):
 
 class StandardUploadForm(FlaskForm):
     file = FileField('Upload File', validators=[DataRequired()])
-    event = SelectField('Event', validators=[DataRequired()])
+    # event = SelectField('Event', validators=[DataRequired()])
     submit = SubmitField('Submit Upload')
 
 class MerchantForm(FlaskForm):

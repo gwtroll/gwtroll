@@ -13,10 +13,8 @@ from flask_security import roles_accepted
 @login_required
 @roles_accepted('Admin')
 def lodging():
-    if current_user.event_id:
-        all_lodging = Lodging.query.filter(Lodging.event_id == current_user.event_id).order_by(Lodging.name).all()
-    else:
-        all_lodging = Lodging.query.order_by(Lodging.name).all()
+
+    all_lodging = Lodging.query.order_by(Lodging.name).all()
     return render_template('viewlodging.html', lodgings=all_lodging)
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -24,11 +22,11 @@ def lodging():
 @roles_accepted('Admin')
 def createlodging():
     form = LodgingForm()
-    form.event.choices = get_event_choices()
+    # form.event.choices = get_event_choices()
     if request.method == 'POST':
         lodging = Lodging(
             name=request.form.get('name'),
-            event_id=request.form.get('event'),
+            # event_id=request.form.get('event'),
         )
         db.session.add(lodging)
         db.session.commit()
@@ -40,7 +38,7 @@ def createlodging():
 @roles_accepted('Admin')
 def uploadlodging():
     form = StandardUploadForm()
-    form.event.choices = get_event_choices()
+    # form.event.choices = get_event_choices()
     if request.method == 'POST':
         file = request.files['file']
         if file:
@@ -50,7 +48,7 @@ def uploadlodging():
                     group_name = line_content.split(',')[0].strip()
                     lodging = Lodging(
                         name=group_name,
-                        event_id=request.form.get('event'),
+                        # event_id=request.form.get('event'),
                     )
                     db.session.add(lodging)
                 print(line_content)
@@ -66,13 +64,13 @@ def editlodging(lodgingid):
     lodging = Lodging.query.get(lodgingid)
     form = LodgingForm(
         name=lodging.name,
-        event=lodging.event_id,
+        # event=lodging.event_id,
     )
-    form.event.choices = get_event_choices()
+    # form.event.choices = get_event_choices()
     form.submit.label.text = 'Update Lodging'
     if request.method == 'POST':
         lodging.name = request.form.get('name')
-        lodging.event_id = request.form.get('event')
+        # lodging.event_id = request.form.get('event')
         db.session.commit()
         return redirect(url_for('lodging.lodging'))
     return render_template('editlodging.html', form=form, lodging=lodging)

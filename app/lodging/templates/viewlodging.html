@@ -31,7 +31,6 @@
         <thead>
             <th data-field="lodgingid">ID</th>
             <th data-field="name" data-filter-control="input">Name</th>
-            <th data-field="event" data-filter-control="select">Event</th>
             <th data-field="edit">Edit</th>
             <th data-field="delete">Delete</th>
         </thead>
@@ -43,9 +42,6 @@
                 </td>
                 <td>
                     {{lodging.name}}
-                </td>
-                <td>
-                    {{lodging.event.name}}
                 </td>
                 <td>
                     <a class="btn btn-primary" href="{{url_for('lodging.editlodging', lodgingid=lodging.id)}}" role="button">Edit</a>

@@ -1,5 +1,5 @@
-from flask import Blueprint
+# from flask import Blueprint
 
-bp = Blueprint('events', __name__, url_prefix='/events', template_folder='templates')
+# bp = Blueprint('events', __name__, url_prefix='/events', template_folder='templates')
 
-from app.events import routes
+# from app.events import routes

@@ -15,7 +15,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="{{ url_for('index')}}">{{current_user.event.name}} - {{current_user.event.year}}</a>
+        <a class="navbar-brand" href="{{ url_for('index')}}">Gulf Wars</a>
         <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button> -->
@@ -51,20 +51,6 @@
             </li>
             {% endif %}
 
-            {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head') %} 
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="adminMenuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Admin
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{{ url_for('users.createuser') }}">Create User</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('users.users') }}">Manage Users</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('lodging.lodging') }}">Manage Lodging</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('kingdom.kingdom') }}">Manage Kingdoms</a></li>
-              </ul>
-            </li>
-            {% endif %}
-
             {% if current_user.has_role('Invoices') or current_user.has_role('Admin') %} 
       
             <li class="nav-item dropdown">
@@ -77,6 +63,32 @@
                 <li><a class="dropdown-item" href="{{ url_for('invoices.paid') }}">Paid Invoices</a></li>
                 <li><a class="dropdown-item" href="{{ url_for('invoices.canceled') }}">Canceled Invoices</a></li>
                 <li><a class="dropdown-item" href="{{ url_for('invoices.all') }}">All Invoices</a></li>
+              </ul>
+            </li>
+            {% endif %}
+
+            {% if current_user.has_role('Merchant Head') or current_user.has_role('Admin') %} 
+      
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="merchantButtonMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Merchants
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('merchant.merchants') }}">Manage Applications</a></li>
+              </ul>
+            </li>
+            {% endif %}
+
+            {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head') %} 
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="adminMenuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Admin
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('users.createuser') }}">Create User</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('users.users') }}">Manage Users</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('lodging.lodging') }}">Manage Lodging</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('kingdom.kingdom') }}">Manage Kingdoms</a></li>
               </ul>
             </li>
             {% endif %}

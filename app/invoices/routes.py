@@ -16,12 +16,8 @@ from flask_login import login_required
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def unsent():
-    if current_user.event_id:
-        all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.event_id == current_user.event_id)).order_by(Registrations.invoice_email).all()
-        all_merchants = Merchant.query.filter(and_(Merchant.event_id == current_user.event_id, Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
-    else:
-        all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
-        all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
+    all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
 
     # preregtotal = prereg_total()
     # invoicecount = unsent_count()
@@ -44,10 +40,8 @@ def unsent():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def open():
-    if current_user.event_id:
-        all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'OPEN', Invoice.event_id == current_user.event_id)).all()
-    else:
-        all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'OPEN', Invoice.event_id == current_user.event_id)).all()
+
+    all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'OPEN')).all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     # preregtotal = prereg_total()
     # invoicecount = unsent_count()
@@ -58,10 +52,8 @@ def open():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def paid():
-    if current_user.event_id:
-        all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'PAID', Invoice.event_id == current_user.event_id)).all()
-    else:
-        all_inv = Invoice.query.filter(Invoice.invoice_status == 'PAID').all()
+
+    all_inv = Invoice.query.filter(Invoice.invoice_status == 'PAID').all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     # preregtotal = prereg_total()
     # invoicecount = unsent_count()
@@ -72,10 +64,8 @@ def paid():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def canceled():
-    if current_user.event_id:
-        all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'CANCELED', Invoice.event_id == current_user.event_id)).all()
-    else:
-        all_inv = Invoice.query.filter(Invoice.invoice_status == 'CANCELED').all()
+
+    all_inv = Invoice.query.filter(Invoice.invoice_status == 'CANCELED').all()
     # preregtotal = prereg_total()
     # invoicecount = unsent_count()
     # regcount = unsent_reg_count()
@@ -90,10 +80,8 @@ def canceled():
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def all():
-    if current_user.event_id:
-        all_inv = Invoice.query.filter(Invoice.event_id == current_user.event_id).all()
-    else:
-        all_inv = Invoice.query.all()
+
+    all_inv = Invoice.query.all()
 
     # invoices = {}
     # for reg in all_inv:
@@ -223,7 +211,7 @@ def createinvoice():
                 donation_total = paypal_donation,
                 balance = total_due,
                 notes = notes,
-                event_id = regs[0].event_id,
+                # event_id = regs[0].event_id,
             )
             for reg in regs:      
                 reg.invoice_number = invoice_number
@@ -243,7 +231,7 @@ def createinvoice():
                 processing_fee = processing_fee,
                 balance = space_fee + processing_fee,
                 notes = notes,
-                event_id = regs[0].event_id,
+                # event_id = regs[0].event_id,
             )
             for reg in regs:      
                 reg.invoice_number = invoice_number
@@ -305,7 +293,7 @@ def createpayment():
                         # amount = payment_amount,
                         reg_id = regid,
                         invoice_number  = invoice_number,
-                        event_id = reg.event_id
+                        # event_id = reg.event_id
                     )
                     if reg_balance <= payment_balance:
                         payment_balance = payment_balance - reg_balance
@@ -372,7 +360,7 @@ def createpayment():
                         # amount = payment_amount,
                         merchant_id = regid,
                         invoice_number  = invoice_number,
-                        event_id = reg.event_id
+                        # event_id = reg.event_id
                     )
                     if reg_balance <= payment_balance:
                         payment_balance = payment_balance - reg_balance

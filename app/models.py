@@ -30,8 +30,8 @@ class User(UserMixin, db.Model):
 
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
 
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='users')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='users')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -131,8 +131,8 @@ class Registrations(db.Model):
     lodging = db.relationship("Lodging", backref="regs")
 
     #Event
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='registrations')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='registrations')
 
     def __repr__(self):
         return '<Registrations {}>'.format(self.id)
@@ -167,8 +167,8 @@ class Invoice(db.Model):
     regs = db.relationship("Registrations", back_populates="invoice")
     merchants = db.relationship("Merchant", back_populates="invoice")
     payments = db.relationship("Payment", back_populates="invoice")
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='invoice')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='invoice')
 
 
 class Payment(db.Model):
@@ -189,8 +189,8 @@ class Payment(db.Model):
     reg = db.relationship("Registrations", back_populates="payments")
     merchant_id = db.Column(db.Integer(), db.ForeignKey('merchant.id'))
     merchant = db.relationship("Merchant", back_populates="payments")
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='payment')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='payment')
     
 class RegLogs(db.Model):
     __tablename__ = 'reglogs'  
@@ -199,8 +199,8 @@ class RegLogs(db.Model):
     userid = db.Column(db.Integer(), db.ForeignKey('users.id'))
     timestamp = db.Column(db.DateTime())
     action = db.Column(db.String())
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='reglogs')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='reglogs')
 
 class MarshalInspection(db.Model):
     __tablename__ = 'marshal_inspection' 
@@ -253,8 +253,8 @@ class IncidentReport(db.Model):
     reporting_user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
     reporting_user = db.relationship('User', foreign_keys=[reporting_user_id])
     notes = db.Column(db.Text())
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='incidentreport')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='incidentreport')
 
 class PriceSheet(db.Model):
     __tablename__ = 'pricesheet'
@@ -262,8 +262,8 @@ class PriceSheet(db.Model):
     prereg_price = db.Column(db.Integer())
     atd_price = db.Column(db.Integer())
     nmr = db.Column(db.Integer())
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='pricesheet')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='pricesheet')
 
 class Kingdom(db.Model):
     __tablename__ = 'kingdom'
@@ -274,18 +274,18 @@ class Lodging(db.Model):
     __tablename__ = 'lodging'
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(), nullable=False)
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='lodging')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='lodging')
 
-class Event(db.Model):
-    __tablename__ = 'event'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(), nullable=False)
-    year = db.Column(db.Integer(), nullable=False)
-    start_date = db.Column(db.Date(), nullable=False)
-    end_date = db.Column(db.Date(), nullable=False)
-    location = db.Column(db.String(), nullable=False)
-    description = db.Column(db.Text(), nullable=False)
+# class Event(db.Model):
+#     __tablename__ = 'event'
+#     id = db.Column(db.Integer(), primary_key=True)
+#     name = db.Column(db.String(), nullable=False)
+#     year = db.Column(db.Integer(), nullable=False)
+#     start_date = db.Column(db.Date(), nullable=False)
+#     end_date = db.Column(db.Date(), nullable=False)
+#     location = db.Column(db.String(), nullable=False)
+#     description = db.Column(db.Text(), nullable=False)
 
 
 class Merchant(db.Model):
@@ -333,8 +333,8 @@ class Merchant(db.Model):
     invoice_number = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
     invoice = db.relationship("Invoice", back_populates="merchants")
     payments = db.relationship("Payment", back_populates="merchant")
-    event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
-    event = db.relationship("Event", backref='merchants')
+    # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
+    # event = db.relationship("Event", backref='merchants')
 
     def __repr__(self):
         return '<Merchant {}>'.format(self.business_name)
