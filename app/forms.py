@@ -13,6 +13,8 @@ reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg
 
 arrivaldata = [('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025'),('Early_On','Early On')]
 
+merchant_arrivaldata = [('03-07-2025','Friday - March 7th 2025'),('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025')]
+
 paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle'),('travlers_check','Travlers Check')]
 
 preregstatusdata = [('',''),('SUCCEEDED','SUCCEEDED')]
@@ -221,6 +223,9 @@ class UpdateInvoiceForm(FlaskForm):
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])
     invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMNET','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    processing_fee = IntegerField('Processing Fee')
+    space_fee = FloatField('Space Fee')
+    merchant_fee = FloatField('Merchant Fee')
     paypal_donation = IntegerField('PayPal Donation')
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
     payment_date = DateField('Payment Date')
@@ -232,6 +237,9 @@ class UpdateInvoiceForm(FlaskForm):
 
 class SendInvoiceForm(FlaskForm):
     invoice_amount = IntegerField('Invoice Amount')
+    space_fee = FloatField('Space Fee')
+    processing_fee = IntegerField('Processing Fee')
+    merchant_fee = FloatField('Merchant Fee')
     registration_amount = IntegerField('Registration Amount')
     invoice_number = IntegerField('Invoice Number', validators=[])
     invoice_email = StringField('Invoice Email')
@@ -243,13 +251,16 @@ class SendInvoiceForm(FlaskForm):
 class PayInvoiceForm(FlaskForm):
     invoice_amount = IntegerField('Invoice Amount')
     registration_amount = IntegerField('Registration Amount')
+    processing_fee = IntegerField('Processing Fee')
+    merchant_fee = FloatField('Merchant Fee')
+    space_fee = FloatField('Space Fee')
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])
     invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMNET','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
     paypal_donation = IntegerField('PayPal Donation')
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
     payment_date = DateField('Payment Date')
-    payment_amount = IntegerField('Payment Amount')
+    payment_amount = FloatField('Payment Amount')
     payment_type = SelectField('Payment Type',choices=[('PAYPAL','PAYPAL'),('CHECK','CHECK')])
     check_num = IntegerField('Check Number')
     notes = TextAreaField('Notes')
@@ -326,25 +337,22 @@ class StandardUploadForm(FlaskForm):
 class MerchantForm(FlaskForm):
     
     business_name = StringField('Business Name', validators=[DataRequired()])
-    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')], validators=[DataRequired()])
     sca_name = StringField('SCA Name', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone', validators=[DataRequired()])
     text_permission = BooleanField('Permission to Text', default=False, validators=[Optional()])
+    address = StringField('Address', validators=[DataRequired()])
     city = StringField('City', validators=[DataRequired()])
     state_province = StringField('State/Province', validators=[DataRequired()])
     zip = IntegerField('Zip Code', validators=[DataRequired()])
     frontage_width = IntegerField('Frontage Width (in feet)', validators=[DataRequired()])
     frontage_depth = IntegerField('Frontage Depth (in feet)', validators=[DataRequired()])
-    space_fee = FloatField('Space Fee', validators=[DataRequired()])
     additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
-    processing_fee = IntegerField('Processing Fee', validators=[DataRequired()])
-    merchant_fee = FloatField('Merchant Fee', validators=[DataRequired()])
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: I agree to send menu and pricing to merchancrat@gulfwars.org along with a copy of your food safety certification.', validators=[Optional()]) 
-    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', choices=arrivaldata, validators=[DataRequired()])
+    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', choices=merchant_arrivaldata, validators=[DataRequired()])
     service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
     last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
     vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])
@@ -362,5 +370,43 @@ class MerchantForm(FlaskForm):
     
     submit = SubmitField(
         'Submit Merchant Application',
+        render_kw={'id':'submit','data_action':'save-svg'}
+    )
+
+class EditMerchantForm(FlaskForm):
+    
+    business_name = StringField('Business Name', validators=[DataRequired()])
+    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')], validators=[DataRequired()])
+    sca_name = StringField('SCA Name', validators=[DataRequired()])
+    fname = StringField('First Name', validators=[DataRequired()])
+    lname = StringField('Last Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone', validators=[DataRequired()])
+    text_permission = BooleanField('Permission to Text', default=False, validators=[Optional()])
+    address = StringField('Address', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    state_province = StringField('State/Province', validators=[DataRequired()])
+    zip = IntegerField('Zip Code', validators=[DataRequired()])
+    frontage_width = IntegerField('Frontage Width (in feet)', validators=[DataRequired()])
+    frontage_depth = IntegerField('Frontage Depth (in feet)', validators=[DataRequired()])
+    space_fee = FloatField('Space Fee', validators=[DataRequired()])
+    additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
+    processing_fee = IntegerField('Processing Fee',validators=[DataRequired()])
+    merchant_fee = FloatField('Merchant Fee',validators=[DataRequired()])
+    electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
+    food_merchant_agreement = BooleanField('FOOD MERCHANTS: Agreement to send menu and pricing', validators=[Optional()]) 
+    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', choices=merchant_arrivaldata, validators=[DataRequired()])
+    service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
+    last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
+    vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])
+    vehicle_license_plate = StringField('Vehicle License Plate', validators=[Optional()])
+    vehicle_state = StringField('Vehicle State', validators=[Optional()])
+    trailer_length = IntegerField('Trailer Length (in feet)', validators=[Optional()])  
+    trailer_license_plate = StringField('Trailer License Plate', validators=[Optional()])
+    trailer_state = StringField('Trailer State', validators=[Optional()])
+    notes = TextAreaField('Notes', validators=[Optional()])
+    
+    submit = SubmitField(
+        'Update Merchant Application',
         render_kw={'id':'submit','data_action':'save-svg'}
     )

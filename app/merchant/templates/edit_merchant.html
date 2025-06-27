@@ -15,11 +15,32 @@
         </div>
     </div>
 
+    <h2>Application Information</h2>
     <div class="row form-group">
         <div class="col form-group">
             <p>
                 {{ form.estimated_date_of_arrival.label }}
                 {{ form.estimated_date_of_arrival(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.food_merchant_agreement.label }}
+                {{ form.food_merchant_agreement(class_='form-check-input big-checkbox')  }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.service_animal.label }}
+                {{ form.service_animal(class_='form-check-input big-checkbox')  }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.last_3_years.label }}
+                {{ form.last_3_years(class_='form-check-input big-checkbox')  }}
             </p>
         </div>
     </div>

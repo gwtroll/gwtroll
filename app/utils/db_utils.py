@@ -60,6 +60,12 @@ def reg_count():
         abort(404)
     return regcount
 
+def get_merchants(regids):
+    regs = Merchant.query.filter(Merchant.id.in_(ast.literal_eval(regids))).all()
+    if regs is None:
+        abort(404)
+    return regs
+
 def get_inspection_stats():
     inspection_stats = {}
     inspections = MarshalInspection.query.all()

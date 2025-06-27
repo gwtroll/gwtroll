@@ -39,6 +39,7 @@
     data-classes="table table-striped table-responsive">
       <thead>
           <tr>
+              <th data-field="invoice_type" data-filter-control="select">Invoice Type</th>
               <th data-field="invoice_number" data-filter-control="input">Invoice Number</th>
               <th data-field="invoice_date" data-filter-control="select">Invoice Date</th>
               <th data-field="email" data-filter-control="input">Email</th>
@@ -49,6 +50,9 @@
         {% if invoices %}
           {%for invoice in invoices %}
           <tr>
+              <td> 
+                {{invoice['invoice_type']}}
+            </td>
                   <td> 
                       {{invoice['invoice_number']}}
                   </td>

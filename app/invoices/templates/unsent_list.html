@@ -39,6 +39,7 @@
     data-classes="table table-striped table-responsive">
       <thead>
           <tr>
+              <th data-field="invoice_type" data-filter-control="select" data-sortable="true">Invoice Type</th>
               <th data-field="invoice_number" data-filter-control="input">Invoice Number</th>
               <th data-field="invoice_date" data-filter-control="select">Invoice Date</th>
               <th data-field="email" data-filter-control="input">Email</th>
@@ -46,15 +47,17 @@
           </tr>
       </thead>
       <tbody>
-        {% if invoices %}
-          {%for invoice in invoices %}
+        {% if reg_invoices %}
+          {%for invoice in reg_invoices %}
           <tr>
                   <td> 
-                      {{invoices[invoice]['invoice_number']}}
-                  </td>
-                  {% if invoices[invoice]['invoice_date'] %}
+                      {{reg_invoices[invoice]['invoice_type']}}
                   <td> 
-                      {{invoices[invoice]['invoice_date'].strftime('%m-%d-%Y')}}
+                      {{reg_invoices[invoice]['invoice_number']}}
+                  </td>
+                  {% if reg_invoices[invoice]['invoice_date'] %}
+                  <td> 
+                      {{reg_invoices[invoice]['invoice_date'].strftime('%m-%d-%Y')}}
                   </td>
                   {% else %}
                   <td> 
@@ -62,10 +65,36 @@
                   </td>
                   {% endif %}
                   <td> 
-                      {{invoices[invoice]['invoice_email']}}
+                      {{reg_invoices[invoice]['invoice_email']}}
                   </td>
                   <td>
-                    <a class="btn btn-primary" href="{{url_for('invoices.createinvoice', regids=[invoices[invoice]['registrations']])}}" role="button">Create Invoice</a>
+                    <a class="btn btn-primary" href="{{url_for('invoices.createinvoice', regids=[reg_invoices[invoice]['registrations']], type=reg_invoices[invoice]['invoice_type'])}}" role="button">Create Invoice</a>
+                  </td>
+          </tr>
+          {% endfor %}
+          {% endif %}
+          {% if merchant_invoices %}
+          {%for invoice in merchant_invoices %}
+          <tr>
+                  <td> 
+                      {{merchant_invoices[invoice]['invoice_type']}}
+                  <td> 
+                      {{merchant_invoices[invoice]['invoice_number']}}
+                  </td>
+                  {% if merchant_invoices[invoice]['invoice_date'] %}
+                  <td> 
+                      {{merchant_invoices[invoice]['invoice_date'].strftime('%m-%d-%Y')}}
+                  </td>
+                  {% else %}
+                  <td> 
+                    None
+                  </td>
+                  {% endif %}
+                  <td> 
+                      {{merchant_invoices[invoice]['invoice_email']}}
+                  </td>
+                  <td>
+                    <a class="btn btn-primary" href="{{url_for('invoices.createinvoice', regids=[merchant_invoices[invoice]['registrations']], type=merchant_invoices[invoice]['invoice_type'])}}" role="button">Create Invoice</a>
                   </td>
           </tr>
           {% endfor %}
