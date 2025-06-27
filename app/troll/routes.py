@@ -60,7 +60,7 @@ def checkin():
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
     if reg.mbr_num_exp is not None:
-        form.mbr_num_exp.data = datetime.strptime(reg.mbr_num_exp, '%Y-%m-%d')
+        form.mbr_num_exp.data = reg.mbr_num_exp
 
     #if form.validate_on_submit():
         #print(form)
