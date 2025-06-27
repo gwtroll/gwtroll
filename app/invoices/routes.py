@@ -73,38 +73,37 @@ def paid():
 @roles_accepted('Admin','Invoices','Department Head')
 def canceled():
     if current_user.event_id:
-        all_regs = Registrations.query.filter(and_(Registrations.prereg == True, or_(Registrations.invoice_status == 'CANCELED', Registrations.invoice_status == 'DUPLICATE', Registrations.event_id == current_user.event_id))).order_by(Registrations.invoice_email).all()
+        all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'CANCELED', Invoice.event_id == current_user.event_id)).all()
     else:
-        all_regs = Registrations.query.filter(and_(Registrations.prereg == True, or_(Registrations.invoice_status == 'CANCELED', Registrations.invoice_status == 'DUPLICATE'))).order_by(Registrations.invoice_email).all()
-
-    preregtotal = prereg_total()
-    invoicecount = unsent_count()
-    regcount = unsent_reg_count()
-    invoices = {}
-    for reg in all_regs:
-        if reg.invoice_email not in invoices:
-            invoices[reg.invoice_email] = {'invoice_email':reg.invoice_email,'invoice_number':reg.invoice_number, 'invoice_status':reg.invoice_status, 'invoice_date':reg.invoice_date, 'registrations':[]}
-        invoices[reg.invoice_email]['registrations'].append(reg.id)
-    return render_template('invoice_list.html', invoices=invoices, preregtotal=preregtotal, invoicecount=invoicecount, regcount=regcount, back='canceled')
+        all_inv = Invoice.query.filter(Invoice.invoice_status == 'CANCELED').all()
+    # preregtotal = prereg_total()
+    # invoicecount = unsent_count()
+    # regcount = unsent_reg_count()
+    # invoices = {}
+    # for reg in all_inv:
+    #     if reg.invoice_email not in invoices:
+    #         invoices[reg.invoice_email] = {'invoice_email':reg.invoice_email,'invoice_number':reg.invoice_number, 'invoice_status':reg.invoice_status, 'invoice_date':reg.invoice_date, 'registrations':[]}
+    #     invoices[reg.invoice_email]['registrations'].append(reg.id)
+    return render_template('invoice_list.html', invoices=all_inv, back='canceled')
 
 @bp.route('/all', methods=('GET', 'POST'))
 @login_required
 @roles_accepted('Admin','Invoices','Department Head')
 def all():
     if current_user.event_id:
-        all_regs = Registrations.query.filter(and_(Registrations.prereg == True,Registrations.event_id == current_user.event_id)).order_by(Registrations.invoice_email).all()
+        all_inv = Invoice.query.filter(Invoice.event_id == current_user.event_id).all()
     else:
-        all_regs = Registrations.query.filter(Registrations.prereg == True).order_by(Registrations.invoice_email).all()
+        all_inv = Invoice.query.all()
 
-    invoices = {}
-    for reg in all_regs:
-        if reg.invoice_email not in invoices:
-            invoices[reg.invoice_email] = {'invoice_email':reg.invoice_email,'invoice_number':reg.invoice_number, 'invoice_status':reg.invoice_status, 'invoice_date':reg.invoice_date, 'invoice_total':0, 'registrations':[]}
-        invoices[reg.invoice_email]['invoice_total'] += reg.total_due
+    # invoices = {}
+    # for reg in all_inv:
+    #     if reg.invoice_email not in invoices:
+    #         invoices[reg.invoice_email] = {'invoice_email':reg.invoice_email,'invoice_number':reg.invoice_number, 'invoice_status':reg.invoice_status, 'invoice_date':reg.invoice_date, 'invoice_total':0, 'registrations':[]}
+    #     invoices[reg.invoice_email]['invoice_total'] += reg.total_due
 
-        invoices[reg.invoice_email]['registrations'].append(reg.id)
+    #     invoices[reg.invoice_email]['registrations'].append(reg.id)
     now = datetime.now()
-    return render_template('invoice_list.html', invoices=invoices, back='all', now=now)
+    return render_template('invoice_list.html', invoices=all_inv, back='all', now=now)
 
 @bp.route('/update', methods=('GET', 'POST'))
 @login_required
