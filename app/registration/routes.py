@@ -130,6 +130,23 @@ def createprereg():
     form.kingdom.choices = get_kingdom_choices()
     print("Form Created")
 
+    merchantid = request.args.get('merchantid')
+    if merchantid is not None and request.form.get("action") == None:
+        merchant = Merchant.query.filter_by(id=merchantid).first()
+        if merchant is None:
+            flash('Merchant not found.','error')
+            return redirect(url_for('registration.createprereg'))
+        else:
+            form.fname.data = merchant.fname
+            form.lname.data = merchant.lname
+            form.scaname.data = merchant.sca_name
+            form.email.data = merchant.email
+            form.invoice_email.data = merchant.email
+            form.phone.data = merchant.phone
+            form.city.data = merchant.city
+            form.state_province.data = merchant.state_province
+            form.zip.data = merchant.zip
+
     if form.validate_on_submit() and request.method == 'POST':
         print("Form Validated")
         if request.form.get("action") == 'Submit_Another':
@@ -143,7 +160,15 @@ def createprereg():
             new_reg = create_prereg(form)
             additional_registrations.append(new_reg.toJSON())
             reg_names.append(new_reg)
-            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=reg_names)
+            form.fname.data = None
+            form.lname.data = None
+            form.scaname.data = None
+            form.email.data = None
+            form.phone.data = None
+            form.city.data = None
+            form.state_province.data = None
+            form.zip.data = None
+            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=reg_names, clear=True)
             # return redirect(url_for('registration.createprereg', form=form, additional_registrations=additional_registrations, reg_names=reg_names))
         else:
             additional_registrations = []
@@ -173,7 +198,7 @@ def createprereg():
         print(request.form)
         form.fname.data = request.form.get('fname')
         form.lname.data = request.form.get('lname')
-    return render_template('create_prereg.html', form=form)
+    return render_template('create_prereg.html', form=form, clear=False)
 
 @bp.route('/success')
 def success():
@@ -188,7 +213,6 @@ def duplicate():
     reg.duplicate = True
     db.session.commit()
 
-
     all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
 
     for r in all_regs:
@@ -197,7 +221,7 @@ def duplicate():
     if len(regids) == 0:
         return redirect(url_for('invoices.unsent'))
 
-    return redirect(url_for('invoices.createinvoice', regids=[regids]))
+    return redirect(url_for('invoices.createinvoice', regids=[regids], type="REGISTRATION"))
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required

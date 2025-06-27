@@ -161,6 +161,7 @@ def createinvoice():
     type = request.args.get('type')
     print(type)
     print('regids', regids)
+    form = SendInvoiceForm()
     if type == 'REGISTRATION':
         regs = get_regs(regids)
         paypal_donation = 0
@@ -172,7 +173,6 @@ def createinvoice():
             registration_price += reg.registration_price
             nmr_price += reg.nmr_price
             total_due += reg.total_due
-        form = SendInvoiceForm()
         form.paypal_donation.data = paypal_donation
         form.registration_amount.data = registration_price + nmr_price
         form.invoice_amount.data = total_due
@@ -185,7 +185,6 @@ def createinvoice():
         for merchant in regs:
             processing_fee += merchant.processing_fee
             space_fee += merchant.space_fee
-        form = SendInvoiceForm()
         form.space_fee.data = space_fee
         form.processing_fee.data = processing_fee
         form.merchant_fee.data = space_fee + processing_fee

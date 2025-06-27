@@ -71,22 +71,22 @@ def update(merch_id):
             merchant.city = form.city.data
             merchant.state_province = form.state_province.data
             merchant.zip = form.zip.data
-            merchant.frontage_width = int(form.frontage_width.data)
-            merchant.frontage_depth = int(form.frontage_depth.data)
+            merchant.frontage_width = int(form.frontage_width.data) if form.frontage_width.data else 0
+            merchant.frontage_depth = int(form.frontage_depth.data) if form.frontage_depth.data else 0
             merchant.additional_space_information = form.additional_space_information.data
             merchant.electricity_request = form.electricity_request.data
             merchant.food_merchant_agreement = form.food_merchant_agreement.data
             merchant.estimated_date_of_arrival = form.estimated_date_of_arrival.data
             merchant.service_animal = form.service_animal.data
             merchant.last_3_years = form.last_3_years.data
-            merchant.vehicle_length = int(form.vehicle_length.data)
+            merchant.vehicle_length = int(form.vehicle_length.data) if form.vehicle_length.data else 0
             merchant.vehicle_license_plate = form.vehicle_license_plate.data
             merchant.vehicle_state = form.vehicle_state.data
-            merchant.trailer_length = int(form.trailer_length.data)
+            merchant.trailer_length = int(form.trailer_length.data) if form.trailer_length.data else 0
             merchant.trailer_license_plate = form.trailer_license_plate.data
             merchant.trailer_state = form.trailer_state.data
             merchant.notes = form.notes.data
-            merchant.space_fee = int(form.frontage_width.data) * int(form.frontage_depth.data) * .10
+            merchant.space_fee = int(form.frontage_width.data) * int(form.frontage_depth.data) * .10 if form.frontage_width.data and form.frontage_depth.data else 0
             merchant.processing_fee = int(form.processing_fee.data)
             merchant.merchant_fee = merchant.processing_fee + merchant.space_fee
             db.session.commit()
@@ -154,11 +154,12 @@ def createprereg():
         flash('Merchant Application {} created for {}.'.format(
         merchant.id, merchant.business_name))
 
-        return redirect(url_for('merchant.success'))
+        return redirect(url_for('merchant.success', merchantid=merchant.id))
     elif request.method == 'POST' and not form.validate_on_submit():
         print(form.errors)
     return render_template('create_merchant.html', form=form)
 
 @bp.route('/success')
 def success():
-    return render_template('merchant_success.html')
+    merchantid = request.args.get('merchantid')
+    return render_template('merchant_success.html', merchantid=merchantid)

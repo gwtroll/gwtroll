@@ -370,7 +370,12 @@
 
 <script>
 
-    document.onload = clearform()
+    let clear = "{{ clear|tojson|safe }}"; 
+    if (clear == 'true') {
+        document.onload = clearform()
+    }
+
+    alert(clear);
 
     function clearform() {
         document.getElementById('expected_arrival_date').selectedIndex = 0
