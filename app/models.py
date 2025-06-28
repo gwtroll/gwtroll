@@ -95,7 +95,7 @@ class Registrations(db.Model):
     prereg = db.Column(db.Boolean(), default=False)
     prereg_date_time = db.Column(db.DateTime())
     expected_arrival_date = db.Column(db.Date())
-    early_on = db.Column(db.String())
+    early_on = db.Column(db.Boolean())
     notes = db.Column(db.Text)
     duplicate = db.Column(db.Boolean, default=False)
     

@@ -167,8 +167,15 @@ def update(merch_id):
         trailer_state = merchant.trailer_state,
         notes = merchant.notes,
         status = merchant.status,
-        application_date = merchant.application_date
+        application_date = datetime.strptime(str(merchant.application_date), '%Y-%m-%d %H:%M:%S') if merchant.application_date else None,
     )
+
+    print(merchant.application_date)
+
+    form.application_date.data = datetime.now()
+
+    print(type(merchant.application_date))
+
     if request.method == 'POST':
         old_status = merchant.status
         if form.validate_on_submit():
@@ -228,7 +235,7 @@ def createprereg():
         print("Form Validated")
 
         merchant = Merchant(
-            application_date = datetime.today(),
+            application_date = datetime.today().replace(microsecond=0),
             business_name = form.business_name.data,
             sca_name = form.sca_name.data,
             fname = form.fname.data,

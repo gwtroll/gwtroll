@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField
-from wtforms.fields import DateField, DateTimeLocalField
+from wtforms.fields import DateField, DateTimeLocalField, DateTimeField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
 import datetime
@@ -405,7 +405,7 @@ class EditMerchantForm(FlaskForm):
     trailer_license_plate = StringField('Trailer License Plate', validators=[Optional()])
     trailer_state = StringField('Trailer State', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
-    application_date = DateTimeLocalField('Application Date', validators=[DataRequired()])
+    application_date = DateTimeField('Application Date', validators=[DataRequired()])
     
     submit = SubmitField(
         'Update Merchant Application',

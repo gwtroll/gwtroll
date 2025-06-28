@@ -362,10 +362,10 @@ def createpayment():
                         # event_id = reg.event_id
                     )
                     if reg_balance <= payment_balance:
-                        payment_balance = payment_balance - reg_balance
-                        pay.space_fee_amount = reg.space_fee
-                        pay.processing_fee_amount = reg.processing_fee
-                        pay.amount = reg_balance
+                        payment_balance = float(payment_balance) - float(reg_balance)
+                        pay.space_fee_amount = float(reg.space_fee)
+                        pay.processing_fee_amount = float(reg.processing_fee)
+                        pay.amount = float(reg_balance)
                         reg.space_fee_balance = 0
                         reg.processing_fee_balance = 0
                     else:
@@ -394,7 +394,7 @@ def createpayment():
                     db.session.add(pay)
                     reg.notes = notes
 
-            inv.balance = inv.balance - payment_amount
+            inv.balance = float(inv.balance) - float(payment_amount)
             if inv.balance <= 0:
                 inv.invoice_status = 'PAID'
             inv.notes = notes
