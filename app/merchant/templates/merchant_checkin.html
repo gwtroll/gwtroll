@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col text-center">
+        <h2>
+{{ merchant.business_name }}
+        </h2>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col form-group">
+        <p>
+            <label for="name">Name</label>
+            <input type="text" class="form-control m-0" id="name" name="name" readonly
+                value="{{ merchant.fname }} {{ merchant.lname }}" />
+        </p>
+    </div>
+    <div class="col form-group">
+        <p>
+            <label for="sca_name">SCA Name</label>
+            <input type="text" class="form-control m-0" id="sca_name" name="sca_name" readonly
+                value="{{ merchant.sca_name }}" />
+        </p>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col form-group">
+        <p class="text-center">
+            <label for="food_merchant_agreement">Food Merchant Agreement</label>
+            {% if merchant.food_merchant_agreement %}
+            <input type="checkbox" class="form-check-input big-checkbox" id="food_merchant_agreement"
+                name="food_merchant_agreement" disabled checked />
+            {% else %}
+            <input type="checkbox" class="form-check-input big-checkbox" id="food_merchant_agreement"
+                name="food_merchant_agreement" disabled />
+            {% endif %}
+        </p>
+    </div>
+    <div class="col form-group">
+        <p class="text-center">
+            <label for="service_animal">Service Animal</label>
+            {% if merchant.service_animal %}
+            <input type="checkbox" class="form-check-input big-checkbox" id="service_animal" name="service_animal"
+                disabled checked />
+            {% else %}
+            <input type="checkbox" class="form-check-input big-checkbox" id="service_animal" name="service_animal"
+                disabled />
+            {% endif %}
+        </p>
+    </div>
+    <div class="col form-group">
+        <p class="text-center">
+            <label for="last_3_years">Last 3 Years</label>
+            {% if merchant.last_3_years %}
+            <input type="checkbox" class="form-check-input big-checkbox" id="last_3_years" name="last_3_years" disabled
+                checked />
+            {% else %}
+            <input type="checkbox" class="form-check-input big-checkbox" id="last_3_years" name="last_3_years"
+                disabled />
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col form-group">
+        <p>
+            <label for="space_fee">Space Fee</label>
+            <input type="text" class="form-control m-0" id="space_fee" name="space_fee" readonly
+                value="{{ merchant.space_fee }}" />
+        </p>
+    </div>
+    <div class="col form-group">
+        <p>
+            <label for="space_fee_balance">Space Fee Balance</label>
+            <input type="text" class="form-control m-0" id="space_fee_balance" name="space_fee_balance" readonly
+                value="{{ merchant.space_fee_balance }}" />
+        </p>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col form-group">
+        <p>
+            <label for="processing_fee">Processing Fee</label>
+            <input type="text" class="form-control m-0" id="processing_fee" name="processing_fee" readonly
+                value="{{ merchant.processing_fee }}" />
+        </p>
+    </div>
+    <div class="col form-group">
+        <p>
+            <label for="processing_fee_balance">Processing Fee Balance</label>
+            <input type="text" class="form-control m-0" id="processing_fee_balance" name="processing_fee_balance"
+                readonly value="{{ merchant.processing_fee_balance }}" />
+        </p>
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col form-group">
+        <p>
+            <label for="electricity_fee">Electricity Fee</label>
+            <input type="text" class="form-control m-0" id="electricity_fee" name="electricity_fee" readonly
+                value="{{ merchant.electricity_fee }}" />
+        </p>
+    </div>
+    <div class="col form-group">
+        <p>
+            <label for="electricity_balance">Electricity Fee Balance</label>
+            <input type="text" class="form-control m-0" id="electricity_balance" name="electricity_balance" readonly
+                value="{{ merchant.electricity_balance }}" />
+        </p>
+    </div>
+</div>
+
+<h5>Payments</h5>
+<div class="row">
+    <div class="col">
+        <table class="table table-reg table-reg-display table-responsive">
+            <tr>
+                <th>Payment Type</th>
+                <th>Space Fee</th>
+                <th>Processing Fee</th>
+                <th>Electricity Fee</th>
+                <th>Total Payment</th>
+            </tr>
+
+            {% if payments %}
+            {% for payment in payments %}
+            <tr>
+                <td>{{ payment.type }}</td>
+                <td>{{ payment.space_fee_amount}}</td>
+                <td>{{ payment.processing_fee_amount}}</td>
+                <td>{{ payment.electricity_fee_amount}}</td>
+                <td>{{ payment.amount }}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </table>
+    </div>
+</div>
+
+<form action="/checkin" method="post">
+    {{ form.hidden_tag() }}
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{form.notes.label}}
+                {{form.notes(class_='form-control m-0')}}
+            </p>
+        </div>
+    </div>
+    <br>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>{{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}</p>
+        </div>
+    </div>
+</form>
+
+<button type="button" class="btn btn-lg btn-warning form-control" data-bs-toggle="modal"
+    data-bs-target="#electricityfeeModal">
+    Update Electricity Fee
+</button>
+
+<br/>
+<br/>
+
+<button type="button" class="btn btn-lg btn-success form-control" data-bs-toggle="modal"
+    data-bs-target="#paymentModal">
+    Create Payment
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="electricityfeeModal" tabindex="-1" role="dialog" aria-labelledby="electricityfeeModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="electricityfeeModalLabel">Electricity Fee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/merchant/{{merchant.id}}/electricityfee" method="POST">
+                    <b>{{electricity_fee_form.electricity_request.label}}</b>
+                    {{electricity_fee_form.electricity_request(class_='form-control')}}
+                    <b>{{electricity_fee_form.electricity_fee.label}}</b>
+                    {{electricity_fee_form.electricity_fee(class_='form-control')}}
+                    {{electricity_fee_form.submit(class_='form-control btn btn-primary')}}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Create Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/merchant/{{merchant.id}}/payment" method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="row form-group">
+                        <div class="row form-group">
+                            <div class="col form-group">
+                                <p>
+                                    {{ payment_form.total_due.label }}<br>
+                                    {{ payment_form.total_due(class_='form-control', readonly=true) }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col form-group">
+                                <p>
+                                    {{ payment_form.payment_type.label }}<br>
+                                    {{ payment_form.payment_type(class_='form-control') }}
+                                </p>
+                            </div>
+                        </div>
+                        <p>{{ payment_form.submit(class_='form-control btn-primary btn-lg') }}</p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

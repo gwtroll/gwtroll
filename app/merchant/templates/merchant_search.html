@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="title m-0">{% block title %} Search Merchants {% endblock %}</h1>
+<div class="row m-0">
+    <div class="col m-0 d-flex justify-content-center">
+        <p class="text-muted m-0">There are {{merchant_count}} Merchants checked in to Gulf Wars.</p>
+    </div>
+</div>
+<div class="row m-0">
+    <div class="col">
+        <form action="/merchant/search" method="POST">
+            <div class="row">
+                <!-- Search -->
+                <div class="col">
+                    <input class="form-control py-2 custom-input-space"
+                           placeholder="Search by Name" name="search_name" value=""/>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Search -->
+                <div class="col">
+                    <input class="form-control py-2 custom-input-space"
+                           placeholder="Search by Business" name="business_name" value=""/>
+                </div>
+            </div>
+            <div class="row m-0">
+                <div class="col">
+                    <button type="submit" class="btn btn-lg btn-primary form-control my-2">Search</button>
+                </div>
+            </div>
+            <div class="row m-0">
+                <div class="col">
+                    <a class="btn btn-lg btn-success form-control my-2" href="{{url_for('merchant.merchant_fastpass')}}" role="button">Fast Pass</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {% for merchant in merchants %}
+        {% if merchant['checkin_date'] %}
+        <div class="row reg_card_checkedin">
+        {% else %}
+        <div class="row reg_card_notcheckedin">
+        {% endif %}
+            <div class="col">
+                <a href="{{ url_for('merchant.merchant_checkin', merchantid=merchant['id']) }}">
+                    <h5>{{ merchant['business_name'] }}</h5>
+                </a>
+                <div>
+                    <p class="text-muted">{{ merchant['fname'] }} {{merchant['lname']}}</p>
+                    <p class="text-muted">{{ merchant['sca_name'] }}</p>
+                </div>
+            </div>
+            <div class="col">
+                <div>
+                    <p class="text-muted">Invoice Number: {{merchant.invoice_number}}</p>
+                </div>
+                <div>
+                    <p class="text-muted">Invoice Status: {{merchant.invoice}}</p>
+                </div>
+            </div>
+            <div class="col">
+                <div>
+                    <p class="text-muted">Ready For Checkin:
+                        {% if merchant['ready_for_checkin'] %}
+                        <span class="logged-in" style="color: green;">●</span>
+                        {% else %}
+                        <span class="logged-in" style="color: red;">●</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-muted">Expected Arrival: {{merchant['estimated_date_of_arrival'].strftime('%m-%d-%Y')}}</p>
+                </div>
+            </div>
+        </div>
+        
+            <hr>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>
+
+{% endblock %}

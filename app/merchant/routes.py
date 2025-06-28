@@ -18,6 +18,119 @@ def merchants():
     merchants = Merchant.query.all()
     return render_template('merchant_list.html', merchants=merchants)
 
+@bp.route('/search', methods=('GET','POST'))
+@login_required
+@roles_accepted('Admin','Merchant Head','Department Head')
+def merchant_search():
+    merchant_count = 0
+    if request.method == "POST":
+        if request.form.get('search_name'):
+            search_value = request.form.get('search_name')
+            print(search_value)
+            if search_value is not None and search_value != '':
+                    merchants = query_db(
+                    "SELECT * FROM merchant WHERE (fname ILIKE %s OR lname ILIKE %s OR sca_name ILIKE %s) Order by checkin_date DESC, business_name, lname, fname",
+                    #(search_value, search_value, search_value))
+                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+
+        elif request.form.get('business_name'):
+            search_value = request.form.get('business_name')
+            merchants = query_db(
+                "SELECT * FROM merchant WHERE (business_name ILIKE %s) Order by checkin_date DESC, business_name, lname, fname",
+                ('%' + search_value + '%',))
+
+        else:
+            return render_template('merchant_search.html', merchant_count=merchant_count)
+
+            # if (arrival_date == datetime.strptime('03/08/2025','%m/%d/%Y') or arrival_date <= datetime.now()):
+            #     r['expected_arrival_date'] = arrival_date
+            #     r['ready_for_checkin'] = True
+            # else:
+            #     r['expected_arrival_date'] = arrival_date
+            #     r['ready_for_checkin'] = False
+        return render_template('merchant_search.html', merchants=merchants, merchant_count=merchant_count)
+    else:
+        return render_template('merchant_search.html', merchant_count=merchant_count)
+
+@bp.route('/checkin/<int:merchantid>', methods=('GET','POST'))
+@login_required
+@roles_accepted('Admin','Merchant Head','Department Head')
+def merchant_checkin(merchantid):
+    merchant = Merchant.query.filter_by(id=merchantid).first()
+    payments = Payment.query.filter_by(merchant_id=merchantid).all()
+    electricity_fee_form = MerchantElectricityForm(
+        electricity_request=merchant.electricity_request,
+        electricity_fee=merchant.electricity_fee,
+        electricity_balance=merchant.electricity_balance,
+    )
+    payment_form = PayRegistrationForm()
+    payment_form.total_due.data = merchant.electricity_balance + merchant.processing_fee_balance + merchant.space_fee_balance
+    form = MerchantCheckinForm(
+        notes=merchant.notes,
+    )
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            merchant.notes = form.notes.data
+            merchant.checkin_date = datetime.today()
+            db.session.commit()
+            flash('Merchant {} checked in successfully.'.format(merchant.business_name), 'success')
+            return redirect(url_for('merchant.merchant_search'))
+
+    return render_template('merchant_checkin.html', merchant=merchant, payments=payments, form=form, electricity_fee_form=electricity_fee_form, payment_form=payment_form)
+
+@bp.route('/<int:merchantid>/electricityfee', methods=('GET','POST'))
+@login_required
+@roles_accepted('Admin','Merchant Head','Department Head')
+def merchant_electricityfee(merchantid):
+    merchant = Merchant.query.filter_by(id=merchantid).first()
+    
+    if request.method == 'POST':
+        if request.form.get('electricity_fee'):
+            payments = Payment.query.filter_by(merchant_id=merchantid).all()
+            electricity_fee_paid = 0
+            for payment in payments:
+                electricity_fee_paid += payment.electricity_fee_amount
+            merchant.electricity_request= request.form.get('electricity_request')
+            merchant.electricity_fee = request.form.get('electricity_fee')
+            merchant.electricity_balance = float(merchant.electricity_fee) - float(electricity_fee_paid)
+            db.session.commit()
+
+    return redirect(url_for("merchant.merchant_checkin",merchantid=merchant.id))
+
+@bp.route('/<int:merchantid>/payment', methods=('GET','POST'))
+@login_required
+@roles_accepted('Admin','Merchant Head','Department Head')
+def merchant_payment(merchantid):
+    merchant = Merchant.query.filter_by(id=merchantid).first()
+
+    if request.method == 'POST':
+
+        pay = Payment(
+            type = request.form.get('payment_type'),
+            payment_date = datetime.now().date(),
+            amount = request.form.get('total_due'),
+            processing_fee_amount = merchant.processing_fee_balance,
+            space_fee_amount = merchant.space_fee_balance,
+            electricity_fee_amount = merchant.electricity_balance,
+            merchant_id = merchant.id,
+            # event_id = reg.event_id
+        )
+
+        db.session.add(pay)
+
+        merchant.electricity_balance = 0
+        merchant.processing_fee_balance = 0
+        merchant.space_fee_balance = 0
+
+        db.session.commit()
+
+        return redirect(url_for("merchant.merchant_checkin",merchantid=merchant.id))
+
+
+@bp.route('/fastpass')
+def merchant_fastpass():
+        return render_template('merchant_fastpass.html')
+
 @bp.route('/<int:merch_id>', methods=('GET','POST'))
 @login_required
 @roles_accepted('Admin','Merchant Head','Department Head')
@@ -54,12 +167,13 @@ def update(merch_id):
         trailer_state = merchant.trailer_state,
         notes = merchant.notes,
         status = merchant.status,
+        application_date = merchant.application_date
     )
-
     if request.method == 'POST':
         old_status = merchant.status
         if form.validate_on_submit():
             merchant.status = form.status.data
+            merchant.application_date = form.application_date.data
             merchant.business_name = form.business_name.data
             merchant.sca_name = form.sca_name.data
             merchant.fname = form.fname.data
@@ -114,6 +228,7 @@ def createprereg():
         print("Form Validated")
 
         merchant = Merchant(
+            application_date = datetime.today(),
             business_name = form.business_name.data,
             sca_name = form.sca_name.data,
             fname = form.fname.data,

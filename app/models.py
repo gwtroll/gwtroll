@@ -182,6 +182,7 @@ class Payment(db.Model):
     paypal_donation_amount = db.Column(db.Integer(), default=0)
     space_fee_amount = db.Column(db.Numeric(10,2), default=0)
     processing_fee_amount = db.Column(db.Integer(), default=0)
+    electricity_fee_amount = db.Column(db.Numeric(10,2), default=0)
     amount = db.Column(db.Numeric(10,2), nullable=False)
     invoice_number  = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
     invoice = db.relationship("Invoice", back_populates="payments")
@@ -326,6 +327,10 @@ class Merchant(db.Model):
     trailer_state = db.Column(db.String(), nullable=True)
     notes = db.Column(db.Text(), nullable=True)
 
+    application_date = db.Column(db.DateTime(), default=lambda: datetime.now().replace(microsecond=0).isoformat())
+
+    checkin_date = db.Column(db.DateTime(), nullable=True)
+
     # LEGAL
     signature = db.Column(db.String(), nullable=True)
 
@@ -333,6 +338,7 @@ class Merchant(db.Model):
     invoice_number = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
     invoice = db.relationship("Invoice", back_populates="merchants")
     payments = db.relationship("Payment", back_populates="merchant")
+
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='merchants')
 

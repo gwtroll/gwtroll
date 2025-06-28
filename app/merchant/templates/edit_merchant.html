@@ -19,6 +19,12 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
+                {{ form.application_date.label }}
+                {{ form.application_date(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
                 {{ form.estimated_date_of_arrival.label }}
                 {{ form.estimated_date_of_arrival(class_='form-control m-0') }}
             </p>

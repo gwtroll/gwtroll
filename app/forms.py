@@ -395,7 +395,7 @@ class EditMerchantForm(FlaskForm):
     merchant_fee = FloatField('Merchant Fee',validators=[DataRequired()])
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: Agreement to send menu and pricing', validators=[Optional()]) 
-    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', choices=merchant_arrivaldata, validators=[DataRequired()])
+    estimated_date_of_arrival = DateField('Estimated Date of Arrival', validators=[DataRequired()])
     service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
     last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
     vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])
@@ -405,8 +405,28 @@ class EditMerchantForm(FlaskForm):
     trailer_license_plate = StringField('Trailer License Plate', validators=[Optional()])
     trailer_state = StringField('Trailer State', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
+    application_date = DateTimeLocalField('Application Date', validators=[DataRequired()])
     
     submit = SubmitField(
         'Update Merchant Application',
         render_kw={'id':'submit','data_action':'save-svg'}
     )
+
+class MerchantCheckinForm(FlaskForm):
+
+    notes = TextAreaField('Notes', validators=[Optional()])
+    space_fee = FloatField('Space Fee')
+    
+    submit = SubmitField(
+        'Checkin Merchant',
+        render_kw={'id':'submit','data_action':'save-svg'}
+    )
+
+class MerchantElectricityForm(FlaskForm):
+
+    electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
+    electricity_fee = FloatField('Electricity Fee', validators=[DataRequired()])
+    electricity_balance = FloatField('Electricity Fee Balance', validators=[DataRequired()])
+    
+    submit = SubmitField('Update Electricity Fee')
+    
