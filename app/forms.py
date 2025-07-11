@@ -363,10 +363,7 @@ class MerchantForm(FlaskForm):
     trailer_state = StringField('Trailer State', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
 
-    signature = HiddenField(
-        'signature',
-        render_kw={'id':'signature'}
-    )
+    signature = StringField('By Typing your name here, you are signing this application electronically. You agree your electronic signature is the legal equivalent of your manual signature on this application.', validators=[DataRequired()])
     
     submit = SubmitField(
         'Submit Merchant Application',
@@ -406,6 +403,7 @@ class EditMerchantForm(FlaskForm):
     trailer_state = StringField('Trailer State', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
     application_date = DateTimeField('Application Date', validators=[DataRequired()])
+    signature = StringField('Signature', validators=[DataRequired()])
     
     submit = SubmitField(
         'Update Merchant Application',

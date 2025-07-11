@@ -337,7 +337,7 @@ def createpayment():
                     db.session.add(pay)
                     reg.notes = notes
                     reg.balance = recalculate_reg_balance(reg)
-            inv.balance = inv.balance - payment_amount
+            inv.balance = float(inv.balance) - float(payment_amount)
             if inv.balance <= 0:
                 inv.invoice_status = 'PAID'
             inv.notes = notes

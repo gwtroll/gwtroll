@@ -6,15 +6,6 @@
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
 
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.status.label }}
-                {{ form.status(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-
     <h2>Application Information</h2>
     <div class="row form-group">
         <div class="col form-group">
@@ -121,39 +112,6 @@
         </div>
     </div>
 
-    <h2>Space Information</h2>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.frontage_width.label }}
-                {{ form.frontage_width(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.frontage_depth.label }}
-                {{ form.frontage_depth(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p class="text-center">
-                {{ form.additional_space_information.label }}
-                {{ form.additional_space_information(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-
-    <div class="row form-group">
-        <div class="col form-group">
-            <p class="text-center">
-                {{ form.electricity_request.label(class_='form-check-label') }}
-                {{ form.electricity_request(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-
     <h2>Vehicle</h2>
     <div class="row form-group">
         <div class="col form-group">
@@ -198,6 +156,39 @@
         </div>
     </div>
 
+    <h2>Space Information</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.frontage_width.label }}
+                {{ form.frontage_width(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.frontage_depth.label }}
+                {{ form.frontage_depth(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.additional_space_information.label }}
+                {{ form.additional_space_information(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.electricity_request.label(class_='form-check-label') }}
+                {{ form.electricity_request(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
     <h2>Fees</h2>
     <div class="row form-group">
         <div class="col form-group">
@@ -215,8 +206,13 @@
         <div class="col form-group">
             <p>
                 {{ form.merchant_fee.label(class_='form-check-label') }}
-                {{ form.merchant_fee(class_='form-control m-0') }}
+                {{ form.merchant_fee(class_='form-control m-0', readonly=true) }}
             </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <button type="button" class="m-0 btn btn-lg btn-success " onclick="calculateFees()">Calculate Fees</button>
         </div>
     </div>
 
@@ -229,12 +225,25 @@
             </p>
         </div>
     </div>
+
     <div class="row form-group">
         <div class="col form-group">
-            Signature:
-            <img style="margin: auto; display: block;" src="{{merchant.signature}}" width="75%" height="50%"/>
+            <p>
+                {{ form.signature.label }}
+                {{ form.signature(class_='form-control m-0', readonly=true) }}
+            </p>
         </div>
     </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.status.label }}
+                {{ form.status(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
     <div class="row form-group">
         <div class="col form-group">
             <p>
@@ -248,5 +257,18 @@
 {% endblock %}
 
 {% block script %}
+
+<script>
+    function calculateFees() {
+        merchant_fee = document.getElementById('merchant_fee')
+        space_fee = document.getElementById('space_fee')
+        processing_fee = document.getElementById('processing_fee')
+        frontage_width = document.getElementById('frontage_width')
+        frontage_depth = document.getElementById('frontage_depth')
+
+        space_fee.value = (frontage_width.value * frontage_depth.value * 0.10).toFixed(2)
+        merchant_fee.value = (parseFloat(space_fee.value) + parseFloat(processing_fee.value)).toFixed(2)
+    }
+</script>
 
 {% endblock %}

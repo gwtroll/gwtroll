@@ -485,17 +485,17 @@
         </div> 
     </div>
 
-    <p>I have read and understand the rules for merchanting at Gulf Wars</p>
-    <p>I have read and understand the Friday arrival information.</p>
-    <p>I have read and understand the rules and merchant agreement</p>
-    <div id="signature-pad" class="signature-pad col justify-content-center">
-        <div class="signature-pad--body col">
-          <canvas width="600" style="touch-action: none; user-select: none;" height="200"></canvas>
-        </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>I have read and understand the rules for merchanting at Gulf Wars</p>
+            <p>I have read and understand the Friday arrival information.</p>
+            <p>I have read and understand the rules and merchant agreement</p>
+            <p>
+                {{ form.signature.label }}
+                {{ form.signature(class_='form-control m-0') }}
+            </p>
+        </div> 
     </div>
-
-    {{ form.hidden_tag() }}
-    <p>{{ form.signature }}</p>
 
     <div id="new-reg-div"></div>
     <div class="row">
@@ -514,34 +514,6 @@
     {% endblock %}
 
     {% block script %}
-    
-    <script>
-        const wrapper = document.getElementById("signature-pad");
-        const form = document.getElementById("merchantform")
-        const saveSVGButton = form.querySelector("[data-action=save-svg]");
-        const submitButton = form.querySelector("[data-action=save-svg]");
-        var canvas = document.querySelector("canvas");
-    
-        var signaturePad = new SignaturePad(canvas);
-    
-        saveSVGButton.addEventListener("click", () => {
-        if (signaturePad.isEmpty()) {
-        alert("Please provide a signature first.");
-        } else {
-        const dataURL = signaturePad.toDataURL('image/svg+xml');
-        var signature = document.getElementById('signature').value;
-        const test = document.getElementById('test')
-    
-        document.getElementById('signature').value = dataURL;
-        document.getElementById('test').value = test.checked
-        console.log(signature)
-    
-        }
-    });
-    
-        //var i = signaturePad.toDataURL("image/svg+xml"); // save image as SVG data url
-    
-      </script>
 
       <script>
         frontage_width = document.getElementById('frontage_width');

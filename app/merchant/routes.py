@@ -71,7 +71,7 @@ def merchant_checkin(merchantid):
     if request.method == 'POST':
         if form.validate_on_submit():
             merchant.notes = form.notes.data
-            merchant.checkin_date = datetime.today()
+            merchant.checkin_date = datetime.today().replace(microsecond=0)
             db.session.commit()
             flash('Merchant {} checked in successfully.'.format(merchant.business_name), 'success')
             return redirect(url_for('merchant.merchant_search'))
@@ -168,19 +168,14 @@ def update(merch_id):
         notes = merchant.notes,
         status = merchant.status,
         application_date = datetime.strptime(str(merchant.application_date), '%Y-%m-%d %H:%M:%S') if merchant.application_date else None,
+        signature = merchant.signature if merchant.signature else ''
     )
-
-    print(merchant.application_date)
-
-    form.application_date.data = datetime.now()
-
-    print(type(merchant.application_date))
 
     if request.method == 'POST':
         old_status = merchant.status
         if form.validate_on_submit():
             merchant.status = form.status.data
-            merchant.application_date = form.application_date.data
+            merchant.application_date = form.application_date.data.replace(microsecond=0)
             merchant.business_name = form.business_name.data
             merchant.sca_name = form.sca_name.data
             merchant.fname = form.fname.data
@@ -214,8 +209,6 @@ def update(merch_id):
             if old_status != merchant.status:
                 if merchant.status == 'APPROVED':
                     send_merchant_approval_email(merchant.email, merchant)
-                elif merchant.status == 'DENIED':
-                    send_merchant_denial_email(merchant.email, merchant)
             return render_template('merchant_list.html', merchants=Merchant.query.all())
         print(form.errors)
         flash('There was an error with your submission. Please check the form and try again.', 'error')
