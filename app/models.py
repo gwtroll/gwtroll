@@ -48,6 +48,9 @@ class User(UserMixin, db.Model):
 
     medallion = db.Column(db.Integer())
 
+    department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'))
+    department = db.relationship("Department", backref="user_department")
+
     active = db.Column(db.Boolean())
 
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
@@ -87,6 +90,16 @@ class UserRoles(db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.filter_by(fs_uniquifier=id).first()
+
+class Department(db.Model):
+    __tablename__ = 'departments'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(64), nullable=False, unique=True)
+    description = db.Column(db.Text(), nullable=True)
+    users = db.relationship('User', backref='department_user', lazy=True)
+
+    def __repr__(self):
+        return '<Department {}>'.format(self.name)
 
 class Registrations(db.Model):
     id = db.Column(db.Integer(), primary_key=True, unique=True)

@@ -13,14 +13,14 @@ from markupsafe import Markup
 
 @bp.route('/', methods=('GET',))
 @login_required
-@roles_accepted('Admin','Merchant Head','Department Head')
+@roles_accepted('Admin','Merchant Head')
 def merchants():
     merchants = Merchant.query.order_by(Merchant.application_date).all()
     return render_template('merchant_list.html', merchants=merchants)
 
 @bp.route('/search', methods=('GET','POST'))
 @login_required
-@roles_accepted('Admin','Merchant Head','Department Head')
+@roles_accepted('Admin','Merchant Head')
 def merchant_search():
     merchant_count = 0
     if request.method == "POST":
@@ -54,7 +54,7 @@ def merchant_search():
 
 @bp.route('/checkin/<int:merchantid>', methods=('GET','POST'))
 @login_required
-@roles_accepted('Admin','Merchant Head','Department Head')
+@roles_accepted('Admin','Merchant Head')
 def merchant_checkin(merchantid):
     merchant = Merchant.query.filter_by(id=merchantid).first()
     payments = Payment.query.filter_by(merchant_id=merchantid).all()
@@ -88,7 +88,7 @@ def merchant_checkin(merchantid):
 
 @bp.route('/<int:merchantid>/updatefees', methods=('GET','POST'))
 @login_required
-@roles_accepted('Admin','Merchant Head','Department Head')
+@roles_accepted('Admin','Merchant Head')
 def merchant_updatefees(merchantid):
     merchant = Merchant.query.filter_by(id=merchantid).first()
 
@@ -121,7 +121,7 @@ def merchant_updatefees(merchantid):
 
 @bp.route('/<int:merchantid>/payment', methods=('GET','POST'))
 @login_required
-@roles_accepted('Admin','Merchant Head','Department Head')
+@roles_accepted('Admin','Merchant Head')
 def merchant_payment(merchantid):
     merchant = Merchant.query.filter_by(id=merchantid).first()
 
@@ -155,7 +155,7 @@ def merchant_fastpass():
 
 @bp.route('/<int:merch_id>', methods=('GET','POST'))
 @login_required
-@roles_accepted('Admin','Merchant Head','Department Head')
+@roles_accepted('Admin','Merchant Head')
 def update(merch_id):
     merchant = Merchant.query.get_or_404(merch_id)
     event = EventVariables.query.first()
@@ -253,6 +253,7 @@ def createprereg():
     #     return render_template("prereg_closed.html")
 
     form = MerchantForm()
+    form.estimated_date_of_arrival.choices = get_merch_arrival_dates()
     event = EventVariables.query.first()
     
     if form.validate_on_submit() and request.method == 'POST':

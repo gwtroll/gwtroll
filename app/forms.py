@@ -13,7 +13,7 @@ reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg
 
 arrivaldata = [('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025'),('Early_On','Early On')]
 
-merchant_arrivaldata = [('03-07-2025','Friday - March 7th 2025'),('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025')]
+# merchant_arrivaldata = [('03-07-2025','Friday - March 7th 2025'),('03-08-2025','Saturday - March 8th 2025'),('03-09-2025','Sunday - March 9th 2025'),('03-10-2025','Monday - March 10th 2025'),('03-11-2025','Tuesday - March 11th 2025'),('03-12-2025','Wednesday - March 12th 2025'),('03-13-2025','Tursday - March 13th 2025'),('03-14-2025','Friday - March 14th 2025'),('03-15-2025','Saturday - March 15th 2025')]
 
 paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle'),('travlers_check','Travlers Check')]
 
@@ -65,6 +65,7 @@ class CreateUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    department = SelectField('Department', validators=[DataRequired()], choices=[])
     # event = SelectField('Event', validators=[])
     medallion = IntegerField('Medallion')
     password = PasswordField('Password', validators=[DataRequired()])
@@ -90,6 +91,7 @@ class EditUserForm(FlaskForm):
     role = SelectMultipleField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
+    department = SelectField('Department', validators=[DataRequired()], choices=[])
     # event = SelectField('Event', validators=[])
     medallion = IntegerField('Medallion')
     active = BooleanField('Active')
@@ -356,7 +358,7 @@ class MerchantForm(FlaskForm):
     additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: I agree to send menu and pricing to merchancrat@gulfwars.org along with a copy of your food safety certification.', validators=[Optional()]) 
-    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', choices=merchant_arrivaldata, validators=[DataRequired()])
+    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', validators=[DataRequired()])
     service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
     last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
     vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])
@@ -468,4 +470,9 @@ class EventVariablesForm(FlaskForm):
     merchant_bounced_check_fee = FloatField('Merchant Bounced Check Fee', validators=[DataRequired()])
 
     submit = SubmitField('Update Event Variables')
+
+class DepartmentForm(FlaskForm):
+    name = StringField('Department Name', validators=[DataRequired()])
+    description = TextAreaField('Department Description', validators=[])
+    submit = SubmitField('Create Department')
     

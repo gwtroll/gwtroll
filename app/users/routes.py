@@ -40,6 +40,7 @@ def createuser():
 
     form = CreateUserForm()
     form.role.choices = get_role_choices()
+    form.department.choices = get_department_choices()
     # form.event.choices = get_event_choices()
     
     if request.method == 'POST':
@@ -49,6 +50,7 @@ def createuser():
             return render_template('createuser.html', form=form)
         user = User()
         user.username = form.username.data
+        user.department_id = form.department.data if form.department.data != 0 else None
         for roleid in form.role.data:
             user.roles.append(get_role(roleid))
         user.fname = form.fname.data
@@ -83,7 +85,8 @@ def edituser(userid):
 
     form = EditUserForm(
         id = user.id, 
-        username = user.username, 
+        username = user.username,
+        department = user.department_id if user.department_id else 0, 
         role = role_array,
         fname = user.fname,
         lname = user.lname,
@@ -92,6 +95,7 @@ def edituser(userid):
         # event = user.event_id
     )
     form.role.choices = get_role_choices()
+    form.department.choices = get_department_choices()
     # form.event.choices = get_event_choices()
 
     if request.method == 'POST':
@@ -100,6 +104,7 @@ def edituser(userid):
             role_array.append(get_role(roleid))
         user = get_user(form.id.data)
         user.username = form.username.data
+        user.department_id = form.department.data if form.department.data != 0 else None
         user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data

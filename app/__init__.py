@@ -38,6 +38,7 @@ from app.roles import bp as roles_bp
 from app.eventvariables import bp as eventvariables_bp 
 from app.lodging import bp as lodging_bp
 from app.kingdom import bp as kingdom_bp
+from app.department import bp as department_bp
 from app.merchant import bp as merchant_bp
 app.register_blueprint(user_bp)
 app.register_blueprint(users_bp)
@@ -50,4 +51,5 @@ app.register_blueprint(roles_bp)
 app.register_blueprint(eventvariables_bp)
 app.register_blueprint(lodging_bp)
 app.register_blueprint(kingdom_bp)
+app.register_blueprint(department_bp)
 app.register_blueprint(merchant_bp)

@@ -7,6 +7,8 @@ import psycopg2.extras
 from sqlalchemy import or_, and_
 import json
 import ast
+import pandas as pd
+from datetime import datetime, timedelta
 
 def get_db_connection():
     conn = psycopg2.connect(os.environ
@@ -358,3 +360,34 @@ def canceled_reg_count():
     if canceledcount is None:
         abort(404)
     return canceledcount
+
+def get_reg_arrival_dates():
+    returned_dates = []
+    event = EventVariables.query.first()
+    event_start = event.start_date
+    event_end = event.end_date
+    event_dates = pd.date_range(start=event_start, end=event_end).tolist()
+    for date in event_dates:
+        date_tup = (date.strftime('%m-%d-%Y'), date.strftime('%A - %B %d, %Y'))
+        returned_dates.append(date_tup)
+    return returned_dates
+
+def get_merch_arrival_dates():
+    returned_dates = []
+    event = EventVariables.query.first()
+    event_start = event.start_date + timedelta(days=-1)
+    event_end = event.end_date + timedelta(days=-8)
+    event_dates = pd.date_range(start=event_start, end=event_end).tolist()
+    for date in event_dates:
+        date_tup = (date.strftime('%m-%d-%Y'), date.strftime('%A - %B %d, %Y'))
+        returned_dates.append(date_tup)
+        print(date_tup)
+    return returned_dates
+
+def get_department_choices():
+    departments = Department.query.all()
+    department_choices = [(None, '-')]
+    for d in departments:
+        department_tup = (d.id, d.name)
+        department_choices.append(department_tup)
+    return department_choices
