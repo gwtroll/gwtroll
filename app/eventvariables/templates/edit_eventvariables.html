@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field, errors in form.errors.items() %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <h2>Event Variables</h2>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.event_title.label }}
+                    {{ form.event_title(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.name.label }}
+                    {{ form.name(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.year.label }}
+                    {{ form.year(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.start_date.label }}
+                    {{ form.start_date(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.end_date.label }}
+                    {{ form.end_date(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.location.label }}
+                    {{ form.location(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.description.label }}
+                    {{ form.description(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+
+        <h3>Registration Data</h3>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.preregistration_open_date.label }}
+                    {{ form.preregistration_open_date(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.preregistration_close_date.label }}
+                    {{ form.preregistration_close_date(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+
+        <h3>Merchant Data</h3>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.merchantcrat_email.label }}
+                    {{ form.merchantcrat_email(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.marchantcrat_phone.label }}
+                    {{ form.marchantcrat_phone(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.merchant_application_deadline.label }}
+                    {{ form.merchant_application_deadline(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.merchant_preregistration_open_date.label }}
+                    {{ form.merchant_preregistration_open_date(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.merchant_preregistration_close_date.label }}
+                    {{ form.merchant_preregistration_close_date(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.merchant_processing_fee.label }}
+                    {{ form.merchant_processing_fee(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.merchant_late_processing_fee.label }}
+                    {{ form.merchant_late_processing_fee(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.merchant_squarefoot_fee.label }}
+                    {{ form.merchant_squarefoot_fee(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.merchant_bounced_check_fee.label }}
+                    {{ form.merchant_bounced_check_fee(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit(class_='form-control m-0 btn btn-lg btn-success') }}
+                </p>
+            </div>
+        </div>
+    </form>
+
+    
+{% endblock %}

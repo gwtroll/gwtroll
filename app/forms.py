@@ -177,7 +177,7 @@ class EditForm(FlaskForm):
     city = StringField('City')
     state_province = StringField('State/Province')
     zip = IntegerField('Zip Code')
-    country = StringField('Country')
+    country = StringField('Country', default='United States')
     phone = StringField('Phone')
     email = StringField('Communication Email')
     invoice_email = StringField('Invoice Email')
@@ -347,8 +347,12 @@ class MerchantForm(FlaskForm):
     city = StringField('City', validators=[DataRequired()])
     state_province = StringField('State/Province', validators=[DataRequired()])
     zip = IntegerField('Zip Code', validators=[DataRequired()])
-    frontage_width = IntegerField('Frontage Width (in feet)', validators=[DataRequired()])
-    frontage_depth = IntegerField('Frontage Depth (in feet)', validators=[DataRequired()])
+    frontage_width = IntegerField('Frontage Width (in feet)', validators=[DataRequired()], default=0)
+    frontage_depth = IntegerField('Frontage Depth (in feet)', validators=[DataRequired()], default=0)
+    ropes_front = IntegerField('Ropes Front (in feet)', default=0)
+    ropes_back = IntegerField('Ropes Back (in feet)', default=0)
+    ropes_left = IntegerField('Ropes Left (in feet)', default=0)
+    ropes_right = IntegerField('Ropes Right (in feet)', default=0)
     additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: I agree to send menu and pricing to merchancrat@gulfwars.org along with a copy of your food safety certification.', validators=[Optional()]) 
@@ -373,7 +377,7 @@ class MerchantForm(FlaskForm):
 class EditMerchantForm(FlaskForm):
     
     business_name = StringField('Business Name', validators=[DataRequired()])
-    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')], validators=[DataRequired()])
+    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('WAITLIST','WAITLIST'),('DUPLICATE','DUPLICATE')], validators=[DataRequired()])
     sca_name = StringField('SCA Name', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -386,6 +390,10 @@ class EditMerchantForm(FlaskForm):
     zip = IntegerField('Zip Code', validators=[DataRequired()])
     frontage_width = IntegerField('Frontage Width (in feet)', validators=[DataRequired()])
     frontage_depth = IntegerField('Frontage Depth (in feet)', validators=[DataRequired()])
+    ropes_front = IntegerField('Ropes Front (in feet)', default=0)
+    ropes_back = IntegerField('Ropes Back (in feet)', default=0)
+    ropes_left = IntegerField('Ropes Left (in feet)', default=0)
+    ropes_right = IntegerField('Ropes Right (in feet)', default=0)
     space_fee = FloatField('Space Fee', validators=[DataRequired()])
     additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
     processing_fee = IntegerField('Processing Fee',validators=[DataRequired()])
@@ -420,11 +428,44 @@ class MerchantCheckinForm(FlaskForm):
         render_kw={'id':'submit','data_action':'save-svg'}
     )
 
-class MerchantElectricityForm(FlaskForm):
+class MerchantUpdateFeesForm(FlaskForm):
 
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     electricity_fee = FloatField('Electricity Fee', validators=[DataRequired()])
     electricity_balance = FloatField('Electricity Fee Balance', validators=[DataRequired()])
+    space_fee = FloatField('Space Fee', validators=[DataRequired()])
+    space_fee_balance = FloatField('Space Fee Balance', validators=[DataRequired()])
+    processing_fee = IntegerField('Processing Fee', validators=[DataRequired()])
+    processing_fee_balance = IntegerField('Processing Fee Balance', validators=[DataRequired()])
+    frontage_width = IntegerField('Frontage Width (in feet)', validators=[DataRequired()])
+    frontage_depth = IntegerField('Frontage Depth (in feet)', validators=[DataRequired()])
+    ropes_front = IntegerField('Ropes Front (in feet)', default=0)
+    ropes_back = IntegerField('Ropes Back (in feet)', default=0)
+    ropes_left = IntegerField('Ropes Left (in feet)', default=0)
+    ropes_right = IntegerField('Ropes Right (in feet)', default=0)
     
-    submit = SubmitField('Update Electricity Fee')
+    submit = SubmitField('Update Fees')
+
+class EventVariablesForm(FlaskForm):
+
+    name = StringField('Event Name', validators=[DataRequired()])
+    year = IntegerField('Event Year', validators=[DataRequired()])
+    event_title = StringField('Event Title', validators=[DataRequired()])
+    start_date = DateField('Start Date', format='%Y-%m-%d', validators=[DataRequired()])
+    end_date = DateField('End Date', format='%Y-%m-%d', validators=[DataRequired()])
+    location = StringField('Event Location', validators=[DataRequired()])
+    description = TextAreaField('Event Description', validators=[DataRequired()])
+    merchant_application_deadline = DateField('Merchant Application Deadline', format='%Y-%m-%d', validators=[DataRequired()])
+    merchantcrat_email = StringField('Merchantcrat Email', validators=[DataRequired(), Email()])
+    marchantcrat_phone = StringField('Merchantcrat Phone', validators=[DataRequired()])
+    preregistration_open_date = DateField('Preregistration Open Date', format='%Y-%m-%d', validators=[DataRequired()])
+    preregistration_close_date = DateField('Preregistration Close Date', format='%Y-%m-%d', validators=[DataRequired()])
+    merchant_preregistration_open_date = DateField('Merchant Preregistration Open Date', format='%Y-%m-%d', validators=[DataRequired()])
+    merchant_preregistration_close_date = DateField('Merchant Preregistration Close Date', format='%Y-%m-%d', validators=[DataRequired()])
+    merchant_processing_fee = IntegerField('Merchant Processing Fee', validators=[DataRequired()])
+    merchant_late_processing_fee = IntegerField('Merchant Late Processing Fee', validators=[DataRequired()])
+    merchant_squarefoot_fee = FloatField('Merchant Square Foot Fee', validators=[DataRequired()])
+    merchant_bounced_check_fee = FloatField('Merchant Bounced Check Fee', validators=[DataRequired()])
+
+    submit = SubmitField('Update Event Variables')
     

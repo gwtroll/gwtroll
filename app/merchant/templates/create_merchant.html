@@ -3,7 +3,7 @@
 
 {% block content %}
 <div style="background-color: rgb(255, 255, 255); padding: 10px; border-radius: 1em;">
-<h1>{% block title %} Gulf Wars XXXIII – March 8-16, 2026 {% endblock %}</h1>
+<h1>{% block title %} {{event.event_title}} – {{event.start_date.strftime("%B %d")}}-{{event.end_date.strftime("%d, %Y")}} {% endblock %}</h1>
 <h3 class="text-center">King’s Arrow Ranch, Lumberton, Mississippi</h3>
 <p class="text-center"><a href="http://www.gulfwars.org">www.gulfwars.org</a></p>
 <h2 class="text-center">Merchant Registration</h2>
@@ -13,26 +13,23 @@
         <p class="text-center" style="color: red;">****** MUST be filled out on line  ******</p>
         <ol>
             <li>Read all paperwork and accompanying application first.</li>
-            <li>MAKE SURE YOU UNDERSTAND—if you have any questions, please contact me at            
-                merchantcrat@gulfwars.org    or call me at (210)287-3275</li>
+            <li>MAKE SURE YOU UNDERSTAND—if you have any questions, please contact me at {{event.merchantcrat_email}}</li>
             <li>Fill out the merchant application form completely ONLINE. (DO NOT mail application)</li>
-            <li>By submitting the application you are agreeing to adhere to the rules of Gulf Wars XXXII</li>
-            <li>Application deadline is Nov. 19, 2024</li>
-            <li>*****Invoices will be sent from Gulf Wars paypal******You have the option to pay your merchant fees through PayPal or by mail with a check. Fees are due by Nov. 19th, plan accordingly.  </li>
+            <li>By submitting the application you are agreeing to adhere to the rules of {{event.event_title}}</li>
+            <li>Application deadline is {{event.merchant_application_deadline.strftime("%b. %d, %Y")}}</li>
+            <li>*****Invoices will be sent from Gulf Wars paypal******You have the option to pay your merchant fees through PayPal or by mail with a check. Fees are due by {{event.merchant_application_deadline.strftime("%b. %dth")}}, plan accordingly.</li>
         </ol>
     </div>
 </div>
 <div class="row" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
     <div class="col">
-    <p class="text-center" style="color: red;">MERCHANTS APPLICATIONS MUST BE submitted BY THE DEADLINE OF Nov 19TH 2024.</p>
+    <p class="text-center" style="color: red;">MERCHANTS APPLICATIONS MUST BE submitted BY THE DEADLINE OF {{event.merchant_application_deadline.strftime("%b. %d, %Y")}}.</p>
     <p class="text-center" style="color: red;">Invoices will be sent through paypal. You will have ten days to pay the invoice.</p>
-    <p class="text-center" style="color: red;">Payment deadline is Nov 19th, after that there is a late fee. Please plan accordingly, If you need to pay by check, contact merchant department for mailing istructions at merchantcrat@gulfwars.org.</p>
+    <p class="text-center" style="color: red;">Payment deadline is {{event.merchant_application_deadline.strftime("%B %dth")}}, after that there is a late fee. Please plan accordingly, If you need to pay by check, contact the merchant department for mailing instructions at merchantcrat@gulfwars.org.</p>
     
     <p>TO APPLY FOR A MERCHANT SPACE:</p>
     <ol>
-        <li>Fill out this application completely and accurately. One application per merchant, even if you are sharing a space.
-            !! IMPORTANT !! 
-     If another merchant is selling in your space, they must fill out a separate application and pay the $20 fee. They do not need to pay the square footage fee, as it has already been paid.  If they do not fill out a separate application, their merchandise is considered to be on consignment, and you are responsible for collecting and turning in the taxes.</li>
+        <li>Fill out this application completely and accurately. One application per merchant, even if you are sharing a space. If another merchant is selling in your space, they must fill out a separate application and pay the $20 fee. They do not need to pay the square footage fee, as it has already been paid.  If they do not fill out a separate application, their merchandise is considered to be on consignment, and you are responsible for collecting and turning in the taxes.</li>
         <li>Pay your merchant fees</li>
         <li>Notification of space assignments will be made in January.</li>
     </ol>
@@ -50,13 +47,13 @@
                 <div class="card card-body">
                     <p>MERCHANT FEES DO NOT INCLUDE YOUR GULF WARS SITE ENTRY FEES. </p>
                     
-                    <p>Selling spaces at Gulf Wars cost 10 cents per square foot*  plus a nonrefundable $20.00 processing fee.</p>
+                    <p>Selling spaces at Gulf Wars cost {{(event.merchant_squarefoot_fee * 100) | int}} cents per square foot*  plus a nonrefundable ${{event.merchant_processing_fee}} processing fee.</p>
                     
                     <p>LATE REGISTRATION FEES</p>
-                    <p>There is an ADDITIONAL $25 non-refundable late fee for registrations after Nov 19th.</p>
+                    <p>There is an ADDITIONAL ${{event.merchant_late_processing_fee - event.merchant_processing_fee}} non-refundable late fee for registrations after {{event.merchant_application_deadline.strftime("%B %dth")}}</p>
                     
                     <p>BOUNCED CHECK FEES</p>
-                    <p>A $35 fee will be assessed for each check that is bounced. If you bounce a check, your application will be canceled, and you still owe Gulf Wars the bounced check fee. Do not expect your checks to be cashed immediately but they will be deposited within two weeks. If you don't like your account to be "unbalanced" for a period of time, send a money order.</p>
+                    <p>A ${{event.merchant_bounced_check_fee}} fee will be assessed for each check that is bounced. If you bounce a check, your application will be canceled, and you still owe Gulf Wars the bounced check fee. Do not expect your checks to be cashed immediately but they will be deposited within two weeks. If you don't like your account to be "unbalanced" for a period of time, send a money order.</p>
                     
                     <p>NOTE:  *Merchant fees are for the sales tent with ropes and any extra sales space you may need outside your tent. Living space behind your tent in the merchant area is available on a limited basis at no additional cost. Camping space is included in your site fees, but not in the merchant area.  If you have concerns or questions, please email the mechantcrat.   </p>                </div>
               </div>
@@ -79,7 +76,7 @@
                     <li>History as a Gulf Wars merchant</li>
                     <li>Acceptable tent -  NO pop-ups.</li>
                     <li>Acceptable merchandise</li>
-                    <li>Space available Merchants whose applications are not accepted after all regular spaces have been assigned will be notified and given a choice of three options:</li>
+                    <li>Space available</li>
                 </ul>
             </div>
         </div>
@@ -95,16 +92,17 @@
             </button>
         </p>
         <div class="collapse" id="collapseNotAccepted">
+            <p>Merchants whose applications are not accepted after all regular spaces have been assigned will be notified and given a choice of three options:</p>
             <div class="card card-body">
                 <ol>
                     <li>Refund of fees</li>
                     <li>Placed on a waiting list for cancellations</li>
                     <li>Placed on a list for odd or no-show spaces</li>
                 </ol>
-                <p>NOTE: Spaces not occupied by 5 PM on Sunday, March 09, 2025 without previous notification of the merchant autocrat will be assigned to merchants on the waiting list.</p>
-                <p>Merchant space use is limited to the persons listed on the application unless the Merchant Coordinator is notified in advance.</p>
+                <p>NOTE: Spaces not occupied by 5 PM on Sunday, March 15, 2026 without previous notification of the merchantcrats will be assigned to merchants on the waiting list.</p>
+                <p>Merchant space use is limited to the persons listed on the application unless the Merchantcrats are notified in advance.</p>
                 <p class="text-center" style="color: red;">!! IMPORTANT !!</p>
-                <p>Confirmation of the merchant application being received does not imply that you have been accepted as a merchant for Gulf Wars XXXIII.  If you are missing information, documentation, your application will not be considered received until it is complete.</p>
+                <p>Confirmation of the merchant application being received does not imply that you have been accepted as a merchant for {{event.event_title}}.  If you are missing information, documentation, your application will not be considered received until it is complete.</p>
             </div>
         </div>
     </div>
@@ -120,7 +118,7 @@
         </p>
         <div class="collapse" id="collapseSiteRules">
             <div class="card card-body">
-                <p>Participation as a merchant constitutes agreement with the published rules and regulations. By registering to merchant at Gulf Wars XXXIII all merchants, their agents, employees and affiliates agree to abide by all the rules and regulations of the State of Mississippi, The Society for Creative Anachronism Inc., King's Arrow Ranch, and the Autocrat/Merchant Staff of Gulf Wars XXXIII.  Merchants are responsible for acquainting themselves and their staff with these rules and standards - ignorance is not an excuse.</p>
+                <p>Participation as a merchant constitutes agreement with the published rules and regulations. By registering to merchant at {{event.event_title}} all merchants, their agents, employees and affiliates agree to abide by all the rules and regulations of the State of Mississippi, The Society for Creative Anachronism Inc., King's Arrow Ranch, and the Autocrat/Merchant Staff of {{event.event_title}}.</p>
                 <p>All the rules that apply for Gulf Wars in general also apply to Merchants (merchants are responsible for acquainting themselves with SCA rules and standards - ignorance is not an excuse.)</p>
                 <hr/>
                 <p><b>SIGNS FOR YOUR SHOP</b></p>
@@ -195,8 +193,8 @@
                 <p>You must be open until **10 P.M.** on Wednesday March 13th  for Moonlight Madness. You may close Wednesday for up to 2 hours during the day with a sign as to when you are returning. You should reopen by 7 P.M.  You may stay open later if you wish.</p>
                 <hr/>
                 <p><b>LEGAL INFORMATION</b></p>
-                <p>IMPORTANT: King's Arrow Ranch is a private property with the right to limit the hours, location and operation of any and all businesses on its premises.  Gulf Wars XXXIII  merchants sell by invitation and must conform to the policies established regardless of license. Merchants sell at their own risk. </p>
-                <p>Registration gives the merchant the privilege of selling as an independent operator, not as an employee or agent of King's Arrow Ranch, Gulf Wars XXXIII, or the SCA. Registration as a merchant is a privilege granted by King's Arrow Ranch, not a right. The Merchant Coordinator, Autocrat, or Site owner may revoke said approval or refuse to accept any application without reason or cause of any kind. Infractions of the rules may result in withdrawal of merchant privileges, expulsion from Gulf Wars XXXIII, and can affect registration for future Gulf Wars.</p>
+                <p>IMPORTANT: King's Arrow Ranch is a private property with the right to limit the hours, location and operation of any and all businesses on its premises.  {{event.event_title}}  merchants sell by invitation and must conform to the policies established regardless of license. Merchants sell at their own risk. </p>
+                <p>Registration gives the merchant the privilege of selling as an independent operator, not as an employee or agent of King's Arrow Ranch, {{event.event_title}}, or the SCA. Registration as a merchant is a privilege granted by King's Arrow Ranch, not a right. The Merchant Coordinator, Autocrat, or Site owner may revoke said approval or refuse to accept any application without reason or cause of any kind. Infractions of the rules may result in withdrawal of merchant privileges, expulsion from {{event.event_title}}, and can affect registration for future Gulf Wars.</p>
             </div>
         </div>
     </div>
@@ -214,7 +212,7 @@
             <div class="card card-body">
                 <p>REFUNDS MUST BE REQUESTED NO LATER THAN March 1st, 2025. In order to receive a refund of your Merchant Fees you must:</p>
                 <ol>
-                    <li>Notify the Merchant Coordinator of your cancellation</li>
+                    <li>Notify the Merchcrats of your cancellation</li>
                     <li>Request a refund from the GULF WARS Exchequer and include:
                         Your business name, your name, address, and invoice number.</li>
                 </ol>
@@ -233,7 +231,7 @@
         </p>
         <div class="collapse" id="collapseFriday">
             <div class="card card-body">
-                <p>You and your helpers MUST be entered into early  form if arriving on Friday.  You do not have to do this now, you have until site pre registration closes to do so. Here is the link: bit.ly/45UciQ5</p>
+                <p>You and your helpers MUST be entered into early  form if arriving on Friday.  You do not have to do this now, you have until site pre registration closes to do so.</p>
                 <p>EVERYONE on your list must be preregistered for site.  The merchant office provides a list to the gate.  They will NOT be allowed on site if they are not on this list —NO ARGUMENT, NO APPEAL. Merchants are limited to 5 adults (no limit on minor children).</p>
                 <p>The earliest you'll be allowed on site is NOON.  The latest you can arrive on Friday is 6 PM. Check in with the merchant office BEFORE setting up. You must "troll in" Saturday morning between 9 A.M. and noon for site.</p>
                 <p>Friday merchant arrivals are for merchant set up. You and your helpers are expected to set up your merchant tent before setting up your personal camps elsewhere on site.</p>
@@ -254,13 +252,13 @@
         <div class="collapse" id="collapseAgreement">
             <div class="card card-body">
                 <p><b>Gulf Wars Merchant Agreement</b></p>
-                <p>I, the undersigned merchant for myself and my agents, employees and affiliates, have read and understood the accompanying information and regulations and agree to abide by all rules established by the state of Mississippi, The Society for Creative Anachronism, King's Arrow Ranch Campground, and the Autocrat Staff of Gulf Wars XXXIII. By registering to be a merchant, I am declaring that I have the proper business permits to sell in Mississippi and will pay the Mississippi sales taxes through the Gulf Wars merchant office.   I acknowledge that I am solely responsible for all permits and fees associated with vending.
-                    I acknowledge that I am an independent operator and neither I nor my agents, employees or affiliates have any authority to contract or incur liability for or obligation on behalf of the S.C.A., Gulf Wars XXXIII, King's Arrow Ranch Campground or any of their agents; and will indemnity the above entities against any and all claims that may be made against them due to my activities. I assume responsibility for any claims, costs, expenses or attorney fees incurred by King's Arrow Ranch or Gulf Wars XXXIII due to my activities.
-                    I agree that if anyone using the assigned merchant space fails to comply with these rules or any portion at this agreement. King's Arrow Ranch, the Autocrat and Merchant Staff may take immediate steps which in their sole judgment may be necessary to protect Gulf Wars XXXIII interests. Including, but not limited to, the closing of the contracted selling site, removal of selling materials, removal of merchant and halting all merchant activities at King's Arrow Ranch without refund of any fees to the merchant.
+                <p>I, the undersigned merchant for myself and my agents, employees and affiliates, have read and understood the accompanying information and regulations and agree to abide by all rules established by the state of Mississippi, The Society for Creative Anachronism, King's Arrow Ranch Campground, and the Autocrat Staff of {{event.event_title}}. By registering to be a merchant, I am declaring that I have the proper business permits to sell in Mississippi and will pay the Mississippi sales taxes through the Gulf Wars merchant office.   I acknowledge that I am solely responsible for all permits and fees associated with vending.
+                    I acknowledge that I am an independent operator and neither I nor my agents, employees or affiliates have any authority to contract or incur liability for or obligation on behalf of the S.C.A., {{event.event_title}}, King's Arrow Ranch Campground or any of their agents; and will indemnity the above entities against any and all claims that may be made against them due to my activities. I assume responsibility for any claims, costs, expenses or attorney fees incurred by King's Arrow Ranch or {{event.event_title}} due to my activities.
+                    I agree that if anyone using the assigned merchant space fails to comply with these rules or any portion at this agreement. King's Arrow Ranch, the Autocrat and Merchant Staff may take immediate steps which in their sole judgment may be necessary to protect {{event.event_title}} interests. Including, but not limited to, the closing of the contracted selling site, removal of selling materials, removal of merchant and halting all merchant activities at King's Arrow Ranch without refund of any fees to the merchant.
                     I acknowledge that King's Arrow Ranch is a private property with the right to limit the hours, locations and operation of any and all businesses on its premises.
                     I acknowledge that the assigned merchant space is non-transferable, and that use is limited to the persons listed with this agreement and assume responsibility for the actions of all and any persons who use the assigned space.
-                    Parcels shipped to King's Arrow Ranch are done so at my own risk; neither King's Arrow Ranch nor Merchant Staff, nor Gulf Wars XXXIII is responsible for any items delivered to the site.
-                    I will, by the closing time of 12 Noon Sunday March 16, 2025, remove all equipment, supplies, merchandise, propane bottles, and trash from the assigned space, and pay all charges, including all merchant and camping fees.  I assume responsibility for any hauling charges or other expenses incurred for disposal and for cleanup of the merchant site occupied.</p>
+                    Parcels shipped to King's Arrow Ranch are done so at my own risk; neither King's Arrow Ranch nor Merchant Staff, nor {{event.event_title}} is responsible for any items delivered to the site.
+                    I will, by the closing time of 12 Noon {{event.end_date.strftime("%A %B %d, %Y")}}, remove all equipment, supplies, merchandise, propane bottles, and trash from the assigned space, and pay all charges, including all merchant and camping fees.  I assume responsibility for any hauling charges or other expenses incurred for disposal and for cleanup of the merchant site occupied.</p>
             </div>
         </div>
     </div>
@@ -268,10 +266,7 @@
 
 <div class="row" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
     <div class="col">
-        <p>You will receive an email confirmation of your application that includes your registration information. This is not an acceptance email.
-            Enter your merchant information for the site booklet at  bit.ly/48mhY7q
-            Enter your early on list at bit.ly/45UciQ5
-        </p>
+        <p>You will receive an email confirmation of your application that includes your registration information. This is not an acceptance email.</p>
 
         <p>If you don't get the auto response email, your application did not go through.  (Don't forget to check your spam folder)</p>
     </div>
@@ -399,6 +394,33 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
+                {{ form.ropes_front.label }} <span style="color: red;">*</span>
+                {{ form.ropes_front(class_='form-control m-0', oninput_="fee_script()") }}
+            </p>
+        </div> 
+        <div class="col form-group">
+            <p>
+                {{ form.ropes_back.label }} <span style="color: red;">*</span>
+                {{ form.ropes_back(class_='form-control m-0', oninput_="fee_script()") }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.ropes_left.label }} <span style="color: red;">*</span>
+                {{ form.ropes_left(class_='form-control m-0', oninput_="fee_script()") }}
+            </p>
+        </div> 
+        <div class="col form-group">
+            <p>
+                {{ form.ropes_right.label }} <span style="color: red;">*</span>
+                {{ form.ropes_right(class_='form-control m-0', oninput_="fee_script()") }}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
                 {{ form.additional_space_information.label }}
                 {{ form.additional_space_information(class_='form-control m-0') }}
             </p>
@@ -485,16 +507,38 @@
         </div> 
     </div>
 
+    <div class="row" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
     <div class="row form-group">
         <div class="col form-group">
             <p>I have read and understand the rules for merchanting at Gulf Wars</p>
             <p>I have read and understand the Friday arrival information.</p>
             <p>I have read and understand the rules and merchant agreement</p>
             <p>
-                {{ form.signature.label }}
+                <b>{{ form.signature.label }}</b>
                 {{ form.signature(class_='form-control m-0') }}
             </p>
         </div> 
+    </div>
+    </div>
+
+    <div class="row" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
+    <div class="row form-group">
+        <div class="col form-group">
+            <p id="space_fee_text">
+                <b>Space Fee:</b>
+            </p>
+        </div> 
+        <div class="col form-group">
+            <p id="processing_fee_text">
+                <b>Processing Fee:</b>
+            </p>
+        </div> 
+        <div class="col form-group">
+            <p id="merchant_fee_text">
+                <b>Total Merchant Fee:</b>
+            </p>
+        </div> 
+    </div>
     </div>
 
     <div id="new-reg-div"></div>
@@ -505,10 +549,6 @@
     </div>
 </form>
 
-<p id="space_fee_text"><b>Space Fee:</b></p>
-<p id="processing_fee_text"><b>Processing Fee:</b></p>
-<p id="merchant_fee_text"><b>Total Merchant Fee:</b></p>
-
 </div>
 
     {% endblock %}
@@ -518,17 +558,22 @@
       <script>
         frontage_width = document.getElementById('frontage_width');
         frontage_depth = document.getElementById('frontage_depth');
-        if (new Date() <= new Date("2025-11-19T00:00:00")) {
-            processing_fee = 20.00;
+        ropes_front = document.getElementById('ropes_front');
+        ropes_back = document.getElementById('ropes_back');
+        ropes_left = document.getElementById('ropes_left');
+        ropes_right = document.getElementById('ropes_right');
+        if (new Date() <= new Date("{{event.merchant_application_deadline}}")) {
+            processing_fee = new Number("{{event.merchant_processing_fee}}");
         }
         else {
-            processing_fee = 45.00; // Late fee after Nov 19th
+            processing_fee = new Number("{{event.merchant_late_processing_fee}}"); // Late fee after Nov 19th
         }
         processing_fee_text.innerHTML = "<b>Processing Fee: $</b>" + processing_fee.toFixed(2);
 
 
        function fee_script() {
-            space_fee = (frontage_width.value * frontage_depth.value) * 0.10;
+
+            space_fee = ((parseInt(frontage_width.value) + parseInt(ropes_left.value) + parseInt(ropes_right.value)) * (parseInt(frontage_depth.value) + parseInt(ropes_front.value) + parseInt(ropes_back.value))) * new Number("{{event.merchant_squarefoot_fee}}");
 
             merchant_fee = space_fee + processing_fee;
             

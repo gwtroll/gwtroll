@@ -8,6 +8,28 @@ from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
+class EventVariables(db.Model):
+    __tablename__ = 'eventvariables'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(), nullable=False)
+    year = db.Column(db.Integer(), nullable=False)
+    event_title = db.Column(db.String(), nullable=False)
+    start_date = db.Column(db.Date(), nullable=False)
+    end_date = db.Column(db.Date(), nullable=False)
+    location = db.Column(db.String(), nullable=False)
+    description = db.Column(db.Text(), nullable=False)
+    preregistration_open_date = db.Column(db.Date(), default=False)
+    preregistration_close_date = db.Column(db.Date(), nullable=False)
+    merchant_application_deadline = db.Column(db.Date(), nullable=False)
+    merchantcrat_email = db.Column(db.String(), nullable=False)
+    marchantcrat_phone = db.Column(db.String(), nullable=False)
+    merchant_preregistration_open_date = db.Column(db.Date(), nullable=False)
+    merchant_preregistration_close_date = db.Column(db.Date(), nullable=False)
+    merchant_processing_fee = db.Column(db.Integer(), default=20, nullable=False)
+    merchant_late_processing_fee = db.Column(db.Integer(), default=45, nullable=False)
+    merchant_squarefoot_fee = db.Column(db.Numeric(10,2), default=0.10, nullable=False)
+    merchant_bounced_check_fee = db.Column(db.Integer(), default=35, nullable=False)
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
@@ -306,6 +328,10 @@ class Merchant(db.Model):
     zip = db.Column(db.Integer())
     frontage_width = db.Column(db.Integer(), nullable=False, default=0)
     frontage_depth = db.Column(db.Integer(), nullable=False, default=0)
+    ropes_front = db.Column(db.Integer(), nullable=False, default=0)
+    ropes_back = db.Column(db.Integer(), nullable=False, default=0)
+    ropes_left = db.Column(db.Integer(), nullable=False, default=0)
+    ropes_right = db.Column(db.Integer(), nullable=False, default=0)
     space_fee = db.Column(db.Numeric(10,2), nullable=False, default=0.0)
     space_fee_balance = db.Column(db.Numeric(10,2), nullable=False, default=0.0)
     additional_space_information = db.Column(db.Text())

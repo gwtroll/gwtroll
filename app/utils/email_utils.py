@@ -35,7 +35,7 @@ def send_confirmation_email(recipient, reg):
 def send_merchant_confirmation_email(recipient, merchant):
     msg = Message(
         subject="Gulf Wars - Merchant Application Confirmation",
-        sender="carl.cox.primary@gmail.com",
+        sender=("GulfWars Merchantcrat","merchantcrat@gulfwars.org"),
         recipients=[recipient],
     )
     

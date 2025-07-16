@@ -378,7 +378,7 @@ def createpayment():
                             payment_balance = 0
                             
                         else:
-                            payment_balance -= reg.space_fee
+                            payment_balance -= float(reg.space_fee)
                             pay.space_fee_amount = reg.space_fee
                             reg.space_fee_balance = 0
                         

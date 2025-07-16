@@ -171,6 +171,34 @@
             </p>
         </div>
     </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.ropes_front.label }} <span style="color: red;">*</span>
+                {{ form.ropes_front(class_='form-control m-0') }}
+            </p>
+        </div> 
+        <div class="col form-group">
+            <p>
+                {{ form.ropes_back.label }} <span style="color: red;">*</span>
+                {{ form.ropes_back(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.ropes_left.label }} <span style="color: red;">*</span>
+                {{ form.ropes_left(class_='form-control m-0') }}
+            </p>
+        </div> 
+        <div class="col form-group">
+            <p>
+                {{ form.ropes_right.label }} <span style="color: red;">*</span>
+                {{ form.ropes_right(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
     <div class="row form-group">
         <div class="col form-group">
             <p class="text-center">
@@ -265,8 +293,13 @@
         processing_fee = document.getElementById('processing_fee')
         frontage_width = document.getElementById('frontage_width')
         frontage_depth = document.getElementById('frontage_depth')
+        ropes_left = document.getElementById('ropes_left')
+        ropes_right = document.getElementById('ropes_right')
+        ropes_front = document.getElementById('ropes_front')
+        ropes_back = document.getElementById('ropes_back')
 
-        space_fee.value = (frontage_width.value * frontage_depth.value * 0.10).toFixed(2)
+        space_fee.value = (((parseInt(frontage_width.value) + parseInt(ropes_left.value) + parseInt(ropes_right.value)) * (parseInt(frontage_depth.value) + parseInt(ropes_front.value) + parseInt(ropes_back.value))) * new Number("{{event.merchant_squarefoot_fee}}")).toFixed(2);
+
         merchant_fee.value = (parseFloat(space_fee.value) + parseFloat(processing_fee.value)).toFixed(2)
     }
 </script>

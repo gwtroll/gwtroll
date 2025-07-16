@@ -15,7 +15,7 @@ from markupsafe import Markup
 @login_required
 @roles_accepted('Admin','Merchant Head','Department Head')
 def merchants():
-    merchants = Merchant.query.all()
+    merchants = Merchant.query.order_by(Merchant.application_date).all()
     return render_template('merchant_list.html', merchants=merchants)
 
 @bp.route('/search', methods=('GET','POST'))
@@ -58,10 +58,18 @@ def merchant_search():
 def merchant_checkin(merchantid):
     merchant = Merchant.query.filter_by(id=merchantid).first()
     payments = Payment.query.filter_by(merchant_id=merchantid).all()
-    electricity_fee_form = MerchantElectricityForm(
+    event = EventVariables.query.first()
+    update_fees_form = MerchantUpdateFeesForm(
         electricity_request=merchant.electricity_request,
         electricity_fee=merchant.electricity_fee,
-        electricity_balance=merchant.electricity_balance,
+        frontage_width=merchant.frontage_width,
+        frontage_depth=merchant.frontage_depth,
+        ropes_front=merchant.ropes_front,
+        ropes_back=merchant.ropes_back,
+        ropes_left=merchant.ropes_left,
+        ropes_right=merchant.ropes_right,
+        space_fee=merchant.space_fee,
+        processing_fee=merchant.processing_fee,
     )
     payment_form = PayRegistrationForm()
     payment_form.total_due.data = merchant.electricity_balance + merchant.processing_fee_balance + merchant.space_fee_balance
@@ -76,23 +84,37 @@ def merchant_checkin(merchantid):
             flash('Merchant {} checked in successfully.'.format(merchant.business_name), 'success')
             return redirect(url_for('merchant.merchant_search'))
 
-    return render_template('merchant_checkin.html', merchant=merchant, payments=payments, form=form, electricity_fee_form=electricity_fee_form, payment_form=payment_form)
+    return render_template('merchant_checkin.html', merchant=merchant, payments=payments, form=form, update_fees_form=update_fees_form, payment_form=payment_form, event=event)
 
-@bp.route('/<int:merchantid>/electricityfee', methods=('GET','POST'))
+@bp.route('/<int:merchantid>/updatefees', methods=('GET','POST'))
 @login_required
 @roles_accepted('Admin','Merchant Head','Department Head')
-def merchant_electricityfee(merchantid):
+def merchant_updatefees(merchantid):
     merchant = Merchant.query.filter_by(id=merchantid).first()
-    
+
     if request.method == 'POST':
         if request.form.get('electricity_fee'):
             payments = Payment.query.filter_by(merchant_id=merchantid).all()
             electricity_fee_paid = 0
+            space_fee_paid = 0
+            processing_fee_paid = 0
             for payment in payments:
+                space_fee_paid += payment.space_fee_amount
+                processing_fee_paid += payment.processing_fee_amount
                 electricity_fee_paid += payment.electricity_fee_amount
             merchant.electricity_request= request.form.get('electricity_request')
             merchant.electricity_fee = request.form.get('electricity_fee')
             merchant.electricity_balance = float(merchant.electricity_fee) - float(electricity_fee_paid)
+            merchant.frontage_width = request.form.get('frontage_width')
+            merchant.frontage_depth = request.form.get('frontage_depth')
+            merchant.ropes_front = request.form.get('ropes_front')
+            merchant.ropes_back = request.form.get('ropes_back')
+            merchant.ropes_left = request.form.get('ropes_left')
+            merchant.ropes_right = request.form.get('ropes_right')
+            merchant.space_fee = (int(merchant.frontage_width) + int(merchant.ropes_left) + int(merchant.ropes_right)) * (int(merchant.frontage_depth) + int(merchant.ropes_front) + int(merchant.ropes_back)) * EventVariables.query.first().merchant_squarefoot_fee
+            merchant.space_fee_balance = float(merchant.space_fee) - float(space_fee_paid)
+            merchant.processing_fee = request.form.get('processing_fee')
+            merchant.processing_fee_balance = float(merchant.processing_fee) - float(processing_fee_paid)
             db.session.commit()
 
     return redirect(url_for("merchant.merchant_checkin",merchantid=merchant.id))
@@ -136,6 +158,7 @@ def merchant_fastpass():
 @roles_accepted('Admin','Merchant Head','Department Head')
 def update(merch_id):
     merchant = Merchant.query.get_or_404(merch_id)
+    event = EventVariables.query.first()
     form = EditMerchantForm(
         business_name = merchant.business_name,
         sca_name = merchant.sca_name,
@@ -150,6 +173,10 @@ def update(merch_id):
         zip = merchant.zip,
         frontage_width = merchant.frontage_width,
         frontage_depth = merchant.frontage_depth,
+        ropes_front = merchant.ropes_front,
+        ropes_back = merchant.ropes_back,
+        ropes_left = merchant.ropes_left,
+        ropes_right = merchant.ropes_right,
         space_fee = merchant.space_fee,
         additional_space_information = merchant.additional_space_information,
         processing_fee = merchant.processing_fee,
@@ -189,6 +216,10 @@ def update(merch_id):
             merchant.zip = form.zip.data
             merchant.frontage_width = int(form.frontage_width.data) if form.frontage_width.data else 0
             merchant.frontage_depth = int(form.frontage_depth.data) if form.frontage_depth.data else 0
+            merchant.ropes_front = int(form.ropes_front.data) if form.ropes_front.data else 0
+            merchant.ropes_back = int(form.ropes_back.data) if form.ropes_back.data else 0
+            merchant.ropes_left = int(form.ropes_left.data) if form.ropes_left.data else 0
+            merchant.ropes_right = int(form.ropes_right.data) if form.ropes_right.data else 0
             merchant.additional_space_information = form.additional_space_information.data
             merchant.electricity_request = form.electricity_request.data
             merchant.food_merchant_agreement = form.food_merchant_agreement.data
@@ -202,7 +233,7 @@ def update(merch_id):
             merchant.trailer_license_plate = form.trailer_license_plate.data
             merchant.trailer_state = form.trailer_state.data
             merchant.notes = form.notes.data
-            merchant.space_fee = int(form.frontage_width.data) * int(form.frontage_depth.data) * .10 if form.frontage_width.data and form.frontage_depth.data else 0
+            merchant.space_fee = (int(form.frontage_width.data) + int(form.ropes_left.data) + int(form.ropes_right.data)) * (int(form.frontage_depth.data) + int(form.ropes_front.data) + int(form.ropes_back.data)) * event.merchant_squarefoot_fee if form.frontage_width.data and form.frontage_depth.data else 0
             merchant.processing_fee = int(form.processing_fee.data)
             merchant.merchant_fee = merchant.processing_fee + merchant.space_fee
             db.session.commit()
@@ -212,7 +243,7 @@ def update(merch_id):
             return render_template('merchant_list.html', merchants=Merchant.query.all())
         print(form.errors)
         flash('There was an error with your submission. Please check the form and try again.', 'error')
-    return render_template('edit_merchant.html', form=form, merchant=merchant)
+    return render_template('edit_merchant.html', form=form, merchant=merchant, event=event)
 
 
 @bp.route('/registration', methods=('GET', 'POST'))
@@ -222,7 +253,7 @@ def createprereg():
     #     return render_template("prereg_closed.html")
 
     form = MerchantForm()
-    print("Form Created")
+    event = EventVariables.query.first()
     
     if form.validate_on_submit() and request.method == 'POST':
         print("Form Validated")
@@ -242,9 +273,13 @@ def createprereg():
             zip = form.zip.data,
             frontage_width = form.frontage_width.data,
             frontage_depth = form.frontage_depth.data,
-            space_fee = int(form.frontage_width.data)* int(form.frontage_depth.data) * .10,  # 10 cent per square foot
+            ropes_left = form.ropes_left.data,
+            ropes_right = form.ropes_right.data,
+            ropes_front = form.ropes_front.data,
+            ropes_back = form.ropes_back.data,
+            space_fee = (int(form.frontage_width.data) + int(form.ropes_left.data) + int(form.ropes_right.data)) * (int(form.frontage_depth.data) + int(form.ropes_front.data) + int(form.ropes_back.data)) * event.merchant_squarefoot_fee,  # 10 cent per square foot
             additional_space_information = form.additional_space_information.data,
-            processing_fee = 20 if datetime.today() < datetime(2025, 11, 19) else 45,
+            processing_fee = event.merchant_processing_fee if datetime.today().date() < event.merchant_application_deadline else event.merchant_late_processing_fee,
             electricity_request = form.electricity_request.data,
             food_merchant_agreement = form.food_merchant_agreement.data,
             estimated_date_of_arrival = form.estimated_date_of_arrival.data,
@@ -266,13 +301,11 @@ def createprereg():
         db.session.commit()
 
         send_merchant_confirmation_email(merchant.email,merchant)
-        flash('Merchant Application {} created for {}.'.format(
-        merchant.id, merchant.business_name))
 
         return redirect(url_for('merchant.success', merchantid=merchant.id))
     elif request.method == 'POST' and not form.validate_on_submit():
         print(form.errors)
-    return render_template('create_merchant.html', form=form)
+    return render_template('create_merchant.html', form=form, event=event)
 
 @bp.route('/success')
 def success():

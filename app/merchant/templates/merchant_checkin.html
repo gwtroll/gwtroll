@@ -164,7 +164,7 @@
 
 <button type="button" class="btn btn-lg btn-warning form-control" data-bs-toggle="modal"
     data-bs-target="#electricityfeeModal">
-    Update Electricity Fee
+    Update Fees
 </button>
 
 <br/>
@@ -181,16 +181,75 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="electricityfeeModalLabel">Electricity Fee</h5>
+                <h5 class="modal-title" id="electricityfeeModalLabel">Update Fees</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="/merchant/{{merchant.id}}/electricityfee" method="POST">
-                    <b>{{electricity_fee_form.electricity_request.label}}</b>
-                    {{electricity_fee_form.electricity_request(class_='form-control')}}
-                    <b>{{electricity_fee_form.electricity_fee.label}}</b>
-                    {{electricity_fee_form.electricity_fee(class_='form-control')}}
-                    {{electricity_fee_form.submit(class_='form-control btn btn-primary')}}
+                <form action="/merchant/{{merchant.id}}/updatefees" method="POST">
+                    {{ update_fees_form.hidden_tag() }}
+                    <div class="row form-group">
+                        <div class="col form-group">
+                            <p>
+                                <b>{{update_fees_form.frontage_width.label}}</b>
+                                {{update_fees_form.frontage_width(class_='form-control m-0', oninput_='calculateFees()')}}
+                            </p>
+                        </div>
+                        <div class="col form-group">
+                            <p>
+                                <b>{{update_fees_form.frontage_depth.label}}</b>
+                                {{update_fees_form.frontage_depth(class_='form-control m-0', oninput_='calculateFees()')}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col form-group">
+                            <p>
+                                <b>{{update_fees_form.ropes_front.label}}</b>
+                                {{update_fees_form.ropes_front(class_='form-control m-0', oninput_='calculateFees()')}}
+                            </p>
+                        </div>
+                        <div class="col form-group">
+                            <p>
+                                <b>{{update_fees_form.ropes_back.label}}</b>
+                                {{update_fees_form.ropes_back(class_='form-control m-0', oninput_='calculateFees()')}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col form-group">
+                            <p>
+                                <b>{{update_fees_form.ropes_left.label}}</b>
+                                {{update_fees_form.ropes_left(class_='form-control m-0', oninput_='calculateFees()')}}
+                            </p>
+                        </div>
+                        <div class="col form-group">
+                            <p>
+                                <b>{{update_fees_form.ropes_right.label}}</b>
+                                {{update_fees_form.ropes_right(class_='form-control m-0', oninput_='calculateFees()')}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col form-group">
+                            <p>
+                                <b>{{update_fees_form.space_fee.label}}</b>
+                                {{update_fees_form.space_fee(class_='form-control m-0', readonly=true, id='space_fee_modal')}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col form-group">
+                            <p>
+                                <b>{{update_fees_form.processing_fee.label}}</b>
+                                {{update_fees_form.processing_fee(class_='form-control m-0')}}
+                            </p>
+                        </div>
+                    </div>
+                    <b>{{update_fees_form.electricity_request.label}}</b>
+                    {{update_fees_form.electricity_request(class_='form-control')}}
+                    <b>{{update_fees_form.electricity_fee.label}}</b>
+                    {{update_fees_form.electricity_fee(class_='form-control')}}
+                    {{update_fees_form.submit(class_='form-control btn btn-primary')}}
                 </form>
             </div>
             <div class="modal-footer">
@@ -242,5 +301,19 @@
 {% endblock %}
 
 {% block script %}
+<script>
+    function calculateFees() {
+        space_fee = document.getElementById('space_fee_modal')
+        processing_fee = document.getElementById('processing_fee')
+        frontage_width = document.getElementById('frontage_width')
+        frontage_depth = document.getElementById('frontage_depth')
+        ropes_left = document.getElementById('ropes_left')
+        ropes_right = document.getElementById('ropes_right')
+        ropes_front = document.getElementById('ropes_front')
+        ropes_back = document.getElementById('ropes_back')
+
+        space_fee.value = (((parseInt(frontage_width.value) + parseInt(ropes_left.value) + parseInt(ropes_right.value)) * (parseInt(frontage_depth.value) + parseInt(ropes_front.value) + parseInt(ropes_back.value))) * new Number("{{event.merchant_squarefoot_fee}}")).toFixed(2);
+    }
+</script>
 
 {% endblock %}
