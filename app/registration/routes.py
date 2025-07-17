@@ -39,11 +39,7 @@ def create_prereg(data):
         royal_title = data.royal_title.data if data.royal_title.data != '' else None
     )
 
-    if data.expected_arrival_date.data == 'Early_On':
-        reg.early_on = True
-        reg.expected_arrival_date = datetime.strptime('03-08-2025', '%m-%d-%Y')
-    else:
-        reg.expected_arrival_date = datetime.strptime(data.expected_arrival_date.data, '%m-%d-%Y')
+    reg.expected_arrival_date = datetime.strptime(data.expected_arrival_date.data, '%Y-%m-%d')
 
     if data.age.data == '18+':
         registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
@@ -97,11 +93,7 @@ def DicttoReg(dict):
         expected_arrival_date = dict['expected_arrival_date']
     )
 
-    if dict['expected_arrival_date'] == 'Early_On':
-        reg.early_on = True
-        reg.expected_arrival_date = datetime.strptime('03-08-2025', '%Y-%m-%d')
-    else:
-        reg.expected_arrival_date = datetime.strptime(dict['expected_arrival_date'], '%Y-%m-%d')
+    reg.expected_arrival_date = datetime.strptime(dict['expected_arrival_date'], '%Y-%m-%d')
 
     if dict['age'] == '18+':
         registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
@@ -128,6 +120,7 @@ def createprereg():
     form = CreatePreRegForm()
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
+    form.expected_arrival_date.choices = get_reg_arrival_dates()
     print("Form Created")
 
     merchantid = request.args.get('merchantid')

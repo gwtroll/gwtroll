@@ -368,7 +368,7 @@ def get_reg_arrival_dates():
     event_end = event.end_date
     event_dates = pd.date_range(start=event_start, end=event_end).tolist()
     for date in event_dates:
-        date_tup = (date.strftime('%m-%d-%Y'), date.strftime('%A - %B %d, %Y'))
+        date_tup = (date.strftime('%Y-%m-%d'), date.strftime('%A - %B %d, %Y'))
         returned_dates.append(date_tup)
     return returned_dates
 
@@ -379,7 +379,7 @@ def get_merch_arrival_dates():
     event_end = event.end_date + timedelta(days=-8)
     event_dates = pd.date_range(start=event_start, end=event_end).tolist()
     for date in event_dates:
-        date_tup = (date.strftime('%m-%d-%Y'), date.strftime('%A - %B %d, %Y'))
+        date_tup = (date.strftime('%Y-%m-%d'), date.strftime('%A - %B %d, %Y'))
         returned_dates.append(date_tup)
         print(date_tup)
     return returned_dates
