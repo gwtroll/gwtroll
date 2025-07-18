@@ -15,7 +15,10 @@ from markupsafe import Markup
 @login_required
 @roles_accepted('Admin','Department Head', 'Autocrat')
 def earlyon():
-    earlyons = EarlyOnRequest.query.all()
+    if current_user.department_id is None:
+        earlyons = EarlyOnRequest.query.all()
+    else:
+        earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
     print(earlyons)
     return render_template('earlyon_list.html', earlyons=earlyons)
 

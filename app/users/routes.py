@@ -104,7 +104,7 @@ def edituser(userid):
             role_array.append(get_role(roleid))
         user = get_user(form.id.data)
         user.username = form.username.data
-        user.department_id = form.department.data if form.department.data != 0 else None
+        user.department_id = form.department.data if form.department.data != 'None' else None,
         user.roles = role_array
         user.fname = form.fname.data
         user.lname = form.lname.data

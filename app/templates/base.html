@@ -80,6 +80,18 @@
             </li>
             {% endif %}
 
+            {% if current_user.has_role('Department Head') or current_user.has_role('Admin') or current_user.has_role('Autocrat') %} 
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="earlyonButtonMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Earlyon
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('earlyon.earlyon') }}">Manage Applications</a></li>
+              </ul>
+            </li>
+            {% endif %}
+
+
             {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head') %} 
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="adminMenuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
