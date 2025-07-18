@@ -149,8 +149,7 @@
     <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
 </div>
     </form>
-{% else %}
-
+{% elif inv.invoice_type=='MERCHANT' %}
 <form action="" method="post">
     {{ form.hidden_tag() }}
     <div class="row">
@@ -287,8 +286,143 @@
         </div>
     <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
 </div>
-    </form>
-
+</form>
+{% elif inv.invoice_type=='EARLYON' %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>EarlyOnID</th>
+                    <th>Name</th>
+                    <th>SCA Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Rider Fee</th>
+                </thead>
+                <tbody>
+                    {% if regs %}
+                    {% for reg in regs %}
+                    <tr> 
+                        <td>{{ reg.id }}</td>
+                        <td>{{ reg.registration.fname }} {{ reg.registration.lname }}</td>
+                        <td>{{ reg.registration.scaname }}</td>
+                        <td>{{ reg.registration.phone }}</td>
+                        <td>{{ reg.registration.invoice_email }}</td>
+                        <td>{{ reg.registration.rider_cost }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.notes.label }}<br>
+                {{ form.notes(class_='form-control') }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center">
+            <p>
+                {{ form.invoice_status.label }}<br>
+                {{ form.invoice_status(class_='form-control') }}
+            </p>  
+        </div>
+    </div>
+    <h4>Invoice Information</h4>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.invoice_email.label }}<br>
+                {{ form.invoice_email(class_='form-control', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.invoice_date.label }}<br>
+                {{ form.invoice_date(class_='form-control') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.invoice_number.label }}<br>
+                {{ form.invoice_number(class_='form-control') }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.invoice_amount.label }}<br>
+                {{ form.invoice_amount(class_='form-control', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <h4>Payment Information</h4>
+    <h5>Applied Payments</h5>
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>PayID</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Registration</th>
+                </thead>
+                <tbody>
+                    {% if inv %}
+                    {% for pay in inv.payments %}
+                    <tr> 
+                        <td>{{ pay.id }}</td>
+                        <td>{{ pay.type }}</td>
+                        <td>{{ pay.payment_date }}</td>
+                        <td>{{ pay.amount }}</td>
+                        <td>{{ pay.earlyonrequest.registration.fname }} {{ pay.earlyonrequest.registration.lname }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.payment_date.label }}<br>
+                {{ form.payment_date(class_='form-control') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.payment_amount.label }}<br>
+                {{ form.payment_amount(class_='form-control') }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.payment_type.label }}<br>
+                {{ form.payment_type(class_='form-control') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.check_num.label }}<br>
+                {{ form.check_num(class_='form-control') }}
+            </p>
+        </div>
+    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+</div>
+</form>
 {% endif %}
 
    

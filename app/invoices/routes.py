@@ -18,6 +18,7 @@ from flask_login import login_required
 def unsent():
     all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
+    all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0)).all()
 
     # preregtotal = prereg_total()
     # invoicecount = unsent_count()
@@ -34,7 +35,13 @@ def unsent():
             merchant_invoices[merchant.email] = {'invoice_type':'MERCHANT','invoice_email':merchant.email,'invoice_number':merchant.invoice_number, 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
         merchant_invoices[merchant.email]['registrations'].append(merchant.id)
 
-    return render_template('unsent_list.html', reg_invoices=reg_invoices, merchant_invoices=merchant_invoices)
+    earlyon_invoices = {}
+    for earlyon in all_earlyons:
+        if earlyon.registration.invoice_email not in earlyon_invoices:
+            earlyon_invoices[earlyon.registration.invoice_email] = {'invoice_type':'EARLYON','invoice_email':earlyon.registration.invoice_email,'invoice_number':earlyon.invoice_number, 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
+        earlyon_invoices[earlyon.registration.invoice_email]['registrations'].append(earlyon.id)
+
+    return render_template('unsent_list.html', reg_invoices=reg_invoices, merchant_invoices=merchant_invoices, earlyon_invoices=earlyon_invoices)
 
 @bp.route('/open', methods=('GET', 'POST'))
 @login_required
@@ -103,6 +110,8 @@ def update():
         regs = inv.regs
     elif inv.invoice_type == 'MERCHANT':
         regs = inv.merchants
+    elif inv.invoice_type == 'EARLYON':
+        regs = inv.earlyonrequests
     pays = inv.payments
 
     form = UpdateInvoiceForm()
@@ -190,6 +199,14 @@ def createinvoice():
         form.merchant_fee.data = space_fee + processing_fee
         form.invoice_date.data = datetime.now()
         form.invoice_email.data = merchant.email
+    elif type == 'EARLYON':
+        regs = get_earlyon(regids)
+        rider_fee = 0
+        for earlyon in regs:
+            rider_fee += earlyon.rider_cost
+        form.rider_fee.data = rider_fee
+        form.invoice_date.data = datetime.now()
+        form.invoice_email.data = earlyon.registration.invoice_email
     
     if request.method == 'POST':
         invoice_number = request.form.get('invoice_number')
@@ -235,6 +252,21 @@ def createinvoice():
             for reg in regs:      
                 reg.invoice_number = invoice_number
 
+        elif invoice_number is not None and type == 'EARLYON':
+            # Create a new invoice for the merchant
+            inv = Invoice(
+                invoice_type = 'EARLYON',
+                invoice_number = invoice_number,
+                invoice_email = invoice_email,
+                invoice_date = invoice_date,
+                invoice_status = 'OPEN',
+                rider_fee = rider_fee,
+                balance = rider_fee,
+                notes = notes,
+            )
+            for reg in regs:      
+                reg.invoice_number = invoice_number
+
             db.session.add(inv)
             db.session.commit()
 
@@ -252,6 +284,8 @@ def createpayment():
         regs = inv.regs
     elif inv.invoice_type == 'MERCHANT':
         regs = inv.merchants
+    elif inv.invoice_type == 'EARLYON':
+        regs = inv.earlyonrequests
 
     form = PayInvoiceForm()
     form.invoice_amount.data = inv.balance
@@ -264,6 +298,7 @@ def createpayment():
     form.invoice_email.data = inv.invoice_email
     form.processing_fee.data = inv.processing_fee
     form.space_fee.data = inv.space_fee
+    form.rider_fee.data = inv.rider_fee
     
     if request.method == 'POST':
         # payment_date = DateField('Payment Date')
@@ -390,6 +425,45 @@ def createpayment():
                             payment_balance -= reg.processing_fee
                             pay.processing_fee_amount = reg.processing_fee
                             reg.processing_fee_balance = 0
+
+                    db.session.add(pay)
+                    reg.notes = notes
+
+            inv.balance = float(inv.balance) - float(payment_amount)
+            if inv.balance <= 0:
+                inv.invoice_status = 'PAID'
+            inv.notes = notes
+
+            db.session.commit()
+
+        elif payment_amount is not None and inv.invoice_type == 'EARLYON':
+            # Create a new payment for the merchant
+            payment_balance = payment_amount
+            for reg in regs:
+                regid = reg.id
+                reg_balance = reg.rider_balance
+                if payment_balance > 0:
+                    pay = Payment(
+                        type = payment_type,
+                        check_num = check_num if check_num != '' else None,
+                        payment_date = payment_date,
+                        earlyonrequest_id = regid,
+                        invoice_number  = invoice_number,
+                        # event_id = reg.event_id
+                    )
+                    if reg_balance <= payment_balance:
+                        payment_balance = float(payment_balance) - float(reg_balance)
+                        pay.rider_fee_amount = float(reg.rider_cost)
+                        pay.amount = float(reg_balance)
+                        reg.rider_balance = 0
+                    else:
+                        # reg.balance = reg.balance - payment_balance
+                        pay.amount = payment_balance
+
+                        if payment_balance <= reg.rider_cost:
+                            pay.rider_fee_amount = payment_balance
+                            reg.rider_balance -= payment_balance
+                            payment_balance = 0
 
                     db.session.add(pay)
                     reg.notes = notes

@@ -100,6 +100,43 @@ class Department(db.Model):
 
     def __repr__(self):
         return '<Department {}>'.format(self.name)
+    
+class EarlyOnRequest(db.Model):
+    __tablename__ = 'earlyonrequest'
+    id = db.Column(db.Integer(), primary_key=True)
+    arrival_date = db.Column(db.Date(), nullable=False)
+    reg_id = db.Column(db.Integer(), db.ForeignKey('registrations.id'))
+    registration = db.relationship("Registrations", backref="earlyonrequest")
+    department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'))
+    department = db.relationship("Department", backref="earlyonrequest")
+    request_date = db.Column(db.DateTime(), default=lambda: datetime.now().replace(microsecond=0))
+    earlyonriders = db.relationship('EarlyOnRider', secondary='earlyonrequest_riders')
+    dept_approval_status = db.Column(db.String(), default='PENDING')
+    autocrat_approval_status = db.Column(db.String(), default='PENDING')
+    rider_cost = db.Column(db.Integer(), default=0)
+    rider_balance = db.Column(db.Integer(), default=0)
+    invoice_number = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
+    invoice = db.relationship("Invoice", back_populates="earlyonrequests")
+    payments = db.relationship("Payment", back_populates="earlyonrequest")
+    notes = db.Column(db.Text())
+
+class EarlyOnRider(db.Model):
+    __tablename__ = 'earlyonrider'
+    id = db.Column(db.Integer(), primary_key=True)
+    fname = db.Column(db.String(), nullable=False)
+    lname = db.Column(db.String(), nullable=False)
+    scaname = db.Column(db.String(), nullable=False)
+    minor = db.Column(db.Boolean(), default=False)
+    regid = db.Column(db.Integer(), db.ForeignKey('registrations.id', ondelete='CASCADE'))
+    reg = db.relationship("Registrations", backref="earlyonriders")
+
+class EarlyOnRequestRiders(db.Model): 
+    __tablename__ = 'earlyonrequest_riders'
+    id = db.Column(db.Integer(), primary_key=True)
+    earlyonrequest_id = db.Column(db.Integer(), db.ForeignKey('earlyonrequest.id', ondelete='CASCADE'))
+    earlyonrider_id = db.Column(db.Integer(), db.ForeignKey('earlyonrider.id', ondelete='CASCADE'))
+    earlyonrequest = db.relationship("EarlyOnRequest", backref="earlyonrequest_riders")
+    earlyonrider = db.relationship("EarlyOnRider", backref="earlyonrequest_riders")
 
 class Registrations(db.Model):
     id = db.Column(db.Integer(), primary_key=True, unique=True)
@@ -196,11 +233,13 @@ class Invoice(db.Model):
     donation_total = db.Column(db.Integer(), default=0)
     space_fee = db.Column(db.Numeric(10,2), default=0)
     processing_fee = db.Column(db.Integer(), default=0)
-    invoice_total = db.Column(db.Numeric(10,2), Computed(registration_total+nmr_total+donation_total+space_fee+processing_fee))
+    rider_fee = db.Column(db.Integer(), default=0)
+    invoice_total = db.Column(db.Numeric(10,2), Computed(registration_total+nmr_total+donation_total+space_fee+processing_fee+rider_fee))
     balance = db.Column(db.Numeric(10,2))
     notes = db.Column(db.Text())
     regs = db.relationship("Registrations", back_populates="invoice")
     merchants = db.relationship("Merchant", back_populates="invoice")
+    earlyonrequests = db.relationship("EarlyOnRequest", back_populates="invoice")
     payments = db.relationship("Payment", back_populates="invoice")
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='invoice')
@@ -217,6 +256,7 @@ class Payment(db.Model):
     paypal_donation_amount = db.Column(db.Integer(), default=0)
     space_fee_amount = db.Column(db.Numeric(10,2), default=0)
     processing_fee_amount = db.Column(db.Integer(), default=0)
+    rider_fee_amount = db.Column(db.Integer(), default=0)
     electricity_fee_amount = db.Column(db.Numeric(10,2), default=0)
     amount = db.Column(db.Numeric(10,2), nullable=False)
     invoice_number  = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
@@ -225,6 +265,8 @@ class Payment(db.Model):
     reg = db.relationship("Registrations", back_populates="payments")
     merchant_id = db.Column(db.Integer(), db.ForeignKey('merchant.id'))
     merchant = db.relationship("Merchant", back_populates="payments")
+    earlyonrequest_id = db.Column(db.Integer(), db.ForeignKey('earlyonrequest.id'))
+    earlyonrequest = db.relationship("EarlyOnRequest", back_populates="payments")
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='payment')
     

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField
+from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField
 from wtforms.fields import DateField, DateTimeLocalField, DateTimeField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
 import pandas as pd
@@ -219,6 +219,31 @@ class EditForm(FlaskForm):
     #mbr_exp
     submit = SubmitField('Submit')
 
+class RiderForm(Form):
+    fname = StringField('First Name', validators=[DataRequired()])
+    lname = StringField('Last Name', validators=[DataRequired()])
+    scaname = StringField('SCA Name', validators=[DataRequired()])
+    minor = BooleanField('Minor', default=False, validators=[Optional()])
+    regid = IntegerField('Registration Id', validators=[DataRequired()])
+    submit = SubmitField('Add Rider')
+
+class EarlyOnForm(FlaskForm):
+    
+    arrival_date = SelectField('Estimated Date of Arrival', validators=[DataRequired()])
+    department = SelectField('Department', validators=[DataRequired()], choices=[])
+    notes = TextAreaField('Notes')
+    riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
+    submit = SubmitField('Submit Early On Request')
+
+class EarlyOnApprovalForm(FlaskForm):
+    arrival_date = SelectField('Estimated Date of Arrival', validators=[DataRequired()])
+    department = SelectField('Department', validators=[DataRequired()], choices=[])
+    notes = TextAreaField('Notes')
+    riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
+    dept_approval_status = SelectField('Department Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
+    autocrat_approval_status = SelectField('Autocrat Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
+    submit = SubmitField('Submit Early On Request')
+
 class UpdateInvoiceForm(FlaskForm):
     invoice_amount = IntegerField('Invoice Amount')
     registration_amount = IntegerField('Registration Amount')
@@ -228,6 +253,7 @@ class UpdateInvoiceForm(FlaskForm):
     processing_fee = IntegerField('Processing Fee')
     space_fee = FloatField('Space Fee')
     merchant_fee = FloatField('Merchant Fee')
+    rider_fee = IntegerField('Rider Fee')
     paypal_donation = IntegerField('PayPal Donation')
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
     payment_date = DateField('Payment Date')
@@ -242,6 +268,7 @@ class SendInvoiceForm(FlaskForm):
     space_fee = FloatField('Space Fee')
     processing_fee = IntegerField('Processing Fee')
     merchant_fee = FloatField('Merchant Fee')
+    rider_fee = IntegerField('Rider Fee')
     registration_amount = IntegerField('Registration Amount')
     invoice_number = IntegerField('Invoice Number', validators=[])
     invoice_email = StringField('Invoice Email')
@@ -255,6 +282,7 @@ class PayInvoiceForm(FlaskForm):
     registration_amount = IntegerField('Registration Amount')
     processing_fee = IntegerField('Processing Fee')
     merchant_fee = FloatField('Merchant Fee')
+    rider_fee = IntegerField('Rider Fee')
     space_fee = FloatField('Space Fee')
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])

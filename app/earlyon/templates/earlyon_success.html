@@ -1,0 +1,13 @@
+{% extends 'base_restricted.html' %}
+
+{% block content %}
+
+<h1>Thank you for Applying to Merchant for Gulf Wars 2026!</h1>
+<h2>You will receive an email confirming your application.</h2>
+<h3>You will receive an email if you are approved or denied.</h3>
+<br>
+<h3>If you would like to register for Gulf Wars please click the link below.</h3>
+<h4><a href="{{url_for('registration.createprereg', merchantid=merchantid)}}">Register for Gulf Wars</a></h4>
+<br>
+<h4>If you are done with registration you can now safely close the window.</h4>
+{% endblock %}

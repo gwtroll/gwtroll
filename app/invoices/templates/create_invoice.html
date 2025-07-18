@@ -95,7 +95,7 @@
     <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
 </div>
     </form>
-{% else %}
+{% elif type=="MERCHANT" %}
 <form action="" method="post">
     {{ form.hidden_tag() }}
     <div class="row">
@@ -181,6 +181,82 @@
             <p>
                 {{ form.merchant_fee.label }}<br>
                 {{ form.merchant_fee(class_='form-control', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+</div>
+    </form>
+{% elif type=='EARLYON' %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>EarlyOnID</th>
+                    <th>Name</th>
+                    <th>SCA Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Rider Fee</th>
+                    <!-- <th>Mark Duplicate</th> -->
+                </thead>
+                <tbody>
+                    {% if regs %}
+                    {% for reg in regs %}
+                    <tr> 
+                        <td>{{ reg.id }}</td>
+                        <td>{{ reg.registration.fname }} {{ reg.lname }}</td>
+                        <td>{{ reg.registration.scaname }}</td>
+                        <td>{{ reg.registration.phone }}</td>
+                        <td>{{ reg.registration.invoice_email }}</td>
+                        <td>{{ reg.rider_cost }}</td>
+                        <!-- <td><a href="{{url_for('registration.duplicate', regid=reg.id)}}"><button class="btn btn-danger" type="button">Mark Duplicate</button></a></td> -->
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.notes.label }}<br>
+                {{ form.notes(class_='form-control') }}
+            </p>
+        </div>
+    </div>
+    <br>
+    <h4>Invoice Information</h4>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.invoice_email.label }}<br>
+                {{ form.invoice_email(class_='form-control', readonly=true) }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.invoice_date.label }}<br>
+                {{ form.invoice_date(class_='form-control') }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.invoice_number.label }}<br>
+                {{ form.invoice_number(class_='form-control') }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                {{ form.rider_fee.label }}<br>
+                {{ form.rider_fee(class_='form-control', readonly=true) }}
             </p>
         </div>
     </div>

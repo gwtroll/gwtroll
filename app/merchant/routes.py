@@ -247,7 +247,7 @@ def update(merch_id):
 
 
 @bp.route('/registration', methods=('GET', 'POST'))
-def createprereg():
+def createmerchant():
     # Close Merchants at Midnight MM/DD/YYYY
     # if datetime.now().date() >= datetime.strptime('02/22/2025','%m/%d/%Y').date():
     #     return render_template("prereg_closed.html")

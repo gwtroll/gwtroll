@@ -50,7 +50,7 @@ def createuser():
             return render_template('createuser.html', form=form)
         user = User()
         user.username = form.username.data
-        user.department_id = form.department.data if form.department.data != 0 else None
+        user.department_id = form.department.data if form.department.data != 'None' else None
         for roleid in form.role.data:
             user.roles.append(get_role(roleid))
         user.fname = form.fname.data

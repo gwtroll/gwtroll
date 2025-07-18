@@ -32,6 +32,7 @@ from app.users import bp as users_bp
 from app.invoices import bp as invoices_bp
 from app.marshal import bp as marshal_bp
 from app.registration import bp as registration_bp
+from app.earlyon import bp as earlyon_bp
 from app.troll import bp as troll_bp
 from app.roles import bp as roles_bp
 # from app.events import bp as events_bp
@@ -45,6 +46,7 @@ app.register_blueprint(users_bp)
 app.register_blueprint(invoices_bp)
 app.register_blueprint(marshal_bp)
 app.register_blueprint(registration_bp)
+app.register_blueprint(earlyon_bp)
 app.register_blueprint(troll_bp)
 app.register_blueprint(roles_bp)
 # app.register_blueprint(events_bp)

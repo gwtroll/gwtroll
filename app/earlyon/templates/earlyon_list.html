@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col">
+    <table id="earlyonTable"data-toggle="table"
+    data-filter-control="true"
+    data-sortable="true"
+    data-pagination="true"
+    data-show-columns="true"
+    data-show-columns-toggle-all="true"
+    data-toolbar="#toolbar"
+    data-show-toggle="true"
+    data-show-fullscreen="true"
+    data-show-export="true"
+    data-export-types="['csv', 'excel', 'pdf']"
+    data-minimum-count-columns="2"
+    data-show-pagination-switch="true"
+    data-page-list="[10, 25, 50, 100, all]"
+    data-response-handler="responseHandler"
+    data-detail-view="true"
+    data-detail-view-icon="false"
+    data-mobile-responsive="true"
+    data-check-on-init="true"
+    data-classes="table table-striped table-responsive">
+      <thead>
+          <tr>
+              <th data-field="registrations" data-filter-control="input">Primary Registration</th>
+              <th data-field="riders" data-filter-control="input">Riders #</th>
+              <th data-field="department" data-filter-control="select">Department</th>
+              <th data-field="lname" data-filter-control="select">Department Approval</th>
+              <th data-field="status" data-filter-control="select">Autocrat Approval</th>
+              <th data-field="update">Update</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% if earlyons %}
+          {%for earlyon in earlyons %}
+          <tr>
+                  <td> 
+                      {{earlyon['registration']['fname']}} {{earlyon['registration']['lname']}}
+                  </td>
+                  <td> 
+                    {%for rider in earlyon['earlyonriders']%}
+                      {{rider['reg']['fname']}} {{rider['reg']['lname']}} - {% if rider['minor'] %}Minor{% else %}Adult{% endif %}
+                    {%endfor%}
+                </td>
+                  <td> 
+                      {{earlyon['department']['name']}}
+                  </td>
+                  <td> 
+                      {{earlyon['dept_approval_status']}}
+                  </td>
+                  <td> 
+                      {{earlyon['autocrat_approval_status']}}
+                  </td>
+                  <td>
+                    <a class="btn btn-primary" href="{{url_for('earlyon.update', earlyon_id=earlyon.id)}}" role="button">Update</a>
+                  </td>
+          </tr>
+          {% endfor %}
+          {% endif %}
+      </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

@@ -99,6 +99,32 @@
           </tr>
           {% endfor %}
           {% endif %}
+          {% if earlyon_invoices %}
+          {%for invoice in earlyon_invoices %}
+          <tr>
+                  <td> 
+                      {{earlyon_invoices[invoice]['invoice_type']}}
+                  <td> 
+                      {{earlyon_invoices[invoice]['invoice_number']}}
+                  </td>
+                  {% if earlyon_invoices[invoice]['invoice_date'] %}
+                  <td> 
+                      {{earlyon_invoices[invoice]['invoice_date'].strftime('%m-%d-%Y')}}
+                  </td>
+                  {% else %}
+                  <td> 
+                    None
+                  </td>
+                  {% endif %}
+                  <td> 
+                      {{earlyon_invoices[invoice]['invoice_email']}}
+                  </td>
+                  <td>
+                    <a class="btn btn-primary" href="{{url_for('invoices.createinvoice', regids=[earlyon_invoices[invoice]['registrations']], type=earlyon_invoices[invoice]['invoice_type'])}}" role="button">Create Invoice</a>
+                  </td>
+          </tr>
+          {% endfor %}
+          {% endif %}
       </tbody>
   </table>
   </div>
