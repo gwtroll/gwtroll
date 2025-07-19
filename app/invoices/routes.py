@@ -3,7 +3,7 @@ from app.invoices import bp
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
-
+from app.utils.security_utils import *
 from flask_security import roles_accepted
 
 from sqlalchemy import and_, or_
@@ -14,7 +14,7 @@ from flask_login import login_required
 
 @bp.route('/unsent', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices','Department Head')
+@permission_required('invoice_view')
 def unsent():
     all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
@@ -45,7 +45,7 @@ def unsent():
 
 @bp.route('/open', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices','Department Head')
+@permission_required('invoice_view')
 def open():
 
     all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'OPEN')).all()
@@ -57,7 +57,7 @@ def open():
 
 @bp.route('/paid', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices','Department Head')
+@permission_required('invoice_view')
 def paid():
 
     all_inv = Invoice.query.filter(Invoice.invoice_status == 'PAID').all()
@@ -69,7 +69,7 @@ def paid():
 
 @bp.route('/canceled', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices','Department Head')
+@permission_required('invoice_view')
 def canceled():
 
     all_inv = Invoice.query.filter(Invoice.invoice_status == 'CANCELED').all()
@@ -85,7 +85,7 @@ def canceled():
 
 @bp.route('/all', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices','Department Head')
+@permission_required('invoice_view')
 def all():
 
     all_inv = Invoice.query.all()
@@ -102,7 +102,7 @@ def all():
 
 @bp.route('/update', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices','Department Head')
+@permission_required('invoice_edit')
 def update():
     invnumber = request.args.get('invnumber')
     inv = get_inv(invnumber)
@@ -164,7 +164,7 @@ def update():
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices','Department Head')
+@permission_required('invoice_edit')
 def createinvoice():
     regids = request.args.get('regids')
     type = request.args.get('type')
@@ -276,7 +276,7 @@ def createinvoice():
 
 @bp.route('/payment', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Invoices','Department Head')
+@permission_required('invoice_edit')
 def createpayment():
     invnumber = request.args.get('invnumber')
     inv = get_inv(invnumber)

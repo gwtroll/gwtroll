@@ -165,6 +165,22 @@ def get_role_choices():
 
     return role_choices
 
+def get_permission(permissionid):
+    permission = Permissions.query.filter_by(id=permissionid).first()
+    if permission is None:
+        abort(404)
+    return permission
+
+def get_permission_choices():
+    permissions = Permissions.query.all()
+    permission_choices = []
+    permission_dict = {}
+    for p in permissions:
+        permission_dict[p.name] = p
+        permission_choices.append([p.id, p.name])
+    
+    return permission_choices
+
 def get_lodging_choices():
 
     lodgings = Lodging.query.filter().all()

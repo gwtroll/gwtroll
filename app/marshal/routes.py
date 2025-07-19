@@ -3,13 +3,14 @@ import os
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
+from app.utils.security_utils import *
 from flask_security import roles_accepted
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from flask_login import current_user, login_required
 import requests
 
 @bp.route('/', methods=['GET', 'POST'])
-@roles_accepted('Admin','Marshal Admin','Marshal User')
+@permission_required('marshal_view')
 def index():
     # inspection_stats = get_inspection_stats()
     inspection_stats = None
@@ -42,7 +43,7 @@ def index():
         return render_template('marshal_home.html', inspection_stats=inspection_stats)
     
 @bp.route('/<int:regid>/addbow', methods=('GET', 'POST'))
-@roles_accepted('Admin','Marshal Admin','Marshal User')
+@permission_required('marshal_edit')
 def add_bow(regid):
     reg = get_reg(regid)
     form = BowForm()
@@ -64,7 +65,7 @@ def add_bow(regid):
     return render_template('add_bow.html', reg=reg, form=form)
 
 @bp.route('/<int:regid>/addcrossbow', methods=('GET', 'POST'))
-@roles_accepted('Admin','Marshal Admin','Marshal User')
+@permission_required('marshal_edit')
 def add_crossbow(regid):
     reg = get_reg(regid)
     form = BowForm()
@@ -91,7 +92,7 @@ def add_crossbow(regid):
     return render_template('add_crossbow.html', reg=reg, form=form)
 
 @bp.route('/<int:regid>/addincident', methods=('GET', 'POST'))
-@roles_accepted('Admin','Marshal Admin','Marshal User')
+@permission_required('marshal_edit')
 def incident(regid):
     reg = get_reg(regid)
     form = IncidentForm()
@@ -114,7 +115,7 @@ def incident(regid):
     return render_template('add_crossbow.html', reg=reg, form=form)
 
 @bp.route('/<int:regid>', methods=('GET', 'POST'))
-@roles_accepted('Admin','Marshal Admin','Marshal User')
+@permission_required('marshal_edit')
 def reg(regid):
     reg = get_reg(regid)
     form = MarshalForm()
@@ -215,7 +216,7 @@ def reg(regid):
 
 @bp.route('/reports', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Marshal Admin')
+@permission_required('marshal_reports')
 def reports():
     form = ReportForm()
     form.report_type.choices = [('full_inspection_report','full_inspection_report'),('full_incident_report','full_incident_report')]

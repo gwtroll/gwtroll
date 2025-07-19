@@ -1,6 +1,6 @@
 from flask import render_template
 from app.department import bp
-
+from app.utils.security_utils import *
 from flask_login import login_required
 from flask import render_template, request, redirect, url_for
 from app.forms import *
@@ -11,7 +11,7 @@ from flask_security import roles_accepted
 
 @bp.route('/', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def department():
     all_department = Department.query.order_by(Department.name).all()
     print(all_department)
@@ -19,7 +19,7 @@ def department():
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def createdepartment():
     form = DepartmentForm()
     if request.method == 'POST':
@@ -34,7 +34,7 @@ def createdepartment():
 
 @bp.route('/<departmentid>', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def editdepartment(departmentid):
     department = Department.query.get(departmentid)
     form = DepartmentForm(
@@ -50,7 +50,7 @@ def editdepartment(departmentid):
 
 @bp.route('/<departmentid>/delete', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def deletedepartment(departmentid):
     department = Department.query.get(departmentid)
 

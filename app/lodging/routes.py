@@ -6,12 +6,12 @@ from flask import render_template, request, redirect, url_for
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
-
+from app.utils.security_utils import *
 from flask_security import roles_accepted
 
 @bp.route('/', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def lodging():
 
     all_lodging = Lodging.query.order_by(Lodging.name).all()
@@ -19,7 +19,7 @@ def lodging():
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def createlodging():
     form = LodgingForm()
     # form.event.choices = get_event_choices()
@@ -35,7 +35,7 @@ def createlodging():
 
 @bp.route('/upload', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def uploadlodging():
     form = StandardUploadForm()
     # form.event.choices = get_event_choices()
@@ -59,7 +59,7 @@ def uploadlodging():
 
 @bp.route('/<lodgingid>', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def editlodging(lodgingid):
     lodging = Lodging.query.get(lodgingid)
     form = LodgingForm(
@@ -77,7 +77,7 @@ def editlodging(lodgingid):
 
 @bp.route('/<lodgingid>/delete', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def deletelodging(lodgingid):
     lodging = Lodging.query.get(lodgingid)
 

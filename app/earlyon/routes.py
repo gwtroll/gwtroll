@@ -1,6 +1,6 @@
 from flask import render_template
 from app.earlyon import bp
-
+from app.utils.security_utils import *
 from flask_login import current_user, login_required
 from flask import render_template, request, url_for, flash, redirect
 from app.forms import *
@@ -13,7 +13,7 @@ from markupsafe import Markup
 
 @bp.route('/', methods=('GET',))
 @login_required
-@roles_accepted('Admin','Department Head', 'Autocrat')
+@permission_required('earlyon_view')
 def earlyon():
     if current_user.department_id is None:
         earlyons = EarlyOnRequest.query.all()
@@ -24,7 +24,7 @@ def earlyon():
 
 @bp.route('/<int:earlyon_id>', methods=('GET','POST'))
 @login_required
-@roles_accepted('Admin','Department Head', 'Autocrat')
+@permission_required('earlyon_edit')
 def update(earlyon_id):
     earlyon = EarlyOnRequest.query.get_or_404(earlyon_id)
     form = EarlyOnApprovalForm(

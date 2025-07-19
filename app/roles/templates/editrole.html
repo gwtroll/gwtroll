@@ -3,7 +3,7 @@
 {% block content %}
 
     <form action="" method="post">
-        <h2>Create Role</h2>
+        <h2>Edit Role</h2>
         <div class="row form-group">
             <div class="col form-group">
                 <p>
@@ -29,11 +29,9 @@
         <div class="row form-group">
             <div class="col form-group">
                 <p>
-                    {{ form.submit.label }}
-                    {{ form.submit(class_='form-control m-0') }}
+                    {{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}
                 </p>
             </div>
         </div>
     </form>
-
 {% endblock %}

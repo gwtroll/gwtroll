@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Roles</h2>
+    {% if roles %}
+    <table id="rolesTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>Role Id</th>
+                <th>Role Name</th>
+                <th>Permissions</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for role in roles %}
+            <tr>
+                <td>
+                    {{role.id}}
+                </td>
+                <td>
+                    {{role.name}}
+                </td>
+                <td>
+                    {%for permission in role.permissions%}
+                    {{permission.name}}
+                    {% endfor %}
+                </td>
+                <td>
+                    <a href="{{ url_for('roles.editrole', roleid=role.id) }}" class="btn btn-primary">Edit</a>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    
+
+
+{% endblock %}

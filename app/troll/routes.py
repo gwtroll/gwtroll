@@ -5,7 +5,7 @@ from flask import render_template, request, url_for, flash, redirect, jsonify
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
-
+from app.utils.security_utils import *
 from flask_security import roles_accepted
 import json
 from markupsafe import Markup
@@ -17,7 +17,7 @@ from pyzbar import pyzbar
 
 @bp.route('/<int:regid>', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Troll Shift Lead','Troll User','Cashier','Department Head')
+@permission_required('registration_edit')
 def reg(regid):
     reg = get_reg(regid)
     atd_payments = []
@@ -38,12 +38,14 @@ def reg(regid):
         return render_template('reg.html', reg=reg, atd_payments=atd_payments)
     
 @bp.route('/fastpass')
+@login_required
+@permission_required('registration_edit')
 def fastpass():
         return render_template('fastpass.html')
 
 @bp.route('/checkin', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
+@permission_required('registration_edit')
 def checkin():
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -147,7 +149,7 @@ def checkin():
 
 @bp.route('/waiver', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', "Troll Shift Lead", "Troll User",'Department Head')
+@permission_required('registration_edit')
 def waiver():
     form = WaiverForm()
     regid = request.args['regid']
@@ -172,7 +174,7 @@ def waiver():
 
 @bp.route('/payment', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', "Troll User", "Troll Shift Lead",'Department Head')
+@permission_required('registration_edit')
 def payment():
     form = PayRegistrationForm()
     regid = request.args['regid']

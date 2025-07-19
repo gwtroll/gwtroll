@@ -77,6 +77,7 @@ class Role(db.Model, RoleMixin):
     __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
+    permissions = db.relationship('Permissions', secondary='role_permissions')
     def __repr__(self):
         return '<Role {}>'.format(self.name)
     
@@ -86,6 +87,17 @@ class UserRoles(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
+
+class Permissions(db.Model):
+    __tablename__ = 'permissions'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+
+class RolePermissions(db.Model):
+    __tablename__ = 'role_permissions'
+    id = db.Column(db.Integer(), primary_key=True)
+    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
+    permission_id = db.Column(db.Integer(), db.ForeignKey('permissions.id', ondelete='CASCADE'))
 
 @login.user_loader
 def load_user(id):

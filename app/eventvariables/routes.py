@@ -6,12 +6,12 @@ from flask import render_template, request, redirect, url_for, flash
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
-
+from app.utils.security_utils import *
 from flask_security import roles_accepted
 
 @bp.route('/', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def eventvariables():
 
     eventvariables = EventVariables.query.first()

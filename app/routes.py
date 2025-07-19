@@ -2,6 +2,7 @@ from app import app, db, login, mail
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
+from app.utils.security_utils import *
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, url_for, flash, redirect, send_file
@@ -47,6 +48,7 @@ def logout():
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
+@permission_required('registration_view')
 def index():
     regcount = reg_count()
     if request.method == "POST":
@@ -95,14 +97,14 @@ def index():
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Department Head','Invoices')
+@permission_required('registration_reports')
 def full_export():
     regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
     return render_template('full_export_images.html', regs=regs)
 
 @app.route('/reports', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin','Department Head','Invoices')
+@permission_required('registration_reports')
 def reports():
     form = ReportForm()
     s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']

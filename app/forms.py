@@ -74,6 +74,7 @@ class CreateUserForm(FlaskForm):
 class CreateRoleForm(FlaskForm):
     id = IntegerField('Id', validators=[DataRequired()])
     role_name = StringField('Role Name', validators=[DataRequired()])
+    permissions = SelectMultipleField('Permissions', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 # class CreateEventForm(FlaskForm):

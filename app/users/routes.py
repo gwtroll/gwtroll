@@ -3,6 +3,7 @@ from app.users import bp
 
 from flask_login import current_user, login_required
 from flask_security import roles_accepted
+from app.utils.security_utils import permission_required
 from flask import render_template, request, flash, redirect
 from app.forms import *
 from app.models import *
@@ -12,7 +13,7 @@ from app.utils.db_utils import *
 
 @bp.route('/', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
+@permission_required('view_users')
 def users():
     return_users = []
 
@@ -35,7 +36,7 @@ def users():
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
+@permission_required('edit_users')
 def createuser():
 
     form = CreateUserForm()
@@ -71,7 +72,7 @@ def createuser():
 
 @bp.route('/<userid>/edit', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
+@permission_required('edit_users')
 def edituser(userid):
     user = get_user(userid)
     if not currentuser_has_permission_on_user(current_user,user):
@@ -121,7 +122,7 @@ def edituser(userid):
 
 @bp.route('/<userid>/pwreset', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Marshal Admin','Troll Shift Lead','Department Head')
+@permission_required('edit_users')
 def pwresetuser(userid):
     user = get_user(userid)
     if not currentuser_has_permission_on_user(current_user,user):

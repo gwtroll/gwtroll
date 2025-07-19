@@ -6,12 +6,13 @@ from flask import render_template, request, redirect, url_for
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
+from app.utils.security_utils import *
 
 from flask_security import roles_accepted
 
 @bp.route('/', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def kingdom():
     all_kingdom = Kingdom.query.order_by(Kingdom.name).all()
     print(all_kingdom)
@@ -19,7 +20,7 @@ def kingdom():
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def createkingdom():
     form = KingdomForm()
     if request.method == 'POST':
@@ -33,7 +34,7 @@ def createkingdom():
 
 @bp.route('/upload', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def uploadkingdom():
     form = StandardUploadForm()
     if request.method == 'POST':
@@ -55,7 +56,7 @@ def uploadkingdom():
 
 @bp.route('/<kingdomid>', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def editkingdom(kingdomid):
     kingdom = Kingdom.query.get(kingdomid)
     form = KingdomForm(
@@ -70,7 +71,7 @@ def editkingdom(kingdomid):
 
 @bp.route('/<kingdomid>/delete', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin')
+@permission_required('admin')
 def deletekingdom(kingdomid):
     kingdom = Kingdom.query.get(kingdomid)
 

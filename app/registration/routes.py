@@ -7,7 +7,7 @@ from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
 from app.utils.email_utils import *
-
+from app.utils.security_utils import *
 from flask_security import roles_accepted
 from markupsafe import Markup
 
@@ -198,6 +198,8 @@ def success():
     return render_template('reg_success.html')
 
 @bp.route('/markduplicate', methods=('GET', 'POST'))
+@login_required
+@permission_required('registration_edit')
 def duplicate():
     regid = request.args.get('regid')
     regids = []
@@ -218,7 +220,7 @@ def duplicate():
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
-@roles_accepted('Admin','Troll Shift Lead','Troll User','Department Head')
+@permission_required('registration_edit')
 def createatd():
     form = CreateRegForm()
     form.lodging.choices = get_lodging_choices()
@@ -290,7 +292,7 @@ def createatd():
 
 @bp.route('/edit', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Admin', 'Troll Shift Lead','Department Head')
+@permission_required('registration_edit')
 def editreg():
     regid = request.args['regid']
     reg = get_reg(regid)
