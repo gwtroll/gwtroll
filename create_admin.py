@@ -26,6 +26,10 @@ conn.commit()
 cur.execute('INSERT INTO public.user_roles (id, user_id, role_id) VALUES (1, 1, 1);')
 
 conn.commit()
+
+cur.execute('INSERT INTO public.role_permissions (id, role_id, permission_id) VALUES (1, 1, 1);')
+
+conn.commit()
 conn.close()
 
 # print("Roles Created")
