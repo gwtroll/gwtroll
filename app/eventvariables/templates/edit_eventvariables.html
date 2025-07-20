@@ -41,6 +41,34 @@
         <div class="row form-group">
             <div class="col form-group">
                 <p>
+                    {{ form.autocrat1.label }}
+                    {{ form.autocrat1(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.autocrat2.label }}
+                    {{ form.autocrat2(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.autocrat3.label }}
+                    {{ form.autocrat3(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+
+        <div class="col form-group">
+            <p>
+                {{ form.reservationist.label }}
+                {{ form.reservationist(class_='form-control m-0') }}
+            </p>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
                     {{ form.start_date.label }}
                     {{ form.start_date(class_='form-control m-0') }}
                 </p>
@@ -80,6 +108,13 @@
                 <p>
                     {{ form.preregistration_close_date.label }}
                     {{ form.preregistration_close_date(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    <a role=button class="btn btn-lg btn-warning" href="{{url_for('eventvariables.pricesheet')}}">Price Sheet</a>
                 </p>
             </div>
         </div>

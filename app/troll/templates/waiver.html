@@ -145,15 +145,23 @@
 
     <div class="col-12">
         <form action="" method="post" novalidate id="WaiverForm">
-        {% if reg.paypal_donation == True%}
+        {% if reg.balance <= 0 %}
         <div class="row form-group" hidden>
         {% else %}
         <div class="row form-group">
         {% endif %}
                 <div class="col form-group">
                     <p class="text-center">
-                        {{ form.paypal_donation.label(class_='form-check-label') }}
-                        {{ form.paypal_donation(class_='form-check-input big-checkbox') }}
+                        Please check here if you would like to <b>DONATE</b> to cover your Paypal processing fees.
+                        {{ form.paypal_donation(class_='form-check-input big-checkbox', onchange_='donation_check()') }}
+                    </p>
+                </div>
+            </div>
+            <div id='paypal_donation_display' class="row form-group" style="display:none">
+                <div class="col form-group" >
+                    <p class="text-center">
+                        {{ form.paypal_donation_amount.label }}<br>
+                        {{ form.paypal_donation_amount(class_='form-control m-0') }}
                     </p>
                 </div>
             </div>
@@ -217,6 +225,20 @@ Output:
     //var i = signaturePad.toDataURL("image/svg+xml"); // save image as SVG data url
 
   
+
+  </script>
+
+  <script>
+    function donation_check(){
+        const paypal_donation_display = document.getElementById("paypal_donation_display");
+        const paypal_donation = document.getElementById("paypal_donation");
+        if (paypal_donation.checked == true){
+            paypal_donation_display.style.display = 'block';
+        } else {
+            paypal_donation_display.style.display = 'none';
+        }
+    }
+
 
   </script>
 

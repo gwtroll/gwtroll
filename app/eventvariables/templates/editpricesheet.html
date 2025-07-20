@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form action="" method="post">
+        <h2>Edit Pricesheet</h2>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.arrival_date.label }}
+                    {{ form.arrival_date(class_='form-control m-0', disabled=true) }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.prereg_price.label }}
+                    {{ form.prereg_price(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.atd_price.label }}
+                    {{ form.atd_price(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit.label }}
+                    {{ form.submit(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+    </form>
+
+    
+{% endblock %}

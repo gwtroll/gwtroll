@@ -51,6 +51,11 @@ def logout():
 @permission_required('registration_view')
 def index():
     regcount = reg_count()
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==datetime.today().date()).first()
+    if pricesheet == None:
+        pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
+    print(pricesheet.prereg_price)
+    print(pricesheet.atd_price)
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
@@ -83,17 +88,11 @@ def index():
                 "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
                 (search_value,))
         else:
-            return render_template('index.html', regcount=regcount)
+            return render_template('index.html', regcount=regcount, pricesheet=pricesheet)
 
-            # if (arrival_date == datetime.strptime('03/08/2025','%m/%d/%Y') or arrival_date <= datetime.now()):
-            #     r['expected_arrival_date'] = arrival_date
-            #     r['ready_for_checkin'] = True
-            # else:
-            #     r['expected_arrival_date'] = arrival_date
-            #     r['ready_for_checkin'] = False
-        return render_template('index.html', searchreg=reg, regcount=regcount)
+        return render_template('index.html', searchreg=reg, regcount=regcount, pricesheet=pricesheet)
     else:
-        return render_template('index.html', regcount=regcount)
+        return render_template('index.html', regcount=regcount, pricesheet=pricesheet)
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required

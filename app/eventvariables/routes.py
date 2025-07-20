@@ -26,11 +26,15 @@ def eventvariables():
             end_date=eventvariables.end_date,
             location=eventvariables.location,
             description=eventvariables.description,
+            preregistration_open_date=eventvariables.preregistration_open_date,
+            preregistration_close_date=eventvariables.preregistration_close_date,
+            autocrat1=eventvariables.autocrat1,
+            autocrat2=eventvariables.autocrat2,
+            autocrat3=eventvariables.autocrat3,
+            reservationist=eventvariables.reservationist,
             merchant_application_deadline=eventvariables.merchant_application_deadline,
             merchantcrat_email=eventvariables.merchantcrat_email,
             marchantcrat_phone=eventvariables.marchantcrat_phone,
-            preregistration_open_date=eventvariables.preregistration_open_date,
-            preregistration_close_date=eventvariables.preregistration_close_date,
             merchant_preregistration_open_date=eventvariables.merchant_preregistration_open_date,
             merchant_preregistration_close_date=eventvariables.merchant_preregistration_close_date,
             merchant_processing_fee=eventvariables.merchant_processing_fee,
@@ -49,11 +53,15 @@ def eventvariables():
                 end_date=form.end_date.data,
                 location=form.location.data,
                 description=form.description.data,
+                preregistration_open_date=form.preregistration_open_date.data,
+                preregistration_close_date=form.preregistration_close_date.data,
+                autocrat1=form.autocrat1.data,
+                autocrat2=form.autocrat2.data,
+                autocrat3=form.autocrat3.data,
+                reservationist=form.reservationist.data,
                 merchant_application_deadline=form.merchant_application_deadline.data,
                 merchantcrat_email=form.merchantcrat_email.data,
                 marchantcrat_phone=form.marchantcrat_phone.data,
-                preregistration_open_date=form.preregistration_open_date.data,
-                preregistration_close_date=form.preregistration_close_date.data,
                 merchant_preregistration_open_date=form.merchant_preregistration_open_date.data,
                 merchant_preregistration_close_date=form.merchant_preregistration_close_date.data,
                 merchant_processing_fee=form.merchant_processing_fee.data,
@@ -71,11 +79,15 @@ def eventvariables():
             eventvariables.end_date = form.end_date.data
             eventvariables.location = form.location.data
             eventvariables.description = form.description.data
+            eventvariables.preregistration_open_date = form.preregistration_open_date.data
+            eventvariables.preregistration_close_date = form.preregistration_close_date.data
+            eventvariables.autocrat1 = form.autocrat1.data
+            eventvariables.autocrat2 = form.autocrat2.data
+            eventvariables.autocrat3 = form.autocrat3.data
+            eventvariables.reservationist = form.reservationist.data
             eventvariables.merchant_application_deadline = form.merchant_application_deadline.data
             eventvariables.merchantcrat_email = form.merchantcrat_email.data
             eventvariables.marchantcrat_phone = form.marchantcrat_phone.data
-            eventvariables.preregistration_open_date = form.preregistration_open_date.data
-            eventvariables.preregistration_close_date = form.preregistration_close_date.data
             eventvariables.merchant_preregistration_open_date = form.merchant_preregistration_open_date.data
             eventvariables.merchant_preregistration_close_date = form.merchant_preregistration_close_date.data
             eventvariables.merchant_processing_fee = form.merchant_processing_fee.data
@@ -91,3 +103,26 @@ def eventvariables():
     print(form.errors)
 
     return render_template('edit_eventvariables.html', form=form)
+
+@bp.route('/pricesheet', methods=('GET', 'POST'))
+@login_required
+@permission_required('admin')
+def pricesheet():
+    pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).all()
+    return render_template('viewpricesheet.html', pricesheet=pricesheet)
+
+
+@bp.route('/pricesheet/<date>', methods=('GET', 'POST'))
+@login_required
+@permission_required('admin')
+def editpricesheet(date):
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
+    form = PriceSheetForm(
+        arrival_date = pricesheet.arrival_date,
+        prereg_price = pricesheet.prereg_price,
+        atd_price = pricesheet.atd_price
+    )
+    form.arrival_date.choices = get_reg_arrival_dates()
+    return render_template('editpricesheet.html', form=form, pricesheet=pricesheet)
+
+

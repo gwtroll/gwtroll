@@ -75,38 +75,6 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.city.label }}<br>
-                {{ form.city(class_='form-control m-0') }}
-            </p>
-            {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-        </div>
-        <div class="col">
-            <p>
-                {{ form.state_province.label }}<br>
-                {{ form.state_province(class_='form-control m-0') }}
-            </p>
-            {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.zip.label }}<br>
-                {{ form.zip(class_='form-control m-0') }}
-            </p>
-            {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-        </div>
-        <div class="col">
-            <p>
-                {{ form.country.label }}<br>
-                {{ form.country(class_='form-control m-0') }}
-            </p>
-            {% if form.country.errors %}{% for error in form.country.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
                 {{ form.phone.label }} <span style="color: red;">*</span><br>
                 {{ form.phone(class_='form-control m-0') }}
             </p>

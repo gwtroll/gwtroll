@@ -119,7 +119,7 @@ class CreateRegForm(FlaskForm):
     city = StringField('City')
     state_province = StringField('State/Province')
     zip = IntegerField('Zip', validators=[Optional()])
-    country = StringField('Country')
+    country = StringField('Country', default='United States')
     phone = StringField('Phone', validators=[DataRequired()])
     email = StringField('Email')
     invoice_email = StringField('Invoice Email')
@@ -137,7 +137,7 @@ class CreatePreRegForm(FlaskForm):
     city = StringField('City', validators=[DataRequired()])
     state_province = StringField('State/Province', validators=[DataRequired()])
     zip = IntegerField('Zip', validators=[DataRequired()])
-    country = StringField('Country', validators=[DataRequired()])
+    country = StringField('Country', validators=[DataRequired()], default='United States')
     phone = StringField('Phone', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(),Email()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired(),Email()])
@@ -150,7 +150,8 @@ class CreatePreRegForm(FlaskForm):
     mbr_num = IntegerField('Membership #', validators=[RequiredIfMembership('mbr')])
     mbr_num_exp = DateField('Exp Date', validators=[RequiredIfMembership('mbr')])
     expected_arrival_date = SelectField('Arrival Date', validators=[DataRequired()])
-    paypal_donation = BooleanField('Please check here if you would like to donate $3 to cover your Paypal processing fees.', validators=[])
+    paypal_donation = BooleanField('Please check here if you would like to <b>DONATE</b> to cover your Paypal processing fees.', validators=[])
+    paypal_donation_amount = IntegerField("PayPal Donation Amount")
     royal_departure_date = DateField('Departure Date', validators=[Optional()])
     royal_title = StringField('Royal Title', validators=[Optional()])
 
@@ -311,8 +312,8 @@ class SearchInvoiceForm(FlaskForm):
 
 class WaiverForm(FlaskForm):
     
-    paypal_donation = BooleanField('Please check here if you would like to donate $3 to cover payment processing fees.',
-                                   render_kw={'id':'test'})
+    paypal_donation = BooleanField('Please check here if you would like to DONATE to cover your Paypal processing fees.', validators=[])
+    paypal_donation_amount = IntegerField("PayPal Donation Amount", default=0)
 
     signature = HiddenField(
         'signature',
@@ -486,11 +487,15 @@ class EventVariablesForm(FlaskForm):
     end_date = DateField('End Date', format='%Y-%m-%d', validators=[DataRequired()])
     location = StringField('Event Location', validators=[DataRequired()])
     description = TextAreaField('Event Description', validators=[DataRequired()])
+    preregistration_open_date = DateField('Preregistration Open Date', format='%Y-%m-%d', validators=[DataRequired()])
+    preregistration_close_date = DateField('Preregistration Close Date', format='%Y-%m-%d', validators=[DataRequired()])
+    autocrat1 = StringField('Autocrat 1', validators=[])
+    autocrat2 = StringField('Autocrat 2', validators=[])
+    autocrat3 = StringField('Autocrat 3', validators=[])
+    reservationist = StringField('Reservationist', validators=[])
     merchant_application_deadline = DateField('Merchant Application Deadline', format='%Y-%m-%d', validators=[DataRequired()])
     merchantcrat_email = StringField('Merchantcrat Email', validators=[DataRequired(), Email()])
     marchantcrat_phone = StringField('Merchantcrat Phone', validators=[DataRequired()])
-    preregistration_open_date = DateField('Preregistration Open Date', format='%Y-%m-%d', validators=[DataRequired()])
-    preregistration_close_date = DateField('Preregistration Close Date', format='%Y-%m-%d', validators=[DataRequired()])
     merchant_preregistration_open_date = DateField('Merchant Preregistration Open Date', format='%Y-%m-%d', validators=[DataRequired()])
     merchant_preregistration_close_date = DateField('Merchant Preregistration Close Date', format='%Y-%m-%d', validators=[DataRequired()])
     merchant_processing_fee = IntegerField('Merchant Processing Fee', validators=[DataRequired()])
@@ -499,6 +504,12 @@ class EventVariablesForm(FlaskForm):
     merchant_bounced_check_fee = FloatField('Merchant Bounced Check Fee', validators=[DataRequired()])
 
     submit = SubmitField('Update Event Variables')
+
+class PriceSheetForm(FlaskForm):
+    arrival_date = SelectField('Arrival Date', validators=[DataRequired()])
+    prereg_price = IntegerField('Pre-Reg Price', validators=[DataRequired()])
+    atd_price = IntegerField('ATD Price', validators=[DataRequired()])
+    submit = SubmitField('Submit Price Change')
 
 class DepartmentForm(FlaskForm):
     name = StringField('Department Name', validators=[DataRequired()])

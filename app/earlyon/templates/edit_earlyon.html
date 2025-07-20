@@ -106,7 +106,7 @@
     {% endfor %}
     {% endif %}
 
-    {% if current_user.has_role('Admin') or current_user.department_id != None %}
+    {% if current_user.has_role('Admin') or current_user.has_role('Department Head') %}
     <div class="row form-group">
         <div class="col form-group">
             <p>
@@ -115,7 +115,8 @@
             </p>
         </div>
     </div>
-    {% elif current_user.has_role('Admin') or current_user.has_role('Autocrat') %}
+    {% endif %}
+    {% if current_user.has_role('Admin') or current_user.has_role('Autocrat') %}
     <div class="row form-group">
         <div class="col form-group">
             <p>

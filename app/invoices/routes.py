@@ -3,6 +3,7 @@ from app.invoices import bp
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
+from app.utils.email_utils import *
 from app.utils.security_utils import *
 from flask_security import roles_accepted
 
@@ -16,9 +17,9 @@ from flask_login import login_required
 @login_required
 @permission_required('invoice_view')
 def unsent():
-    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
-    all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0)).all()
+    all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0, EarlyOnRequest.dept_approval_status == 'APPROVED', EarlyOnRequest.autocrat_approval_status == 'APPROVED')).all()
 
     # preregtotal = prereg_total()
     # invoicecount = unsent_count()
@@ -375,6 +376,8 @@ def createpayment():
             inv.balance = float(inv.balance) - float(payment_amount)
             if inv.balance <= 0:
                 inv.invoice_status = 'PAID'
+                for r in inv.regs:
+                    send_fastpass_email(r.email, r)
             inv.notes = notes
 
             db.session.commit()
@@ -471,7 +474,13 @@ def createpayment():
             inv.balance = float(inv.balance) - float(payment_amount)
             if inv.balance <= 0:
                 inv.invoice_status = 'PAID'
+                #TODO: CREATE EARLY ON EMAIL
             inv.notes = notes
+
+            if reg.rider_balance <= 0 and reg.dept_approval_status == 'APPROVED' and reg.autocrat_approval_status == 'APPROVED':
+                reg.registration.early_on_approved = True
+                for rider in reg.earlyonriders:
+                    rider.reg.early_on_approved = True
 
             db.session.commit()
 

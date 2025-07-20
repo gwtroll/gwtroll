@@ -53,11 +53,12 @@ def checkin():
     form = CheckinForm(
         kingdom = reg.kingdom_id, 
         mbr = 'Member' if reg.mbr else 'Non-Member', 
+        mbr_num = reg.mbr_num,
+        mbr_num_exp = reg.mbr_num_exp,
         medallion = reg.medallion, 
         age = reg.age, 
         lodging = reg.lodging_id, 
         notes=reg.notes, 
-        mbr_num=reg.mbr_num
     )
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
@@ -86,6 +87,8 @@ def checkin():
         medallion = form.medallion.data
         kingdom = form.kingdom.data
         mbr = form.mbr.data
+        mbr_num = form.mbr_num.data
+        mbr_num_exp = form.mbr_num_exp.data
         age = form.age.data
         lodging = form.lodging.data
         minor_waiver = form.minor_waiver.data
@@ -116,9 +119,10 @@ def checkin():
 
             reg.medallion = medallion
             reg.mbr = True if mbr == 'Member' else False
+            reg.mbr_num = mbr_num
+            reg.mbr_num_exp = mbr_num_exp
             reg.age = age
             reg.kingdom_id = kingdom
-            # UNCOMMENT ONCE DB UPDATED - MINOR WAIVER STATUS
             reg.minor_waiver = minor_waiver
             reg.lodging_id = lodging
             reg.checkin = datetime.today()
@@ -128,7 +132,10 @@ def checkin():
 
             #Calculate Price Due
             if reg.age == '18+':
-                registration_price, nmr_price = get_atd_pricesheet_day(reg.actual_arrival_date)
+                if reg.prereg == True:
+                    registration_price = get_prereg_pricesheet_day(reg.actual_arrival_date)
+                else:
+                    registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
                 if reg.registration_price < registration_price:
                     reg.registration_balance = registration_price - reg.registration_price
                     reg.registration_price = registration_price
@@ -154,11 +161,11 @@ def waiver():
     form = WaiverForm()
     regid = request.args['regid']
     reg = get_reg(regid)
-    form.paypal_donation.data = True if reg.paypal_donation > 0 else False
+    
     if request.method == 'POST':
-        if reg.paypal_donation != 3 and bool(request.form.get('paypal_donation')) == True:
-            reg.paypal_donation = 3
-            reg.paypal_donation_balance = 3
+        if bool(request.form.get('paypal_donation')) == True:
+            reg.paypal_donation = int(request.form.get('paypal_donation_amount'))
+            reg.paypal_donation_balance = int(request.form.get('paypal_donation_amount'))
 
         reg.signature = form.signature.data
 
@@ -196,6 +203,9 @@ def payment():
         pay = Payment(
             type = request.form.get('payment_type'),
             payment_date = datetime.now().date(),
+            registration_amount = reg.registration_balance,
+            nmr_amount = reg.nmr_balance,
+            paypal_donation_amount = reg.paypal_donation_balance,
             amount = reg.balance,
             reg_id = reg.id,
             # event_id = reg.event_id

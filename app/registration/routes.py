@@ -42,12 +42,12 @@ def create_prereg(data):
     reg.expected_arrival_date = datetime.strptime(data.expected_arrival_date.data, '%Y-%m-%d')
 
     if data.age.data == '18+':
-        registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
+        registration_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
         reg.registration_price = registration_price
         reg.registration_balance = registration_price
         if not reg.mbr:
-            reg.nmr_price = nmr_price
-            reg.nmr_balance = nmr_price
+            reg.nmr_price = 10
+            reg.nmr_balance = 10
         else:
             reg.nmr_price = 0
             reg.nmr_balance = 0
@@ -96,12 +96,12 @@ def DicttoReg(dict):
     reg.expected_arrival_date = datetime.strptime(dict['expected_arrival_date'], '%Y-%m-%d')
 
     if dict['age'] == '18+':
-        registration_price, nmr_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
+        registration_price = get_prereg_pricesheet_day(reg.expected_arrival_date)
         reg.registration_price = registration_price
         reg.registration_balance = registration_price
         if not reg.mbr:
-            reg.nmr_price = nmr_price
-            reg.nmr_balance = nmr_price
+            reg.nmr_price = 10
+            reg.nmr_balance = 10
         else:
             reg.nmr_price = 0
             reg.nmr_balance = 0
@@ -121,6 +121,9 @@ def createprereg():
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
     form.expected_arrival_date.choices = get_reg_arrival_dates()
+    event = EventVariables.query.first()
+    event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
     print("Form Created")
 
     merchantid = request.args.get('merchantid')
@@ -161,7 +164,7 @@ def createprereg():
             form.city.data = None
             form.state_province.data = None
             form.zip.data = None
-            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=reg_names, clear=True)
+            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=reg_names, clear=True, pricesheet=pricesheet, event=event)
             # return redirect(url_for('registration.createprereg', form=form, additional_registrations=additional_registrations, reg_names=reg_names))
         else:
             additional_registrations = []
@@ -191,7 +194,7 @@ def createprereg():
         print(request.form)
         form.fname.data = request.form.get('fname')
         form.lname.data = request.form.get('lname')
-    return render_template('create_prereg.html', form=form, clear=False)
+    return render_template('create_prereg.html', form=form, pricesheet=pricesheet, event=event, clear=False)
 
 @bp.route('/success')
 def success():
@@ -235,24 +238,19 @@ def createatd():
         mbr = True if form.mbr.data == 'Member' else False,
         mbr_num = form.mbr_num.data,
         mbr_num_exp = form.mbr_num_exp.data,
-        city = form.city.data,
-        state_province = form.state_province.data,
-        zip = form.zip.data,
-        country = form.country.data,
         phone = form.phone.data,
         email = form.email.data,
-        invoice_email = form.invoice_email.data,
         emergency_contact_name = form.emergency_contact_name.data, 
         emergency_contact_phone = form.emergency_contact_phone.data,)
 
         reg.expected_arrival_date = datetime.now().date()
         reg.actual_arrival_date = datetime.now().date()
-        registration_price, nmr_price = get_atd_pricesheet_day(reg.actual_arrival_date)
+        registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
         reg.registration_price = registration_price
         reg.registration_balance = registration_price
         if reg.mbr != True:
-            reg.nmr_price = nmr_price
-            reg.nmr_balance = nmr_price
+            reg.nmr_price = 10
+            reg.nmr_balance = 10
         else:
             reg.nmr_price = 0
             reg.nmr_balance = 0
@@ -287,7 +285,7 @@ def createatd():
         flash('Registration {} created for {} {}.'.format(
             reg.id, reg.fname, reg.lname))
 
-        return redirect(url_for('troll.reg', regid=reg.id))
+        return redirect(url_for('troll.waiver', regid=reg.id))
     return render_template('create.html', form=form)
 
 @bp.route('/edit', methods=['GET', 'POST'])
@@ -319,7 +317,7 @@ def editreg():
         total_due = reg.total_due,
         paypal_donation = reg.paypal_donation,
         prereg = reg.prereg,
-        early_on = reg.early_on,
+        early_on = reg.early_on_approved,
         mbr_num = reg.mbr_num,
         mbr_num_exp = reg.mbr_num_exp if reg.mbr_num_exp is not None else None,
         emergency_contact_name = reg.emergency_contact_name,

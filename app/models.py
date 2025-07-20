@@ -20,6 +20,10 @@ class EventVariables(db.Model):
     description = db.Column(db.Text(), nullable=False)
     preregistration_open_date = db.Column(db.Date(), default=False)
     preregistration_close_date = db.Column(db.Date(), nullable=False)
+    autocrat1 = db.Column(db.String(), nullable=True)
+    autocrat2 = db.Column(db.String(), nullable=True)
+    autocrat3 = db.Column(db.String(), nullable=True)
+    reservationist = db.Column(db.String(), nullable=True)
     merchant_application_deadline = db.Column(db.Date(), nullable=False)
     merchantcrat_email = db.Column(db.String(), nullable=False)
     marchantcrat_phone = db.Column(db.String(), nullable=False)
@@ -179,7 +183,7 @@ class Registrations(db.Model):
     prereg = db.Column(db.Boolean(), default=False)
     prereg_date_time = db.Column(db.DateTime())
     expected_arrival_date = db.Column(db.Date())
-    early_on = db.Column(db.Boolean())
+    early_on_approved = db.Column(db.Boolean(), default=False)
     notes = db.Column(db.Text)
     duplicate = db.Column(db.Boolean, default=False)
     
@@ -351,7 +355,6 @@ class PriceSheet(db.Model):
     arrival_date = db.Column(db.Date(), primary_key=True)
     prereg_price = db.Column(db.Integer())
     atd_price = db.Column(db.Integer())
-    nmr = db.Column(db.Integer())
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='pricesheet')
 

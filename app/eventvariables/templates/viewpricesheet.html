@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    Price Sheet
+
+    {% if pricesheet %}
+    <table id="pricesheetTable"
+    data-toggle="table"
+    data-filter-control="true"
+    data-sortable="true"
+    data-pagination="true"
+    data-show-columns="true"
+    data-show-columns-toggle-all="true"
+    data-toolbar="#toolbar"
+    data-show-toggle="true"
+    data-show-fullscreen="true"
+    data-show-export="true"
+    data-export-types="['csv', 'excel', 'pdf']"
+    data-minimum-count-columns="2"
+    data-show-pagination-switch="true"
+    data-page-list="[10, 25, 50, 100, all]"
+    data-response-handler="responseHandler"
+    data-detail-view="true"
+    data-detail-view-icon="false"
+    data-mobile-responsive="true"
+    data-check-on-init="true"
+    data-classes="table table-striped table-responsive">
+
+        <thead>
+            <th data-field="arrival_date" data-filter-control="select">Arrival Date</th>
+            <th date-field="day_of_week" date-filter-control="select">Day of Week</th>
+            <th data-field="prereg_price" data-filter-control="select">Pre-Reg Price</th>
+            <th data-field="atd_price" data-filter-control="select">ATD Price</th>
+            <th data-field="edit">Edit</th>
+        </thead>
+        <tbody>
+            {% for price in pricesheet %}
+            <tr>
+                <td>
+                    {{price.arrival_date}}
+                </td>
+                <td>
+                    {{price.arrival_date.strftime("%A")}}
+                </td>
+                <td>
+                    {{price.prereg_price}}
+                </td>
+                <td>
+                    {{price.atd_price}}
+                </td>
+                <td>
+                    <a class="btn btn-primary" href="{{url_for('eventvariables.editpricesheet', date=price.arrival_date)}}" role="button">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+{% endblock %}

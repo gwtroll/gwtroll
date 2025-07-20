@@ -42,12 +42,6 @@ def merchant_search():
         else:
             return render_template('merchant_search.html', merchant_count=merchant_count)
 
-            # if (arrival_date == datetime.strptime('03/08/2025','%m/%d/%Y') or arrival_date <= datetime.now()):
-            #     r['expected_arrival_date'] = arrival_date
-            #     r['ready_for_checkin'] = True
-            # else:
-            #     r['expected_arrival_date'] = arrival_date
-            #     r['ready_for_checkin'] = False
         return render_template('merchant_search.html', merchants=merchants, merchant_count=merchant_count)
     else:
         return render_template('merchant_search.html', merchant_count=merchant_count)

@@ -50,6 +50,11 @@ def update(earlyon_id):
             earlyon.notes = form.notes.data
             earlyon.dept_approval_status = form.dept_approval_status.data
             earlyon.autocrat_approval_status = form.autocrat_approval_status.data
+
+            if earlyon.dept_approval_status == 'APPROVED' and earlyon.autocrat_approval_status == 'APPROVED' and earlyon.rider_balance <= 0:
+                earlyon.registration.early_on_approved = True
+                for rider in earlyon.earlyonriders:
+                    rider.reg.early_on_approved = True
             db.session.commit()
             return render_template('earlyon_list.html', earlyons=EarlyOnRequest.query.all())
         print(form.errors)
@@ -103,7 +108,7 @@ def createearlyon(regid):
             rider_cost = 0
             free_riders = 1
             adult_riders = 0
-            if form.department.data == 'Merchant':
+            if form.department.data == 'Merchants':
                 free_riders = 2
 
             for idx, field in enumerate(form.riders):

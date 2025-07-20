@@ -256,13 +256,15 @@ def calculate_price_calc(reg):
 
 def get_prereg_pricesheet_day(date):
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
-    return pricesheet.prereg_price, pricesheet.nmr
+    if pricesheet == None:
+        pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
+    return pricesheet.prereg_price
 
 def get_atd_pricesheet_day(date):
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
     if pricesheet == None:
-        return 999, 999
-    return pricesheet.atf_price, pricesheet.nmr
+        pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
+    return pricesheet.atd_price
 
 def recalculate_reg_balance(reg):
     total_payments = 0
