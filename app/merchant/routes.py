@@ -26,19 +26,10 @@ def merchant_search():
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
-            print(search_value)
-            if search_value is not None and search_value != '':
-                    merchants = query_db(
-                    "SELECT * FROM merchant WHERE (fname ILIKE %s OR lname ILIKE %s OR sca_name ILIKE %s) Order by checkin_date DESC, business_name, lname, fname",
-                    #(search_value, search_value, search_value))
-                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
-
+            merchants = Merchant.query.filter(and_(or_(sa.cast(Merchant.fname,sa.Text).ilike('%' + search_value + '%'),sa.cast(Merchant.lname,sa.Text).ilike('%' + search_value + '%'),sa.cast(Merchant.sca_name,sa.Text).ilike('%' + search_value + '%')))).order_by(Merchant.checkin_date.desc(),Merchant.business_name,Merchant.lname,Merchant.fname)
         elif request.form.get('business_name'):
             search_value = request.form.get('business_name')
-            merchants = query_db(
-                "SELECT * FROM merchant WHERE (business_name ILIKE %s) Order by checkin_date DESC, business_name, lname, fname",
-                ('%' + search_value + '%',))
-
+            merchants = Merchant.query.filter(sa.cast(Merchant.business_name,sa.Text).ilike('%' + search_value + '%')).order_by(Merchant.checkin_date.desc(),Merchant.business_name,Merchant.lname,Merchant.fname)
         else:
             return render_template('merchant_search.html', merchant_count=merchant_count)
 

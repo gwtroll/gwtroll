@@ -316,11 +316,18 @@
 
         </div>
     </div>
-    <div class="row form-group">
+    <br/>
+    <div class="row form-group" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
         <div class="col">
+            <p class="text-center fs-3">
+                Please check here if you would like to <b><span style="color: red;">DONATE</span></b> to cover your Paypal processing fees.
+                {{ form.paypal_donation(class_='form-check-input big-checkbox', onchange_='donation_check()') }}
+            </p>
+        </div>
+        <div id='paypal_donation_display' class="col form-group" style="display:none">
             <p class="text-center">
-                {{ form.paypal_donation.label }}<br>
-                {{ form.paypal_donation(class_='form-check-input big-checkbox') }}
+                <b>{{ form.paypal_donation_amount.label }}</b><br>
+                {{ form.paypal_donation_amount(class_='form-control m-0') }}
             </p>
         </div>
     </div>
@@ -409,4 +416,18 @@
     }
     
 </script>
+
+<script>
+    function donation_check(){
+        const paypal_donation_display = document.getElementById("paypal_donation_display");
+        const paypal_donation = document.getElementById("paypal_donation");
+        if (paypal_donation.checked == true){
+            paypal_donation_display.style.display = 'block';
+        } else {
+            paypal_donation_display.style.display = 'none';
+        }
+    }
+
+
+  </script>
 {% endblock %}

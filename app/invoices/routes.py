@@ -265,8 +265,9 @@ def createinvoice():
                 balance = rider_fee,
                 notes = notes,
             )
-            for reg in regs:      
-                reg.invoice_number = invoice_number
+            for reg in regs:
+                if reg.duplicate == False:
+                    reg.invoice_number = invoice_number
 
             db.session.add(inv)
             db.session.commit()
@@ -377,7 +378,10 @@ def createpayment():
             if inv.balance <= 0:
                 inv.invoice_status = 'PAID'
                 for r in inv.regs:
-                    send_fastpass_email(r.email, r)
+                    if r.duplicate == True:
+                        r.invoice_number = None
+                    else:
+                        send_fastpass_email(r.email, r)
             inv.notes = notes
 
             db.session.commit()

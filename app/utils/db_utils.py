@@ -10,6 +10,18 @@ import ast
 import pandas as pd
 from datetime import datetime, timedelta
 
+lodging_cache_time = datetime.now()
+lodging_choices = None
+
+kingdom_cache_time = datetime.now()
+kingdom_choices = None
+
+pre_reg_price_cache_time = datetime.now()
+pre_reg_price = None
+
+atd_reg_price_cache_time = datetime.now()
+atd_reg_price = None
+
 def get_db_connection():
     conn = psycopg2.connect(os.environ
         
@@ -182,25 +194,32 @@ def get_permission_choices():
     return permission_choices
 
 def get_lodging_choices():
-
-    lodgings = Lodging.query.filter().all()
-    lodging_choices = [('-', '-')]
-    lodging_dict = {}
-    for l in lodgings:
-        lodging_dict[l.name] = l
-        lodging_choices.append([l.id, l.name])
-    
-    return lodging_choices
+    global lodging_cache_time
+    global lodging_choices
+    if lodging_choices != None and lodging_cache_time > datetime.now() + timedelta(hours=-1):
+        return lodging_choices
+    else:
+        lodgings = Lodging.query.filter().all()
+        local_lodging_choices = [('-', '-')]
+        for l in lodgings:
+            local_lodging_choices.append([l.id, l.name])
+        lodging_choices = local_lodging_choices
+        lodging_cache_time = datetime.now()
+        return lodging_choices
 
 def get_kingdom_choices():
-    kingdoms = Kingdom.query.all()
-    kingdom_choices = [('-', '-')]
-    kingdom_dict = {}
-    for l in kingdoms:
-        kingdom_dict[l.name] = l
-        kingdom_choices.append([l.id, l.name])
-    
-    return kingdom_choices
+    global kindgom_cache_time
+    global kingdom_choices
+    if kingdom_choices != None and kindgom_cache_time > datetime.now() + timedelta(hours=-1):
+        return kingdom_choices
+    else:
+        kingdoms = Kingdom.query.all()
+        local_kingdom_choices = [('-', '-')]
+        for l in kingdoms:
+            local_kingdom_choices.append([l.id, l.name])
+        kingdom_choices = local_kingdom_choices
+        kindgom_cache_time = datetime.now()
+        return kingdom_choices
 
 # def get_event_choices():
 #     events = Event.query.all()
@@ -229,42 +248,54 @@ def log_reg_action(reg, action):
     db.session.add(reglog)
     db.session.commit()
 
-def calculate_price_calc(reg):
-    today_datetime = datetime.today()
-    if today_datetime < datetime(2025,3,8).date():
-        today_date = datetime(2025,3,8).strftime('%Y-%m-%d')
-    elif today_datetime > datetime(2025,3,15).date():
-        today_date = datetime(2025,3,15).strftime('%Y-%m-%d')
-    else:
-        today_date = today_datetime.strftime('%Y-%m-%d')
+# def calculate_price_calc(reg):
+#     today_datetime = datetime.today()
+#     if today_datetime < datetime(2025,3,8).date():
+#         today_date = datetime(2025,3,8).strftime('%Y-%m-%d')
+#     elif today_datetime > datetime(2025,3,15).date():
+#         today_date = datetime(2025,3,15).strftime('%Y-%m-%d')
+#     else:
+#         today_date = today_datetime.strftime('%Y-%m-%d')
 
-    with open('rate_sheet.json') as f:
-        rate_sheet = json.load(f)
-        if reg.age.__contains__('18+'):
-            if reg.prereg == True and reg.mbr == 'Member':
-                price_calc = rate_sheet['Pre-Registered Member'][today_date]
-            elif reg.prereg != True and reg.mbr == 'Member':
-                price_calc = rate_sheet['At the Door Member'][today_date]
-            elif reg.prereg == True and reg.mbr != 'Member':
-                price_calc = rate_sheet['Pre-Registered Non-Member'][today_date]
-            elif reg.prereg != True and reg.mbr != 'Member':
-                price_calc = rate_sheet['At the Door Non-Member'][today_date]               
-        else:
-            price_calc = 0
+#     with open('rate_sheet.json') as f:
+#         rate_sheet = json.load(f)
+#         if reg.age.__contains__('18+'):
+#             if reg.prereg == True and reg.mbr == 'Member':
+#                 price_calc = rate_sheet['Pre-Registered Member'][today_date]
+#             elif reg.prereg != True and reg.mbr == 'Member':
+#                 price_calc = rate_sheet['At the Door Member'][today_date]
+#             elif reg.prereg == True and reg.mbr != 'Member':
+#                 price_calc = rate_sheet['Pre-Registered Non-Member'][today_date]
+#             elif reg.prereg != True and reg.mbr != 'Member':
+#                 price_calc = rate_sheet['At the Door Non-Member'][today_date]               
+#         else:
+#             price_calc = 0
 
-    return price_calc
+#     return price_calc
 
 def get_prereg_pricesheet_day(date):
-    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
-    if pricesheet == None:
-        pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
-    return pricesheet.prereg_price
+    global pre_reg_price_cache_time
+    global pre_reg_price
+    if pre_reg_price != None and pre_reg_price_cache_time > datetime.now() + timedelta(hours=-1):
+        return pre_reg_price
+    else:
+        pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
+        if pricesheet == None:
+            pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
+        pre_reg_price = pricesheet.prereg_price
+        return pre_reg_price
 
 def get_atd_pricesheet_day(date):
-    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
-    if pricesheet == None:
-        pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
-    return pricesheet.atd_price
+    global atd_reg_price_cache_time
+    global atd_reg_price
+    if atd_reg_price != None and atd_reg_price_cache_time > datetime.now() + timedelta(hours=-1):
+        return atd_reg_price
+    else:
+        pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
+        if pricesheet == None:
+            pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
+        atd_reg_price = pricesheet.atd_price
+    return atd_reg_price
 
 def recalculate_reg_balance(reg):
     total_payments = 0

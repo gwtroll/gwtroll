@@ -33,8 +33,8 @@ def create_prereg(data):
         mbr_num = data.mbr_num.data,
         prereg = True,
         prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
-        paypal_donation = 3 if data.paypal_donation.data == True else 0,
-        paypal_donation_balance = 3 if data.paypal_donation.data == True else 0,
+        paypal_donation = int(data.paypal_donation_amount.data) if data.paypal_donation.data == True else 0,
+        paypal_donation_balance = int(data.paypal_donation_amount.data) if data.paypal_donation.data == True else 0,
         royal_departure_date = data.royal_departure_date.data,
         royal_title = data.royal_title.data if data.royal_title.data != '' else None
     )
@@ -113,15 +113,16 @@ def DicttoReg(dict):
 
 @bp.route('/', methods=('GET', 'POST'))
 def createprereg():
+
+    event = EventVariables.query.first()
     # Close Pre-Reg at Midnight 02/22/2025
-    # if datetime.now().date() >= datetime.strptime('02/22/2025','%m/%d/%Y').date():
-    #     return render_template("prereg_closed.html")
+    if datetime.now().date() >= event.preregistration_close_date:
+        return render_template("prereg_closed.html", event=event)
 
     form = CreatePreRegForm()
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
     form.expected_arrival_date.choices = get_reg_arrival_dates()
-    event = EventVariables.query.first()
     event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
     print("Form Created")
@@ -211,7 +212,7 @@ def duplicate():
     reg.duplicate = True
     db.session.commit()
 
-    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoice_email==reg.invoice_email, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
 
     for r in all_regs:
         regids.append(r.id)

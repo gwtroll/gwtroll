@@ -110,7 +110,7 @@
     
     <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
     class=SpellE>EqMIC</span> <u>Rose de la Cumbe</u><span style='mso-spacerun:yes'>"
-    </span>EVENT <u>Gulf Wars </u>DATE <u>3/8-3/16/2025<o:p></o:p></u></p>
+    </span>EVENT <u>Gulf Wars </u>DATE <u>{{event.start_date.strftime("%m/%d")}}-{{event.end_date.strftime("%m/%d/%Y")}}{{event}}<o:p></o:p></u></p>
     
     <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><o:p>&nbsp;</o:p></p>
     
@@ -143,22 +143,21 @@
     </div>
 </div>
 
+<br/>
     <div class="col-12">
         <form action="" method="post" novalidate id="WaiverForm">
         {% if reg.balance <= 0 %}
         <div class="row form-group" hidden>
         {% else %}
-        <div class="row form-group">
+        <div class="row form-group" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
         {% endif %}
                 <div class="col form-group">
                     <p class="text-center">
-                        Please check here if you would like to <b>DONATE</b> to cover your Paypal processing fees.
+                        Please check here if you would like to <b><span style="color: red;">DONATE</span></b> to cover your Paypal processing fees.
                         {{ form.paypal_donation(class_='form-check-input big-checkbox', onchange_='donation_check()') }}
                     </p>
                 </div>
-            </div>
-            <div id='paypal_donation_display' class="row form-group" style="display:none">
-                <div class="col form-group" >
+                <div id='paypal_donation_display' class="col form-group" style="display:none">
                     <p class="text-center">
                         {{ form.paypal_donation_amount.label }}<br>
                         {{ form.paypal_donation_amount(class_='form-control m-0') }}

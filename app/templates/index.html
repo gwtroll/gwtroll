@@ -28,6 +28,13 @@
                 <!-- Search -->
                 <div class="col">
                     <input class="form-control py-2 custom-input-space"
+                           placeholder="Search by Member Number" name="mbr_num" value=""/>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Search -->
+                <div class="col">
+                    <input class="form-control py-2 custom-input-space"
                            placeholder="Search by Medallion Number" name="medallion" value=""/>
                 </div>
             </div>
@@ -69,6 +76,31 @@
         {% else %}
         <div class="row reg_card_notcheckedin">
         {% endif %}
+        <div class="col">
+            <div>
+                {% if reg.mbr_num_exp %}
+                <p class="text-muted">
+                    {% if reg.age != '18+'%}
+                        <span class="logged-in fs-1" style="color: green;">●</span>
+                    {% elif reg.age == '18+' and reg.balance <= 0 and reg.prereg == True and reg.registration_price >= pricesheet.prereg_price and reg.mbr_num_exp >= today %}
+                    <span class="logged-in fs-1" style="color: green;">●</span>
+                    {% else %}
+                    <span class="logged-in fs-1" style="color: red;">●</span>
+                    {% endif %}
+                </p>
+                {% else %}
+                <p class="text-muted">
+                    {% if reg.age != '18+'%}
+                        <span class="logged-in fs-1" style="color: green;">●</span>
+                    {% elif reg.age == '18+' and reg.balance <= 0 and reg.prereg == True and reg.registration_price >= pricesheet.prereg_price %}
+                    <span class="logged-in fs-1" style="color: green;">●</span>
+                    {% else %}
+                    <span class="logged-in fs-1" style="color: red;">●</span>
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
             <div class="col">
                 <a href="{{ url_for('troll.reg', regid=reg['id']) }}">
                     <h5>{{ reg['fname'] }} {{ reg['lname'] }}</h5>
@@ -79,24 +111,23 @@
             </div>
             <div class="col">
                 <div>
-                    <p class="text-muted">Invoice Number: {{reg.invoice_number}}</p>
+                    <p class="text-muted">Member Number: {% if reg.mbr_num %}{{ reg['mbr_num'] }}{% else %}-{% endif %}</p>
                 </div>
                 <div>
-                    <p class="text-muted">Invoice Status: {{reg['invoice']}}</p>
+                    <p class="text-muted">Member Exp Date: {% if reg.mbr_num_exp %}{{ reg['mbr_num_exp'] }}{% else %}-{% endif %}</p>
                 </div>
             </div>
             <div class="col">
+                {% if reg.invoice %}
                 <div>
-                    <p class="text-muted">Ready For Checkin:
-                        {% if reg.age != '18+'%}
-                            <span class="logged-in" style="color: green;">●</span>
-                        {% elif reg.age == '18+' and reg.balance <= 0 and reg.prereg == True and reg.registration_price >= pricesheet.prereg_price %}
-                        <span class="logged-in" style="color: green;">●</span>
-                        {% else %}
-                        <span class="logged-in" style="color: red;">●</span>
-                        {% endif %}
-                    </p>
+                    <p class="text-muted">Invoice Number: {{reg.invoice_number}}</p>
                 </div>
+                <div>
+                    <p class="text-muted">Invoice Status: {{reg.invoice.invoice_status}}</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col">
                 <div>
                     <p class="text-muted">Expected Arrival: {{reg['expected_arrival_date'].strftime('%m-%d-%Y')}}</p>
                 </div>

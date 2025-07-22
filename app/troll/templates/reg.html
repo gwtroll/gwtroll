@@ -145,7 +145,7 @@
         {% endif %}
         {% endif %}
         {% if reg['paypal_donation'] > 0 %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION</h1>
+        <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION - ${{pay.paypal_donation_amount}}</h1>
         {% endif %}
     {% else %}
     <h1 class="text-center" style="background-color: red; color: white;">{{pay.type}} - ${{pay.amount}}</h1>

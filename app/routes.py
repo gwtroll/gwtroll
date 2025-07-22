@@ -50,55 +50,70 @@ def logout():
 @login_required
 @permission_required('registration_view')
 def index():
+    today = datetime.today().date()
     regcount = reg_count()
-    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==datetime.today().date()).first()
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==today).first()
     if pricesheet == None:
         pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
-    print(pricesheet.prereg_price)
-    print(pricesheet.atd_price)
     if request.method == "POST":
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
-            print(search_value)
-            if search_value is not None and search_value != '':
-                if request.form.get('search_canceled'):
-                    reg = query_db(
-                        "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
-                        #(search_value, search_value, search_value))
-                        ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
-                else:
-                    reg = query_db(
-                        "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
-                        #(search_value, search_value, search_value))
-                        ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            if request.form.get('search_canceled'):
+                reg = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + search_value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + search_value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + search_value + '%'))),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname)
+                # reg = query_db(
+                #     "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
+                #     #(search_value, search_value, search_value))
+                #     ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            else:
+                reg = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + search_value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + search_value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + search_value + '%'))),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname)
+                # reg = query_db(
+                #     "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
+                #     #(search_value, search_value, search_value))
+                #     ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
 
         elif request.form.get('invoice_number'):
             search_value = request.form.get('invoice_number')
             if request.form.get('search_canceled'):
-                reg = query_db(
-                    "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
-                    ('%' + search_value + '%',))
+                reg = Registrations.query.filter(and_(sa.cast(Registrations.invoice_number,sa.Text).ilike('%' + search_value + '%')),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname)
+                # reg = query_db(
+                #     "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
+                #     ('%' + search_value + '%',))
             else:
-                reg = query_db(
-                    "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
-                    ('%' + search_value + '%',))
+                reg = Registrations.query.filter(and_(sa.cast(Registrations.invoice_number,sa.Text).ilike('%' + search_value + '%')),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname)
+                # reg = query_db(
+                #     "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
+                #     ('%' + search_value + '%',))
+        elif request.form.get('mbr_num'):
+            search_value = request.form.get('mbr_num')
+            if request.form.get('search_canceled'):
+                reg = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + search_value + '%')),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname)
+                # reg = query_db(
+                #     "SELECT * FROM registrations WHERE CAST(mbr_num AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
+                #     ('%' + search_value + '%',))
+            else:
+                reg = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + str(search_value) + '%')),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname)
+                # reg = query_db(
+                #     "SELECT * FROM registrations WHERE CAST(mbr_num AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
+                #     ('%' + search_value + '%',))
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
-            reg = query_db(
-                "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
-                (search_value,))
+            reg = Registrations.query.filter(Registrations.medallion==search_value).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname)
+            # reg = query_db(
+            #     "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
+            #     (search_value,))
         else:
-            return render_template('index.html', regcount=regcount, pricesheet=pricesheet)
+            return render_template('index.html', regcount=regcount, pricesheet=pricesheet, today=today)
 
-        return render_template('index.html', searchreg=reg, regcount=regcount, pricesheet=pricesheet)
+        return render_template('index.html', searchreg=reg, regcount=regcount, pricesheet=pricesheet, today=today)
     else:
-        return render_template('index.html', regcount=regcount, pricesheet=pricesheet)
+        return render_template('index.html', regcount=regcount, pricesheet=pricesheet, today=today)
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required
 @permission_required('registration_reports')
 def full_export():
-    regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
+    regs = Registrations.query.filter(Registrations.signature is not None).all()
+    # regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
     return render_template('full_export_images.html', regs=regs)
 
 @app.route('/reports', methods=['GET', 'POST'])
@@ -120,7 +135,7 @@ def reports():
     report_type = form.report_type.data
 
     if report_type == 'full_signatue_export':
-        regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
+        regs = Registrations.query.filter(Registrations.signature is not None).all()
         return render_template('full_export_images.html', regs=regs)
     
     if report_type == 'full_export':

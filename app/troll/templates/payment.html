@@ -2,17 +2,31 @@
 
 {% block content %}
 
+    <h3>Payment Breakdown</h3>
+    <div class="row no-print">
+        <div class="col">
+            <table class="table table-reg table-reg-display table-responsive">
+                <tr>
+                    <th class="text-center">Registration</th>
+                    <th class="text-center">NMR</th>
+                    <th class="text-center">PayPal Donation</th>
+                    <th class="text-center">Total Due</th>
+                </tr>
+                <tr>
+                    <td class="text-center">${{ reg.registration_balance }}</td>
+                    <td class="text-center">${{ reg.nmr_balance }}</td>
+                    <td class="text-center">${{ reg.paypal_donation_balance }}</td>
+                    <td class="text-center"><b>${{ reg.balance }}</b></td>
+                </tr>
+            </table>   
+        </div>
+    </div>
+
+    
+
     <form action="" method="POST" novalidate>
         {{ form.hidden_tag() }}
         <div class="row form-group">
-        <div class="row form-group">
-            <div class="col form-group">
-                <p>
-                    {{ form.total_due.label }}<br>
-                    {{ form.total_due(class_='form-control', readonly=true) }}
-                </p>
-            </div>
-        </div>
         <div class="row form-group">
             <div class="col form-group">
                 <p>
@@ -21,6 +35,6 @@
                 </p>
             </div>
         </div>
-        <p>{{ form.submit(class_='form-control btn-primary btn-lg') }}</p>
+        <p>{{ form.submit(class_='form-control btn btn-success btn-lg') }}</p>
     </form>
 {% endblock %}

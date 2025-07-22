@@ -5,7 +5,7 @@
 <h1 class="text-center" style="color: red;">REGISTRATION IS NOW CLOSED</h1>
 
 <div style="background-color: rgb(255, 255, 255); padding: 10px; border-radius: 1em;">
-<h1>{% block title %} Gulf Wars XXXIII – March 8-16, 2025 {% endblock %}</h1>
+<h1>{% block title %} {{event.event_title}} – {{event.start_date.strftime("%B %d")}}-{{event.end_date.strftime("%d, %Y")}}{% endblock %}</h1>
 <h3 class="text-center">King’s Arrow Ranch, Lumberton, Mississippi</h3>
 <p class="text-center"><a href="http://www.gulfwars.org">www.gulfwars.org</a></p>
 

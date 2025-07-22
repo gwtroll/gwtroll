@@ -24,9 +24,7 @@ def reg(regid):
     for pay in reg.payments:
         if pay.type.upper() != 'PAYPAL' and pay.type.upper() != 'CHECK':
             atd_payments.append(pay)
-    print(atd_payments)
     if request.form.get("action") == 'Edit':
-    #if request.method == 'POST' and request.path == '/editreg':
         return redirect(url_for('registration.editreg', regid=regid))
     elif request.method == 'POST' and request.form.get("action") == 'waiver':
         return redirect(url_for('troll.waiver', regid=regid))
@@ -158,6 +156,7 @@ def checkin():
 @login_required
 @permission_required('registration_edit')
 def waiver():
+    event = EventVariables.query.first()
     form = WaiverForm()
     regid = request.args['regid']
     reg = get_reg(regid)
@@ -177,7 +176,7 @@ def waiver():
 
         return redirect(url_for('troll.checkin', regid=regid))
 
-    return render_template('waiver.html', form=form, reg=reg)
+    return render_template('waiver.html', form=form, reg=reg, event=event)
 
 @bp.route('/payment', methods=['GET', 'POST'])
 @login_required
@@ -219,4 +218,4 @@ def payment():
 
         return redirect(url_for('troll.reg', regid=regid))
 
-    return render_template('payment.html', form=form)
+    return render_template('payment.html', form=form, reg=reg)

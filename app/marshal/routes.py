@@ -18,24 +18,15 @@ def index():
         print("SEARCHED")
         if request.form.get('search_name'):
             search_value = request.form.get('search_name')
-            print(search_value)
-            if search_value is not None and search_value != '':
-                reg = query_db(
-                    "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND checkin IS NOT NULL order by lname, fname",
-                    #(search_value, search_value, search_value))
-                    ('%' + search_value + '%', '%' + search_value + '%', '%' + search_value + '%'))
+            reg = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + search_value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + search_value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + search_value + '%'))),Registrations.checkin is not None).order_by(Registrations.lname,Registrations.fname)
             return render_template('marshal_home.html', searchreg=reg, inspection_stats=inspection_stats)
         elif request.form.get('mbrnum_id'):
             search_value = request.form.get('mbrnum_id')
-            reg = query_db(
-                "SELECT * FROM registrations WHERE mbr_num = %s AND checkin IS NOT NULL order by lname, fname",
-                (int(search_value),))
+            reg = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + search_value + '%')),Registrations.checkin is not None).order_by(Registrations.lname,Registrations.fname)
             return render_template('marshal_home.html', searchreg=reg, inspection_stats=inspection_stats)
         elif request.form.get('medallion'):
             search_value = request.form.get('medallion')
-            reg = query_db(
-                "SELECT * FROM registrations WHERE medallion = %s order by lname, fname",
-                (search_value,))
+            reg = Registrations.query.filter(Registrations.medallion==search_value).order_by(Registrations.lname,Registrations.fname)
             return render_template('marshal_home.html', searchreg=reg, inspection_stats=inspection_stats)
         else:
             return render_template('marshal_home.html', inspection_stats=inspection_stats)
