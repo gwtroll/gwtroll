@@ -118,10 +118,10 @@
             <p>
                 <b>Registrations on same Invoice:</b>
             </p>
-            {% if reg_names %}
-            {% for reg in reg_names %}
+            {% if additional_registrations %}
+            {% for reg in additional_registrations %}
             <p>
-                {{reg.fname}} {{reg.lname}}
+                {{reg['fname']}} {{reg['lname']}}
             </p>
             {% endfor %}
             {% endif %}

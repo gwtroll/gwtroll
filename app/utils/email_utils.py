@@ -38,8 +38,6 @@ def send_fastpass_email(recipient, reg):
         recipients=[recipient],
     )
 
-    print(qrcode_str)
-
     qrcode_str = qrcode_str[22:]
     image = base64.b64decode(qrcode_str, validate=True)
 
@@ -82,8 +80,6 @@ def send_merchant_approval_email(recipient, merchant):
         sender="carl.cox.primary@gmail.com",
         recipients=[recipient],
     )
-
-    print(qrcode_str)
 
     qrcode_str = qrcode_str[22:]
     image = base64.b64decode(qrcode_str, validate=True)

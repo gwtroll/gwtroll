@@ -2,7 +2,7 @@ from flask import render_template
 from app.registration import bp
 
 from flask_login import current_user, login_required
-from flask import render_template, request, url_for, flash, redirect
+from flask import render_template, request, url_for, flash, redirect, session
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
@@ -125,7 +125,6 @@ def createprereg():
     form.expected_arrival_date.choices = get_reg_arrival_dates()
     event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
-    print("Form Created")
 
     merchantid = request.args.get('merchantid')
     if merchantid is not None and request.form.get("action") == None:
@@ -145,18 +144,17 @@ def createprereg():
             form.zip.data = merchant.zip
 
     if form.validate_on_submit() and request.method == 'POST':
-        print("Form Validated")
+
         if request.form.get("action") == 'Submit_Another':
-            additional_registrations = []
-            reg_names = []
-            if 'additional_registration-1' in request.form.keys():
-                for key in request.form.keys():
-                    if 'additional_registration' in key:
-                        reg_names.append(JSONtoDict(request.form.get(key)))
-                        additional_registrations.append(request.form.get(key))
+
             new_reg = create_prereg(form)
-            additional_registrations.append(new_reg.toJSON())
-            reg_names.append(new_reg)
+            if 'additional_registrations' not in session:
+                session['additional_registrations'] = []
+            reg_list = session['additional_registrations']
+            reg_list.append(new_reg.toJSON())
+            session['additional_registrations'] = reg_list
+            additional_registrations = [json.loads(r) for r in session['additional_registrations']]
+ 
             form.fname.data = None
             form.lname.data = None
             form.scaname.data = None
@@ -165,22 +163,21 @@ def createprereg():
             form.city.data = None
             form.state_province.data = None
             form.zip.data = None
-            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=reg_names, clear=True, pricesheet=pricesheet, event=event)
-            # return redirect(url_for('registration.createprereg', form=form, additional_registrations=additional_registrations, reg_names=reg_names))
+            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=session['additional_registrations'], clear=True, pricesheet=pricesheet, event=event)
         else:
             additional_registrations = []
-            if 'additional_registration-1' in request.form.keys():
-                for key in request.form.keys():
-                    if 'additional_registration' in key:
-                        additional_registrations.append(DicttoReg(JSONtoDict(request.form.get(key))))
-                        
-            for add_reg in additional_registrations:
-                db.session.add(add_reg)
+
+            if 'additional_registrations' in session:
+                for r in session['additional_registrations']:
+                    add_reg = DicttoReg(JSONtoDict(r))
+                    additional_registrations.append(add_reg)
+                    db.session.add(add_reg)
 
             reg = create_prereg(form)
 
             db.session.add(reg)
             db.session.commit()
+            del session['additional_registrations']
 
             for add_reg in additional_registrations:
                 send_confirmation_email(add_reg.email,add_reg)
@@ -189,12 +186,11 @@ def createprereg():
             send_confirmation_email(reg.email,reg)
             flash('Registration {} created for {} {}.'.format(
             reg.id, reg.fname, reg.lname))
-
             return redirect(url_for('registration.success'))
-    elif request.method == 'POST' and not form.validate_on_submit():
-        print(request.form)
-        form.fname.data = request.form.get('fname')
-        form.lname.data = request.form.get('lname')
+    # elif request.method == 'POST' and not form.validate_on_submit():
+    #     print(request.form)
+    #     form.fname.data = request.form.get('fname')
+    #     form.lname.data = request.form.get('lname')
     return render_template('create_prereg.html', form=form, pricesheet=pricesheet, event=event, clear=False)
 
 @bp.route('/success')
