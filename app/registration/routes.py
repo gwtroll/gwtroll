@@ -241,6 +241,7 @@ def createatd():
         mbr_num_exp = form.mbr_num_exp.data,
         phone = form.phone.data,
         email = form.email.data,
+        zip = form.zip.data,
         emergency_contact_name = form.emergency_contact_name.data, 
         emergency_contact_phone = form.emergency_contact_phone.data,)
 

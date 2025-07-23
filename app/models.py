@@ -260,7 +260,6 @@ class Invoice(db.Model):
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='invoice')
 
-
 class Payment(db.Model):
     __tablename__ = 'payment'
     id = db.Column(db.Integer(), primary_key=True)

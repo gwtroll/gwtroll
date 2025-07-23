@@ -6,10 +6,11 @@ from app.utils.db_utils import *
 from app.utils.email_utils import *
 from app.utils.security_utils import *
 from flask_security import roles_accepted
+from markupsafe import Markup
 
 from sqlalchemy import and_, or_
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 from flask_login import login_required
 
@@ -214,6 +215,13 @@ def createinvoice():
         invoice_date = request.form.get('invoice_date')
         invoice_email = request.form.get('invoice_email')
         notes = request.form.get('notes')
+
+        dup_inv = Invoice.query.filter(Invoice.invoice_number==invoice_number).first()
+
+        if dup_inv is not None:
+            dup_url = '<a href=' + url_for('invoices.update', invnumber=str(dup_inv.invoice_number)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+            flash("Invoice Number " + str(dup_inv.invoice_number) +" already exists. " + Markup(dup_url),'error')
+            return render_template('create_invoice.html', form=form, regs=regs, type=type)
         
         if invoice_number is not None and type == 'REGISTRATION':
             # Create a new invoice for the registrations

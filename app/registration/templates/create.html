@@ -87,6 +87,13 @@
             </p>
             {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
+        <div class="col">
+            <p>
+                Zip Code<br>
+                {{ form.zip(class_='form-control m-0') }}
+            </p>
+            {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
     </div>
     <h4>Emergency Contact</h4>
     <div class="row form-group">
