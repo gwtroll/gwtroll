@@ -431,7 +431,7 @@ def get_reg_arrival_dates():
     returned_dates = []
     event = EventVariables.query.first()
     event_start = event.start_date
-    event_end = event.end_date
+    event_end = event.end_date + timedelta(days=-1)
     event_dates = pd.date_range(start=event_start, end=event_end).tolist()
     for date in event_dates:
         date_tup = (date.strftime('%Y-%m-%d'), date.strftime('%A - %B %d, %Y'))

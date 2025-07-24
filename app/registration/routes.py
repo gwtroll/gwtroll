@@ -21,8 +21,8 @@ def create_prereg(data):
         zip = data.zip.data,
         country = data.country.data,
         phone = data.phone.data, 
-        email = data.email.data, 
-        invoice_email = data.invoice_email.data,
+        email = (data.email.data).lower(), 
+        invoice_email = (data.invoice_email.data).lower(),
         age = data.age.data,
         kingdom_id = data.kingdom.data,
         emergency_contact_name = data.emergency_contact_name.data, 
@@ -74,8 +74,8 @@ def DicttoReg(dict):
         zip = int(dict['zip']),
         country = dict['country'],
         phone = dict['phone'],  
-        email = dict['email'],  
-        invoice_email = dict['invoice_email'],
+        email = dict['email'].lower(),  
+        invoice_email = dict['invoice_email'].lower(),
         age = dict['age'],
         kingdom_id = dict['kingdom_id'],
         emergency_contact_name = dict['emergency_contact_name'],  
@@ -109,7 +109,17 @@ def DicttoReg(dict):
         reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
 
     return reg
-        
+
+@bp.route('/removeregistration/<int:index>', methods=('GET', 'POST'))
+def removeregistration(index):
+    reg_list = session['additional_registrations']
+    new_list = []
+    del reg_list[index]
+    for r in reg_list:
+        new_list.append(json.loads(r))
+    session['additional_registrations'] = reg_list
+    print(session['additional_registrations'])
+    return redirect(url_for('registration.createprereg'))
 
 @bp.route('/', methods=('GET', 'POST'))
 def createprereg():
@@ -118,6 +128,7 @@ def createprereg():
     # Close Pre-Reg at Midnight 02/22/2025
     if datetime.now().date() >= event.preregistration_close_date:
         return render_template("prereg_closed.html", event=event)
+    invoice_totals = {'registration':0, 'nmr':0, 'donation':0, 'total':0}
 
     form = CreatePreRegForm()
     form.lodging.choices = get_lodging_choices()
@@ -125,6 +136,17 @@ def createprereg():
     form.expected_arrival_date.choices = get_reg_arrival_dates()
     event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
+    print(pricesheet)
+    if 'additional_registrations' in session and len(session['additional_registrations']) > 0:
+        additional_registrations = [json.loads(r) for r in session['additional_registrations']]
+        form.invoice_email.data = additional_registrations[0]['invoice_email']
+        for ar in additional_registrations:
+            invoice_totals['registration'] += ar['registration_price']
+            invoice_totals['nmr'] += ar['nmr_price']
+            invoice_totals['donation'] += ar['paypal_donation']
+            invoice_totals['total'] += (ar['registration_price'] + ar['nmr_price'] + ar['paypal_donation'])
+    else:
+        additional_registrations = []
 
     merchantid = request.args.get('merchantid')
     if merchantid is not None and request.form.get("action") == None:
@@ -151,7 +173,12 @@ def createprereg():
             if 'additional_registrations' not in session:
                 session['additional_registrations'] = []
             reg_list = session['additional_registrations']
-            reg_list.append(new_reg.toJSON())
+            reg_json = new_reg.toJSON()
+            # if reg_json in reg_list:
+            #     flash('Duplicate Registration Prevented')
+            #     return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, clear=True, pricesheet=pricesheet, event=event)
+
+            reg_list.append(reg_json)
             session['additional_registrations'] = reg_list
             additional_registrations = [json.loads(r) for r in session['additional_registrations']]
  
@@ -163,7 +190,7 @@ def createprereg():
             form.city.data = None
             form.state_province.data = None
             form.zip.data = None
-            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, reg_names=session['additional_registrations'], clear=True, pricesheet=pricesheet, event=event)
+            return render_template('create_prereg.html', form=form, additional_registrations=additional_registrations, clear=True, pricesheet=pricesheet, event=event, invoice_totals=invoice_totals)
         else:
             additional_registrations = []
 
@@ -177,7 +204,8 @@ def createprereg():
 
             db.session.add(reg)
             db.session.commit()
-            del session['additional_registrations']
+            if 'additional_registrations' in session:
+                del session['additional_registrations']
 
             for add_reg in additional_registrations:
                 send_confirmation_email(add_reg.email,add_reg)
@@ -191,7 +219,7 @@ def createprereg():
     #     print(request.form)
     #     form.fname.data = request.form.get('fname')
     #     form.lname.data = request.form.get('lname')
-    return render_template('create_prereg.html', form=form, pricesheet=pricesheet, event=event, clear=False)
+    return render_template('create_prereg.html', form=form, pricesheet=pricesheet, additional_registrations=additional_registrations, event=event, clear=False, invoice_totals=invoice_totals)
 
 @bp.route('/success')
 def success():
@@ -243,32 +271,30 @@ def createatd():
 
         reg.expected_arrival_date = datetime.now().date()
         reg.actual_arrival_date = datetime.now().date()
-        registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
-        reg.registration_price = registration_price
-        reg.registration_balance = registration_price
-        if reg.mbr != True:
-            reg.nmr_price = 10
-            reg.nmr_balance = 10
+
+        if reg.age == '18+':
+            registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
+            reg.registration_price = registration_price
+            reg.registration_balance = registration_price
+            if reg.mbr != True:
+                reg.nmr_price = 10
+                reg.nmr_balance = 10
+            else:
+                reg.nmr_price = 0
+                reg.nmr_balance = 0
         else:
+            reg.registration_price = 0
+            reg.registration_balance = 0
             reg.nmr_price = 0
             reg.nmr_balance = 0
-        
+            
         reg.paypal_donation = 0
         reg.paypal_donation_balance = 0
         
         reg.balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
 
-        if form.kingdom.data == '-':
-            flash('Please select a Kingdom.','error')
-            return render_template('create.html', title = 'New Registration', form=form)
-        else:
-            reg.kingdom_id = form.kingdom.data
-
-        if form.lodging.data == '-':
-            flash('Please select a Camping Group.','error')
-            return render_template('create.html', title = 'New Registration', form=form)
-        else:
-            reg.lodging_id = form.lodging.data
+        reg.kingdom_id = form.kingdom.data
+        reg.lodging_id = form.lodging.data
 
         if form.mbr.data == 'Member':
             if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
@@ -294,7 +320,6 @@ def editreg():
     reg = get_reg(regid)
 
     form = EditForm(
-
         regid = reg.id,
         fname = reg.fname,
         lname = reg.lname,

@@ -165,6 +165,15 @@ html.borderradius #scrollgrabber {
         display: none;
     }
 }
+.reg_card { 
+    background-color: grey; 
+    border-radius: 25px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding-top: 10px;
+}
 
 .reg_card_checkedin {
     background-color: rgba(51, 170, 51, .2); 

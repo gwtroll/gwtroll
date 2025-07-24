@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField
 from wtforms.fields import DateField, DateTimeLocalField, DateTimeField
-from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length
+from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length, NumberRange
 import pandas as pd
 import datetime
 
@@ -97,7 +97,7 @@ class EditUserForm(FlaskForm):
 class UpdatePasswordForm(FlaskForm):
     id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[InputRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Minimum Password Length  of 6 Characters')])
+    password = PasswordField('Password', validators=[InputRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Password length must be between 6 and 32 characters')])
     confirm = PasswordField('Confirm Password', validators=[InputRequired(), EqualTo('password', message='Passwords Must Match')])
     submit = SubmitField('Submit')
 
@@ -106,19 +106,15 @@ class CreateRegForm(FlaskForm):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     scaname = StringField('SCA Name', validators=[])
-    kingdom = SelectField('Kingdom', validators=[DataRequired()])
-    lodging = SelectField('Camping Group', validators=[DataRequired()])
+    kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')])
+    lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')])
     age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     mbr_num = IntegerField('Membership #', validators=[RequiredIfMembership('mbr')])
     mbr_num_exp = DateField('Exp Date', validators=[RequiredIfMembership('mbr')])
-    city = StringField('City')
-    state_province = StringField('State/Province')
     zip = IntegerField('Zip', validators=[Optional()])
-    country = StringField('Country', default='United States')
     phone = StringField('Phone', validators=[DataRequired()])
-    email = StringField('Email')
-    invoice_email = StringField('Invoice Email')
+    email = StringField('Email', validators=[DataRequired()])
     emergency_contact_name = StringField('Legal Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
     #mbr_num
@@ -135,7 +131,7 @@ class CreatePreRegForm(FlaskForm):
     zip = IntegerField('Zip', validators=[DataRequired()])
     country = StringField('Country', validators=[DataRequired()], default='United States')
     phone = StringField('Phone', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(),Email()])
+    email = StringField('Communication Email', validators=[DataRequired(),Email()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired(),Email()])
     kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')])
     lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')])
@@ -158,14 +154,14 @@ class CheckinForm(FlaskForm):
     fname = StringField('First Name')
     lname = StringField('Last Name')
     scaname = StringField('SCA Name')
-    kingdom = SelectField('Kingdom', validators=[DataRequired()])
-    lodging = SelectField('Camping Group', validators=[DataRequired()])
+    kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')])
+    lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Kingdom')])
     age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
-    mbr_num = IntegerField('Membership Number')
-    mbr_num_exp = DateField('Membership Expiration Date')
+    mbr_num = IntegerField('Membership Number', validators=[RequiredIfMembership('mbr')])
+    mbr_num_exp = DateField('Membership Expiration Date', validators=[RequiredIfMembership('mbr')])
     medallion = IntegerField('Medallion #', validators=[DataRequired()])
-    minor_waiver = SelectField('Minor Waiver', validators=[NoneOf('-', message='You must select a Minor Form Validation')], choices=[('-','-'),('Signed by Parent/Guardian','Signed by Parent/Guardian'),('Medical Authorization Form Submitted','Medical Authorization Form Submitted')])
+    minor_waiver = SelectField('Minor Waiver', validators=[Optional(), NoneOf('-', message='You must select a Minor Form Validation')], choices=[('-','-'),('Signed by Parent/Guardian','Signed by Parent/Guardian'),('Medical Authorization Form Submitted','Medical Authorization Form Submitted')])
     notes = TextAreaField('Notes')
     submit = SubmitField('Submit')
 
@@ -299,6 +295,10 @@ class PayRegistrationForm(FlaskForm):
     payment_type = SelectField('Payment Type', choices=[('ZETTLE','ZETTLE'),('CASH','CASH'),('TRAVELLER CHEQUE','TRAVELLER CHEQUE')])
     submit = SubmitField('Submit Payment')
 
+class UpdatePayPalDonationForm(FlaskForm):
+    paypal_donation = BooleanField('PayPal Donation', validators=[])
+    paypal_donation_amount = IntegerField("PayPal Donation Amount", default=5, validators=[NumberRange(1,None, message=' If you would like to DONATE you must enter a value above 0')])
+    submit = SubmitField('Update PayPal Donation')
 class SearchInvoiceForm(FlaskForm):
     invoice_number = StringField('Invoice Number')
     email = StringField('Email')
@@ -309,17 +309,11 @@ class SearchInvoiceForm(FlaskForm):
 class WaiverForm(FlaskForm):
     
     paypal_donation = BooleanField('Please check here if you would like to DONATE to cover your Paypal processing fees.', validators=[])
-    paypal_donation_amount = IntegerField("PayPal Donation Amount", default=5)
+    paypal_donation_amount = IntegerField("PayPal Donation Amount", default=5, validators=[NumberRange(1,None, message=' If you would like to DONATE you must enter a value above 0')])
 
-    signature = HiddenField(
-        'signature',
-        render_kw={'id':'signature'}
-    )
+    signature = HiddenField('signature',render_kw={'id':'signature'})
     
-    submit = SubmitField(
-        'Submit',
-        render_kw={'id':'submit','data_action':'save-svg'}
-    )
+    submit = SubmitField('Submit',render_kw={'id':'submit','data_action':'save-svg'})
 
 class ReportForm(FlaskForm):
     report_type = SelectField('Report Type', validators=[DataRequired()], choices=reporttypedata)

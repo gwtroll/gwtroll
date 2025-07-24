@@ -51,10 +51,8 @@ def permission_required(*required_permissions):
                     for permission in role.permissions:
                         if permission.name not in permissions:
                             permissions.append(permission.name)
-                            print(permission.name)
 
             for r_permission in required_permissions:
-                print(r_permission)
                 if r_permission in permissions:
                     return func(*args, **kwargs)
         

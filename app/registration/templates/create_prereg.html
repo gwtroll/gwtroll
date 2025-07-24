@@ -97,7 +97,6 @@
       </tr>
       <tr>
         <th scope="row" class="text-center" style="color: red;">EARLY ON - Requires Department Head Approval
-            Please select ‘EarlyOn’ for Arrival Date <br>
             Anyone not on the approved list will not be allowed to enter site until Troll opens on Saturday. 
             </th>
       </tr>
@@ -120,19 +119,52 @@
             </p>
             {% if additional_registrations %}
             {% for reg in additional_registrations %}
-            <p>
-                {{reg['fname']}} {{reg['lname']}}
-            </p>
-            {% endfor %}
-            {% endif %}
-            {% if additional_registrations %}
-            {% for reg in additional_registrations %}
-            <p>
-                <input type="hidden" value="{{reg}}" name="additional_registration-{{loop.index}}" id="additional_registration-{{loop.index}}">
-            </p>
+            <div class="card">
+                <div class="card-header">
+                    {% if reg['age'] == '18+' %}
+                    Adult - 
+                    {% elif reg['age'] == 'Royal' %}
+                    Royal - 
+                    {% else %}
+                    Minor - 
+                    {% endif %}
+                    {% if reg['mbr'] %}
+                    Member
+                    {% else %}
+                    Non-Member
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">{{reg['fname']}} {{reg['lname']}} - {{reg['scaname']}}</h5>
+                  <div class="row">
+                    <div class="col">
+                        <p>
+                            Email: {{reg['email']}}
+                        </p>
+                        <p>
+                            Phone: {{reg['phone']}}
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p>
+                            {% if reg['mbr_num'] and reg['mbr_num_exp'] %}
+                            Member#/Exp: {{reg['mbr_num']}} / {{reg['mbr_num_exp']}}
+                            {% else %}
+                            Member#/Exp:
+                            {% endif %}
+                        </p>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                        <a class="btn btn-danger" href="/registration/removeregistration/{{loop.index0}}">Remove</a>
+                    </div>
+                  </div>
+              </div>
             {% endfor %}
             {% endif %}
         </div>
+    </div>
     </div>
 
     <div class="row form-group">
@@ -141,7 +173,7 @@
                 Please use the same Invoicing Email for all registrations on the same invoice.
             </p>
             <p>
-                {{ form.invoice_email.label }}
+                {{ form.invoice_email.label }}<span style="color: red;">*</span>
                 {{ form.invoice_email(class_='form-control m-0') }}
                 {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -152,13 +184,13 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                {{ form.expected_arrival_date.label }}
-                {{ form.expected_arrival_date(class_='form-control m-0') }}
+                {{ form.expected_arrival_date.label }}<span style="color: red;">*</span>
+                {{ form.expected_arrival_date(class_='form-control m-0', onchange_="recalc_price()") }}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.age.label }}<br>
+                {{ form.age.label }}<span style="color: red;">*</span>
                 {{ form.age(class_='form-control m-0', onchange="royalCheck()") }}
             </p>
         </div>
@@ -186,21 +218,21 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.fname.label }}<br>
+                {{ form.fname.label }}<span style="color: red;">*</span>
                 {{ form.fname(class_='form-control m-0') }}
                 {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.lname.label }}<br>
+                {{ form.lname.label }}<span style="color: red;">*</span>
                 {{ form.lname(class_='form-control m-0') }}
                 {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.scaname.label }}<br>
+                {{ form.scaname.label }}
                 {{ form.scaname(class_='form-control m-0') }}
             </p>
         </div>
@@ -208,14 +240,14 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.city.label }}<br>
+                {{ form.city.label }}<span style="color: red;">*</span>
                 {{ form.city(class_='form-control m-0') }}
                 {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.state_province.label }}<br>
+                {{ form.state_province.label }}<span style="color: red;">*</span>
                 {{ form.state_province(class_='form-control m-0') }}
                 {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -225,7 +257,7 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.zip.label }}<br>
+                {{ form.zip.label }}<span style="color: red;">*</span>
                 {{ form.zip(class_='form-control m-0') }}
                 {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -233,7 +265,7 @@
         </div>
         <div class="col">
             <p>
-                {{ form.country.label }}<br>
+                {{ form.country.label }}<span style="color: red;">*</span>
                 {{ form.country(class_='form-control m-0') }}
                 {% if form.country.errors %}{% for error in form.country.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -242,7 +274,7 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.phone.label }}<br>
+                {{ form.phone.label }}<span style="color: red;">*</span>
                 {{ form.phone(class_='form-control m-0') }}
                 {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -250,7 +282,7 @@
         </div>
         <div class="col">
             <p>
-                Communication Email<br>
+                {{ form.email.label }}<span style="color: red;">*</span>
                 {{ form.email(class_='form-control m-0') }}
                 {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -260,7 +292,7 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.kingdom.label }}<br>
+                {{ form.kingdom.label }}<span style="color: red;">*</span>
                 {{ form.kingdom(class_='form-control m-0') }}
                 {% if form.kingdom.errors %}{% for error in form.kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -268,7 +300,7 @@
         </div>
         <div class="col">
             <p>
-                {{ form.lodging.label }}<br>
+                {{ form.lodging.label }}<span style="color: red;">*</span>
                 {{ form.lodging(class_='form-control m-0') }}
                 {% if form.lodging.errors %}{% for error in form.lodging.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -278,20 +310,20 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.mbr.label }}<br>
-                {{ form.mbr(class_='form-control m-0') }}
+                {{ form.mbr.label }}<span style="color: red;">*</span>
+                {{ form.mbr(class_='form-control m-0', onchange_="recalc_price()") }}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.mbr_num.label }}<br>
+                {{ form.mbr_num.label }}
                 {{ form.mbr_num(class_='form-control m-0') }}
                 {% if form.mbr_num.errors %}{% for error in form.mbr_num.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.mbr_num_exp.label }}<br>
+                {{ form.mbr_num_exp.label }}
                 {{ form.mbr_num_exp(class_='form-control m-0') }}
                 {% if form.mbr_num_exp.errors %}{% for error in form.mbr_num_exp.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -301,7 +333,7 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.emergency_contact_name.label }}<br>
+                {{ form.emergency_contact_name.label }}<span style="color: red;">*</span>
                 {{ form.emergency_contact_name(class_='form-control m-0') }}
                 {% if form.emergency_contact_name.errors %}{% for error in form.emergency_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -309,7 +341,7 @@
         </div>
         <div class="col">
             <p>
-                {{ form.emergency_contact_phone.label }}<br>
+                {{ form.emergency_contact_phone.label }}<span style="color: red;">*</span>
                 {{ form.emergency_contact_phone(class_='form-control m-0') }}
                 {% if form.emergency_contact_phone.errors %}{% for error in form.emergency_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -317,9 +349,9 @@
         </div>
     </div>
     <br/>
-    <div class="row form-group" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
+    <div class="row form-group">
         <div class="col">
-            <p class="text-center fs-3">
+            <p class="text-center fs-3" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
                 Please check here if you would like to <b><span style="color: red;">DONATE</span></b> to cover your Paypal processing fees.
                 {{ form.paypal_donation(class_='form-check-input big-checkbox', onchange_='donation_check()') }}
             </p>
@@ -327,12 +359,48 @@
         <div id='paypal_donation_display' class="col form-group" style="display:none">
             <p class="text-center">
                 <b>{{ form.paypal_donation_amount.label }}</b><br>
-                {{ form.paypal_donation_amount(class_='form-control m-0') }}
+                {{ form.paypal_donation_amount(class_='form-control m-0', oninput_="recalc_price()") }}
             </p>
         </div>
     </div>
+    
+    <table class="table">
+        <thead>
+            <th>Registration</th>
+            <th>Registration</th>
+            <th>NMR</th>
+            <th>PayPal Donation</th>
+            <th>Total</th>
+        </thead>
+        <tbody>
+            {% if additional_registrations %}
+            {% for reg in additional_registrations %}
+            <tr>
+                <td>{{reg.fname}} {{reg.lname}}</td>
+                <td>${{invoice_totals['registration']}}</td>
+                <td>${{invoice_totals['nmr']}}</td>
+                <td>${{invoice_totals['donation']}}</td>
+                <td>${{invoice_totals['total']}}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+            <tr>
+                <td><b>Current Registration</b></td>
+                <td id="current_reg_registration">$125</td>
+                <td id="current_reg_nmr">$0</td>
+                <td id="current_reg_donation">$0</td>
+                <td id="current_reg_total">$125</td>
+            </tr>
+            <tr>
+                <td><b>Totals</b></td>
+                <td id="total_invoice_registration">${{invoice_totals['registration']}}</td>
+                <td id="total_invoice_nmr">${{invoice_totals['nmr']}}</td>
+                <td id="total_invoice_donation">${{invoice_totals['donation']}}</td>
+                <td id="total_invoice_total">${{invoice_totals['total']}}</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <div id="new-reg-div"></div>
     <div class="row">
         <div class="col">
             <button type="submit" name="action" value="Complete" class="form-control btn-primary btn btn-lg custom-input-space">Complete</button>
@@ -381,6 +449,12 @@
     let clear = "{{ clear|tojson|safe }}"; 
     if (clear == 'true') {
         document.onload = clearform()
+        window.onload = function() {
+            const targetElement = document.getElementById("preregform");
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' }); // Scrolls smoothly to the element
+            }
+        };
     }
 
     function clearform() {
@@ -413,6 +487,7 @@
         else {
             royals.style.display = 'none';
         }
+        recalc_price();
     }
     
 </script>
@@ -426,8 +501,84 @@
         } else {
             paypal_donation_display.style.display = 'none';
         }
+        recalc_price()
     }
 
+
+  </script>
+
+  <script>
+    function recalc_price(){
+        const arrival_date = String(document.getElementById("expected_arrival_date").selectedIndex);
+        const age = document.getElementById("age");
+        const member = document.getElementById("mbr");
+        const paypal_donation = document.getElementById("paypal_donation");
+        const paypal_donation_amount = document.getElementById("paypal_donation_amount");
+
+        const current_reg_registration = document.getElementById("current_reg_registration");
+        const current_reg_nmr = document.getElementById("current_reg_nmr");
+        const current_reg_donation = document.getElementById("current_reg_donation");
+        const current_reg_total = document.getElementById("current_reg_total");
+
+        const total_invoice_registration = document.getElementById("total_invoice_registration");
+        const total_invoice_nmr = document.getElementById("total_invoice_nmr");
+        const total_invoice_donation = document.getElementById("total_invoice_donation");
+        const total_invoice_total = document.getElementById("total_invoice_total");
+
+        const price_dict = {
+            0:parseInt("{{pricesheet[0].prereg_price}}"),
+            1:parseInt("{{pricesheet[1].prereg_price}}"),
+            2:parseInt("{{pricesheet[2].prereg_price}}"),
+            3:parseInt("{{pricesheet[3].prereg_price}}"),
+            4:parseInt("{{pricesheet[4].prereg_price}}"),
+            5:parseInt("{{pricesheet[5].prereg_price}}"),
+            6:parseInt("{{pricesheet[6].prereg_price}}"),
+            7:parseInt("{{pricesheet[7].prereg_price}}"),
+        }
+
+        let cur_reg = 0;
+        let cur_nmr = 0;
+        let cur_donation = 0;
+        let cur_total = 0;
+
+        if (age.value == '18+'){
+            cur_reg = price_dict[arrival_date]
+            if (member.value == 'Non-Member'){
+                cur_nmr = 10;
+            } else {
+                cur_nmr = 0;
+            }
+        } else {
+            cur_reg = 0;
+            cur_nmr = 0;
+        }
+        
+        if (paypal_donation.checked == true){
+            if (paypal_donation_amount.value == null){
+                cur_donation = 0;
+            } else {
+                cur_donation = parseInt(paypal_donation_amount.value);
+            }
+        } else {
+            cur_donation = 0;
+        }
+        cur_total = cur_reg+cur_nmr+cur_donation;
+
+        current_reg_registration.innerHTML = '$'+cur_reg;
+        current_reg_nmr.innerHTML = '$'+cur_nmr;
+        current_reg_donation.innerHTML = '$'+parseInt(cur_donation);
+        current_reg_total.innerHTML = '$'+cur_total;
+
+        let inv_reg = parseInt("{{invoice_totals['registration']}}")+cur_reg;
+        let inv_nmr = parseInt("{{invoice_totals['nmr']}}")+cur_nmr;
+        let inv_donation = parseInt("{{invoice_totals['donation']}}")+parseInt(cur_donation);
+        let inv_total = parseInt("{{invoice_totals['total']}}")+cur_total;
+
+        total_invoice_registration.innerHTML = '$'+inv_reg
+        total_invoice_nmr.innerHTML = '$'+inv_nmr
+        total_invoice_donation.innerHTML = '$'+inv_donation
+        total_invoice_total.innerHTML = '$'+inv_total
+    }
 
   </script>
 {% endblock %}

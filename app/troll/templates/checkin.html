@@ -6,23 +6,25 @@
     <div class="col form-group">
         <p>
             <label for="name">Name</label>
-            <input type="text" class="form-control m-0" id="name" name="name" readonly value="{{ reg.fname }} {{ reg.lname }}"/>
+            <input type="text" class="form-control m-0" id="name" name="name" readonly disabled
+                value="{{ reg.fname }} {{ reg.lname }}" />
         </p>
     </div>
     <div class="col form-group">
         <p>
             <label for="sca_name">SCA Name</label>
-            <input type="text" class="form-control m-0" id="sca_name" name="sca_name" readonly value="{{ reg.scaname }}"/>
+            <input type="text" class="form-control m-0" id="sca_name" name="sca_name" readonly disabled
+                value="{{ reg.scaname }}" />
         </p>
     </div>
     <div class="col form-group">
         <p>
             <label for="sca_name">Age</label>
-            <input type="text" class="form-control m-0" id="age" name="age" readonly value="{{ reg.age }}"/>
+            <input type="text" class="form-control m-0" id="age" name="age" readonly disabled value="{{ reg.age }}" />
         </p>
     </div>
 </div>
-    <form action="" method="post">
+<form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
     <div class="row form-group">
         <div class="col form-group">
@@ -40,71 +42,74 @@
                 {{ form.mbr(class_='form-control m-0', onchange="memberCheck()") }}
             </p>
         </div>
-    </div>
-    {% if reg.mbr == True %}
-    <div id="membership">
-    {% else %}
-    <div id="membership" style="display: none;">
-    {% endif %}
-        <div class="row form-group">
-            <div class="col form-group">
+        {% if reg.mbr == True %}
+        <div id="membership_number" class="col form-group">
+            {% else %}
+            <div id="membership_number" class="col form-group" style="display: none;">
+                {% endif %}
                 <p>
                     {{form.mbr_num.label}}
                     {{form.mbr_num(class_='form-control m-0')}}
+                    {% if form.mbr_num.errors %}{% for error in form.mbr_num.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
                 </p>
             </div>
-            <div class="col form-group">
-                <p>
-                    {{form.mbr_num_exp.label}}
-                    {{form.mbr_num_exp(class_='form-control m-0')}}
-                </p>
+            {% if reg.mbr == True %}
+            <div id="membership_exp" class="col form-group">
+                {% else %}
+                <div id="membership_exp" class="col form-group" style="display: none;">
+                    {% endif %}
+                    <p>
+                        {{form.mbr_num_exp.label}}
+                        {{form.mbr_num_exp(class_='form-control m-0')}}
+                        {% if form.mbr_num_exp.errors %}{% for error in form.mbr_num_exp.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.kingdom.label }}
-                {{ form.kingdom(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.lodging.label }}
-                {{ form.lodging(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.medallion.label }}
-                {{ form.medallion(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    {% if reg.age != '18+' and reg.age != 'Royals' %}
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{form.minor_waiver.label}}
-                {{form.minor_waiver(class_='form-control m-0')}}
-                {% if form.minor_waiver.errors %}{% for error in form.minor_waiver.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-    </div>
-    {% endif %}
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>{{ form.submit(class_='form-control m-0 btn-primary') }}</p>
-        </div>
-    </div>
-    
-    </form>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.kingdom.label }}
+                        {{ form.kingdom(class_='form-control m-0') }}
+                        {% if form.kingdom.errors %}{% for error in form.kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+                <div class="col form-group">
+                    <p>
+                        {{ form.lodging.label }}
+                        {{ form.lodging(class_='form-control m-0') }}
+                        {% if form.lodging.errors %}{% for error in form.lodging.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+            </div>
+            {% if reg.age != '18+' and reg.age != 'Royals' %}
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{form.minor_waiver.label}}
+                        {{form.minor_waiver(class_='form-control m-0')}}
+                        {% if form.minor_waiver.errors %}{% for error in form.minor_waiver.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.medallion.label }}
+                        {{ form.medallion(class_='form-control m-0') }}
+                        {% if form.medallion.errors %}{% for error in form.medallion.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>{{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}</p>
+                </div>
+            </div>
 
-    <!-- <h5>Cost</h5>
+</form>
+
+<!-- <h5>Cost</h5>
     <table>
         <tr>
             <th>Registration Price</th>
@@ -146,14 +151,17 @@ for(var i, j = 0; i = kingdomField.options[j]; j++) {
 
     function memberCheck() {
         const mbr = document.getElementById("mbr").value;
-        const membership = document.getElementById("membership");
+        const membership_number = document.getElementById("membership_number");
+        const membership_exp = document.getElementById("membership_exp");
         if (mbr == 'Member') {
-            membership.style.display = 'block';
+            membership_number.style.display = 'block';
+            membership_exp.style.display = 'block';
         }
         else {
-            membership.style.display = 'none';
+            membership_number.style.display = 'none';
+            membership_exp.style.display = 'none';
         }
     }
-    
+
 </script>
 {% endblock %}

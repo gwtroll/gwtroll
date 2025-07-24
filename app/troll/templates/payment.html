@@ -22,7 +22,27 @@
         </div>
     </div>
 
-    
+    {% if reg.prereg == false and reg.paypal_donation > 0 %}
+    <form action="/troll/{{reg.id}}/updatedonation" method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="row form-group">
+        <div class="row form-group">
+            <div class="col form-group">
+                <p class="text-center">
+                    {{ paypal_form.paypal_donation.label }}<br>
+                    {{ paypal_form.paypal_donation(class_='form-check-input big-checkbox', onchange_='donation_check()') }}
+                </p>
+            </div>
+            <div id='paypal_donation_display' class="col form-group">
+                <p>
+                    {{ paypal_form.paypal_donation_amount.label }}<br>
+                    {{ paypal_form.paypal_donation_amount(class_='form-control') }}
+                </p>
+            </div>
+        </div>
+        <p>{{ paypal_form.submit(class_='form-control btn btn-warning') }}</p>
+    </form>
+    {% endif %}
 
     <form action="" method="POST" novalidate>
         {{ form.hidden_tag() }}
@@ -37,4 +57,16 @@
         </div>
         <p>{{ form.submit(class_='form-control btn btn-success btn-lg') }}</p>
     </form>
+
+    <script>
+        function donation_check(){
+            const paypal_donation_display = document.getElementById("paypal_donation_display");
+            const paypal_donation = document.getElementById("paypal_donation");
+            if (paypal_donation.checked == true){
+                paypal_donation_display.style.display = 'block';
+            } else {
+                paypal_donation_display.style.display = 'none';
+            }
+        }
+      </script>
 {% endblock %}

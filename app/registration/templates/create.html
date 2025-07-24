@@ -8,7 +8,7 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.fname.label }} <span style="color: red;">*</span><br>
+                {{ form.fname.label }} <span style="color: red;">*</span>
                 {{ form.fname(class_='form-control m-0') }}
                 {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -16,7 +16,7 @@
         <div class="col">
  
             <p>
-                {{ form.lname.label }} <span style="color: red;">*</span><br>
+                {{ form.lname.label }} <span style="color: red;">*</span>
                 {{ form.lname(class_='form-control m-0') }}
                 {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -31,13 +31,13 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.age.label }} <span style="color: red;">*</span><br>
+                {{ form.age.label }} <span style="color: red;">*</span>
                 {{ form.age(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.mbr.label }} <span style="color: red;">*</span><br>
+                {{ form.mbr.label }} <span style="color: red;">*</span>
                 {{ form.mbr(class_='form-control m-0') }}
             </p>
         </div>
@@ -52,7 +52,7 @@
         </div>
         <div class="col">
             <p>
-                {{ form.mbr_num_exp.label }}<br>
+                {{ form.mbr_num_exp.label }}
                 {{ form.mbr_num_exp(class_='form-control m-0') }}
                 {% if form.mbr_num_exp.errors %}{% for error in form.mbr_num_exp.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
@@ -61,55 +61,57 @@
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.kingdom.label }}<br>
+                {{ form.kingdom.label }}<span style="color: red;">*</span>
                 {{ form.kingdom(class_='form-control m-0') }}
+                {% if form.kingdom.errors %}{% for error in form.kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.lodging.label }} <span style="color: red;">*</span><br>
+                {{ form.lodging.label }}<span style="color: red;">*</span>
                 {{ form.lodging(class_='form-control m-0') }}
+                {% if form.lodging.errors %}{% for error in form.lodging.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.phone.label }} <span style="color: red;">*</span><br>
+                {{ form.phone.label }}<span style="color: red;">*</span>
                 {{ form.phone(class_='form-control m-0') }}
+                {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
-                Communication Email<br>
+                Communication Email<span style="color: red;">*</span><br>
                 {{ form.email(class_='form-control m-0') }}
+                {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
                 Zip Code<br>
                 {{ form.zip(class_='form-control m-0') }}
+                {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
     </div>
     <h4>Emergency Contact</h4>
     <div class="row form-group">
         <div class="col">
             <p>
-                {{ form.emergency_contact_name.label }} <span style="color: red;">*</span><br>
+                {{ form.emergency_contact_name.label }} <span style="color: red;">*</span>
                 {{ form.emergency_contact_name(class_='form-control m-0') }}
+                {% if form.emergency_contact_name.errors %}{% for error in form.emergency_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.emergency_contact_name.errors %}{% for error in form.emergency_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
         <div class="col">
             <p>
-                {{ form.emergency_contact_phone.label }} <span style="color: red;">*</span><br>
+                {{ form.emergency_contact_phone.label }} <span style="color: red;">*</span>
                 {{ form.emergency_contact_phone(class_='form-control m-0') }}
+                {% if form.emergency_contact_phone.errors %}{% for error in form.emergency_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
-            {% if form.emergency_contact_phone.errors %}{% for error in form.emergency_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
         </div>
     </div>
 

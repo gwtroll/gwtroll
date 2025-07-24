@@ -74,6 +74,27 @@ class User(UserMixin, db.Model):
                 return True
         else:
             return check_password_hash(self.password_hash, password)
+    
+    def get_permission_set(self):
+        print('WOW')
+        permission_set = []
+        for role in self.roles:
+            for permission in role.permissions:
+                if permission.name not in permission_set:
+                    permission_set.append(permission.name)
+        return permission_set
+    
+    def has_permission(self, query_permission):
+        print('HOLYT SHIT')
+        for role in self.roles:
+            for permission in role.permissions:
+                if query_permission == permission.name:
+                    return True
+        return False
+    
+    def get_greeting(self, test):
+        print('YEP ' + test)
+        return f'Hello {self.username}'
 
 
 #Role Data Model

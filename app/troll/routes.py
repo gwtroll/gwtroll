@@ -71,7 +71,7 @@ def checkin():
 
     #Check for medallion number    
 
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         if form.mbr.data == 'Member':
             if request.form.get('mbr_num') is None:
                 flash('Membership Number is Required if Member.','error')
@@ -161,7 +161,7 @@ def waiver():
     regid = request.args['regid']
     reg = get_reg(regid)
     
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         if bool(request.form.get('paypal_donation')) == True:
             reg.paypal_donation = int(request.form.get('paypal_donation_amount'))
             reg.paypal_donation_balance = int(request.form.get('paypal_donation_amount'))
@@ -178,13 +178,31 @@ def waiver():
 
     return render_template('waiver.html', form=form, reg=reg, event=event)
 
+@bp.route('/<int:regid>/updatedonation', methods=['POST', ''])
+@login_required
+@permission_required('registration_edit')
+def updatedonation(regid):
+    reg = get_reg(regid)
+    if bool(request.form.get('paypal_donation')) == False:
+        reg.paypal_donation = 0
+        reg.paypal_donation_balance = 0
+    elif bool(request.form.get('paypal_donation')) == True:
+        reg.paypal_donation = request.form.get('paypal_donation_amount')
+        reg.paypal_donation_balance = request.form.get('paypal_donation_amount')
+    db.session.commit()
+    return redirect(url_for('troll.payment', regid=regid))
+
 @bp.route('/payment', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_edit')
 def payment():
     form = PayRegistrationForm()
+    paypal_form = UpdatePayPalDonationForm()
     regid = request.args['regid']
     reg = get_reg(regid)
+
+    paypal_form.paypal_donation.data = True if reg.paypal_donation > 0 else False
+    paypal_form.paypal_donation_amount.data = reg.paypal_donation
 
     form.total_due.data = reg.balance
 
@@ -218,4 +236,4 @@ def payment():
 
         return redirect(url_for('troll.reg', regid=regid))
 
-    return render_template('payment.html', form=form, reg=reg)
+    return render_template('payment.html', form=form, reg=reg, paypal_form=paypal_form)
