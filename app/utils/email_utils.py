@@ -6,7 +6,6 @@ import base64, binascii
 def send_confirmation_email(recipient, reg):
     msg = Message(
         subject="Gulf Wars Registration Confirmation",
-        sender="carl.cox.primary@gmail.com",
         recipients=[recipient],
     )
     
@@ -34,7 +33,6 @@ def send_fastpass_email(recipient, reg):
     qrcode_str = qrcode(url_for('troll.reg', regid=reg.id), border=1) 
     msg = Message(
         subject="Gulf Wars Fast Pass",
-        sender="carl.cox.primary@gmail.com",
         recipients=[recipient],
     )
 
@@ -77,7 +75,6 @@ def send_merchant_approval_email(recipient, merchant):
     qrcode_str = qrcode(url_for('merchant.merchant_checkin', merchantid=merchant.id), border=1)
     msg = Message(
         subject="Gulf Wars - Merchant Approval",
-        sender="carl.cox.primary@gmail.com",
         recipients=[recipient],
     )
 
