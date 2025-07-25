@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField
+from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField, widgets
 from wtforms.fields import DateField, DateTimeLocalField, DateTimeField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length, NumberRange
 import pandas as pd
@@ -14,6 +14,10 @@ reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg
 paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle'),('travlers_check','Travlers Check')]
 
 preregstatusdata = [('',''),('SUCCEEDED','SUCCEEDED')]
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(html_tag='ul', prefix_label=False)
+    option_widget = widgets.CheckboxInput()
 
 class RequiredIfMembership(InputRequired):
     # a validator which makes a field required if
@@ -70,7 +74,7 @@ class CreateUserForm(FlaskForm):
 class CreateRoleForm(FlaskForm):
     id = IntegerField('Id', validators=[DataRequired()])
     role_name = StringField('Role Name', validators=[DataRequired()])
-    permissions = SelectMultipleField('Permissions', validators=[DataRequired()])
+    permissions = MultiCheckboxField('Permissions')
     submit = SubmitField('Submit')
 
 # class CreateEventForm(FlaskForm):

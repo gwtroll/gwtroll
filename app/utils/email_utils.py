@@ -1,7 +1,17 @@
 from app import mail, qrcode
 from flask_mail import Message
-from flask import url_for
+from flask import url_for, copy_current_request_context
 import base64, binascii
+import threading
+
+def send_async_mail(message):
+
+    @copy_current_request_context
+    def send_message(message):
+        mail.send(message)
+
+    sender = threading.Thread(name='mail_sender', target=send_message, args=(message,))
+    sender.start()
 
 def send_confirmation_email(recipient, reg):
     msg = Message(
@@ -27,7 +37,7 @@ def send_confirmation_email(recipient, reg):
     "Name: "+reg.fname+" "+reg.lname+"<br/>" \
     "Arrival Date: "+str(reg.expected_arrival_date)+"</p>" \
     
-    mail.send(msg)
+    send_async_mail(msg)
 
 def send_fastpass_email(recipient, reg):
     qrcode_str = qrcode(url_for('troll.reg', regid=reg.id), border=1) 
@@ -53,7 +63,7 @@ def send_fastpass_email(recipient, reg):
     "Arrival Date: "+str(reg.expected_arrival_date)+"</p>" \
     "<img src=\"cid:fastpass\" alt=\"Fast Pass QR Code\">"
     
-    mail.send(msg)
+    send_async_mail(msg)
 
 def send_merchant_confirmation_email(recipient, merchant):
     msg = Message(
@@ -69,7 +79,7 @@ def send_merchant_confirmation_email(recipient, merchant):
     "THL Dante Matteo Ricci</p>" \
     "<br/><br/>" \
 
-    mail.send(msg)
+    send_async_mail(msg)
 
 def send_merchant_approval_email(recipient, merchant):
     qrcode_str = qrcode(url_for('merchant.merchant_checkin', merchantid=merchant.id), border=1)
@@ -96,4 +106,4 @@ def send_merchant_approval_email(recipient, merchant):
     "Arrival Date: "+str(merchant.estimated_date_of_arrival)+"</p>" \
     "<img src=\"cid:fastpass\" alt=\"Fast Pass QR Code\">"
     
-    mail.send(msg)
+    send_async_mail(msg)

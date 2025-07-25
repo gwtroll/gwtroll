@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <form action="" method="post">
+    <form action="" method="post" novalidate>
         <h2>Edit Role</h2>
         <div class="row form-group">
             <div class="col form-group">
@@ -22,7 +22,7 @@
             <div class="col form-group">
                 <p>
                     {{ form.permissions.label }}
-                    {{ form.permissions(class_='form-control m-0') }}
+                    {{ form.permissions() }}
                 </p>
             </div>
         </div>
