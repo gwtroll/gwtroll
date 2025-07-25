@@ -12,7 +12,6 @@ from markupsafe import Markup
 
 import base64
 import numpy as np
-import cv2
 from pyzbar import pyzbar
 
 @bp.route('/<int:regid>', methods=('GET', 'POST'))
