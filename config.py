@@ -13,6 +13,8 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
     MAIL_DEBUG = True
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = 'no-reply@gulfwars.org'
     MAIL_MAX_EMAILS = None
     MAIL_SUPPRESS_SEND = False
