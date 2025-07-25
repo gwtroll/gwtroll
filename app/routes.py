@@ -47,8 +47,8 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/', methods=['GET', 'POST'])
-# @login_required #REMOVE
-# @permission_required('registration_view') #REMOVE
+@login_required
+@permission_required('registration_view')
 def index():
     today = datetime.today().date()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==today).first()

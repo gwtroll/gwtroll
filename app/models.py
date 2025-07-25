@@ -84,7 +84,6 @@ class User(UserMixin, db.Model):
         return permission_set
     
     def has_permission(self, query_permission):
-        return True #REMOVE
         for role in self.roles:
             for permission in role.permissions:
                 if query_permission == permission.name or permission.name == 'admin':
