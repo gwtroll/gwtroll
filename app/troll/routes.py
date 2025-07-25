@@ -12,7 +12,6 @@ from markupsafe import Markup
 
 import base64
 import numpy as np
-from pyzbar import pyzbar
 
 @bp.route('/<int:regid>', methods=('GET', 'POST'))
 @login_required
