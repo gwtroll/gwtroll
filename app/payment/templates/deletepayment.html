@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Delete Payment</h2>
+        <h3>Payment</h3>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Payment Type
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.type }}" readonly disabled>
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    Payment Date
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.payment_date }}" readonly disabled>
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Check Number
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.check_num }}" readonly disabled>
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    Invoice Number
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.invoice_number }}" readonly disabled>
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Amount
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.amount }}" readonly disabled>
+                </p>
+            </div>
+        </div>
+
+        <h3>Registration Amount</h3>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Registration Amount
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.registration_amount }}" readonly disabled>
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    NMR Amount
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.nmr_amount }}" readonly disabled>
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    PayPal Donation Amount
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.paypal_donation_amount }}" readonly disabled>
+                </p>
+            </div>
+        </div>
+        
+
+        <h3>Merchant Amount</h3>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Space Fee
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.space_fee_amount }}" readonly disabled>
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    Processing Fee
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.processing_fee_amount }}" readonly disabled>
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    Electricity Fee
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.electricity_fee_amount }}" readonly disabled>
+                </p>
+            </div>
+        </div>
+
+        <h3>EarlyOn Amount</h3>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Rider Fee
+                    <input type="text" class="form-control m-0" name="name" value="{{ payment.rider_fee_amount }}" readonly disabled>
+                </p>
+            </div>
+        </div>
+        <form action="" method="post" novalidate>
+            <button type="submit" class="form-control m-0 btn btn-danger btn-lg" action="/">Confirm Delete Payment</button>
+        </form>
+        {% endblock %}

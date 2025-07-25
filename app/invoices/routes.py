@@ -324,64 +324,24 @@ def createpayment():
         notes = request.form.get('notes')
         
         if payment_amount is not None and inv.invoice_type == 'REGISTRATION':
-            # Create a new payment for the registrations
             payment_balance = payment_amount
             for reg in regs:
-                regid = reg.id
-                reg_balance = reg.balance
-                if payment_balance > 0:
+                if payment_balance > 0 and reg.balance > 0:
                     pay = Payment(
                         type = payment_type,
                         check_num = check_num if check_num != '' else None,
                         payment_date = payment_date,
-                        # amount = payment_amount,
-                        reg_id = regid,
+                        reg_id = reg.id,
+                        reg = reg,
                         invoice_number  = invoice_number,
-                        # event_id = reg.event_id
                     )
-                    if reg_balance <= payment_balance:
-                        payment_balance = payment_balance - reg_balance
-                        pay.amount = reg_balance
-                        pay.registration_amount = reg.registration_balance
-                        pay.nmr_amount = reg.nmr_balance
-                        pay.paypal_donation_amount = reg.paypal_donation_balance
-                        reg.registration_balance = 0
-                        reg.nmr_balance = 0
-                        reg.paypal_donation_balance = 0
-                    else:
-                        # reg.balance = reg.balance - payment_balance
-                        pay.amount = payment_balance
-
-                        if payment_balance <= reg.registration_balance:
-                            reg.registration_balance -= payment_balance
-                            pay.registration_amount = payment_balance
-                            payment_balance = 0
-                        else:
-                            payment_balance -= reg.registration_balance
-                            reg.registration_balance = 0
-                            pay.registration_amount =  reg.registration_balance
-                        
-                        if payment_balance <= reg.nmr_balance:
-                            reg.nmr_balance -= payment_balance
-                            pay.nmr_amount = payment_balance
-                            payment_balance = 0
-                        else:
-                            payment_balance -= reg.nmr_balance
-                            reg.nmr_balance = 0
-                            pay.nmr_amount =  reg.nmr_balance
-
-                        if payment_balance <= reg.paypal_donation_balance:
-                            reg.paypal_donation_balance -= payment_balance
-                            pay.paypal_donation_amount = payment_balance
-                            payment_balance = 0
-                        else:
-                            payment_balance -= reg.paypal_donation_balance
-                            reg.paypal_donation_balance = 0
-                            pay.paypal_donation_amount =  reg.paypal_donation_balance
-
+                    pay.calculate_payment_amounts(payment_balance)
                     db.session.add(pay)
+                    payment_balance -= (reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance)
                     reg.notes = notes
-                    reg.balance = recalculate_reg_balance(reg)
+                    reg.recalculate_balance()
+                    db.session.commit()
+
             inv.balance = float(inv.balance) - float(payment_amount)
             if inv.balance <= 0:
                 inv.invoice_status = 'PAID'
@@ -394,55 +354,25 @@ def createpayment():
 
             db.session.commit()
 
-            log_reg_action(reg, 'INVOICE PAID')
         elif payment_amount is not None and inv.invoice_type == 'MERCHANT':
-            # Create a new payment for the merchant
             payment_balance = payment_amount
             for reg in regs:
-                regid = reg.id
-                reg_balance = reg.merchant_fee
                 if payment_balance > 0:
                     pay = Payment(
                         type = payment_type,
                         check_num = check_num if check_num != '' else None,
                         payment_date = payment_date,
-                        # amount = payment_amount,
-                        merchant_id = regid,
+                        merchant_id = reg.id,
+                        merchant = reg,
                         invoice_number  = invoice_number,
-                        # event_id = reg.event_id
                     )
-                    if reg_balance <= payment_balance:
-                        payment_balance = float(payment_balance) - float(reg_balance)
-                        pay.space_fee_amount = float(reg.space_fee)
-                        pay.processing_fee_amount = float(reg.processing_fee)
-                        pay.amount = float(reg_balance)
-                        reg.space_fee_balance = 0
-                        reg.processing_fee_balance = 0
-                    else:
-                        # reg.balance = reg.balance - payment_balance
-                        pay.amount = payment_balance
 
-                        if payment_balance <= reg.space_fee:
-                            pay.space_fee_amount = payment_balance
-                            reg.space_fee_balance -= payment_balance
-                            payment_balance = 0
-                            
-                        else:
-                            payment_balance -= float(reg.space_fee)
-                            pay.space_fee_amount = reg.space_fee
-                            reg.space_fee_balance = 0
-                        
-                        if payment_balance <= reg.processing_fee:
-                            pay.processing_fee_amount = payment_balance
-                            reg.processing_fee_balance -= payment_balance
-                            payment_balance = 0
-                        else:
-                            payment_balance -= reg.processing_fee
-                            pay.processing_fee_amount = reg.processing_fee
-                            reg.processing_fee_balance = 0
-
+                    pay.calculate_payment_amounts(payment_balance)
                     db.session.add(pay)
+                    payment_balance -= (reg.space_fee_balance + reg.processing_fee_balance + reg.electricity_balance)
                     reg.notes = notes
+                    reg.recalculate_balance()
+                    db.session.commit()
 
             inv.balance = float(inv.balance) - float(payment_amount)
             if inv.balance <= 0:
@@ -452,36 +382,23 @@ def createpayment():
             db.session.commit()
 
         elif payment_amount is not None and inv.invoice_type == 'EARLYON':
-            # Create a new payment for the merchant
             payment_balance = payment_amount
             for reg in regs:
-                regid = reg.id
-                reg_balance = reg.rider_balance
                 if payment_balance > 0:
                     pay = Payment(
                         type = payment_type,
                         check_num = check_num if check_num != '' else None,
                         payment_date = payment_date,
-                        earlyonrequest_id = regid,
+                        earlyonrequest_id = reg.id,
+                        earlyonrequest = reg,
                         invoice_number  = invoice_number,
-                        # event_id = reg.event_id
                     )
-                    if reg_balance <= payment_balance:
-                        payment_balance = float(payment_balance) - float(reg_balance)
-                        pay.rider_fee_amount = float(reg.rider_cost)
-                        pay.amount = float(reg_balance)
-                        reg.rider_balance = 0
-                    else:
-                        # reg.balance = reg.balance - payment_balance
-                        pay.amount = payment_balance
-
-                        if payment_balance <= reg.rider_cost:
-                            pay.rider_fee_amount = payment_balance
-                            reg.rider_balance -= payment_balance
-                            payment_balance = 0
-
+                    pay.calculate_payment_amounts(payment_balance)
                     db.session.add(pay)
+                    payment_balance -= reg.rider_balance
                     reg.notes = notes
+                    reg.recalculate_balance()
+                    db.session.commit()
 
             inv.balance = float(inv.balance) - float(payment_amount)
             if inv.balance <= 0:

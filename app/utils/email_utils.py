@@ -31,7 +31,7 @@ def send_confirmation_email(recipient, reg):
     mail.send(msg)
 
 def send_fastpass_email(recipient, reg):
-    qrcode_str = qrcode(url_for('troll.reg', regid=reg.id))
+    qrcode_str = qrcode(url_for('troll.reg', regid=reg.id), border=1) 
     msg = Message(
         subject="Gulf Wars Fast Pass",
         sender="carl.cox.primary@gmail.com",

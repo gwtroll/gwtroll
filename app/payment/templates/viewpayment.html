@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% if payments %}
+    <table id="paymentTable"
+    data-toggle="table"
+    data-filter-control="true"
+    data-sortable="true"
+    data-pagination="true"
+    data-show-columns="true"
+    data-show-columns-toggle-all="true"
+    data-toolbar="#toolbar"
+    data-show-toggle="true"
+    data-show-fullscreen="true"
+    data-show-export="true"
+    data-export-types="['csv', 'excel', 'pdf']"
+    data-minimum-count-columns="2"
+    data-show-pagination-switch="true"
+    data-page-list="[10, 25, 50, 100, all]"
+    data-response-handler="responseHandler"
+    data-detail-view="true"
+    data-detail-view-icon="false"
+    data-mobile-responsive="true"
+    data-check-on-init="true"
+    data-classes="table table-striped table-responsive">
+
+        <thead>
+            <th data-field="id">ID</th>
+            <th data-field="type" data-filter-control="select">Type</th>
+            <th data-field="relationship" data-filter-control="select">Relationship</th>
+            <th data-field="object" data-filter-control="input">Object</th>
+            <th data-field="edit">Edit</th>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr>
+                <td>
+                    {{payment.id}}
+                </td>
+                <td>
+                    {{payment.type}}
+                </td>
+                <td>
+                    {% if payment.reg %}
+                    Registration
+                    {% endif %}
+                    {% if payment.earlyonrequest %}
+                    EarlyOn
+                    {% endif %}
+                    {% if payment.merchant %}
+                    Merchant
+                    {% endif %}
+                </td>
+                <td>
+                    {% if payment.reg %}
+                    <a href="{{url_for('registration.editreg',regid=payment.reg_id)}}" target="_blank">{{payment.reg.fname}} {{payment.reg.lname}}</a>
+                    {% endif %}
+                    {% if payment.earlyonrequest %}
+                    <a href="{{url_for('earlyon.update',earlyon_id=payment.earlyonrequest_id)}}" target="_blank">{{payment.earlyonrequest.registration.fname}} {{payment.earlyonrequest.registration.lname}}</a>
+                    {% endif %}
+                    {% if payment.merchant %}
+                    <a href="{{url_for('merchant.update',merch_id=payment.merchant_id)}}" target="_blank">{{payment.merchant.business_name}}</a>
+                    {% endif %}
+                </td>
+                <td>
+                    <a class="btn btn-primary" href="{{url_for('payment.editpayment', paymentid=payment.id)}}" role="button">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+{% endblock %}

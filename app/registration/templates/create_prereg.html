@@ -377,10 +377,10 @@
             {% for reg in additional_registrations %}
             <tr>
                 <td>{{reg.fname}} {{reg.lname}}</td>
-                <td>${{invoice_totals['registration']}}</td>
-                <td>${{invoice_totals['nmr']}}</td>
-                <td>${{invoice_totals['donation']}}</td>
-                <td>${{invoice_totals['total']}}</td>
+                <td>${{reg.registration_price}}</td>
+                <td>${{reg.nmr_price}}</td>
+                <td>${{reg.paypal_donation}}</td>
+                <td>${{reg.balance}}</td>
             </tr>
             {% endfor %}
             {% endif %}

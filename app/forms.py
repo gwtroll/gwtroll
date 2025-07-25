@@ -222,7 +222,6 @@ class RiderForm(Form):
     submit = SubmitField('Add Rider')
 
 class EarlyOnForm(FlaskForm):
-    
     arrival_date = SelectField('Estimated Date of Arrival', validators=[DataRequired()])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
     notes = TextAreaField('Notes')
@@ -299,6 +298,7 @@ class UpdatePayPalDonationForm(FlaskForm):
     paypal_donation = BooleanField('PayPal Donation', validators=[])
     paypal_donation_amount = IntegerField("PayPal Donation Amount", default=5, validators=[NumberRange(1,None, message=' If you would like to DONATE you must enter a value above 0')])
     submit = SubmitField('Update PayPal Donation')
+
 class SearchInvoiceForm(FlaskForm):
     invoice_number = StringField('Invoice Number')
     email = StringField('Email')
@@ -314,6 +314,21 @@ class WaiverForm(FlaskForm):
     signature = HiddenField('signature',render_kw={'id':'signature'})
     
     submit = SubmitField('Submit',render_kw={'id':'submit','data_action':'save-svg'})
+
+class PaymentForm(FlaskForm):
+    type = SelectField('Payment Type', validators=[DataRequired()], choices=[('ZETTLE','ZETTLE'),('CASH','CASH'),('TRAVELLER CHEQUE','TRAVELLER CHEQUE'),('PAYPAL','PAYPAL'),('CHECK','CHECK')])
+    check_num = IntegerField('Check Number', validators=[Optional()])
+    payment_date = DateTimeField('Payment Date', validators=[DataRequired()])
+    registration_amount = IntegerField('Registration Amount', default=0, validators=[NumberRange(0,None, message='Value must be 0 or greater')])
+    nmr_amount = IntegerField('NMR Amount', default=0, validators=[NumberRange(0,None, message='Value must be 0 or greater')])
+    paypal_donation_amount = IntegerField('PayPal Donation Amount', validators=[NumberRange(0,None, message='Value must be 0 or greater')])
+    space_fee_amount = FloatField('Space Fee', default=0.0, validators=[NumberRange(0,None, message='Value must be 0 or greater')])
+    processing_fee_amount = IntegerField('Processing Fee', default=0, validators=[NumberRange(0,None, message='Value must be 0 or greater')])
+    rider_fee_amount = IntegerField('Rider Fee', default=0, validators=[NumberRange(0,None, message='Value must be 0 or greater')])
+    electricity_fee_amount = FloatField('Electricity Fee', default=0.0, validators=[NumberRange(0,None, message='Value must be 0 or greater')])
+    amount = FloatField('Total Payment', default=0.0, validators=[NumberRange(0,None, message='Value must be 0 or greater')])
+    invoice_number  = IntegerField('Invoice Number', validators=[Optional()])
+    submit = SubmitField('Update Payment')
 
 class ReportForm(FlaskForm):
     report_type = SelectField('Report Type', validators=[DataRequired()], choices=reporttypedata)

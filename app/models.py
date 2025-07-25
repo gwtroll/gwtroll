@@ -157,6 +157,19 @@ class EarlyOnRequest(db.Model):
     payments = db.relationship("Payment", back_populates="earlyonrequest")
     notes = db.Column(db.Text())
 
+    def recalculate_balance(self):
+        balance = self.rider_cost
+        rider_balance = self.rider_cost
+        for payment in self.payments:
+            balance -= payment.amount
+            rider_balance -= payment.rider_fee_amount
+        if balance < 0:
+            balance = 0
+        self.balance = balance
+        if rider_balance < 0:
+            rider_balance = 0
+        self.rider_balance = rider_balance
+
 class EarlyOnRider(db.Model):
     __tablename__ = 'earlyonrider'
     id = db.Column(db.Integer(), primary_key=True)
@@ -258,6 +271,31 @@ class Registrations(db.Model):
                     data_dict[key] = self.__dict__[key]
         return json.dumps(data_dict)
     
+    def recalculate_balance(self):
+        balance = self.registration_price + self.nmr_price + self.paypal_donation + self.nmr_donation
+        registration_balance = self.registration_price
+        nmr_balance = self.nmr_price
+        paypal_donation_balance = self.paypal_donation
+        for payment in self.payments:
+            balance -= payment.amount
+            registration_balance -= payment.registration_amount
+            nmr_balance -= payment.nmr_amount
+            paypal_donation_balance -= payment.paypal_donation_amount
+        if balance < 0:
+            balance = 0
+        self.balance = balance
+        if registration_balance < 0:
+            registration_balance = 0
+        self.registration_balance = registration_balance
+        if nmr_balance < 0:
+            nmr_balance = 0
+        self.nmr_balance = nmr_balance
+        if paypal_donation_balance < 0:
+            paypal_donation_balance = 0
+        self.paypal_donation_balance = paypal_donation_balance
+
+            
+    
 class Invoice(db.Model):
     __tablename__ = 'invoice'
     invoice_number = db.Column(db.Integer(), primary_key=True)
@@ -280,6 +318,16 @@ class Invoice(db.Model):
     payments = db.relationship("Payment", back_populates="invoice")
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='invoice')
+
+    def recalculate_balance(self):
+        balance = self.registration_total + self.nmr_total + self.donation_total + self.space_fee + self.processing_fee + self.rider_fee
+        for payment in self.payments:
+            balance -= payment.amount
+        if balance < 0:
+            balance = 0
+        self.balance = balance
+        if self.balance > 0:
+            self.invoice_status = 'OPEN'
 
 class Payment(db.Model):
     __tablename__ = 'payment'
@@ -305,6 +353,96 @@ class Payment(db.Model):
     earlyonrequest = db.relationship("EarlyOnRequest", back_populates="payments")
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='payment')
+
+    def calculate_payment_amounts(self, payment_amount):
+        #Registrations
+        if self.reg is not None:
+            #Check if Payment is enough to cover all costs
+            if payment_amount >= self.reg.registration_balance + self.reg.nmr_balance + self.reg.paypal_donation_balance:
+                self.registration_amount = self.reg.registration_balance
+                self.nmr_amount = self.reg.nmr_balance
+                self.paypal_donation_amount = self.reg.paypal_donation_balance
+                self.amount = self.registration_amount + self.nmr_amount + self.paypal_donation_amount
+                return
+            #Registration Payment
+            if payment_amount >= self.reg.registration_balance:
+                payment_amount -=  self.reg.registration_balance
+                self.registration_amount = self.reg.registration_balance
+            else:
+                payment_amount = 0
+                self.registration_amount = payment_amount
+                return
+            #NMR Payment
+            if payment_amount >= self.reg.nmr_balance:
+                payment_amount -=  self.reg.nmr_balance
+                self.nmr_amount = self.reg.nmr_balance
+            else:
+                payment_amount = 0
+                self.nmr_amount = payment_amount
+                return
+            #PayPal Donation
+            if payment_amount >= self.reg.paypal_donation_balance:
+                payment_amount -=  self.reg.paypal_donation_balance
+                self.paypal_donation_amount = self.reg.paypal_donation_balance
+            else:
+                payment_amount = 0
+                self.paypal_donation_amount = payment_amount
+                return
+            
+            self.amount = self.registration_amount + self.nmr_amount + self.paypal_donation_amount
+            
+        #Merchant
+        if self.merchant is not None:
+            #Check if Payment is enough to cover all costs
+            if payment_amount >= self.merchant.space_fee_balance + self.merchant.processing_fee_balance + self.merchant.electricity_balance:
+                self.space_fee_amount = self.merchant.space_fee_balance
+                self.processing_fee_amount = self.merchant.processing_fee_balance
+                self.electricity_fee_amount = self.merchant.electricity_balance
+                return
+            #Space Fee Payment
+            if payment_amount >= self.merchant.space_fee_balance:
+                payment_amount -=  self.merchant.space_fee_balance
+                self.space_fee_amount = self.merchant.space_fee_balance
+            else:
+                payment_amount = 0
+                self.space_fee_amount = payment_amount
+                return
+            #Processing Fee Payment
+            if payment_amount >= self.merchant.processing_fee_balance:
+                payment_amount -=  self.merchant.processing_fee_balance
+                self.processing_fee_amount = self.merchant.processing_fee_balance
+            else:
+                payment_amount = 0
+                self.processing_fee_amount = payment_amount
+                return
+            #Electricity Fee Payment
+            if payment_amount >= self.merchant.electricity_balance:
+                payment_amount -=  self.merchant.electricity_balance
+                self.electricity_fee_amount = self.merchant.electricity_balance
+            else:
+                payment_amount = 0
+                self.electricity_fee_amount = payment_amount
+                return
+            
+            self.amount = self.space_fee_amount + self.processing_fee_amount + self.electricity_fee_amount
+        
+        #EarlyOn
+        if self.earlyonrequest is not None:
+            #Check if Payment is enough to cover all costs
+            if payment_amount >= self.earlyonrequest.rider_balance:
+                self.rider_fee_amount = self.earlyonrequest.rider_balance
+                return
+            #Rider Fee Payment
+            if payment_amount >= self.earlyonrequest.rider_balance:
+                payment_amount -=  self.earlyonrequest.rider_balance
+                self.rider_fee_amount = self.earlyonrequest.rider_balance
+            else:
+                payment_amount = 0
+                self.rider_fee_amount = payment_amount
+                return
+        
+            self.amount = self.rider_fee_amount
+
     
 class RegLogs(db.Model):
     __tablename__ = 'reglogs'  
@@ -460,3 +598,27 @@ class Merchant(db.Model):
 
     def __repr__(self):
         return '<Merchant {}>'.format(self.business_name)
+    
+    def recalculate_balance(self):
+        balance = self.space_fee + self.processing_fee
+        space_fee_balance = self.space_fee
+        processing_fee_balance = self.processing_fee
+        electricity_balance = self.electricity_fee
+        for payment in self.payments:
+            balance -= payment.space_fee_amount
+            balance -= payment.processing_fee_amount
+            space_fee_balance -= payment.space_fee_amount
+            processing_fee_balance -= payment.processing_fee_amount
+            electricity_balance -= payment.electricity_fee_amount
+        if balance < 0:
+            self.balance = 0
+        self.balance = balance
+        if space_fee_balance < 0:
+            self.space_fee_balance = 0
+        self.space_fee_balance = space_fee_balance
+        if processing_fee_balance < 0:
+            self.processing_fee_balance = 0
+        self.processing_fee_balance = processing_fee_balance
+        if electricity_balance < 0:
+            self.electricity_balance = 0
+        self.electricity_balance = electricity_balance
