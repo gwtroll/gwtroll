@@ -62,17 +62,18 @@ def get_inv(invnumber):
         abort(404)
     return inv
 
-def reg_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute('SELECT count(*) FROM registrations WHERE checkin IS NOT NULL;', [])
-    results = cur.fetchone()
-    for regcount in results:
-        print(regcount)
-    conn.close()
-    if regcount is None:
-        abort(404)
-    return regcount
+# def reg_count():
+
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute('SELECT count(*) FROM registrations WHERE checkin IS NOT NULL;', [])
+#     results = cur.fetchone()
+#     for regcount in results:
+#         print(regcount)
+#     conn.close()
+#     if regcount is None:
+#         abort(404)
+#     return regcount
 
 def get_merchants(regids):
     regs = Merchant.query.filter(Merchant.id.in_(ast.literal_eval(regids))).all()
@@ -308,113 +309,113 @@ def recalculate_reg_balance(reg):
         new_balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
     return new_balance
 
-def prereg_total():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status IS NOT NULL AND invoice_status != 'DUPLICATE' AND invoice_status != 'CANCELED';", [])
-    results = cur.fetchone()
-    for preregcount in results:
-        print(preregcount)
-    conn.close()
-    if preregcount is None:
-        abort(404)
-    return preregcount
+# def prereg_total():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status IS NOT NULL AND invoice_status != 'DUPLICATE' AND invoice_status != 'CANCELED';", [])
+#     results = cur.fetchone()
+#     for preregcount in results:
+#         print(preregcount)
+#     conn.close()
+#     if preregcount is None:
+#         abort(404)
+#     return preregcount
 
-def unsent_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(DISTINCT invoice_email) FROM registrations WHERE invoice_status = 'UNSENT';", [])
-    results = cur.fetchone()
-    for unsentcount in results:
-        print(unsentcount)
-    conn.close()
-    if unsentcount is None:
-        abort(404)
-    return unsentcount
+# def unsent_count():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(DISTINCT invoice_email) FROM registrations WHERE invoice_status = 'UNSENT';", [])
+#     results = cur.fetchone()
+#     for unsentcount in results:
+#         print(unsentcount)
+#     conn.close()
+#     if unsentcount is None:
+#         abort(404)
+#     return unsentcount
 
-def unsent_reg_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'UNSENT';", [])
-    results = cur.fetchone()
-    for unsentcount in results:
-        print(unsentcount)
-    conn.close()
-    if unsentcount is None:
-        abort(404)
-    return unsentcount
+# def unsent_reg_count():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'UNSENT';", [])
+#     results = cur.fetchone()
+#     for unsentcount in results:
+#         print(unsentcount)
+#     conn.close()
+#     if unsentcount is None:
+#         abort(404)
+#     return unsentcount
 
-def open_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'SENT';", [])
-    results = cur.fetchone()
-    for opencount in results:
-        print(opencount)
-    conn.close()
-    if opencount is None:
-        abort(404)
-    return opencount
+# def open_count():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'SENT';", [])
+#     results = cur.fetchone()
+#     for opencount in results:
+#         print(opencount)
+#     conn.close()
+#     if opencount is None:
+#         abort(404)
+#     return opencount
 
-def open_reg_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'SENT';", [])
-    results = cur.fetchone()
-    for opencount in results:
-        print(opencount)
-    conn.close()
-    if opencount is None:
-        abort(404)
-    return opencount
+# def open_reg_count():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'SENT';", [])
+#     results = cur.fetchone()
+#     for opencount in results:
+#         print(opencount)
+#     conn.close()
+#     if opencount is None:
+#         abort(404)
+#     return opencount
 
-def paid_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'PAID';", [])
-    results = cur.fetchone()
-    for paidcount in results:
-        print(paidcount)
-    conn.close()
-    if paidcount is None:
-        abort(404)
-    return paidcount
+# def paid_count():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'PAID';", [])
+#     results = cur.fetchone()
+#     for paidcount in results:
+#         print(paidcount)
+#     conn.close()
+#     if paidcount is None:
+#         abort(404)
+#     return paidcount
 
-def paid_reg_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'PAID';", [])
-    results = cur.fetchone()
-    for paidcount in results:
-        print(paidcount)
-    conn.close()
-    if paidcount is None:
-        abort(404)
-    return paidcount
+# def paid_reg_count():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'PAID';", [])
+#     results = cur.fetchone()
+#     for paidcount in results:
+#         print(paidcount)
+#     conn.close()
+#     if paidcount is None:
+#         abort(404)
+#     return paidcount
 
-def canceled_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'CANCELED' OR invoice_status = 'DUPLICATE';", [])
-    results = cur.fetchone()
-    for canceledcount in results:
-        print(canceledcount)
-    conn.close()
-    if canceledcount is None:
-        abort(404)
-    return canceledcount
+# def canceled_count():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'CANCELED' OR invoice_status = 'DUPLICATE';", [])
+#     results = cur.fetchone()
+#     for canceledcount in results:
+#         print(canceledcount)
+#     conn.close()
+#     if canceledcount is None:
+#         abort(404)
+#     return canceledcount
 
-def canceled_reg_count():
-    conn= get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'CANCELED' OR invoice_status = 'DUPLICATE';", [])
-    results = cur.fetchone()
-    for canceledcount in results:
-        print(canceledcount)
-    conn.close()
-    if canceledcount is None:
-        abort(404)
-    return canceledcount
+# def canceled_reg_count():
+#     conn= get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'CANCELED' OR invoice_status = 'DUPLICATE';", [])
+#     results = cur.fetchone()
+#     for canceledcount in results:
+#         print(canceledcount)
+#     conn.close()
+#     if canceledcount is None:
+#         abort(404)
+#     return canceledcount
 
 def get_earlyon_arrival_dates():
     returned_dates = []

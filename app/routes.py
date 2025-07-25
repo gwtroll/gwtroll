@@ -51,7 +51,6 @@ def logout():
 # @permission_required('registration_view') #REMOVE
 def index():
     today = datetime.today().date()
-    regcount = reg_count()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==today).first()
     if pricesheet == None:
         pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
@@ -102,11 +101,11 @@ def index():
             #     "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
             #     (search_value,))
         else:
-            return render_template('index.html', regcount=regcount, pricesheet=pricesheet, today=today)
+            return render_template('index.html', pricesheet=pricesheet, today=today)
 
-        return render_template('index.html', searchreg=reg, regcount=regcount, pricesheet=pricesheet, today=today)
+        return render_template('index.html', searchreg=reg, pricesheet=pricesheet, today=today)
     else:
-        return render_template('index.html', regcount=regcount, pricesheet=pricesheet, today=today)
+        return render_template('index.html', pricesheet=pricesheet, today=today)
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required
