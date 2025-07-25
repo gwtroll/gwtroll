@@ -396,6 +396,7 @@ class MerchantForm(FlaskForm):
     estimated_date_of_arrival = SelectField('Estimated Date of Arrival', validators=[DataRequired()])
     service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
     last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
+    require_merchant_parking = BooleanField('Do you require merchant parking in the vehicle section', default=False)
     vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])
     vehicle_license_plate = StringField('Vehicle License Plate', validators=[Optional()])
     vehicle_state = StringField('Vehicle State', validators=[Optional()])

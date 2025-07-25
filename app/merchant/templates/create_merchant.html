@@ -465,48 +465,60 @@
         </div> 
     </div>
 
+    <h3>Parking/Vehicle</h3>
     <div class="row form-group">
-        <div class="col form-group">
+        <div class="col form-group text-center">
             <p>
-                {{ form.vehicle_length.label }}
-                {{ form.vehicle_length(class_='form-control m-0') }}
-            </p>
-        </div> 
-        <div class="col form-group">
-            <p>
-                {{ form.vehicle_license_plate.label }}
-                {{ form.vehicle_license_plate(class_='form-control m-0') }}
-            </p>
-        </div> 
-        <div class="col form-group">
-            <p>
-                {{ form.vehicle_state.label }}
-                {{ form.vehicle_state(class_='form-control m-0') }}
+                {{ form.require_merchant_parking.label }}
+                {{ form.require_merchant_parking(class_='form-check-input big-checkbox', onchange_="parking_check()") }}
             </p>
         </div> 
     </div>
 
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.trailer_length.label }}
-                {{ form.trailer_length(class_='form-control m-0') }}
-            </p>
-        </div> 
-        <div class="col form-group">
-            <p>
-                {{ form.trailer_license_plate.label }}
-                {{ form.trailer_license_plate(class_='form-control m-0') }}
-            </p>
-        </div> 
-        <div class="col form-group">
-            <p>
-                {{ form.trailer_state.label }}
-                {{ form.trailer_state(class_='form-control m-0') }}
-            </p>
-        </div> 
+    <div id="parking_questions" style="display: none;">
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.vehicle_length.label }}
+                    {{ form.vehicle_length(class_='form-control m-0') }}
+                </p>
+            </div> 
+            <div class="col form-group">
+                <p>
+                    {{ form.vehicle_license_plate.label }}
+                    {{ form.vehicle_license_plate(class_='form-control m-0') }}
+                </p>
+            </div> 
+            <div class="col form-group">
+                <p>
+                    {{ form.vehicle_state.label }}
+                    {{ form.vehicle_state(class_='form-control m-0') }}
+                </p>
+            </div> 
+        </div>
+    
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.trailer_length.label }}
+                    {{ form.trailer_length(class_='form-control m-0') }}
+                </p>
+            </div> 
+            <div class="col form-group">
+                <p>
+                    {{ form.trailer_license_plate.label }}
+                    {{ form.trailer_license_plate(class_='form-control m-0') }}
+                </p>
+            </div> 
+            <div class="col form-group">
+                <p>
+                    {{ form.trailer_state.label }}
+                    {{ form.trailer_state(class_='form-control m-0') }}
+                </p>
+            </div> 
+        </div>    
     </div>
-
+    
     <div class="row" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
     <div class="row form-group">
         <div class="col form-group">
@@ -584,6 +596,19 @@
             space_fee_text.innerHTML = "<b>Space Fee: $</b>" + space_fee.toFixed(2);
             merchant_fee_text.innerHTML = "<b>Total Merchant Fee: $</b>" + merchant_fee.toFixed(2);
         };
+
+        function parking_check() {
+
+            const parking_checkbox = document.getElementById('require_merchant_parking');
+            const parking_questions = document.getElementById('parking_questions');
+
+            if (parking_checkbox.checked == true){
+                parking_questions.style.display = 'block';
+            } else {
+                parking_questions.style.display = 'none';
+            }
+
+        }
     </script>
     
       {% endblock %}

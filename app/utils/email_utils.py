@@ -60,15 +60,15 @@ def send_fastpass_email(recipient, reg):
 def send_merchant_confirmation_email(recipient, merchant):
     msg = Message(
         subject="Gulf Wars - Merchant Application Confirmation",
-        sender=("GulfWars Merchantcrat","merchantcrat@gulfwars.org"),
         recipients=[recipient],
     )
     
     msg.html = "<p>Greetings,</p>" \
-    "<p>We have received your Merchant Application</p>" \
+    "<p>Your Merchant Application for Gulf Wars XXXIV has been successfully submitted. You will receive another email once you are approved.</p>" \
+    "<p>If you have any questions or need to submit further information please contact the Merchantcrats at merchantcrat@gulfwars.org</p>" \
     "<p>In Service,<br/>" \
-    "Salim Al'Hahlil<br/>" \
-    "Testing SMTP Deputy</p>" \
+    "Master Odhrán macc Corbáin<br/>" \
+    "THL Dante Matteo Ricci</p>" \
     "<br/><br/>" \
 
     mail.send(msg)
@@ -87,13 +87,15 @@ def send_merchant_approval_email(recipient, merchant):
     msg.attach('fastpass.png','image/png',image, 'inline', headers=[['Content-ID','<fastpass>'],])
     
     msg.html = "<p>Greetings,</p>" \
-    "<p>You have been approved to merchant ay Gulf Wars!</p>" \
+    "<p>Your Merchant Application has been Approved for Gulf Wars XXXIV! We are excited to have you join us this March. Be on the lookout for your invoices from Gulf Wars PayPal team and get those taken care of.</p>" \
+    "<p>If you have any questions or need further information please contact the Merchantcrats at merchantcrat@gulfwars.org</p>"\
     "<p>In Service,<br/>" \
-    "Salim Al'Hahlil<br/>" \
-    "Testing SMTP Deputy</p>" \
+    "Master Odhrán macc Corbáin<br/>" \
+    "THL Dante Matteo Ricci</p>" \
     "<br/><br/>" \
-    "<p>RegID: "+str(merchant.id)+"<br/>" \
+    "<p>Merchant ID: "+str(merchant.id)+"<br/>" \
     "Name: "+merchant.fname+" "+merchant.lname+"<br/>" \
+    "Business Name: "+merchant.business_name+"<br/>"\
     "Arrival Date: "+str(merchant.estimated_date_of_arrival)+"</p>" \
     "<img src=\"cid:fastpass\" alt=\"Fast Pass QR Code\">"
     
