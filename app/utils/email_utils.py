@@ -74,7 +74,7 @@ def send_merchant_confirmation_email(recipient, merchant):
     mail.send(msg)
 
 def send_merchant_approval_email(recipient, merchant):
-    qrcode_str = qrcode(url_for('merchant.merchant_checkin', merchantid=merchant.id))
+    qrcode_str = qrcode(url_for('merchant.merchant_checkin', merchantid=merchant.id), border=1)
     msg = Message(
         subject="Gulf Wars - Merchant Approval",
         sender="carl.cox.primary@gmail.com",
