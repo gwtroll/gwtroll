@@ -47,8 +47,8 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/', methods=['GET', 'POST'])
-@login_required
-@permission_required('registration_view')
+# @login_required #REMOVE
+# @permission_required('registration_view') #REMOVE
 def index():
     today = datetime.today().date()
     regcount = reg_count()
