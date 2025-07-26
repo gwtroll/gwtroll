@@ -2,7 +2,7 @@
 
 {% block content %}
 {% if type=="REGISTRATION" %}
-<form action="" method="post">
+<form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
     <div class="row">
         <div class="col">
@@ -52,7 +52,8 @@
         <div class="col">
             <p>
                 {{ form.invoice_email.label }}<br>
-                {{ form.invoice_email(class_='form-control', readonly=true) }}
+                {{ form.invoice_email(class_='form-control') }}
+                {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -61,26 +62,34 @@
             <p>
                 {{ form.invoice_date.label }}<br>
                 {{ form.invoice_date(class_='form-control') }}
+                {% if form.invoice_date.errors %}{% for error in form.invoice_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
             <p>
                 {{ form.invoice_number.label }}<br>
                 {{ form.invoice_number(class_='form-control') }}
+                {% if form.invoice_number.errors %}{% for error in form.invoice_number.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
     <div class="row">
-        <div class="col">
+                <div class="col">
             <p>
-                {{ form.paypal_donation.label }}<br>
-                {{ form.paypal_donation(class_='form-control', readonly=true) }}
+                {{ form.registration_amount.label }}<br>
+                {{ form.registration_amount(class_='form-control', readonly=true, disabled=true) }}
             </p>
         </div>
         <div class="col">
             <p>
-                {{ form.registration_amount.label }}<br>
-                {{ form.registration_amount(class_='form-control', readonly=true) }}
+                {{ form.nmr_amount.label }}<br>
+                {{ form.nmr_amount(class_='form-control', readonly=true, disabled=true) }}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.paypal_donation.label }}<br>
+                {{ form.paypal_donation(class_='form-control', readonly=true, disabled=true) }}
             </p>
         </div>
     </div>
@@ -88,7 +97,7 @@
         <div class="col">
             <p>
                 {{ form.invoice_amount.label }}<br>
-                {{ form.invoice_amount(class_='form-control', readonly=true) }}
+                {{ form.invoice_amount(class_='form-control', readonly=true, disabled=true) }}
             </p>
         </div>
     </div>
@@ -96,7 +105,7 @@
 </div>
     </form>
 {% elif type=="MERCHANT" %}
-<form action="" method="post">
+<form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
     <div class="row">
         <div class="col">
@@ -144,7 +153,8 @@
         <div class="col">
             <p>
                 {{ form.invoice_email.label }}<br>
-                {{ form.invoice_email(class_='form-control', readonly=true) }}
+                {{ form.invoice_email(class_='form-control') }}
+                {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -153,12 +163,14 @@
             <p>
                 {{ form.invoice_date.label }}<br>
                 {{ form.invoice_date(class_='form-control') }}
+                {% if form.invoice_date.errors %}{% for error in form.invoice_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col">
             <p>
                 {{ form.invoice_number.label }}<br>
                 {{ form.invoice_number(class_='form-control') }}
+                {% if form.invoice_number.errors %}{% for error in form.invoice_number.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -166,13 +178,13 @@
         <div class="col">
             <p>
                 {{ form.space_fee.label }}<br>
-                {{ form.space_fee(class_='form-control', readonly=true) }}
+                {{ form.space_fee(class_='form-control', readonly=true, disabled=true) }}
             </p>
         </div>
         <div class="col">
             <p>
                 {{ form.processing_fee.label }}<br>
-                {{ form.processing_fee(class_='form-control', readonly=true) }}
+                {{ form.processing_fee(class_='form-control', readonly=true, disabled=true) }}
             </p>
         </div>
     </div>
@@ -180,7 +192,7 @@
         <div class="col">
             <p>
                 {{ form.merchant_fee.label }}<br>
-                {{ form.merchant_fee(class_='form-control', readonly=true) }}
+                {{ form.merchant_fee(class_='form-control', readonly=true, disabled=true) }}
             </p>
         </div>
     </div>

@@ -210,7 +210,7 @@ def createinvoice():
         form.invoice_date.data = datetime.now()
         form.invoice_email.data = earlyon.registration.invoice_email
     
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         invoice_number = request.form.get('invoice_number')
         invoice_date = request.form.get('invoice_date')
         invoice_email = request.form.get('invoice_email')

@@ -120,10 +120,10 @@ def full_export():
 @permission_required('registration_reports')
 def reports():
     form = ReportForm()
-    s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
-    conndict = dict(item.split("=") for item in s.split(" "))
-    connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
-    engine=db.create_engine(connstring)
+    # s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
+    # conndict = dict(item.split("=") for item in s.split(" "))
+    # connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
+    # engine=db.create_engine(connstring)
     
     file = 'test_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_")) + '.xlsx'
     #if form.dt_start.data is not None:
@@ -141,19 +141,17 @@ def reports():
 
         file = 'full_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        rptquery = "SELECT * FROM registrations"
-        df = pd.read_sql_query(rptquery, engine)
-        base_price_list = []
-        nmr_list = []
-        for index, row in df.iterrows():
-            if row['mbr'] == 'Non-Member' and row['price_calc'] != 0 and row['age'].__contains__('18+'):
-                base_price_list.append(row['price_calc'] - 10)
-                nmr_list.append(10)
-            else:
-                base_price_list.append(row['price_calc'])
-                nmr_list.append(0)
-        df['nmr'] = nmr_list
-        df['base_price'] = base_price_list
+        # rptquery = "SELECT * FROM registrations"
+        # df = pd.read_sql_query(rptquery, engine)
+
+        regs = Registrations.query.all()
+
+        data = [obj.__dict__ for obj in regs]
+
+        data = [{k: v for k, v in d.items() if not k.startswith('_')} for d in data]
+
+        df = pd.DataFrame(data)
+
         path1 = './reports/' + file
         path2 = '../reports/' + file
         
