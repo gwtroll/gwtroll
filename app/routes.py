@@ -111,14 +111,29 @@ def index():
 @login_required
 @permission_required('registration_reports')
 def full_export():
+    
     regs = Registrations.query.filter(Registrations.signature is not None).all()
     # regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
     return render_template('full_export_images.html', regs=regs)
 
-def orm_to_df(orm_obj):
+def orm_to_df(orm_obj, columns=[]):
     data = [obj.__dict__ for obj in orm_obj]
-    data = [{k: v for k, v in d.items() if not k.startswith('_')} for d in data]
-    df = pd.DataFrame(data)
+    return_data = []
+    if len(columns)>0:
+        for d in data:
+            obj = {}
+            for k, v in d.items():
+                if k in columns:
+                    if type(v) == datetime:
+                        obj[k]=v.date()
+                    else:
+                        obj[k]=v
+            return_data.append(obj)
+        # data = [{k: v for k, v in d.items() if k in columns} for d in data]
+    else:
+        return_data = [{k: v for k, v in d.items() if not k.startswith('_')} for d in data]
+    print(return_data)
+    df = pd.DataFrame(return_data)
     return df
 
 @app.route('/reports', methods=['GET', 'POST'])
@@ -216,17 +231,19 @@ def reports():
             return send_file(path2)
     
     if report_type == 'kingdom_count':
-
         file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
-        kingdom_count = Registrations.query.filter(Registrations.checkin is not None)
-        # things = Registrations.query.with_entities(Registrations.kingdom, Registrations.checkin, sa.func.count(Registrations.id)).filter(Registrations.checkin is not None).group_by(Registrations.kingdom, Registrations.checkin).column_descriptions
-        #  Registrations.query()
-        print(kingdom_count)
-        df = orm_to_df(kingdom_count)
-        df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
 
-        # df = pd.read_sql("SELECT kingdom, checkin::date, COUNT(regid) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", engine)
-        # df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
+        # kingdom_count = Registrations.query.filter(Registrations.checkin != None)
+
+        # df = orm_to_df(kingdom_count, columns=['kingdom_id','checkin'])
+
+        # df = pd.DataFrame.from_dict(kingdom_count)
+
+        # df['freq'] = df.groupby(['checkin', 'kingdom_id'])['checkin'].transform('count')
+        # df_pivot = df.pivot_table(values='freq', index='kingdom_id', aggfunc='count', columns='checkin')
+
+        df = pd.read_sql("SELECT (SELECT name FROM kingdom WHERE kingdom.id = registrations.kingdom_id) as kingdom, checkin::date, COUNT(id) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", db.engine)
+        df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -243,12 +260,13 @@ def reports():
 
         writer.close()
         return send_file(path2)
+        return 'bob'
 
     if report_type == 'earlyon':
 
         file = 'earlyon_list_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        df = pd.read_sql("SELECT regid, invoice_status, fname, lname, scaname, email, kingdom, lodging FROM registrations WHERE early_on = true and invoice_status = 'PAID'", engine)
+        df = pd.read_sql("SELECT id, fname, lname, scaname, email, (SELECT name FROM kingdom WHERE kingdom.id = registrations.kingdom_id) AS kingdom, (SELECT name FROM lodging WHERE lodging.id = registrations.lodging_id) AS lodging FROM registrations WHERE early_on_approved = true and balance <= 0", db.engine)
 
         df_obj = df.select_dtypes('object')
 
@@ -271,7 +289,7 @@ def reports():
         rptquery = "SELECT invoice_number, regid, fname, lname, scaname, age, lodging, invoice_status, checkin FROM registrations WHERE prereg = {} AND checkin IS NULL ORDER BY lodging"
         rptquery = rptquery.format('%(prereg)s')
         params = {'prereg':True}
-        df = pd.read_sql_query(rptquery, engine, params=params)
+        df = pd.read_sql_query(rptquery, db.engine, params=params)
         path1 = './reports/' + file
         path2 = '../reports/' + file
 
@@ -285,7 +303,7 @@ def reports():
 
         file = 'royal_registrations_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        df = pd.read_sql("SELECT * FROM registrations WHERE age = 'Royals'", engine)
+        df = pd.read_sql("SELECT * FROM registrations WHERE age = 'Royals'", db.engine)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -301,7 +319,7 @@ def reports():
 
         file = 'land_pre-reg_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-        df = pd.read_sql("SELECT lodging, invoice_number, regid, fname, lname, scaname, age, invoice_status FROM registrations WHERE invoice_status = 'PAID' ORDER BY lodging, invoice_number", engine)
+        df = pd.read_sql("SELECT lodging, invoice_number, regid, fname, lname, scaname, age, invoice_status FROM registrations WHERE invoice_status = 'PAID' ORDER BY lodging, invoice_number", db.engine)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -319,7 +337,7 @@ def reports():
         file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'PAID'"
-        df = pd.read_sql_query(rptquery, engine)
+        df = pd.read_sql_query(rptquery, db.engine)
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
@@ -342,7 +360,7 @@ def reports():
         file = 'paypal_cenceled_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, price_due, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'CANCELED'"
-        df = pd.read_sql_query(rptquery, engine)
+        df = pd.read_sql_query(rptquery, db.engine)
         base_price_list = []
         nmr_list = []
         for index, row in df.iterrows():
@@ -449,7 +467,7 @@ def reports():
         file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND (invoice_status = 'PAID' or invoice_status = 'CANCELED') AND invoice_number IN ({invoice_nums_str})"
-        df = pd.read_sql_query(rptquery, engine)
+        df = pd.read_sql_query(rptquery, db.engine)
         base_price_list = []
         nmr_list = [] 
         checks_list = []
@@ -499,7 +517,7 @@ def reports():
                 counts.append(counts_obj[obj])
         
         rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'check' AND invoice_status = 'PAID'"
-        df = pd.read_sql_query(rptquery, engine)
+        df = pd.read_sql_query(rptquery, db.engine)
 
         for index, row in df.iterrows():
             if row['mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['age'].__contains__('18+'):
@@ -518,7 +536,7 @@ def reports():
         for paypal_invoice_num in paypal_invoice_nums:
             if paypal_invoice_num not in found_invoices and paypal_invoice_num != '':
                 rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND invoice_status = 'PAID' AND invoice_number LIKE '%%{paypal_invoice_num}%%'"
-                df = pd.read_sql_query(rptquery, engine)
+                df = pd.read_sql_query(rptquery, db.engine)
                 for index, row in df.iterrows():
                     if row['mbr'] == 'Non-Member' and row['price_paid'] != 0 and row['age'].__contains__('18+'):
                         row['base_price'] = row['price_paid'] - 10 - row['paypal_donation_amount']
@@ -553,7 +571,7 @@ def reports():
         rptquery = "SELECT checkin, mbr, age, notes, price_paid, pay_type, atd_paid, atd_pay_type, paypal_donation_amount FROM registrations WHERE checkin::date BETWEEN {} and {}"
         rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
         params = {'start_date':start_date, 'end_date':end_date}
-        df = pd.read_sql_query(rptquery, engine, params=params)
+        df = pd.read_sql_query(rptquery, db.engine, params=params)
 
         base_price_list = []
         nmr_list = []
@@ -577,7 +595,7 @@ def reports():
         file = 'log_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT id, regid, userid, (SELECT username FROM users WHERE users.id = reglogs.userid), timestamp, action FROM reglogs"
-        df = pd.read_sql_query(rptquery, engine)
+        df = pd.read_sql_query(rptquery, db.engine)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -589,7 +607,7 @@ def reports():
         file = 'minor_waivers_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT regid, fname, lname, minor_waiver FROM registrations WHERE minor_waiver IS NOT NULL"
-        df = pd.read_sql_query(rptquery, engine)
+        df = pd.read_sql_query(rptquery, db.engine)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file

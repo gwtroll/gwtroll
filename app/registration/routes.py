@@ -306,7 +306,7 @@ def createatd():
         db.session.add(reg)
         db.session.commit()
 
-        log_reg_action(reg, 'CREATE')
+        # log_reg_action(reg, 'CREATE')
 
         flash('Registration {} created for {} {}.'.format(
             reg.id, reg.fname, reg.lname))
@@ -381,7 +381,7 @@ def editreg():
 
                 db.session.commit()
 
-                log_reg_action(reg, 'EDIT')
+                # log_reg_action(reg, 'EDIT')
 
                 return redirect(url_for('troll.reg',regid=regid))
             
@@ -455,7 +455,7 @@ def editreg():
 
                 db.session.commit()
 
-                log_reg_action(reg, 'EDIT')
+                # log_reg_action(reg, 'EDIT')
 
                 return redirect(url_for('troll.reg',regid=regid))
 

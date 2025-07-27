@@ -238,16 +238,16 @@ def get_kingdom_choices():
     
 #     return event_choices
 
-def log_reg_action(reg, action):
-    print(reg)
-    reglog = RegLogs(
-        regid = reg.id,
-        userid = current_user.id,
-        timestamp = datetime.now(),
-        action = action
-    )
-    db.session.add(reglog)
-    db.session.commit()
+# def log_reg_action(reg, action):
+#     print(reg)
+#     reglog = RegLogs(
+#         regid = reg.id,
+#         userid = current_user.id,
+#         timestamp = datetime.now(),
+#         action = action
+#     )
+#     db.session.add(reglog)
+#     db.session.commit()
 
 # def calculate_price_calc(reg):
 #     today_datetime = datetime.today()

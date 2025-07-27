@@ -160,7 +160,7 @@ def update():
 
         db.session.commit()
 
-        log_reg_action(reg, 'INVOICE UPDATED')
+        # log_reg_action(reg, 'INVOICE UPDATED')
 
     return render_template('update_invoice.html', form=form, regs=regs, inv=inv)
 
