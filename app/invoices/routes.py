@@ -170,8 +170,6 @@ def update():
 def createinvoice():
     regids = request.args.get('regids')
     type = request.args.get('type')
-    print(type)
-    print('regids', regids)
     form = SendInvoiceForm()
     if type == 'REGISTRATION':
         regs = get_regs(regids)

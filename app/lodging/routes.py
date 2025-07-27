@@ -51,7 +51,6 @@ def uploadlodging():
                         # event_id=request.form.get('event'),
                     )
                     db.session.add(lodging)
-                print(line_content)
         db.session.commit()
         return redirect(url_for('lodging.lodging'))
 

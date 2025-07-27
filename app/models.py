@@ -254,13 +254,11 @@ class Registrations(db.Model):
     
     def toJSON(self):
         data_dict = {}
-        print(self.__dict__)
         for key in self.__dict__:
             if not key.startswith("_"):
                 if isinstance(self.__dict__[key], datetime):
                     data_dict[key] = datetime.strftime(self.__dict__[key],'%Y-%m-%d')
                 else:
-                    print(self.__dict__[key])
                     data_dict[key] = self.__dict__[key]
         return json.dumps(data_dict)
     

@@ -69,7 +69,6 @@ def eventvariables():
                 merchant_squarefoot_fee=form.merchant_squarefoot_fee.data,
                 merchant_bounced_check_fee=form.merchant_bounced_check_fee.data
             )
-            print("Event Variables Updated")
             db.session.add(eventvariables)
         else:
             eventvariables.name = form.name.data
@@ -96,11 +95,8 @@ def eventvariables():
             eventvariables.merchant_bounced_check_fee = form.merchant_bounced_check_fee.data
         
         db.session.commit()
-        print("Event Variables Saved")
         flash('Event Variables saved successfully!', 'success')
         return redirect(url_for('eventvariables.eventvariables', form=form))
-
-    print(form.errors)
 
     return render_template('edit_eventvariables.html', form=form)
 

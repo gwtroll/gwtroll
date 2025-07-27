@@ -226,7 +226,6 @@ def update(merch_id):
                 if merchant.status == 'APPROVED':
                     send_merchant_approval_email(merchant.email, merchant)
             return render_template('merchant_list.html', merchants=Merchant.query.all())
-        print(form.errors)
         flash('There was an error with your submission. Please check the form and try again.', 'error')
     return render_template('edit_merchant.html', form=form, merchant=merchant, event=event)
 
@@ -242,7 +241,6 @@ def createmerchant():
     event = EventVariables.query.first()
     
     if form.validate_on_submit() and request.method == 'POST':
-        print("Form Validated")
 
         merchant = Merchant(
             application_date = datetime.today().replace(microsecond=0),
@@ -289,8 +287,6 @@ def createmerchant():
         send_merchant_confirmation_email(merchant.email,merchant)
 
         return redirect(url_for('merchant.success', merchantid=merchant.id))
-    elif request.method == 'POST' and not form.validate_on_submit():
-        print(form.errors)
     return render_template('create_merchant.html', form=form, event=event)
 
 @bp.route('/success')

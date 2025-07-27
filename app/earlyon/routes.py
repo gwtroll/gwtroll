@@ -19,7 +19,6 @@ def earlyon():
         earlyons = EarlyOnRequest.query.all()
     else:
         earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
-    print(earlyons)
     return render_template('earlyon_list.html', earlyons=earlyons)
 
 @bp.route('/<int:earlyon_id>', methods=('GET','POST'))
@@ -57,7 +56,6 @@ def update(earlyon_id):
                     rider.reg.early_on_approved = True
             db.session.commit()
             return render_template('earlyon_list.html', earlyons=EarlyOnRequest.query.all())
-        print(form.errors)
         flash('There was an error with your submission. Please check the form and try again.', 'error')
     return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
 
@@ -74,7 +72,6 @@ def createearlyon(regid):
     form.department.choices = get_department_choices()
 
     if request.method == 'POST':
-        print(form.department.data)
         if form.department.data == 'None':
             flash('Please select a department.', 'error')
             return render_template('create_earlyon.html', form=form, reg=reg)
@@ -148,8 +145,6 @@ def createearlyon(regid):
         # send_merchant_confirmation_email(merchant.email,merchant)
 
         return redirect(url_for('earlyon.success', earlyonid=earlyon.id))
-    elif request.method == 'POST' and not form.validate_on_submit():
-        print(form.errors)
     return render_template('create_earlyon.html', form=form, reg=reg)
 
 @bp.route('/success')

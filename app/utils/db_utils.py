@@ -448,7 +448,6 @@ def get_merch_arrival_dates():
     for date in event_dates:
         date_tup = (date.strftime('%Y-%m-%d'), date.strftime('%A - %B %d, %Y'))
         returned_dates.append(date_tup)
-        print(date_tup)
     return returned_dates
 
 def get_department_choices():

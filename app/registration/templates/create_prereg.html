@@ -7,30 +7,34 @@
 <h3 class="text-center">King’s Arrow Ranch, Lumberton, Mississippi</h3>
 <p class="text-center"><a href="http://www.gulfwars.org">www.gulfwars.org</a></p>
 
-<table class="table table-striped table-responsive">
-    <thead>
+<div class="table-responsive">
+    <table class="table table-striped">
+    <tbody>
       <tr>
-        <th scope="col">Autocrats:</th>
-        <th scope="col">
+        <td scope="col">Autocrats:</td>
+        <td scope="col">
             {{event.autocrat1}}<br>
             {{event.autocrat2}}<br>
             {{event.autocrat3}}<br>
             <a href="mailto:autocrats@gulfwars.org">autocrats@gulfwars.org</a>
-        </th>
-        <th scope="col">Registration:</th>
-        <th scope="col">
+        </td>
+        <td scope="col">Registration:</td>
+        <td scope="col">
             Gulf Wars Registrations CST 918-640-5242 <br>
             {{event.reservationist}} <br>
             <a href="mailto:reservations@gulfwars.org">reservations@gulfwars.org</a><br>
             209 S Dogwood Ave. <br>
             Broken Arrow, OK 74012
-        </th>
+        </td>
       </tr>
-    </thead>
+    </tbody>
     </table>  
-    <h5 class="text-center" style="color: red;">Deadline for online registration is 11:59 p.m. Central Time on {{event.preregistration_close_date.strftime('%b. %d, %Y')}}.</h5>  
+</div>
 
-<table class="table table-striped table-responsive">
+<h5 class="text-center" style="color: red;">Deadline for online registration is 11:59 p.m. Central Time on {{event.preregistration_close_date.strftime('%b. %d, %Y')}}.</h5>  
+
+<div class="table-responsive">
+<table class="table table-striped">
     <thead>
       <tr>
         <th scope="col" style="color: red;">Arrival Dates and Rates</th>
@@ -78,6 +82,7 @@
       </tr>
     </tbody>
   </table>
+  </div>
 
   <table class="table table-responsive">
     <thead>
@@ -364,7 +369,8 @@
         </div>
     </div>
     
-    <table class="table">
+    <div class="table-responsive">
+    <table class="table table-striped">
         <thead>
             <th>Registration</th>
             <th>Registration</th>
@@ -393,13 +399,14 @@
             </tr>
             <tr>
                 <td><b>Totals</b></td>
-                <td id="total_invoice_registration">${{invoice_totals['registration']}}</td>
+                <td id="total_invoice_registration">${{invoice_totals['registration'] + 125}}</td>
                 <td id="total_invoice_nmr">${{invoice_totals['nmr']}}</td>
                 <td id="total_invoice_donation">${{invoice_totals['donation']}}</td>
                 <td id="total_invoice_total">${{invoice_totals['total']}}</td>
             </tr>
         </tbody>
     </table>
+    </div>
 
     <div class="row">
         <div class="col">
@@ -414,34 +421,45 @@
 
 </form>
 
+<div class="row">
+    <div class="col">
+        Land Questions? Please visit the Land Page here: <a href="https://gulfwars.org/site-info/land/">Land Information</a>
+        <br/>
+        Site Rules for camps are also located here: <a href="https://gulfwars.org/policies/site-rules/">Site Rules</a>
+        <br/>
+        <span style="color: red;">ALL attendees are responsible for knowing Land and Site rules.</span>
+        <br/>
+        <br/>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        Merchants: If you are interested in receiving a merchant packet contact <a href="mailto:merchantcrat@gulfwars.org">merchantcrat@gulfwars.org</a>
+        <br/>
+        <br/>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        Animals: Any person bringing a service animal is asked to pre-register at: <a href="mailto:animalliaison@gulfwars.org">animalliaison@gulfwars.org</a>
+        <br/>
+        <br/>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        Equestrians: For more information please visit: <a href="https://gulfwars.org/activities/animals/equestrian/">Equestrion Information</a><br>
+        To Register your horse please visit: <a href="https://docs.google.com/forms/d/e/1FAIpQLSfEsxwkK8v5eihH9ktAtf1LmzNEQXIszvxEPiJAwpzaUuw6og/viewform">Horse Registration</a>
+        <br/>
+        <br/>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        Please visit <a href="http://www.gulfwars.org">www.gulfwars.org</a> for more information on attending and participating at the War
+    </div>
+</div>
 
-<table class="table">
-    <tbody>
-      <tr>
-        <th scope="row">Land Questions? Please visit the Land Page here:<a href="https://gulfwars.org/site-info/land/">https://gulfwars.org/site-info/land/</a>
-        <br>
-
-        Site Rules for camps are also located here:<a href="https://gulfwars.org/policies/site-rules/">https://gulfwars.org/policies/site-rules/</a>
-        <br>
-
-        <span style="color: red;">ALL attendees are responsible for knowing Land and Site rules.</span> 
-        </th>
-        </tr>
-      <tr>
-        <th scope="row">Merchants: If you are interested in receiving a merchant packet contact <a href="mailto:merchantcrat@gulfwars.org">merchantcrat@gulfwars.org</a></th>
-      </tr>
-      <tr>
-        <th scope="row">Animals: Any person bringing a service animal is asked to pre-register at: <a href="mailto:animalliaison@gulfwars.org">animalliaison@gulfwars.org</a></th>
-      </tr>
-      <tr>
-        <th scope="row">Equestrians: For more information please visit: <a href="https://gulfwars.org/activities/animals/equestrian/">https://gulfwars.org/activities/animals/equestrian/</a><br>
-        To Register your horse please visit: <a href="https://docs.google.com/forms/d/e/1FAIpQLSfEsxwkK8v5eihH9ktAtf1LmzNEQXIszvxEPiJAwpzaUuw6og/viewform">https://docs.google.com/forms/d/e/1FAIpQLSfEsxwkK8v5eihH9ktAtf1LmzNEQXIszvxEPiJAwpzaUuw6og/viewform </a></th>
-      </tr>
-      <tr>
-        <th scope="row">Please visit <a href="http://www.gulfwars.org">www.gulfwars.org</a> for more information on attending and participating at the War</th>
-      </tr>
-    </tbody>
-  </table>
 </div>
 
 <script>

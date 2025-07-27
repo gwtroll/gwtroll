@@ -14,7 +14,6 @@ from flask_security import roles_accepted
 @permission_required('admin')
 def department():
     all_department = Department.query.order_by(Department.name).all()
-    print(all_department)
     return render_template('viewdepartment.html', departments=all_department)
 
 @bp.route('/create', methods=('GET', 'POST'))

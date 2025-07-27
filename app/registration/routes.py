@@ -123,7 +123,6 @@ def removeregistration(index):
     for r in reg_list:
         new_list.append(json.loads(r))
     session['additional_registrations'] = reg_list
-    print(session['additional_registrations'])
     return redirect(url_for('registration.createprereg'))
 
 @bp.route('/', methods=('GET', 'POST'))
@@ -141,7 +140,6 @@ def createprereg():
     form.expected_arrival_date.choices = get_reg_arrival_dates()
     event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
-    print(pricesheet)
     if 'additional_registrations' in session and len(session['additional_registrations']) > 0:
         additional_registrations = [json.loads(r) for r in session['additional_registrations']]
         form.invoice_email.data = additional_registrations[0]['invoice_email']
@@ -221,7 +219,6 @@ def createprereg():
             reg.id, reg.fname, reg.lname))
             return redirect(url_for('registration.success'))
     # elif request.method == 'POST' and not form.validate_on_submit():
-    #     print(request.form)
     #     form.fname.data = request.form.get('fname')
     #     form.lname.data = request.form.get('lname')
     return render_template('create_prereg.html', form=form, pricesheet=pricesheet, additional_registrations=additional_registrations, event=event, clear=False, invoice_totals=invoice_totals)

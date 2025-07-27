@@ -15,7 +15,6 @@ from flask_security import roles_accepted
 @permission_required('admin')
 def kingdom():
     all_kingdom = Kingdom.query.order_by(Kingdom.name).all()
-    print(all_kingdom)
     return render_template('viewkingdom.html', kingdoms=all_kingdom)
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -48,7 +47,6 @@ def uploadkingdom():
                         name=kingdom_name,
                     )
                     db.session.add(kingdom)
-                print(line_content)
         db.session.commit()
         return redirect(url_for('kingdom.kingdom'))
 
