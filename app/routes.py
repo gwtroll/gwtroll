@@ -1,4 +1,6 @@
 from app import app, db, login, mail
+import mimetypes
+mimetypes.add_type('application/javascript', '.js')
 from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
@@ -132,7 +134,6 @@ def orm_to_df(orm_obj, columns=[]):
         # data = [{k: v for k, v in d.items() if k in columns} for d in data]
     else:
         return_data = [{k: v for k, v in d.items() if not k.startswith('_')} for d in data]
-    print(return_data)
     df = pd.DataFrame(return_data)
     return df
 
@@ -200,20 +201,20 @@ def reports():
         if form.validate_on_submit():
             file = 'at_door_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-            checkins = Registrations.query(sa.func.count(Registrations.id), sa.func.sum(Registrations.registration_price)).filter(Registrations.checkin.between(start_date, end_date), Registrations.prereg==False)
-            df_atd = orm_to_df(checkins)
-            checkins = Registrations.query(sa.func.count(Registrations.id), sa.func.sum(Registrations.registration_price)).filter(Registrations.checkin.between(start_date, end_date), Registrations.prereg==True)
-            df_prereg = orm_to_df(checkins)
-            df = df_atd.merge(df_prereg, how='outer')
+            # checkins = Registrations.query(sa.func.count(Registrations.id), sa.func.sum(Registrations.registration_price)).filter(Registrations.checkin.between(start_date, end_date), Registrations.prereg==False)
+            # df_atd = orm_to_df(checkins)
+            # checkins = Registrations.query(sa.func.count(Registrations.id), sa.func.sum(Registrations.registration_price)).filter(Registrations.checkin.between(start_date, end_date), Registrations.prereg==True)
+            # df_prereg = orm_to_df(checkins)
+            # df = df_atd.merge(df_prereg, how='outer')
 
-            # rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg is false"
-            # rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
-            # params = {'start_date':start_date, 'end_date':end_date}
-            # df = pd.read_sql_query(rptquery, engine, params=params)
-            # rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg = {}"
-            # rptquery = rptquery.format('%(start_date)s', '%(end_date)s', '%(prereg)s')
-            # params = {'start_date':start_date, 'end_date':end_date, 'prereg':True}
-            # df = df.merge(pd.read_sql_query(rptquery, engine, params=params), how='outer')
+            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg is false"
+            rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
+            params = {'start_date':start_date, 'end_date':end_date}
+            df = pd.read_sql_query(rptquery, db.engine, params=params)
+            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg = {}"
+            rptquery = rptquery.format('%(start_date)s', '%(end_date)s', '%(prereg)s')
+            params = {'start_date':start_date, 'end_date':end_date, 'prereg':True}
+            df = df.merge(pd.read_sql_query(rptquery, db.engine, params=params), how='outer')
 
             path1 = './reports/' + file
             path2 = '../reports/' + file

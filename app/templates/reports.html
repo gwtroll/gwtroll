@@ -2,6 +2,23 @@
 
 {% block content %}
 
+<!-- <div style="width: 500px;"><canvas id="dimensions"></canvas></div><br/> -->
+<div class="row">
+    <div class="col">
+        <canvas id="preregistrations"></canvas>
+    </div>
+    <div class="col">
+        <canvas id="checkins"></canvas>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <canvas id="registrations_bykingdom"></canvas>
+    </div>
+    <div class="col">
+        <canvas id="invoice_status_amount"></canvas>
+    </div>
+</div>
 
 <form action="" method="post" novalidate enctype="multipart/form-data">
     {{ form.hidden_tag() }}
@@ -19,8 +36,13 @@
         {{ form.dt_end() }}
     </p>
     <p> For PayPal Recon </p>
-    <input type="file" name="paypal_file" id="paypal_file" />  
+    <input type="file" name="paypal_file" id="paypal_file" />
     <p>{{ form.submit() }}</p>
-    </form>
+</form>
+
+<script src="{{ url_for('static', filename='plugins/preregistrations.js')}}"></script>
+<script src="{{ url_for('static', filename='plugins/checkins.js')}}"></script>
+<script src="{{ url_for('static', filename='plugins/regbykingdom.js')}}"></script>
+<script src="{{ url_for('static', filename='plugins/invoice_status_amount.js')}}"></script>
 
 {% endblock %}
