@@ -51,8 +51,13 @@ def create_prereg(data):
         else:
             reg.nmr_price = 0
             reg.nmr_balance = 0
+    else:
+        reg.registration_price = 0
+        reg.registration_balance = 0
+        reg.nmr_price = 0
+        reg.nmr_balance = 0
     
-        reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
+    reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
 
     return reg
 

@@ -36,13 +36,13 @@ def get_db_connection():
 
     return conn
 
-def query_db(query, args=(), one=False):
-    conn = get_db_connection()
-    cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-    cur.execute(query, args)
-    rv = cur.fetchall()
-    conn.close()
-    return (rv[0] if rv else None) if one else rv
+# def query_db(query, args=(), one=False):
+#     conn = get_db_connection()
+#     cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+#     cur.execute(query, args)
+#     rv = cur.fetchall()
+#     conn.close()
+#     return (rv[0] if rv else None) if one else rv
 
 def get_reg(regid):
     reg = Registrations.query.filter_by(id=regid).first()
@@ -150,7 +150,7 @@ def get_role(roleid):
     return role
 
 def get_roles():
-    roles = Role.query.all()
+    roles = Role.query.order_by(Role.name).all()
     if roles is None:
         abort(404)
     return roles
@@ -185,7 +185,7 @@ def get_permission(permissionid):
     return permission
 
 def get_permission_choices():
-    permissions = Permissions.query.all()
+    permissions = Permissions.query.order_by(Permissions.name).all()
     permission_choices = []
     permission_dict = {}
     for p in permissions:
@@ -200,7 +200,7 @@ def get_lodging_choices():
     if lodging_choices != None and lodging_cache_time > datetime.now() + timedelta(hours=-1):
         return lodging_choices
     else:
-        lodgings = Lodging.query.filter().all()
+        lodgings = Lodging.query.order_by(Lodging.name).all()
         local_lodging_choices = [('-', '-')]
         for l in lodgings:
             local_lodging_choices.append([l.id, l.name])
@@ -214,7 +214,7 @@ def get_kingdom_choices():
     if kingdom_choices != None and kindgom_cache_time > datetime.now() + timedelta(hours=-1):
         return kingdom_choices
     else:
-        kingdoms = Kingdom.query.all()
+        kingdoms = Kingdom.query.order_by(Kingdom.name).all()
         local_kingdom_choices = [('-', '-')]
         for l in kingdoms:
             local_kingdom_choices.append([l.id, l.name])
@@ -452,7 +452,7 @@ def get_merch_arrival_dates():
     return returned_dates
 
 def get_department_choices():
-    departments = Department.query.all()
+    departments = Department.query.order_by(Department.name).all()
     department_choices = [(None, '-')]
     for d in departments:
         department_tup = (d.id, d.name)

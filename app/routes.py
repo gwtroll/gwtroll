@@ -115,6 +115,12 @@ def full_export():
     # regs = query_db("SELECT * FROM registrations WHERE signature IS NOT NULL")
     return render_template('full_export_images.html', regs=regs)
 
+def orm_to_df(orm_obj):
+    data = [obj.__dict__ for obj in orm_obj]
+    data = [{k: v for k, v in d.items() if not k.startswith('_')} for d in data]
+    df = pd.DataFrame(data)
+    return df
+
 @app.route('/reports', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_reports')
@@ -146,11 +152,7 @@ def reports():
 
         regs = Registrations.query.all()
 
-        data = [obj.__dict__ for obj in regs]
-
-        data = [{k: v for k, v in d.items() if not k.startswith('_')} for d in data]
-
-        df = pd.DataFrame(data)
+        df = orm_to_df(regs)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
@@ -163,10 +165,12 @@ def reports():
 
             file = 'full_checkin_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-            rptquery = "SELECT * FROM registrations WHERE checkin::date BETWEEN {} and {}"
-            rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
-            params = {'start_date':start_date, 'end_date':end_date}
-            df = pd.read_sql_query(rptquery, engine, params=params)
+            checkins = Registrations.query.filter(Registrations.checkin.between(start_date, end_date))
+            df = orm_to_df(checkins)
+            # rptquery = "SELECT * FROM registrations WHERE checkin::date BETWEEN {} and {}"
+            # rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
+            # params = {'start_date':start_date, 'end_date':end_date}
+            # df = pd.read_sql_query(rptquery, engine, params=params)
             path1 = './reports/' + file
             path2 = '../reports/' + file
             
@@ -175,26 +179,33 @@ def reports():
             worksheet = writer.sheets['Report']
             writer.close()
             return send_file(path2)
+        
     
     if report_type == 'at_door_count':
         if form.validate_on_submit():
             file = 'at_door_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
-            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg is false"
-            rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
-            params = {'start_date':start_date, 'end_date':end_date}
-            df = pd.read_sql_query(rptquery, engine, params=params)
-            rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg = {}"
-            rptquery = rptquery.format('%(start_date)s', '%(end_date)s', '%(prereg)s')
-            params = {'start_date':start_date, 'end_date':end_date, 'prereg':True}
-            df = df.merge(pd.read_sql_query(rptquery, engine, params=params), how='outer')
+            checkins = Registrations.query(sa.func.count(Registrations.id), sa.func.sum(Registrations.registration_price)).filter(Registrations.checkin.between(start_date, end_date), Registrations.prereg==False)
+            df_atd = orm_to_df(checkins)
+            checkins = Registrations.query(sa.func.count(Registrations.id), sa.func.sum(Registrations.registration_price)).filter(Registrations.checkin.between(start_date, end_date), Registrations.prereg==True)
+            df_prereg = orm_to_df(checkins)
+            df = df_atd.merge(df_prereg, how='outer')
+
+            # rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg is false"
+            # rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
+            # params = {'start_date':start_date, 'end_date':end_date}
+            # df = pd.read_sql_query(rptquery, engine, params=params)
+            # rptquery = "SELECT count(*), sum(price_calc) FROM registrations WHERE checkin::date BETWEEN {} and {} and prereg = {}"
+            # rptquery = rptquery.format('%(start_date)s', '%(end_date)s', '%(prereg)s')
+            # params = {'start_date':start_date, 'end_date':end_date, 'prereg':True}
+            # df = df.merge(pd.read_sql_query(rptquery, engine, params=params), how='outer')
 
             path1 = './reports/' + file
             path2 = '../reports/' + file
 
             writer = pd.ExcelWriter(path1, engine='xlsxwriter')
 
-            df.to_excel(writer, sheet_name='Report' ,index = False, startcol=1)
+            df.to_excel(writer, sheet_name='Report', index = False, startcol=1)
             workbook = writer.book
             worksheet = writer.sheets["Report"]           
             worksheet.write('A2', "At the Door")
@@ -207,9 +218,15 @@ def reports():
     if report_type == 'kingdom_count':
 
         file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
-
-        df = pd.read_sql("SELECT kingdom, checkin::date, COUNT(regid) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", engine)
+        kingdom_count = Registrations.query.filter(Registrations.checkin is not None)
+        # things = Registrations.query.with_entities(Registrations.kingdom, Registrations.checkin, sa.func.count(Registrations.id)).filter(Registrations.checkin is not None).group_by(Registrations.kingdom, Registrations.checkin).column_descriptions
+        #  Registrations.query()
+        print(kingdom_count)
+        df = orm_to_df(kingdom_count)
         df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
+
+        # df = pd.read_sql("SELECT kingdom, checkin::date, COUNT(regid) FROM registrations WHERE checkin IS NOT NULL GROUP BY kingdom, checkin", engine)
+        # df_pivot = df.pivot_table(index='kingdom', columns='checkin', values='count', dropna=False)
 
         path1 = './reports/' + file
         path2 = '../reports/' + file
