@@ -54,7 +54,7 @@ class User(UserMixin, db.Model):
     medallion = db.Column(db.Integer())
 
     department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'))
-    department = db.relationship("Department", backref="user_department")
+    department = db.relationship("Department", backref="user_department", viewonly=True)
 
     active = db.Column(db.Boolean())
 
@@ -179,8 +179,8 @@ class EarlyOnRequestRiders(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     earlyonrequest_id = db.Column(db.Integer(), db.ForeignKey('earlyonrequest.id', ondelete='CASCADE'))
     earlyonrider_id = db.Column(db.Integer(), db.ForeignKey('earlyonrider.id', ondelete='CASCADE'))
-    earlyonrequest = db.relationship("EarlyOnRequest", backref="earlyonrequest_riders")
-    earlyonrider = db.relationship("EarlyOnRider", backref="earlyonrequest_riders")
+    earlyonrequest = db.relationship("EarlyOnRequest", backref="earlyonrequest_riders", viewonly=True)
+    earlyonrider = db.relationship("EarlyOnRider", backref="earlyonrequest_riders", viewonly=True)
 
 class Registrations(db.Model):
     id = db.Column(db.Integer(), primary_key=True, unique=True)
@@ -285,8 +285,6 @@ class Registrations(db.Model):
         if paypal_donation_balance < 0:
             paypal_donation_balance = 0
         self.paypal_donation_balance = paypal_donation_balance
-
-            
     
 class Invoice(db.Model):
     __tablename__ = 'invoice'

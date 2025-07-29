@@ -117,6 +117,8 @@
         <br/>
     </div>
     {% endfor %}
+    {% if form.riders.errors %}{% for error in form.riders.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
 
     <div class="row">
         <div class="col">

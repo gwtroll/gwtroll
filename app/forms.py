@@ -220,7 +220,7 @@ class EditForm(FlaskForm):
 class RiderForm(Form):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
-    scaname = StringField('SCA Name', validators=[DataRequired()])
+    scaname = StringField('SCA Name', validators=[Optional()])
     minor = BooleanField('Minor', default=False, validators=[Optional()])
     regid = IntegerField('Registration Id', validators=[DataRequired()])
     submit = SubmitField('Add Rider')

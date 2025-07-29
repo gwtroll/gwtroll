@@ -142,9 +142,9 @@ def createearlyon(regid):
             db.session.add(earlyon)
             db.session.commit()
 
-        # send_merchant_confirmation_email(merchant.email,merchant)
+            # TODO: send_earlyon_confirmation_email(earlyon.email,earlyon)
 
-        return redirect(url_for('earlyon.success', earlyonid=earlyon.id))
+            return redirect(url_for('earlyon.success', earlyonid=earlyon.id))
     return render_template('create_earlyon.html', form=form, reg=reg)
 
 @bp.route('/success')
