@@ -16,6 +16,7 @@
                     <th>Registration</th>
                     <th>NMR</th>
                     <th>PayPal Donation</th>
+                    <th>Balance</th>
                     <th>Mark Duplicate</th>
                 </thead>
                 <tbody>
@@ -30,6 +31,7 @@
                         <td>{{ reg.registration_price }}</td>
                         <td>{{ reg.nmr_price }}</td>
                         <td>{{ reg.paypal_donation }}</td>
+                        <td>{{ reg.balance }}</td>
                         <td><a href="{{url_for('registration.duplicate', regid=reg.id)}}"><button class="btn btn-danger" type="button">Mark Duplicate</button></a></td>
                     </tr>
                     {% endfor %}

@@ -43,7 +43,7 @@ def add_bow(regid):
             bow = Bows()
             bow.poundage = request.form.get("poundage")
             bow.bow_inspection_marshal_id = current_user.id
-            bow.bow_inspection_date = datetime.now()
+            bow.bow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
             if update_reg.bows:
                 update_reg.bows.append(bow)
             else:
@@ -65,7 +65,7 @@ def add_crossbow(regid):
             crossbow = Crossbows()
             crossbow.inchpounds = request.form.get("poundage")
             crossbow.crossbow_inspection_marshal_id = current_user.id
-            crossbow.crossbow_inspection_date = datetime.now()
+            crossbow.crossbow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
             if update_reg.crossbows:
                 update_reg.crossbows.append(crossbow)
             else:
@@ -87,7 +87,7 @@ def incident(regid):
 
         new_incident = IncidentReport(
             regid = regid,
-            report_date = datetime.now(),
+            report_date = datetime.now(pytz.timezone('America/Chicago')),
             incident_date = incident_date,
             reporting_user_id = current_user.id,
             notes = notes
@@ -149,7 +149,7 @@ def reg(regid):
             new_inspection = MarshalInspection(
                 regid = regid,
                 inspection_type = 'Heavy',
-                inspection_date = datetime.now(),
+                inspection_date = datetime.now(pytz.timezone('America/Chicago')),
                 inspecting_marshal_id = current_user.id,
                 inspected = True
             )
@@ -158,7 +158,7 @@ def reg(regid):
             new_inspection = MarshalInspection(
                 regid = regid,
                 inspection_type = 'Heavy Spear',
-                inspection_date = datetime.now(),
+                inspection_date = datetime.now(pytz.timezone('America/Chicago')),
                 inspecting_marshal_id = current_user.id,
                 inspected = True
             )
@@ -167,7 +167,7 @@ def reg(regid):
             new_inspection = MarshalInspection(
                 regid = regid,
                 inspection_type = 'Rapier',
-                inspection_date = datetime.now(),
+                inspection_date = datetime.now(pytz.timezone('America/Chicago')),
                 inspecting_marshal_id = current_user.id,
                 inspected = True
             )
@@ -176,7 +176,7 @@ def reg(regid):
             new_inspection = MarshalInspection(
                 regid = regid,
                 inspection_type = 'Rapier Spear',
-                inspection_date = datetime.now(),
+                inspection_date = datetime.now(pytz.timezone('America/Chicago')),
                 inspecting_marshal_id = current_user.id,
                 inspected = True
             )
@@ -185,7 +185,7 @@ def reg(regid):
             new_inspection = MarshalInspection(
                 regid = regid,
                 inspection_type = 'Combat Archery',
-                inspection_date = datetime.now(),
+                inspection_date = datetime.now(pytz.timezone('America/Chicago')),
                 inspecting_marshal_id = current_user.id,
                 inspected = True
             )
@@ -206,13 +206,13 @@ def reports():
     connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
     engine=db.create_engine(connstring)
     
-    file = 'test_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_")) + '.xlsx'
+    file = 'test_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_")) + '.xlsx'
    
     report_type = form.report_type.data
 
     if report_type == 'full_inspection_report':
 
-        file = 'full_inspection_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'full_inspection_report_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         rptquery = "SELECT id, (SELECT fname FROM registrations WHERE registrations.id = marshal_inspection.id) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.id = marshal_inspection.id) AS \"Reg_LName\", inspection_type, inspection_date, (SELECT fname FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_LName\", (SELECT medallion FROM users WHERE users.id = marshal_inspection.inspecting_marshal_id) AS \"Marshal_Medallion\" FROM marshal_inspection"
         df = pd.read_sql_query(rptquery, engine)
@@ -227,7 +227,7 @@ def reports():
     
     if report_type == 'full_incident_report':
 
-        file = 'full_incident_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'full_incident_report_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         rptquery = "SELECT id, (SELECT fname FROM registrations WHERE registrations.id = incidentreport.id) AS \"Reg_FName\", (SELECT lname FROM registrations WHERE registrations.id = incidentreport.id) AS \"Reg_LName\", report_date, incident_date, (SELECT fname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_FName\", (SELECT lname FROM users WHERE users.id = incidentreport.reporting_user_id) AS \"Marshal_LName\", notes FROM incidentreport"
         df = pd.read_sql_query(rptquery, engine)

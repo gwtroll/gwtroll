@@ -52,7 +52,7 @@ def logout():
 @login_required
 @permission_required('registration_view')
 def index():
-    today = datetime.today().date()
+    today = datetime.now(pytz.timezone('America/Chicago')).date()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==today).first()
     if pricesheet == None:
         pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
@@ -103,11 +103,11 @@ def index():
             #     "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
             #     (search_value,))
         else:
-            return render_template('index.html', pricesheet=pricesheet, today=today)
+            return render_template('index.html', pricesheet=pricesheet, today=today, regcount=reg_count())
 
-        return render_template('index.html', searchreg=reg, pricesheet=pricesheet, today=today)
+        return render_template('index.html', searchreg=reg, pricesheet=pricesheet, today=today, regcount=reg_count())
     else:
-        return render_template('index.html', pricesheet=pricesheet, today=today)
+        return render_template('index.html', pricesheet=pricesheet, today=today, regcount=reg_count())
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required
@@ -147,7 +147,7 @@ def reports():
     # connstring = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
     # engine=db.create_engine(connstring)
     
-    file = 'test_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_")) + '.xlsx'
+    file = 'test_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_")) + '.xlsx'
     #if form.dt_start.data is not None:
     start_date = form.dt_start.data
     #if form.dt_end.data is not None:
@@ -161,7 +161,7 @@ def reports():
     
     if report_type == 'full_export':
 
-        file = 'full_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+        file = 'full_export_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         # rptquery = "SELECT * FROM registrations"
         # df = pd.read_sql_query(rptquery, engine)
@@ -179,7 +179,7 @@ def reports():
     if report_type == 'full_checkin_report':
         if form.validate_on_submit():
 
-            file = 'full_checkin_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+            file = 'full_checkin_report_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
             checkins = Registrations.query.filter(Registrations.checkin.between(start_date, end_date))
             df = orm_to_df(checkins)
@@ -199,7 +199,7 @@ def reports():
     
     if report_type == 'at_door_count':
         if form.validate_on_submit():
-            file = 'at_door_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+            file = 'at_door_count_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
             # checkins = Registrations.query(sa.func.count(Registrations.id), sa.func.sum(Registrations.registration_price)).filter(Registrations.checkin.between(start_date, end_date), Registrations.prereg==False)
             # df_atd = orm_to_df(checkins)
@@ -232,7 +232,7 @@ def reports():
             return send_file(path2)
     
     if report_type == 'kingdom_count':
-        file = 'kingdom_count_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'kingdom_count_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         # kingdom_count = Registrations.query.filter(Registrations.checkin != None)
 
@@ -265,7 +265,7 @@ def reports():
 
     if report_type == 'earlyon':
 
-        file = 'earlyon_list_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'earlyon_list_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         df = pd.read_sql("SELECT id, fname, lname, scaname, email, (SELECT name FROM kingdom WHERE kingdom.id = registrations.kingdom_id) AS kingdom, (SELECT name FROM lodging WHERE lodging.id = registrations.lodging_id) AS lodging FROM registrations WHERE early_on_approved = true and balance <= 0", db.engine)
 
@@ -285,7 +285,7 @@ def reports():
 
     if report_type == 'ghost_report':
 
-        file = 'ghost_report_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'ghost_report_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         rptquery = "SELECT invoice_number, regid, fname, lname, scaname, age, lodging, invoice_status, checkin FROM registrations WHERE prereg = {} AND checkin IS NULL ORDER BY lodging"
         rptquery = rptquery.format('%(prereg)s')
@@ -302,7 +302,7 @@ def reports():
 
     if report_type == 'royal_registrations':
 
-        file = 'royal_registrations_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'royal_registrations_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         df = pd.read_sql("SELECT * FROM registrations WHERE age = 'Royals'", db.engine)
 
@@ -318,7 +318,7 @@ def reports():
 
     if report_type == 'land_pre-reg':
 
-        file = 'land_pre-reg_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'land_pre-reg_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         df = pd.read_sql("SELECT lodging, invoice_number, regid, fname, lname, scaname, age, invoice_status FROM registrations WHERE invoice_status = 'PAID' ORDER BY lodging, invoice_number", db.engine)
 
@@ -335,7 +335,7 @@ def reports():
 
     if report_type == 'paypal_paid_export':
 
-        file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+        file = 'paypal_paid_export_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'PAID'"
         df = pd.read_sql_query(rptquery, db.engine)
@@ -358,7 +358,7 @@ def reports():
     
     if report_type == 'paypal_canceled_export':
 
-        file = 'paypal_cenceled_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+        file = 'paypal_cenceled_export_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, price_due, paypal_donation_amount, notes FROM registrations WHERE invoice_status = 'CANCELED'"
         df = pd.read_sql_query(rptquery, db.engine)
@@ -465,7 +465,7 @@ def reports():
 
         invoice_nums_str = ','.join(invoice_nums)
 
-        file = 'paypal_recon_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'paypal_recon_export_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         rptquery = f"SELECT invoice_number, invoice_email, invoice_status, invoice_payment_date, mbr, age, price_paid, paypal_donation_amount FROM registrations WHERE pay_type = 'paypal' AND (invoice_status = 'PAID' or invoice_status = 'CANCELED') AND invoice_number IN ({invoice_nums_str})"
         df = pd.read_sql_query(rptquery, db.engine)
@@ -567,7 +567,7 @@ def reports():
     
     if report_type == 'atd_export':
 
-        file = 'paypal_paid_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+        file = 'paypal_paid_export_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT checkin, mbr, age, notes, price_paid, pay_type, atd_paid, atd_pay_type, paypal_donation_amount FROM registrations WHERE checkin::date BETWEEN {} and {}"
         rptquery = rptquery.format('%(start_date)s', '%(end_date)s')
@@ -593,7 +593,7 @@ def reports():
     
     if report_type == 'log_export':
 
-        file = 'log_export_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+        file = 'log_export_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT id, regid, userid, (SELECT username FROM users WHERE users.id = reglogs.userid), timestamp, action FROM reglogs"
         df = pd.read_sql_query(rptquery, db.engine)
@@ -605,7 +605,7 @@ def reports():
         return send_file(path2)
 
     if report_type == 'minor_waivers':
-        file = 'minor_waivers_' + str(datetime.now().isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
+        file = 'minor_waivers_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
         rptquery = "SELECT regid, fname, lname, minor_waiver FROM registrations WHERE minor_waiver IS NOT NULL"
         df = pd.read_sql_query(rptquery, db.engine)

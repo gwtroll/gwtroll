@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 from typing import Optional
 from flask_security import UserMixin, RoleMixin, UserMixin
 import sqlalchemy as sa
@@ -139,7 +140,7 @@ class EarlyOnRequest(db.Model):
     registration = db.relationship("Registrations", backref="earlyonrequest")
     department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'))
     department = db.relationship("Department", backref="earlyonrequest")
-    request_date = db.Column(db.DateTime(), default=lambda: datetime.now().replace(microsecond=0))
+    request_date = db.Column(db.DateTime(), default=lambda: datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0))
     earlyonriders = db.relationship('EarlyOnRider', secondary='earlyonrequest_riders')
     dept_approval_status = db.Column(db.String(), default='PENDING')
     autocrat_approval_status = db.Column(db.String(), default='PENDING')
@@ -206,7 +207,7 @@ class Registrations(db.Model):
     mbr_num = db.Column(db.Integer())
     
     #Prereg/Reg
-    reg_date_time = db.Column(db.DateTime(), default=lambda: datetime.now().replace(microsecond=0).isoformat())
+    reg_date_time = db.Column(db.DateTime(), default=lambda: datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0).isoformat())
     prereg = db.Column(db.Boolean(), default=False)
     prereg_date_time = db.Column(db.DateTime())
     expected_arrival_date = db.Column(db.Date())
@@ -572,7 +573,7 @@ class Merchant(db.Model):
     trailer_state = db.Column(db.String(), nullable=True)
     notes = db.Column(db.Text(), nullable=True)
 
-    application_date = db.Column(db.DateTime(), default=lambda: datetime.now().replace(microsecond=0).isoformat())
+    application_date = db.Column(db.DateTime(), default=lambda: datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0).isoformat())
 
     checkin_date = db.Column(db.DateTime(), nullable=True)
 

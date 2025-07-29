@@ -16,6 +16,7 @@
                     <th>Registration</th>
                     <th>NMR</th>
                     <th>PayPal Donation</th>
+                    <th>Balance</th>
                 </thead>
                 <tbody>
                     {% if regs %}
@@ -29,6 +30,7 @@
                         <td>{{ reg.registration_price }}</td>
                         <td>{{ reg.nmr_price }}</td>
                         <td>{{ reg.paypal_donation }}</td>
+                        <td>{{ reg.balance }}</td>
                     </tr>
                     {% endfor %}
                     {% endif %}

@@ -32,7 +32,7 @@ def create_prereg(data):
         mbr_num_exp = datetime.strftime(data.mbr_num_exp.data, '%Y-%m-%d') if data.mbr_num_exp.data is not None else None, 
         mbr_num = data.mbr_num.data,
         prereg = True,
-        prereg_date_time = datetime.now().replace(microsecond=0).isoformat(),
+        prereg_date_time = datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0).isoformat(),
         paypal_donation = int(data.paypal_donation_amount.data) if data.paypal_donation.data == True else 0,
         paypal_donation_balance = int(data.paypal_donation_amount.data) if data.paypal_donation.data == True else 0,
         royal_departure_date = data.royal_departure_date.data,
@@ -130,7 +130,7 @@ def createprereg():
 
     event = EventVariables.query.first()
     # Close Pre-Reg at Midnight 02/22/2025
-    if datetime.now().date() >= event.preregistration_close_date:
+    if datetime.now(pytz.timezone('America/Chicago')).date() >= event.preregistration_close_date:
         return render_template("prereg_closed.html", event=event)
     invoice_totals = {'registration':0, 'nmr':0, 'donation':0, 'total':0}
 
@@ -210,13 +210,17 @@ def createprereg():
             if 'additional_registrations' in session:
                 del session['additional_registrations']
 
+            flash_string = ''
             for add_reg in additional_registrations:
                 send_confirmation_email(add_reg.email,add_reg)
-                flash('Registration {} created for {} {}.'.format(
-                add_reg.id, add_reg.fname, add_reg.lname))
+                if add_reg.balance<=0:
+                    send_fastpass_email(add_reg.email,add_reg)
+                flash_string += ('Registration {} created for {} {}.\n'.format(add_reg.id, add_reg.fname, add_reg.lname))
             send_confirmation_email(reg.email,reg)
-            flash('Registration {} created for {} {}.'.format(
-            reg.id, reg.fname, reg.lname))
+            if reg.balance<=0:
+                    send_fastpass_email(reg.email,reg)
+            flash_string += 'Registration {} created for {} {}.'.format(reg.id, reg.fname, reg.lname)
+            flash(flash_string)
             return redirect(url_for('registration.success'))
     # elif request.method == 'POST' and not form.validate_on_submit():
     #     form.fname.data = request.form.get('fname')
@@ -271,8 +275,8 @@ def createatd():
         emergency_contact_name = form.emergency_contact_name.data, 
         emergency_contact_phone = form.emergency_contact_phone.data,)
 
-        reg.expected_arrival_date = datetime.now().date()
-        reg.actual_arrival_date = datetime.now().date()
+        reg.expected_arrival_date = datetime.now(pytz.timezone('America/Chicago')).date()
+        reg.actual_arrival_date = datetime.now(pytz.timezone('America/Chicago')).date()
 
         if reg.age == '18+':
             registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
@@ -299,7 +303,7 @@ def createatd():
         reg.lodging_id = form.lodging.data
 
         if form.mbr.data == 'Member':
-            if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
+            if datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now(pytz.timezone('America/Chicago')).date():
                 flash('Membership Expiration Date {} is not current.'.format(form.mbr_num_exp.data),'error')
                 return render_template('create.html', title = 'New Registration', form=form)
 

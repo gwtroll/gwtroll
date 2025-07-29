@@ -22,9 +22,6 @@ def unsent():
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0, EarlyOnRequest.dept_approval_status == 'APPROVED', EarlyOnRequest.autocrat_approval_status == 'APPROVED')).all()
 
-    # preregtotal = prereg_total()
-    # invoicecount = unsent_count()
-    # regcount = unsent_reg_count()
     reg_invoices = {}
     for reg in all_regs:
         if reg.invoice_email not in reg_invoices:
@@ -43,7 +40,7 @@ def unsent():
             earlyon_invoices[earlyon.registration.invoice_email] = {'invoice_type':'EARLYON','invoice_email':earlyon.registration.invoice_email,'invoice_number':earlyon.invoice_number, 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
         earlyon_invoices[earlyon.registration.invoice_email]['registrations'].append(earlyon.id)
 
-    return render_template('unsent_list.html', reg_invoices=reg_invoices, merchant_invoices=merchant_invoices, earlyon_invoices=earlyon_invoices)
+    return render_template('unsent_list.html', reg_invoices=reg_invoices, merchant_invoices=merchant_invoices, earlyon_invoices=earlyon_invoices, counts=inv_prereg_unsent_counts())
 
 @bp.route('/open', methods=('GET', 'POST'))
 @login_required
@@ -52,10 +49,7 @@ def open():
 
     all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'OPEN')).all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
-    # preregtotal = prereg_total()
-    # invoicecount = unsent_count()
-    # regcount = unsent_reg_count()
-    return render_template('open_list.html', invoices=all_inv)
+    return render_template('open_list.html', invoices=all_inv, counts=inv_prereg_open_counts())
 
 @bp.route('/paid', methods=('GET', 'POST'))
 @login_required
@@ -64,10 +58,7 @@ def paid():
 
     all_inv = Invoice.query.filter(Invoice.invoice_status == 'PAID').all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
-    # preregtotal = prereg_total()
-    # invoicecount = unsent_count()
-    # regcount = unsent_reg_count()
-    return render_template('paid_list.html', invoices=all_inv)
+    return render_template('paid_list.html', invoices=all_inv, counts=inv_prereg_paid_counts())
 
 @bp.route('/canceled', methods=('GET', 'POST'))
 @login_required
@@ -75,15 +66,12 @@ def paid():
 def canceled():
 
     all_inv = Invoice.query.filter(Invoice.invoice_status == 'CANCELED').all()
-    # preregtotal = prereg_total()
-    # invoicecount = unsent_count()
-    # regcount = unsent_reg_count()
     # invoices = {}
     # for reg in all_inv:
     #     if reg.invoice_email not in invoices:
     #         invoices[reg.invoice_email] = {'invoice_email':reg.invoice_email,'invoice_number':reg.invoice_number, 'invoice_status':reg.invoice_status, 'invoice_date':reg.invoice_date, 'registrations':[]}
     #     invoices[reg.invoice_email]['registrations'].append(reg.id)
-    return render_template('invoice_list.html', invoices=all_inv, back='canceled')
+    return render_template('invoice_list.html', invoices=all_inv, back='canceled', counts=inv_prereg_canceled_counts())
 
 @bp.route('/all', methods=('GET', 'POST'))
 @login_required
@@ -99,8 +87,8 @@ def all():
     #     invoices[reg.invoice_email]['invoice_total'] += reg.total_due
 
     #     invoices[reg.invoice_email]['registrations'].append(reg.id)
-    now = datetime.now()
-    return render_template('invoice_list.html', invoices=all_inv, back='all', now=now)
+    now = datetime.now(pytz.timezone('America/Chicago'))
+    return render_template('invoice_list.html', invoices=all_inv, back='all', now=now, counts=inv_prereg_all_counts())
 
 @bp.route('/update', methods=('GET', 'POST'))
 @login_required
@@ -109,7 +97,10 @@ def update():
     invnumber = request.args.get('invnumber')
     inv = get_inv(invnumber)
     if inv.invoice_type == 'REGISTRATION':
-        regs = inv.regs
+        regs = []
+        for r in inv.regs:
+            if r.duplicate == False:
+                regs.append(r)
     elif inv.invoice_type == 'MERCHANT':
         regs = inv.merchants
     elif inv.invoice_type == 'EARLYON':
@@ -178,14 +169,15 @@ def createinvoice():
         nmr_price = 0
         total_due = 0
         for reg in regs:
-            paypal_donation += reg.paypal_donation
-            registration_price += reg.registration_price
-            nmr_price += reg.nmr_price
-            total_due += reg.total_due
+            if reg.duplicate == False:
+                paypal_donation += reg.paypal_donation
+                registration_price += reg.registration_price
+                nmr_price += reg.nmr_price
+                total_due += reg.total_due
         form.paypal_donation.data = paypal_donation
         form.registration_amount.data = registration_price + nmr_price
         form.invoice_amount.data = total_due
-        form.invoice_date.data = datetime.now()
+        form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
         form.invoice_email.data = reg.invoice_email
     elif type == 'MERCHANT':
         regs = get_merchants(regids)
@@ -197,7 +189,7 @@ def createinvoice():
         form.space_fee.data = space_fee
         form.processing_fee.data = processing_fee
         form.merchant_fee.data = space_fee + processing_fee
-        form.invoice_date.data = datetime.now()
+        form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
         form.invoice_email.data = merchant.email
     elif type == 'EARLYON':
         regs = get_earlyon(regids)
@@ -205,7 +197,7 @@ def createinvoice():
         for earlyon in regs:
             rider_fee += earlyon.rider_cost
         form.rider_fee.data = rider_fee
-        form.invoice_date.data = datetime.now()
+        form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
         form.invoice_email.data = earlyon.registration.invoice_email
     
     if request.method == 'POST' and form.validate_on_submit():
@@ -289,7 +281,10 @@ def createpayment():
     invnumber = request.args.get('invnumber')
     inv = get_inv(invnumber)
     if inv.invoice_type == 'REGISTRATION':
-        regs = inv.regs
+        regs = []
+        for r in inv.regs:
+            if r.duplicate == False:
+                regs.append(r)
     elif inv.invoice_type == 'MERCHANT':
         regs = inv.merchants
     elif inv.invoice_type == 'EARLYON':

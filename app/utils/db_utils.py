@@ -22,6 +22,9 @@ pre_reg_price = None
 atd_reg_price_cache_time = datetime.now()
 atd_reg_price = None
 
+checkin_count_cache_time = datetime.now()
+checkin_count = None
+
 def get_db_connection():
     conn = psycopg2.connect(os.environ
         
@@ -62,8 +65,18 @@ def get_inv(invnumber):
         abort(404)
     return inv
 
-# def reg_count():
+def reg_count():
+    global checkin_count_cache_time
+    global checkin_count
+    if checkin_count != None and checkin_count_cache_time > datetime.now() + timedelta(minutes=-10):
+        return checkin_count
+    else:
+        count = len(Registrations.query.with_entities(Registrations.id).filter(Registrations.checkin is not None).all())
+        checkin_count = count
+        checkin_count_cache_time = datetime.now()
+        return checkin_count
 
+# def reg_count():
 #     conn= get_db_connection()
 #     cur = conn.cursor()
 #     cur.execute('SELECT count(*) FROM registrations WHERE checkin IS NOT NULL;', [])
@@ -309,113 +322,90 @@ def recalculate_reg_balance(reg):
         new_balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
     return new_balance
 
-# def prereg_total():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status IS NOT NULL AND invoice_status != 'DUPLICATE' AND invoice_status != 'CANCELED';", [])
-#     results = cur.fetchone()
-#     for preregcount in results:
-#         print(preregcount)
-#     conn.close()
-#     if preregcount is None:
-#         abort(404)
-#     return preregcount
+def inv_prereg_unsent_counts():
+    return {'Prereg':prereg_total(),'Regs':unsent_reg_count(),'Inv':unsent_count()}
 
-# def unsent_count():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(DISTINCT invoice_email) FROM registrations WHERE invoice_status = 'UNSENT';", [])
-#     results = cur.fetchone()
-#     for unsentcount in results:
-#         print(unsentcount)
-#     conn.close()
-#     if unsentcount is None:
-#         abort(404)
-#     return unsentcount
+def prereg_total():
+    regs = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.duplicate==False, Registrations.prereg==True)).all()
+    return len(regs)
 
-# def unsent_reg_count():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'UNSENT';", [])
-#     results = cur.fetchone()
-#     for unsentcount in results:
-#         print(unsentcount)
-#     conn.close()
-#     if unsentcount is None:
-#         abort(404)
-#     return unsentcount
+def unsent_count():
+    unsent=0
+    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
+    unsent += len(unsent_reg)
+    unsent_merch = Merchant.query.with_entities(Merchant.id).filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
+    unsent += len(unsent_merch)
+    unsent_earlyon = EarlyOnRequest.query.with_entities(EarlyOnRequest.id).filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0, EarlyOnRequest.dept_approval_status == 'APPROVED', EarlyOnRequest.autocrat_approval_status == 'APPROVED')).all()
+    unsent += len(unsent_earlyon)
+    return unsent
 
-# def open_count():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'SENT';", [])
-#     results = cur.fetchone()
-#     for opencount in results:
-#         print(opencount)
-#     conn.close()
-#     if opencount is None:
-#         abort(404)
-#     return opencount
+def unsent_reg_count():
+    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).all()
+    return len(unsent_reg)
 
-# def open_reg_count():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'SENT';", [])
-#     results = cur.fetchone()
-#     for opencount in results:
-#         print(opencount)
-#     conn.close()
-#     if opencount is None:
-#         abort(404)
-#     return opencount
+def inv_prereg_open_counts():
+    return {'Prereg':prereg_total(),'Regs':open_reg_count(),'Inv':open_count()}
 
-# def paid_count():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'PAID';", [])
-#     results = cur.fetchone()
-#     for paidcount in results:
-#         print(paidcount)
-#     conn.close()
-#     if paidcount is None:
-#         abort(404)
-#     return paidcount
+def open_count():
+    open_inv = Invoice.query.with_entities(Invoice.invoice_number).filter(Invoice.invoice_status=='OPEN').all()
+    return len(open_inv)
 
-# def paid_reg_count():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'PAID';", [])
-#     results = cur.fetchone()
-#     for paidcount in results:
-#         print(paidcount)
-#     conn.close()
-#     if paidcount is None:
-#         abort(404)
-#     return paidcount
+def open_reg_count():
+    count = 0
+    open_reg = Invoice.query.filter(and_(Invoice.invoice_status=='OPEN')).all()
+    for inv in open_reg:
+        for reg in inv.regs:
+            if reg.duplicate == False: 
+                count+=1
+    return count
 
-# def canceled_count():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(DISTINCT invoice_number) FROM registrations WHERE invoice_status = 'CANCELED' OR invoice_status = 'DUPLICATE';", [])
-#     results = cur.fetchone()
-#     for canceledcount in results:
-#         print(canceledcount)
-#     conn.close()
-#     if canceledcount is None:
-#         abort(404)
-#     return canceledcount
+def inv_prereg_paid_counts():
+    return {'Prereg':prereg_total(),'Regs':paid_reg_count(),'Inv':paid_count()}
 
-# def canceled_reg_count():
-#     conn= get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT count(*) FROM registrations WHERE invoice_status = 'CANCELED' OR invoice_status = 'DUPLICATE';", [])
-#     results = cur.fetchone()
-#     for canceledcount in results:
-#         print(canceledcount)
-#     conn.close()
-#     if canceledcount is None:
-#         abort(404)
-#     return canceledcount
+def paid_count():
+    open_inv = Invoice.query.with_entities(Invoice.invoice_number).filter(Invoice.invoice_status=='PAID').all()
+    return len(open_inv)
+
+def paid_reg_count():
+    count = 0
+    paid_reg = Invoice.query.filter(and_(Invoice.invoice_status=='PAID')).all()
+    for inv in paid_reg:
+        for reg in inv.regs:
+            if reg.duplicate == False: 
+                count+=1
+    return count
+
+def inv_prereg_canceled_counts():
+    return {'Prereg':prereg_total(),'Regs':canceled_reg_count(),'Inv':canceled_count()}
+
+def canceled_count():
+    canceled_inv = Invoice.query.with_entities(Invoice.invoice_number).filter(or_(Invoice.invoice_status=='NO PAYMNET', Invoice.invoice_status=='DUPLICATE')).all()
+    return len(canceled_inv)
+
+def canceled_reg_count():
+    count = 0
+    canceled_reg = Invoice.query.filter(or_(Invoice.invoice_status=='NO PAYMNET', Invoice.invoice_status=='DUPLICATE')).all()
+    for inv in canceled_reg:
+        for reg in inv.regs:
+            if reg.duplicate == False: 
+                count+=1
+    return count
+
+def inv_prereg_all_counts():
+    return {'Prereg':prereg_total(),'Regs':all_reg_count(),'Inv':all_count()}
+
+def all_count():
+    invs = Invoice.query.with_entities(Invoice.invoice_number).filter(and_(Invoice.invoice_status!='NO PAYMNET', Invoice.invoice_status!='DUPLICATE')).all()
+    return len(invs)
+
+def all_reg_count():
+    count = 0
+    regs = Invoice.query.filter(and_(Invoice.invoice_status!='NO PAYMNET', Invoice.invoice_status!='DUPLICATE')).all()
+    for inv in regs:
+        for reg in inv.regs:
+            if reg.duplicate == False: 
+                count+=1
+    return count
 
 def get_earlyon_arrival_dates():
     returned_dates = []

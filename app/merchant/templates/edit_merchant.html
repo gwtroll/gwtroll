@@ -12,12 +12,14 @@
             <p>
                 {{ form.application_date.label }}
                 {{ form.application_date(class_='form-control m-0') }}
+                {% if form.application_date.errors %}{% for error in form.application_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.estimated_date_of_arrival.label }}
                 {{ form.estimated_date_of_arrival(class_='form-control m-0') }}
+                {% if form.estimated_date_of_arrival.errors %}{% for error in form.estimated_date_of_arrival.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -48,18 +50,21 @@
             <p>
                 {{ form.business_name.label }}
                 {{ form.business_name(class_='form-control m-0') }}
+                {% if form.business_name.errors %}{% for error in form.business_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.fname.label }}
                 {{ form.fname(class_='form-control m-0') }}
+                {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.lname.label }}
                 {{ form.lname(class_='form-control m-0') }}
+                {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
@@ -75,18 +80,21 @@
             <p>
                 {{ form.city.label }}
                 {{ form.city(class_='form-control m-0') }}
+                {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.state_province.label }}
                 {{ form.state_province(class_='form-control m-0') }}
+                {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.zip.label }}
                 {{ form.zip(class_='form-control m-0') }}
+                {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -96,12 +104,14 @@
             <p>
                 {{ form.email.label }}
                 {{ form.email(class_='form-control m-0') }}
+                {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.phone.label }}
                 {{ form.phone(class_='form-control m-0') }}
+                {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
@@ -162,12 +172,14 @@
             <p>
                 {{ form.frontage_width.label }}
                 {{ form.frontage_width(class_='form-control m-0') }}
+                {% if form.frontage_width.errors %}{% for error in form.frontage_width.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.frontage_depth.label }}
                 {{ form.frontage_depth(class_='form-control m-0') }}
+                {% if form.frontage_depth.errors %}{% for error in form.frontage_depth.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -177,24 +189,28 @@
             <p>
                 {{ form.ropes_front.label }} <span style="color: red;">*</span>
                 {{ form.ropes_front(class_='form-control m-0') }}
+                {% if form.ropes_front.errors %}{% for error in form.ropes_front.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div> 
         <div class="col form-group">
             <p>
                 {{ form.ropes_back.label }} <span style="color: red;">*</span>
                 {{ form.ropes_back(class_='form-control m-0') }}
+                {% if form.ropes_back.errors %}{% for error in form.ropes_back.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.ropes_left.label }} <span style="color: red;">*</span>
                 {{ form.ropes_left(class_='form-control m-0') }}
+                {% if form.ropes_left.errors %}{% for error in form.ropes_left.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div> 
         <div class="col form-group">
             <p>
                 {{ form.ropes_right.label }} <span style="color: red;">*</span>
                 {{ form.ropes_right(class_='form-control m-0') }}
+                {% if form.ropes_right.errors %}{% for error in form.ropes_right.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -223,12 +239,14 @@
             <p>
                 {{ form.space_fee.label }}
                 {{ form.space_fee(class_='form-control m-0') }}
+                {% if form.space_fee.errors %}{% for error in form.space_fee.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">
             <p>
                 {{ form.processing_fee.label }}
                 {{ form.processing_fee(class_='form-control m-0') }}
+                {% if form.processing_fee.errors %}{% for error in form.processing_fee.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
         <div class="col form-group">

@@ -77,7 +77,7 @@ def checkin():
             elif request.form.get('mbr_num_exp') is None:
                 flash('Membership Expiration Date is Required if Member.','error')
                 return render_template('checkin.html', reg=reg, form=form)
-            elif datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now().date():
+            elif datetime.strptime(request.form.get('mbr_num_exp'),'%Y-%m-%d').date() < datetime.now(pytz.timezone('America/Chicago')).date():
                 flash('Membership Expiration Date {} is not current.'.format(request.form.get('mbr_num_exp')),'error')
                 return render_template('checkin.html', reg=reg, form=form)
         medallion = form.medallion.data
@@ -121,8 +121,8 @@ def checkin():
             reg.kingdom_id = kingdom
             reg.minor_waiver = minor_waiver
             reg.lodging_id = lodging
-            reg.checkin = datetime.today()
-            reg.actual_arrival_date = datetime.today().date()
+            reg.checkin = datetime.now(pytz.timezone('America/Chicago'))
+            reg.actual_arrival_date = datetime.now(pytz.timezone('America/Chicago')).date()
 
             reg.notes = form.notes.data
 
@@ -217,7 +217,7 @@ def payment():
         #     reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
         pay = Payment(
             type = request.form.get('payment_type'),
-            payment_date = datetime.now().date(),
+            payment_date = datetime.now(pytz.timezone('America/Chicago')).date(),
             registration_amount = reg.registration_balance,
             nmr_amount = reg.nmr_balance,
             paypal_donation_amount = reg.paypal_donation_balance,

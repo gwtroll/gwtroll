@@ -64,7 +64,7 @@ def merchant_checkin(merchantid):
     if request.method == 'POST':
         if form.validate_on_submit():
             merchant.notes = form.notes.data
-            merchant.checkin_date = datetime.today().replace(microsecond=0)
+            merchant.checkin_date = datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0).date()
             db.session.commit()
             flash('Merchant {} checked in successfully.'.format(merchant.business_name), 'success')
             return redirect(url_for('merchant.merchant_search'))
@@ -114,7 +114,7 @@ def merchant_payment(merchantid):
 
         pay = Payment(
             type = request.form.get('payment_type'),
-            payment_date = datetime.now().date(),
+            payment_date = datetime.now(pytz.timezone('America/Chicago')).date(),
             amount = request.form.get('total_due'),
             processing_fee_amount = merchant.processing_fee_balance,
             space_fee_amount = merchant.space_fee_balance,
@@ -243,7 +243,7 @@ def createmerchant():
     if form.validate_on_submit() and request.method == 'POST':
 
         merchant = Merchant(
-            application_date = datetime.today().replace(microsecond=0),
+            application_date = datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0),
             business_name = form.business_name.data,
             sca_name = form.sca_name.data,
             fname = form.fname.data,
@@ -263,7 +263,7 @@ def createmerchant():
             ropes_back = form.ropes_back.data,
             space_fee = (int(form.frontage_width.data) + int(form.ropes_left.data) + int(form.ropes_right.data)) * (int(form.frontage_depth.data) + int(form.ropes_front.data) + int(form.ropes_back.data)) * event.merchant_squarefoot_fee,  # 10 cent per square foot
             additional_space_information = form.additional_space_information.data,
-            processing_fee = event.merchant_processing_fee if datetime.today().date() < event.merchant_application_deadline else event.merchant_late_processing_fee,
+            processing_fee = event.merchant_processing_fee if datetime.now(pytz.timezone('America/Chicago')).date() < event.merchant_application_deadline else event.merchant_late_processing_fee,
             electricity_request = form.electricity_request.data,
             food_merchant_agreement = form.food_merchant_agreement.data,
             estimated_date_of_arrival = form.estimated_date_of_arrival.data,
