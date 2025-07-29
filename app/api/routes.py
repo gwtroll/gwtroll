@@ -102,3 +102,48 @@ def invoice_status():
         data['datasets'][0]['data'].append(results_counts[key])
 
     return json.dumps(data)
+
+@bp.route('/registration/search/<key>/<value>', methods=('GET',''))
+@login_required
+@permission_required('registration_view')
+def search_registration(key,value):
+
+    data = {'prereg_price':0,'regs':[]}
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==datetime.now(pytz.timezone('America/Chicago')).date()).first()
+    if pricesheet == None:
+        pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
+    data['prereg_price'] = pricesheet.prereg_price
+    if key == 'name':
+        regs = Registrations.query.join(Invoice, Registrations.invoice_number==Invoice.invoice_number).add_columns(Invoice.invoice_number, Invoice.invoice_status).filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + value + '%'))),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        print(regs)
+        # reg = query_db(
+        #     "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
+        #     #(value, value, value))
+        #     ('%' + value + '%', '%' + value + '%', '%' + value + '%'))
+
+    elif key == 'inv':
+        regs = Registrations.query.filter(and_(sa.cast(Registrations.invoice_number,sa.Text).ilike('%' + value + '%')),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        # reg = query_db(
+        #     "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
+        #     ('%' + value + '%',))
+
+    elif key == 'mbr':
+        regs = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + value + '%')),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        # reg = query_db(
+        #     "SELECT * FROM registrations WHERE CAST(mbr_num AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
+        #     ('%' + value + '%',))
+
+    elif key == 'med':
+        regs = Registrations.query.filter(sa.cast(Registrations.medallion,sa.Text)==value).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        # reg = query_db(
+        #     "SELECT * FROM registrations WHERE medallion = %s order by checkin DESC, lname, fname",
+        #     (value,))
+    
+    if regs:
+        for reg in regs:
+            reg_str = reg[0].toJSON()
+            reg_json = json.loads(reg_str)
+            reg_json['invoice_status'] = reg[2]
+            data['regs'].append(json.dumps(reg_json))
+
+    return data

@@ -261,7 +261,7 @@ class Registrations(db.Model):
                     data_dict[key] = datetime.strftime(self.__dict__[key],'%Y-%m-%d')
                 else:
                     data_dict[key] = self.__dict__[key]
-        return json.dumps(data_dict)
+        return json.dumps(data_dict, sort_keys=True, default=str)
     
     def recalculate_balance(self):
         balance = self.registration_price + self.nmr_price + self.paypal_donation + self.nmr_donation
