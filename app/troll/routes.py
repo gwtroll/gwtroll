@@ -22,16 +22,7 @@ def reg(regid):
     for pay in reg.payments:
         if pay.type.upper() != 'PAYPAL' and pay.type.upper() != 'CHECK':
             atd_payments.append(pay)
-    if request.form.get("action") == 'Edit':
-        return redirect(url_for('registration.editreg', regid=regid))
-    elif request.method == 'POST' and request.form.get("action") == 'waiver':
-        return redirect(url_for('troll.waiver', regid=regid))
-    elif request.method == 'POST' and request.form.get("action") == 'payment':
-        return redirect(url_for('troll.payment', regid=regid))
-    elif request.method == 'POST'and request.form.get("action") == 'checkin':
-        return redirect(url_for('troll.checkin', regid=regid))
-    else:
-        return render_template('reg.html', reg=reg, atd_payments=atd_payments)
+    return render_template('reg.html', reg=reg, atd_payments=atd_payments)
     
 @bp.route('/fastpass')
 @login_required
@@ -39,11 +30,11 @@ def reg(regid):
 def fastpass():
         return render_template('fastpass.html')
 
-@bp.route('/checkin', methods=['GET', 'POST'])
+@bp.route('/<int:regid>/checkin', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_edit')
-def checkin():
-    regid = request.args['regid']
+def checkin(regid):
+    # regid = request.args['regid']
     reg = get_reg(regid)
 
     form = CheckinForm(
@@ -150,13 +141,13 @@ def checkin():
 
     return render_template('checkin.html', reg=reg, form=form)
 
-@bp.route('/waiver', methods=['GET', 'POST'])
+@bp.route('/<int:regid>/waiver', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_edit')
-def waiver():
+def waiver(regid):
     event = EventVariables.query.first()
     form = WaiverForm()
-    regid = request.args['regid']
+    # regid = request.args['regid']
     reg = get_reg(regid)
     
     if request.method == 'POST' and form.validate_on_submit():
@@ -190,13 +181,13 @@ def updatedonation(regid):
     db.session.commit()
     return redirect(url_for('troll.payment', regid=regid))
 
-@bp.route('/payment', methods=['GET', 'POST'])
+@bp.route('/<int:regid>/payment', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_edit')
-def payment():
+def payment(regid):
     form = PayRegistrationForm()
     paypal_form = UpdatePayPalDonationForm()
-    regid = request.args['regid']
+    # regid = request.args['regid']
     reg = get_reg(regid)
 
     paypal_form.paypal_donation.data = True if reg.paypal_donation > 0 else False

@@ -158,47 +158,27 @@
 </div>
 
     {% if not reg['signature'] %}
-        <form method="post">
-            <div class="row form-group no-print">
-                <div class="col form-group">
-                    <p>
-                        <a href="/waiver">
-                            <button type="submit" name="action" value="waiver" class="form-control btn btn-success btn-lg custom-input-space">Waivers</button>
-                        </a>
-                    </p>
-                </div>
+        <div class="row form-group no-print">
+            <div class="col form-group">
+                <a href="{{url_for('troll.waiver', regid=reg.id)}}"><button class="form-control btn btn-success btn-lg custom-input-space" type="button">Waivers</button></a>
             </div>
-        </form>
+        </div>
     {% endif %}
 
     {% if (not reg['checkin']) and (reg['signature']) %}
-
-        <form method="post">
-            <div class="row form-group no-print">
-                <div class="col form-group">
-                    <p>
-                        <a href="/checkin">
-                            <button type="submit" name="action" value="checkin" class="form-control btn btn-success btn-lg custom-input-space">Check-In</button>
-                        </a>
-                    </p>
-                </div>
+        <div class="row form-group no-print">
+            <div class="col form-group">
+                <a href="{{url_for('troll.checkin', regid=reg.id)}}"><button class="form-control btn btn-success btn-lg custom-input-space" type="button">Check-In</button></a>
             </div>
-        </form>
+        </div>
     {% endif %}
 
     {% if reg['balance'] > 0 and reg['checkin'] and reg['signature'] %}
-
-    <form method="post">
         <div class="row form-group no-print">
             <div class="col form-group">
-                <p>
-                    <a href="/payment">
-                        <button type="submit" name="action" value="payment" class="form-control btn btn-success btn-lg custom-input-space">Payment</button>
-                    </a>
-                </p>
+                <a href="{{url_for('troll.payment', regid=reg.id)}}"><button class="form-control btn btn-success btn-lg custom-input-space" type="button">Payment</button></a>
             </div>
         </div>
-    </form>
 {% endif %}
     
     {% if reg['checkin'] %}
@@ -219,11 +199,7 @@
     <form method="post">
         <div class="row form-group no-print">
             <div class="col form-group">
-                <p>
-                    <a href="/">
-                        <button type="submit" name="action" value="Edit" class="form-control btn btn-warning btn-lg custom-input-space">Edit</button>
-                    </a>              
-                </p>
+                <a href="{{url_for('registration.editreg', regid=reg.id)}}"><button class="form-control btn btn-warning btn-lg custom-input-space" type="button">Edit</button></a>
             </div>
         </div>
     </form>
