@@ -19,7 +19,7 @@ class EventVariables(db.Model):
     end_date = db.Column(db.Date(), nullable=False)
     location = db.Column(db.String(), nullable=False)
     description = db.Column(db.Text(), nullable=False)
-    preregistration_open_date = db.Column(db.Date(), default=False)
+    preregistration_open_date = db.Column(db.Date(), nullable=False)
     preregistration_close_date = db.Column(db.Date(), nullable=False)
     autocrat1 = db.Column(db.String(), nullable=True)
     autocrat2 = db.Column(db.String(), nullable=True)
@@ -324,7 +324,7 @@ class AdditionalInvoices(db.Model):
     __tablename__ = 'additionalinvoices'
     id = db.Column(db.Integer(), primary_key=True)
     reg_id = db.Column(db.Integer(), db.ForeignKey('registrations.id', ondelete='CASCADE'))
-    invoice_id = db.Column(db.Integer(), db.ForeignKey('invoice.id', ondelete='CASCADE'))
+    invoice_id = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number', ondelete='CASCADE'))
 
 class Payment(db.Model):
     __tablename__ = 'payment'

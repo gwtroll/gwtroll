@@ -46,7 +46,6 @@ def unsent():
 @login_required
 @permission_required('invoice_view')
 def open():
-
     all_inv = Invoice.query.filter(and_(Invoice.invoice_status == 'OPEN')).all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     return render_template('open_list.html', invoices=all_inv, counts=inv_prereg_open_counts())
@@ -55,7 +54,6 @@ def open():
 @login_required
 @permission_required('invoice_view')
 def paid():
-
     all_inv = Invoice.query.filter(Invoice.invoice_status == 'PAID').all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     return render_template('paid_list.html', invoices=all_inv, counts=inv_prereg_paid_counts())
@@ -64,7 +62,6 @@ def paid():
 @login_required
 @permission_required('invoice_view')
 def canceled():
-
     all_inv = Invoice.query.filter(Invoice.invoice_status == 'CANCELED').all()
     # invoices = {}
     # for reg in all_inv:
