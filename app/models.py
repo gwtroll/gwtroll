@@ -236,6 +236,7 @@ class Registrations(db.Model):
     #Relationships
     invoice_number = db.Column(db.Integer(), db.ForeignKey('invoice.invoice_number'))
     invoice = db.relationship("Invoice", back_populates="regs")
+    additionalinvoices = db.relationship('Invoice', secondary='additionalinvoices')
     payments = db.relationship("Payment", back_populates="reg")
     bows = db.relationship('Bows', secondary='reg_bows')
     crossbows = db.relationship('Crossbows', secondary='reg_crossbows')
@@ -318,6 +319,12 @@ class Invoice(db.Model):
         self.balance = balance
         if self.balance > 0:
             self.invoice_status = 'OPEN'
+
+class AdditionalInvoices(db.Model):
+    __tablename__ = 'additionalinvoices'
+    id = db.Column(db.Integer(), primary_key=True)
+    reg_id = db.Column(db.Integer(), db.ForeignKey('registrations.id', ondelete='CASCADE'))
+    invoice_id = db.Column(db.Integer(), db.ForeignKey('invoice.id', ondelete='CASCADE'))
 
 class Payment(db.Model):
     __tablename__ = 'payment'

@@ -28,7 +28,7 @@ def create_prereg(data):
         emergency_contact_name = data.emergency_contact_name.data, 
         emergency_contact_phone = data.emergency_contact_phone.data, 
         lodging_id = data.lodging.data, 
-        mbr = True if data.mbr.data == 'Member' else False,
+        mbr = True if data.mbr.data == True else False,
         mbr_num_exp = datetime.strftime(data.mbr_num_exp.data, '%Y-%m-%d') if data.mbr_num_exp.data is not None else None, 
         mbr_num = data.mbr_num.data,
         prereg = True,
@@ -86,10 +86,10 @@ def DicttoReg(dict):
         emergency_contact_name = dict['emergency_contact_name'],  
         emergency_contact_phone = dict['emergency_contact_phone'],  
         lodging_id = dict['lodging_id'], 
-        mbr = bool(dict['mbr']),
+        mbr = True if dict['mbr'] == 'true' else False,
         mbr_num_exp = dict['mbr_num_exp'] if dict['mbr_num_exp'] != 'null' else None, 
         mbr_num = int(dict['mbr_num']) if dict['mbr_num'] != 'null' else None,
-        prereg = bool(dict['prereg']),
+        prereg = True if dict['prereg'] == 'true' else False,
         prereg_date_time = dict['prereg_date_time'],
         paypal_donation = int(dict['paypal_donation']),
         paypal_donation_balance = int(dict['paypal_donation_balance']),
@@ -110,8 +110,13 @@ def DicttoReg(dict):
         else:
             reg.nmr_price = 0
             reg.nmr_balance = 0
+    else:
+        reg.registration_price = 0
+        reg.registration_balance = 0
+        reg.nmr_price = 0
+        reg.nmr_balance = 0
     
-        reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
+    reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
 
     return reg
 
@@ -215,7 +220,7 @@ def createprereg():
                 send_confirmation_email(add_reg.email,add_reg)
                 if add_reg.balance<=0:
                     send_fastpass_email(add_reg.email,add_reg)
-                flash_string += ('Registration {} created for {} {}.\n'.format(add_reg.id, add_reg.fname, add_reg.lname))
+                flash_string += ('\nRegistration {} created for {} {}.'.format(add_reg.id, add_reg.fname, add_reg.lname))
             send_confirmation_email(reg.email,reg)
             if reg.balance<=0:
                     send_fastpass_email(reg.email,reg)
