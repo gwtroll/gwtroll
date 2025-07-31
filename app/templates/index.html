@@ -77,6 +77,7 @@
 </html>
 
 <script>
+
     const handle_search = async () => {
         const search_results = document.getElementById('search_results')
         search_results.innerHTML = ""
@@ -100,9 +101,20 @@
         }
 
         if (value != '') {
+            let user_permission = await fetch("/api/user/permissions")
+                .then((response) => response.json())
+                .then((data) => {
+                    let user_permission = 'view';
+                    console.log(data)
+                    if (data.includes('troll')) {
+                        user_permission = 'troll'
+                    }
+                    return user_permission
+                })
             await fetch("/api/registration/search/" + key + "/" + value)
                 .then((response) => response.json())
                 .then((data, prereg_price) => {
+                    console.log(user_permission)
                     if (data.regs.length == 0) {
                         let div_row = document.createElement('div');
                         div_row.classList.add('row');
@@ -143,7 +155,11 @@
                         let div_col_name = document.createElement('div');
                         div_col_name.classList.add('col');
                         let a_reg = document.createElement('a');
-                        a_reg.href = "/troll/" + reg.id;
+                        if (user_permission == 'troll') {
+                            a_reg.href = "/troll/" + reg.id;
+                        } else if (user_permission == 'view') {
+                            a_reg.href = "/registration/" + reg.id;
+                        }
                         let h5_name = document.createElement('h5');
                         h5_name.innerText = reg.fname + " " + reg.lname;
                         let p_scaname = document.createElement('p');
@@ -168,20 +184,6 @@
                         div_col_mbr.appendChild(p_mbrexp);
                         div_row.appendChild(div_col_mbr);
 
-                        let div_col_inv = document.createElement('div');
-                        div_col_inv.classList.add('col')
-                        let p_invnum = document.createElement('p');
-                        p_invnum.classList.add('text-muted');
-                        p_invnum.innerText = 'Invoice Number: ';
-                        if (reg.invoice_number != null) { p_invnum.innerText += reg.invoice_number } else { p_invnum.innerText += '-' }
-                        let p_invstatus = document.createElement('p');
-                        p_invstatus.classList.add('text-muted');
-                        p_invstatus.innerText = 'Invoice Status: ';
-                        if (reg.invoice_status != null) { p_invstatus.innerText += reg.invoice_status } else { p_invstatus.innerText += '-' }
-                        div_col_inv.appendChild(p_invnum);
-                        div_col_inv.appendChild(p_invstatus);
-                        div_row.appendChild(div_col_inv);
-
                         let div_col_arr = document.createElement('div');
                         div_col_arr.classList.add('col');
                         let p_arr = document.createElement('p');
@@ -191,11 +193,20 @@
                         div_row.appendChild(div_col_arr)
 
                         search_results.appendChild(div_row);
+
+                        clearform();
                     }
                 })
-                .catch((error) => console.error("Error fetching data:", error));
+                .catch((error) => console.error("Error fetching data:", error), clearform());
         }
     };
+
+    function clearform() {
+        document.getElementById('name_search').value = ''
+        document.getElementById('inv_search').value = ''
+        document.getElementById('mbr_search').value = ''
+        document.getElementById('med_search').value = ''
+    }
 
 </script>
 

@@ -28,7 +28,7 @@ def create_prereg(data):
         emergency_contact_name = data.emergency_contact_name.data, 
         emergency_contact_phone = data.emergency_contact_phone.data, 
         lodging_id = data.lodging.data, 
-        mbr = True if data.mbr.data == True else False,
+        mbr = True if data.mbr.data == True or data.mbr.data == 'Member' else False,
         mbr_num_exp = datetime.strftime(data.mbr_num_exp.data, '%Y-%m-%d') if data.mbr_num_exp.data is not None else None, 
         mbr_num = data.mbr_num.data,
         prereg = True,
@@ -86,10 +86,10 @@ def DicttoReg(dict):
         emergency_contact_name = dict['emergency_contact_name'],  
         emergency_contact_phone = dict['emergency_contact_phone'],  
         lodging_id = dict['lodging_id'], 
-        mbr = True if dict['mbr'] == 'true' else False,
+        mbr = True if dict['mbr'] == 'true' or dict['mbr'] == True else False,
         mbr_num_exp = dict['mbr_num_exp'] if dict['mbr_num_exp'] != 'null' else None, 
         mbr_num = int(dict['mbr_num']) if dict['mbr_num'] != 'null' else None,
-        prereg = True if dict['prereg'] == 'true' else False,
+        prereg = True,
         prereg_date_time = dict['prereg_date_time'],
         paypal_donation = int(dict['paypal_donation']),
         paypal_donation_balance = int(dict['paypal_donation_balance']),
@@ -247,7 +247,7 @@ def duplicate():
     reg.duplicate = True
     db.session.commit()
 
-    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoice_email==reg.invoice_email, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoice_email==reg.invoice_email, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
 
     for r in all_regs:
         regids.append(r.id)
@@ -259,7 +259,7 @@ def duplicate():
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
-@permission_required('registration_edit')
+@permission_required('troll')
 def createatd():
     form = CreateRegForm()
     form.lodging.choices = get_lodging_choices()
@@ -323,11 +323,63 @@ def createatd():
         return redirect(url_for('troll.waiver', regid=reg.id))
     return render_template('create.html', form=form)
 
-@bp.route('/edit', methods=['GET', 'POST'])
+@bp.route('/<int:regid>', methods=['GET', ''])
+@login_required
+@permission_required('registration_view')
+def viewreg(regid):
+    reg = get_reg(regid)
+    return render_template('viewreg.html', reg=reg)
+
+@bp.route('/<int:regid>/edit_limited', methods=['GET', 'POST'])
+@login_required
+@permission_required('registration_edit_limited')
+def editreg_limited(regid):
+    reg = get_reg(regid)
+
+    form = EditLimitedForm(
+        mbr = 'Member' if reg.mbr else 'Non-Member',
+        medallion = reg.medallion,
+        mbr_num = reg.mbr_num,
+        mbr_num_exp = reg.mbr_num_exp if reg.mbr_num_exp is not None else None,
+        notes = reg.notes
+    )
+
+    if request.method == 'POST':
+        reg.notes = request.form.get('notes')
+        if request.form.get('medallion') != '' and request.form.get('medallion') != None:
+            medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
+        else:
+            medallion_check = None
+
+        if medallion_check is not None and int(regid) != int(medallion_check.id):
+            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.id),'error')
+            dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.id)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+            flash(Markup(dup_url),'error')
+        else:
+            if request.form.get('medallion'):
+                reg.medallion = int(request.form.get('medallion'))
+            else: reg.medallion = None
+
+            reg.mbr = True if request.form.get('mbr') == 'Member' else False
+            if request.form.get('mbr_num'):
+                reg.mbr_num = int(request.form.get('mbr_num'))
+            else: reg.mbr_num = None
+
+            if request.form.get('mbr_num_exp'):
+                reg.mbr_num_exp = request.form.get('mbr_num_exp')
+
+            db.session.commit()
+
+            # log_reg_action(reg, 'EDIT')
+
+            return redirect(url_for('troll.reg',regid=reg.id))
+
+    return render_template('editreg_limited.html', reg=reg, form=form)
+
+@bp.route('/<int:regid>/edit', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_edit')
-def editreg():
-    regid = request.args['regid']
+def editreg(regid):
     reg = get_reg(regid)
 
     form = EditForm(
@@ -364,108 +416,76 @@ def editreg():
 
     if request.method == 'POST':
 
-        if current_user.has_role('Troll Shift Lead'):
-            reg.notes = request.form.get('notes')
-            if request.form.get('medallion') != '' and request.form.get('medallion') != None:
-                medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
-            else:
-                medallion_check = None
+        reg.notes = request.form.get('notes')
 
-            if medallion_check is not None and int(regid) != int(medallion_check.id):
-                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.id),'error')
-                dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.id)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-                flash(Markup(dup_url),'error')
-            else:
-                if request.form.get('medallion'):
-                    reg.medallion = int(request.form.get('medallion'))
-                else: reg.medallion = None
-
-                reg.mbr = request.form.get('mbr')
-                if request.form.get('mbr_num'):
-                    reg.mbr_num = int(request.form.get('mbr_num'))
-                else: reg.mbr_num = None
-
-                if request.form.get('mbr_num_exp'):
-                    reg.mbr_num_exp = request.form.get('mbr_num_exp')
-
-                db.session.commit()
-
-                # log_reg_action(reg, 'EDIT')
-
-                return redirect(url_for('troll.reg',regid=regid))
-            
+        if request.form.get('medallion') != '' and request.form.get('medallion') != None:
+            medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
         else:
+            medallion_check = None
 
-            reg.notes = request.form.get('notes')
+        if medallion_check is not None and int(regid) != int(medallion_check.id):
+            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.id),'error')
+            dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.id)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+            flash(Markup(dup_url),'error')
 
-            if request.form.get('medallion') != '' and request.form.get('medallion') != None:
-                medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
-            else:
-                medallion_check = None
+        else:
+            reg.fname = request.form.get('fname')
+            reg.lname = request.form.get('lname')
+            reg.scaname = request.form.get('scaname')
+            reg.city = request.form.get('city')
+            reg.state_province = request.form.get('state_province')
+            if request.form.get('zip'):
+                reg.zip = int(request.form.get('zip'))
+            else: reg.zip = None
+            reg.country = request.form.get('country')
+            reg.phone = request.form.get('phone')
+            reg.email = request.form.get('email')
+            reg.invoice_email = request.form.get('invoice_email')
+            reg.kingdom = request.form.get('kingdom')
+            reg.lodging = request.form.get('lodging')
+            reg.expected_arrival_date = datetime.strptime(request.form.get('expected_arrival_date'), '%Y-%m-%d') if (request.form.get('expected_arrival_date') != '' and request.form.get('expected_arrival_date')) else None
+            reg.age = request.form.get('age')
+            reg.mbr = request.form.get('mbr')
+            if request.form.get('medallion'):
+                reg.medallion = int(request.form.get('medallion'))
+            else: reg.medallion = None
+            if request.form.get('atd_paid'):
+                reg.atd_paid = int(request.form.get('atd_paid'))
+            else: reg.atd_paid = 0
+            if request.form.get('price_paid'):
+                reg.price_paid = int(request.form.get('price_paid'))
+            else: reg.price_paid =  0
+            if request.form.get('pay_type') == '' or request.form.get('pay_type') == None:
+                reg.atd_pay_type = None
+            else: reg.atd_pay_type = request.form.get('pay_type')
+            if request.form.get('price_calc'):
+                reg.price_calc = int(request.form.get('price_calc'))
+            else: reg.price_calc = 0
+            if request.form.get('price_due'):
+                reg.price_due = int(request.form.get('price_due'))
+            else: reg.price_due = 0
+            reg.paypal_donation = bool(request.form.get('paypal_donation'))
+            if request.form.get('paypal_donation_amount'):
+                reg.paypal_donation_amount = int(request.form.get('paypal_donation_amount'))
+            else: reg.paypal_donation_amount = 0
+            reg.prereg = request.form.get('prereg')
+            reg.early_on = bool(request.form.get('early_on'))
+            if request.form.get('mbr_num'):
+                reg.mbr_num = int(request.form.get('mbr_num'))
+            else: reg.mbr_num = None
+            if request.form.get('mbr_num_exp'):
+                reg.mbr_num_exp = request.form.get('mbr_num_exp')
+            reg.emergency_contact_name = request.form.get('emergency_contact_name')
+            reg.emergency_contact_phone = request.form.get('emergency_contact_phone') 
 
-            if medallion_check is not None and int(regid) != int(medallion_check.id):
-                flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.id),'error')
-                dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.id)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-                flash(Markup(dup_url),'error')
+            reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
+            if reg.price_due < 0:  #Account for people who showed up late.  No refund.
+                reg.price_due = 0
 
-            else:
-                reg.fname = request.form.get('fname')
-                reg.lname = request.form.get('lname')
-                reg.scaname = request.form.get('scaname')
-                reg.city = request.form.get('city')
-                reg.state_province = request.form.get('state_province')
-                if request.form.get('zip'):
-                    reg.zip = int(request.form.get('zip'))
-                else: reg.zip = None
-                reg.country = request.form.get('country')
-                reg.phone = request.form.get('phone')
-                reg.email = request.form.get('email')
-                reg.invoice_email = request.form.get('invoice_email')
-                reg.kingdom = request.form.get('kingdom')
-                reg.lodging = request.form.get('lodging')
-                reg.expected_arrival_date = datetime.strptime(request.form.get('expected_arrival_date'), '%Y-%m-%d') if (request.form.get('expected_arrival_date') != '' and request.form.get('expected_arrival_date')) else None
-                reg.age = request.form.get('age')
-                reg.mbr = request.form.get('mbr')
-                if request.form.get('medallion'):
-                    reg.medallion = int(request.form.get('medallion'))
-                else: reg.medallion = None
-                if request.form.get('atd_paid'):
-                    reg.atd_paid = int(request.form.get('atd_paid'))
-                else: reg.atd_paid = 0
-                if request.form.get('price_paid'):
-                    reg.price_paid = int(request.form.get('price_paid'))
-                else: reg.price_paid =  0
-                if request.form.get('pay_type') == '' or request.form.get('pay_type') == None:
-                    reg.atd_pay_type = None
-                else: reg.atd_pay_type = request.form.get('pay_type')
-                if request.form.get('price_calc'):
-                    reg.price_calc = int(request.form.get('price_calc'))
-                else: reg.price_calc = 0
-                if request.form.get('price_due'):
-                    reg.price_due = int(request.form.get('price_due'))
-                else: reg.price_due = 0
-                reg.paypal_donation = bool(request.form.get('paypal_donation'))
-                if request.form.get('paypal_donation_amount'):
-                    reg.paypal_donation_amount = int(request.form.get('paypal_donation_amount'))
-                else: reg.paypal_donation_amount = 0
-                reg.prereg = request.form.get('prereg')
-                reg.early_on = bool(request.form.get('early_on'))
-                if request.form.get('mbr_num'):
-                    reg.mbr_num = int(request.form.get('mbr_num'))
-                else: reg.mbr_num = None
-                if request.form.get('mbr_num_exp'):
-                    reg.mbr_num_exp = request.form.get('mbr_num_exp')
-                reg.emergency_contact_name = request.form.get('emergency_contact_name')
-                reg.emergency_contact_phone = request.form.get('emergency_contact_phone') 
+            db.session.commit()
 
-                reg.price_due = (reg.price_calc + reg.paypal_donation_amount) - (reg.price_paid + reg.atd_paid)
-                if reg.price_due < 0:  #Account for people who showed up late.  No refund.
-                    reg.price_due = 0
+            # log_reg_action(reg, 'EDIT')
 
-                db.session.commit()
-
-                # log_reg_action(reg, 'EDIT')
-
-                return redirect(url_for('troll.reg',regid=regid))
+            return redirect(url_for('troll.reg',regid=regid))
 
     return render_template('editreg.html', regid=reg.id, reg=reg, form=form)

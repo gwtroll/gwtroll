@@ -5,9 +5,9 @@ from wtforms.validators import DataRequired, Email, InputRequired, Optional, Val
 import pandas as pd
 import datetime
 
-agedata = [('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 12'), ('0-5', 'Child 0 - 5'),('Royals','Royals')]
+agedata = [('-','-'),('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 12'), ('0-5', 'Child 0 - 5'),('Royals','Royals')]
 
-mbrdata = [('Member', 'Member'), ('Non-Member', 'Non-Member')]
+mbrdata = [('-','-'),('Member', 'Member'), ('Non-Member', 'Non-Member')]
 
 reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg', 'land_pre-reg'), ('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report'), ('earlyon','early_on_report'), ('paypal_paid_export','paypal_paid_export'),('paypal_canceled_export','paypal_canceled_export'),('paypal_recon_export','paypal_recon_export'),('atd_export','atd_export'),('log_export','log_export'),('minor_waivers','minor_waivers')]
 
@@ -112,8 +112,8 @@ class CreateRegForm(FlaskForm):
     scaname = StringField('SCA Name', validators=[])
     kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')])
     lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')])
-    age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
-    mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
+    age = SelectField('Age Range', validators=[NoneOf('-', message='You must select an Age Range')], choices=agedata)
+    mbr = SelectField('Membership Status', validators=[NoneOf('-', message='You must select a Membership Status')], choices=mbrdata)
     mbr_num = IntegerField('Membership #', validators=[RequiredIfMembership('mbr')])
     mbr_num_exp = DateField('Exp Date', validators=[RequiredIfMembership('mbr')])
     zip = IntegerField('Zip', validators=[Optional()])
@@ -141,11 +141,11 @@ class CreatePreRegForm(FlaskForm):
     lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')])
     emergency_contact_name = StringField('Legal Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
-    age = SelectField('Age Range', validators=[DataRequired()], id='age', choices=agedata)
-    mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
+    age = SelectField('Age Range', validators=[NoneOf('-', message='You must select an Age Range')], id='age', choices=agedata)
+    mbr = SelectField('Membership Status', validators=[NoneOf('-', message='You must select a Membership Status')], choices=mbrdata)
     mbr_num = IntegerField('Membership #', validators=[RequiredIfMembership('mbr')])
     mbr_num_exp = DateField('Exp Date', validators=[RequiredIfMembership('mbr')])
-    expected_arrival_date = SelectField('Arrival Date', validators=[DataRequired()])
+    expected_arrival_date = SelectField('Arrival Date', validators=[NoneOf('-', message='You must select an Arrival Date')])
     paypal_donation = BooleanField('Please check here if you would like to <b>DONATE</b> to cover your Paypal processing fees.', validators=[])
     paypal_donation_amount = IntegerField("PayPal Donation Amount", default=5)
     royal_departure_date = DateField('Departure Date', validators=[Optional()])
@@ -159,9 +159,9 @@ class CheckinForm(FlaskForm):
     lname = StringField('Last Name')
     scaname = StringField('SCA Name')
     kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')])
-    lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Kingdom')])
-    age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
-    mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
+    lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')])
+    age = SelectField('Age Range', validators=[NoneOf('-', message='You must select an Age Range')], choices=agedata)
+    mbr = SelectField('Membership Status', validators=[NoneOf('-', message='You must select a Membership Status')], choices=mbrdata)
     mbr_num = IntegerField('Membership Number', validators=[RequiredIfMembership('mbr')])
     mbr_num_exp = DateField('Membership Expiration Date', validators=[RequiredIfMembership('mbr')])
     medallion = IntegerField('Medallion #', validators=[DataRequired()])
@@ -181,7 +181,7 @@ class EditForm(FlaskForm):
     phone = StringField('Phone')
     email = StringField('Communication Email')
     invoice_email = StringField('Invoice Email')
-    age = SelectField('Age Range', validators=[DataRequired()], choices=agedata)
+    age = SelectField('Age Range', validators=[NoneOf('-', message='You must select an Age Range')], choices=agedata)
     emergency_contact_name = StringField('Name')
     emergency_contact_phone = StringField('Phone')
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
@@ -217,6 +217,17 @@ class EditForm(FlaskForm):
     #mbr_exp
     submit = SubmitField('Submit')
 
+class EditLimitedForm(FlaskForm):
+    age = SelectField('Age Range', validators=[NoneOf('-', message='You must select an Age Range')], choices=agedata)
+    mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
+    mbr_num = IntegerField('Member Number')
+    mbr_num_exp = DateField('Member Exp Date')
+    medallion = IntegerField('Medallion #', validators=[DataRequired()])
+    kingdom = SelectField('Kingdom', validators=[DataRequired()])
+    lodging = SelectField('Camping Group', validators=[DataRequired()])
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Submit')
+
 class RiderForm(Form):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -226,15 +237,15 @@ class RiderForm(Form):
     submit = SubmitField('Add Rider')
 
 class EarlyOnForm(FlaskForm):
-    arrival_date = SelectField('Estimated Date of Arrival', validators=[DataRequired()])
+    arrival_date = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
     submit = SubmitField('Submit Early On Request')
 
 class EarlyOnApprovalForm(FlaskForm):
-    arrival_date = SelectField('Estimated Date of Arrival', validators=[DataRequired()])
-    department = SelectField('Department', validators=[DataRequired()], choices=[])
+    arrival_date = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
+    department = SelectField('Department', validators=[NoneOf('-', message='You must select a Department')], choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
     dept_approval_status = SelectField('Department Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
@@ -398,7 +409,7 @@ class MerchantForm(FlaskForm):
     additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: I agree to send menu and pricing to merchancrat@gulfwars.org along with a copy of your food safety certification.', validators=[Optional()]) 
-    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', validators=[DataRequired()])
+    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
     last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
     require_merchant_parking = BooleanField('Do you require merchant parking in the vehicle section', default=False)
@@ -443,7 +454,7 @@ class EditMerchantForm(FlaskForm):
     merchant_fee = FloatField('Merchant Fee',validators=[DataRequired()], default=0)
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: Agreement to send menu and pricing', validators=[Optional()]) 
-    estimated_date_of_arrival = DateField('Estimated Date of Arrival', validators=[DataRequired()])
+    estimated_date_of_arrival = DateField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
     last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
     vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])

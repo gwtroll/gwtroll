@@ -15,7 +15,7 @@ import numpy as np
 
 @bp.route('/<int:regid>', methods=('GET', 'POST'))
 @login_required
-@permission_required('registration_edit')
+@permission_required('troll')
 def reg(regid):
     reg = get_reg(regid)
     atd_payments = []
@@ -26,13 +26,13 @@ def reg(regid):
     
 @bp.route('/fastpass')
 @login_required
-@permission_required('registration_edit')
+@permission_required('troll')
 def fastpass():
         return render_template('fastpass.html')
 
 @bp.route('/<int:regid>/checkin', methods=['GET', 'POST'])
 @login_required
-@permission_required('registration_edit')
+@permission_required('troll')
 def checkin(regid):
     # regid = request.args['regid']
     reg = get_reg(regid)
@@ -124,10 +124,11 @@ def checkin(regid):
                 else:
                     registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
                 if reg.registration_price < registration_price:
-                    reg.registration_balance = registration_price - reg.registration_price
+                    # reg.registration_balance = registration_price - reg.registration_price
                     reg.registration_price = registration_price
             
-            reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
+            # reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
+            reg.recalculate_balance()
 
             db.session.commit()
 
@@ -143,7 +144,7 @@ def checkin(regid):
 
 @bp.route('/<int:regid>/waiver', methods=['GET', 'POST'])
 @login_required
-@permission_required('registration_edit')
+@permission_required('troll')
 def waiver(regid):
     event = EventVariables.query.first()
     form = WaiverForm()
@@ -169,7 +170,7 @@ def waiver(regid):
 
 @bp.route('/<int:regid>/updatedonation', methods=['POST', ''])
 @login_required
-@permission_required('registration_edit')
+@permission_required('troll')
 def updatedonation(regid):
     reg = get_reg(regid)
     if bool(request.form.get('paypal_donation')) == False:
@@ -183,7 +184,7 @@ def updatedonation(regid):
 
 @bp.route('/<int:regid>/payment', methods=['GET', 'POST'])
 @login_required
-@permission_required('registration_edit')
+@permission_required('troll')
 def payment(regid):
     form = PayRegistrationForm()
     paypal_form = UpdatePayPalDonationForm()

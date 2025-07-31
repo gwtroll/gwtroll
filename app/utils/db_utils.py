@@ -16,11 +16,11 @@ lodging_choices = None
 kingdom_cache_time = datetime.now()
 kingdom_choices = None
 
-pre_reg_price_cache_time = datetime.now()
-pre_reg_price = None
+pre_reg_pricesheet_cache_time = datetime.now()
+pre_reg_pricesheet = None
 
-atd_reg_price_cache_time = datetime.now()
-atd_reg_price = None
+atd_reg_pricesheet_cache_time = datetime.now()
+atd_reg_pricesheet = None
 
 checkin_count_cache_time = datetime.now()
 checkin_count = None
@@ -288,28 +288,50 @@ def get_kingdom_choices():
 #     return price_calc
 
 def get_prereg_pricesheet_day(date):
-    global pre_reg_price_cache_time
-    global pre_reg_price
-    if pre_reg_price != None and pre_reg_price_cache_time > datetime.now() + timedelta(hours=-1):
-        return pre_reg_price
+    global pre_reg_pricesheet_cache_time
+    global pre_reg_pricesheet
+    if pre_reg_pricesheet != None and pre_reg_pricesheet_cache_time > datetime.now() + timedelta(hours=-1):
+        if date.strftime("%Y/%m/%d") in pre_reg_pricesheet:
+            return pre_reg_pricesheet[date.strftime("%Y/%m/%d")]
+        else:
+            return get_prereg_pricesheet_day_not_in_sheet()
     else:
-        pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
-        if pricesheet == None:
-            pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
-        pre_reg_price = pricesheet.prereg_price
-        return pre_reg_price
+        pricesheet = PriceSheet.query.all()
+        prices = {}
+        for price in pricesheet:
+            prices[price.arrival_date.strftime("%Y/%m/%d")] = price.prereg_price
+        pre_reg_pricesheet = prices
+        if date.strftime("%Y/%m/%d") in pre_reg_pricesheet:
+            return pre_reg_pricesheet[date.strftime("%Y/%m/%d")]
+        else:
+            return get_prereg_pricesheet_day_not_in_sheet()
+
+def get_prereg_pricesheet_day_not_in_sheet():
+    pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
+    return pricesheet.prereg_price
 
 def get_atd_pricesheet_day(date):
-    global atd_reg_price_cache_time
-    global atd_reg_price
-    if atd_reg_price != None and atd_reg_price_cache_time > datetime.now() + timedelta(hours=-1):
-        return atd_reg_price
+    global atd_reg_pricesheet_cache_time
+    global atd_reg_pricesheet
+    if atd_reg_pricesheet != None and atd_reg_pricesheet_cache_time > datetime.now() + timedelta(hours=-1):
+        if date.strftime("%Y/%m/%d") in atd_reg_pricesheet:
+            return atd_reg_pricesheet[date.strftime("%Y/%m/%d")]
+        else:
+            return get_atd_pricesheet_day_not_in_sheet()
     else:
-        pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
-        if pricesheet == None:
-            pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
-        atd_reg_price = pricesheet.atd_price
-    return atd_reg_price
+        pricesheet = PriceSheet.query.all()
+        prices = {}
+        for price in pricesheet:
+            prices[price.arrival_date.strftime("%Y/%m/%d")] = price.atd_price
+        atd_reg_pricesheet = prices
+        if date.strftime("%Y/%m/%d") in atd_reg_pricesheet:
+            return atd_reg_pricesheet[date.strftime("%Y/%m/%d")]
+        else:
+            return get_atd_pricesheet_day_not_in_sheet()
+    
+def get_atd_pricesheet_day_not_in_sheet():
+    pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
+    return pricesheet.atd_price
 
 def recalculate_reg_balance(reg):
     total_payments = 0
@@ -331,7 +353,7 @@ def prereg_total():
 
 def unsent_count():
     unsent=0
-    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
+    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
     unsent += len(unsent_reg)
     unsent_merch = Merchant.query.with_entities(Merchant.id).filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     unsent += len(unsent_merch)
@@ -340,7 +362,7 @@ def unsent_count():
     return unsent
 
 def unsent_reg_count():
-    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).all()
+    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).all()
     return len(unsent_reg)
 
 def inv_prereg_open_counts():
@@ -408,7 +430,7 @@ def all_reg_count():
     return count
 
 def get_earlyon_arrival_dates():
-    returned_dates = []
+    returned_dates = [('-','-')]
     event = EventVariables.query.first()
     event_start = event.start_date + timedelta(days=-3)
     event_end = event.start_date
@@ -419,7 +441,7 @@ def get_earlyon_arrival_dates():
     return returned_dates
 
 def get_reg_arrival_dates():
-    returned_dates = []
+    returned_dates = [('-','-')]
     event = EventVariables.query.first()
     event_start = event.start_date
     event_end = event.end_date + timedelta(days=-1)
@@ -430,7 +452,7 @@ def get_reg_arrival_dates():
     return returned_dates
 
 def get_merch_arrival_dates():
-    returned_dates = []
+    returned_dates = [('-','-')]
     event = EventVariables.query.first()
     event_start = event.start_date + timedelta(days=-1)
     event_end = event.end_date + timedelta(days=-8)

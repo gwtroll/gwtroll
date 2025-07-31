@@ -191,12 +191,16 @@
             <p>
                 {{ form.expected_arrival_date.label }}<span style="color: red;">*</span>
                 {{ form.expected_arrival_date(class_='form-control m-0', onchange_="recalc_price()") }}
+                {% if form.expected_arrival_date.errors %}{% for error in form.expected_arrival_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
             </p>
         </div>
         <div class="col">
             <p>
                 {{ form.age.label }}<span style="color: red;">*</span>
                 {{ form.age(class_='form-control m-0', onchange="royalCheck()") }}
+                {% if form.age.errors %}{% for error in form.age.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
             </p>
         </div>
     </div>
@@ -316,17 +320,18 @@
         <div class="col">
             <p>
                 {{ form.mbr.label }}<span style="color: red;">*</span>
-                {{ form.mbr(class_='form-control m-0', onchange_="recalc_price()") }}
+                {{ form.mbr(class_='form-control m-0', onchange_="mbr_check()") }}
+                {% if form.mbr.errors %}{% for error in form.mbr.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
-        <div class="col">
+        <div id="mbr_num_col" class="col" style="display: none;">
             <p>
                 {{ form.mbr_num.label }}
                 {{ form.mbr_num(class_='form-control m-0') }}
                 {% if form.mbr_num.errors %}{% for error in form.mbr_num.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
-        <div class="col">
+        <div id="mbr_exp_col" class="col" style="display: none;">
             <p>
                 {{ form.mbr_num_exp.label }}
                 {{ form.mbr_num_exp(class_='form-control m-0') }}
@@ -511,6 +516,22 @@
 </script>
 
 <script>
+    function mbr_check(){
+        const mbr_num_col = document.getElementById("mbr_num_col");
+        const mbr_exp_col = document.getElementById("mbr_exp_col");
+        const mbr = document.getElementById("mbr");
+        if (mbr.value == 'Member'){
+            mbr_num_col.style.display = 'block';
+            mbr_exp_col.style.display = 'block';
+        } else {
+            mbr_num_col.style.display = 'none';
+            mbr_exp_col.style.display = 'none';
+        }
+        recalc_price()
+    }
+  </script>
+
+  <script>
     function donation_check(){
         const paypal_donation_display = document.getElementById("paypal_donation_display");
         const paypal_donation = document.getElementById("paypal_donation");
@@ -521,8 +542,6 @@
         }
         recalc_price()
     }
-
-
   </script>
 
   <script>

@@ -18,14 +18,14 @@ from flask_login import login_required
 @login_required
 @permission_required('invoice_view')
 def unsent():
-    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0, EarlyOnRequest.dept_approval_status == 'APPROVED', EarlyOnRequest.autocrat_approval_status == 'APPROVED')).all()
 
     reg_invoices = {}
     for reg in all_regs:
         if reg.invoice_email not in reg_invoices:
-            reg_invoices[reg.invoice_email] = {'invoice_type':'REGISTRATION','invoice_email':reg.invoice_email,'invoice_number':reg.invoice_number, 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
+            reg_invoices[reg.invoice_email] = {'invoice_type':'REGISTRATION','invoice_email':reg.invoice_email,'invoice_number':[inv.invoice_number for inv in reg.invoices], 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
         reg_invoices[reg.invoice_email]['registrations'].append(reg.id)
     
     merchant_invoices = {}
@@ -173,6 +173,7 @@ def createinvoice():
                 total_due += reg.total_due
         form.paypal_donation.data = paypal_donation
         form.registration_amount.data = registration_price + nmr_price
+        form.nmr_amount.data = nmr_price
         form.invoice_amount.data = total_due
         form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
         form.invoice_email.data = reg.invoice_email
@@ -226,7 +227,7 @@ def createinvoice():
                 # event_id = regs[0].event_id,
             )
             for reg in regs:      
-                reg.invoice_number = invoice_number
+                reg.invoices.append(inv)
 
             db.session.add(inv)
             db.session.commit()
@@ -323,7 +324,7 @@ def createpayment():
                         payment_date = payment_date,
                         reg_id = reg.id,
                         reg = reg,
-                        invoice_number  = invoice_number,
+                        invoice_number = invoice_number,
                     )
                     pay.calculate_payment_amounts(payment_balance)
                     db.session.add(pay)

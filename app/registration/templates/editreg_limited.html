@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Edit Registration {% endblock %}</h1>
+
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <h2>Notes</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.notes.label }}
+                {{ form.notes(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Personal Information</h2>
+    <div class="row">
+        <div class="col">
+            <p>
+                First Name
+                <input type="text" class="form-control" disabled value="{{ reg.fname }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                Last Name
+                <input type="text" class="form-control" disabled value="{{ reg.lname }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                SCA Name
+                <input type="text" class="form-control" disabled value="{{ reg.scaname }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                Age
+                <input type="text" class="form-control" disabled value="{{ reg.age }}" />
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <p>
+                City
+                <input type="text" class="form-control" disabled value="{{ reg.city }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                State/Province
+                <input type="text" class="form-control" disabled value="{{ reg.state_province }}" />
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <p>
+                Zip
+                <input type="text" class="form-control" disabled value="{{ reg.zip }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                Country
+                <input type="text" class="form-control" disabled value="{{ reg.country }}" />
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <p>
+                Phone
+                <input type="text" class="form-control" disabled value="{{ reg.phone }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                Email
+                <input type="text" class="form-control" disabled value="{{ reg.email }}" />
+            </p>
+        </div>
+    </div>
+
+    <h2>Site Information</h2>
+    <div class="row">
+        <div class="col">
+            <p>
+                Registration ID
+                <input type="text" class="form-control" disabled value="{{ reg.id }}" />
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.medallion.label }}
+                {{ form.medallion(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                Kingdom
+                <input type="text" class="form-control" disabled value="{{ reg.kingdom.name }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                Lodging
+                <input type="text" class="form-control" disabled value="{{ reg.lodging.name }}" />
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                Expected Arrival Date
+                <input type="text" class="form-control" disabled value="{{ reg.expected_arrival_date }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p class="text-center">
+                EarlyOn Approved
+                {% if reg.early_on_approved == true%}
+                <input type="checkbox" class="form-check-input big-checkbox" disabled checked
+                    value="{{ reg.early_on_approved }}" />
+                {% else %}
+                <input type="checkbox" class="form-check-input big-checkbox" disabled
+                    value="{{ reg.early_on_approved }}" />
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <h2>Membership</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.mbr.label }}
+                {{ form.mbr(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num.label }}
+                {{ form.mbr_num(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.mbr_num_exp.label }}
+                {{ form.mbr_num_exp(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    <h2>Emergency Contact</h2>
+    <div class="row">
+        <div class="col">
+            <p>
+                Emergency Contact Name
+                <input type="text" class="form-control" disabled value="{{ reg.emergency_contact_name }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                Emergency Contact Phone
+                <input type="text" class="form-control" disabled value="{{ reg.emergency_contact_phone }}" />
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}
+            </p>
+        </div>
+    </div>
+</form>
+
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}
