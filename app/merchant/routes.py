@@ -287,6 +287,20 @@ def createmerchant():
         send_merchant_confirmation_email(merchant.email,merchant)
 
         return redirect(url_for('merchant.success', merchantid=merchant.id))
+    
+    if not form.validate_on_submit() and request.method == 'POST':
+        flash_string = 'The following fields require attention: '
+        error_list = []
+        for error in form.errors.keys():
+            if error == 'signature':
+                error_list.append('Signature')
+            else:
+                error_list.append(form[error].label.text)
+
+
+        flash_string = flash_string + ", ".join(error_list)
+        flash(flash_string,'error')
+
     return render_template('create_merchant.html', form=form, event=event)
 
 @bp.route('/success')

@@ -390,7 +390,7 @@ class StandardUploadForm(FlaskForm):
 class MerchantForm(FlaskForm):
     
     business_name = StringField('Business Name', validators=[DataRequired()])
-    sca_name = StringField('SCA Name', validators=[DataRequired()])
+    sca_name = StringField('SCA Name', validators=[Optional()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -412,10 +412,10 @@ class MerchantForm(FlaskForm):
     estimated_date_of_arrival = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
     last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
-    require_merchant_parking = BooleanField('Do you require merchant parking in the vehicle section', default=False)
-    vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])
-    vehicle_license_plate = StringField('Vehicle License Plate', validators=[Optional()])
-    vehicle_state = StringField('Vehicle State', validators=[Optional()])
+    require_merchant_parking = BooleanField('Will you require merchant parking?', default=False)
+    vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[RequiredIf('require_merchant_parking')])
+    vehicle_license_plate = StringField('Vehicle License Plate', validators=[RequiredIf('require_merchant_parking')])
+    vehicle_state = StringField('Vehicle State', validators=[RequiredIf('require_merchant_parking')])
     trailer_length = IntegerField('Trailer Length (in feet)', validators=[Optional()])  
     trailer_license_plate = StringField('Trailer License Plate', validators=[Optional()])
     trailer_state = StringField('Trailer State', validators=[Optional()])
