@@ -89,7 +89,7 @@ def invoice_status():
 # invoice_status
 # invoice_total
     results = Invoice.query.filter(Invoice.invoice_status != 'DUPLICATE').all()
-    unsent = Registrations.query.filter(Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoice_number == None)
+    unsent = Registrations.query.filter(Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoices == None)
     results_counts = {'UNSENT':0,'OPEN':0,'PAID':0,'NO PAYMENT':0}
     for r in results:
         results_counts[r.invoice_status] += float(r.invoice_total)
@@ -103,6 +103,13 @@ def invoice_status():
 
     return json.dumps(data)
 
+@bp.route('/user/permissions', methods=('GET',''))
+@login_required
+def user_permissions():
+    permissions = current_user.get_permission_set()
+    permission_string = json.dumps(permissions)
+    return json.loads(permission_string)
+
 @bp.route('/registration/search/<key>/<value>', methods=('GET',''))
 @login_required
 @permission_required('registration_view')
@@ -114,7 +121,7 @@ def search_registration(key,value):
         pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
     data['prereg_price'] = pricesheet.prereg_price
     if key == 'name':
-        regs = Registrations.query.join(Invoice, Registrations.invoice_number==Invoice.invoice_number).add_columns(Invoice.invoice_number, Invoice.invoice_status).filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + value + '%'))),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + value + '%'))),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         print(regs)
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
@@ -122,13 +129,13 @@ def search_registration(key,value):
         #     ('%' + value + '%', '%' + value + '%', '%' + value + '%'))
 
     elif key == 'inv':
-        regs = Registrations.query.filter(and_(sa.cast(Registrations.invoice_number,sa.Text).ilike('%' + value + '%')),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.join(Registration_Invoices, Registration_Invoices.reg_id==Registrations.id).filter(and_(sa.cast(Registration_Invoices.invoice_id,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False)).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
         #     ('%' + value + '%',))
 
     elif key == 'mbr':
-        regs = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + value + '%')),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False)).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE CAST(mbr_num AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
         #     ('%' + value + '%',))
@@ -141,9 +148,8 @@ def search_registration(key,value):
     
     if regs:
         for reg in regs:
-            reg_str = reg[0].toJSON()
+            reg_str = reg.toJSON()
             reg_json = json.loads(reg_str)
-            reg_json['invoice_status'] = reg[2]
             data['regs'].append(json.dumps(reg_json))
 
     return data

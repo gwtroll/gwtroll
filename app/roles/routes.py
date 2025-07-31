@@ -53,8 +53,10 @@ def editrole(roleid):
     if request.method == 'POST':
         role.id = request.form.get('id'),
         role.name=request.form.get('role_name')
+        permission_array = []
         for permissionid in request.form.getlist('permissions'):
-            role.permissions.append(get_permission(permissionid))
+            permission_array.append(get_permission(permissionid))
+        role.permissions = (permission_array)
         db.session.commit()
         return redirect('/roles')
     return render_template('editrole.html', form=form)

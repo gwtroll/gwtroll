@@ -136,12 +136,12 @@
     <br>
     {% if atd_payments %}
     {% for pay in atd_payments %}
-    {% if reg.invoice == None %}
+    {% if reg.invoices|length <= 0 %}
     <h1 class="text-center" style="background-color: red; color: white;">{{pay.type}} - ${{pay.amount}}</h1>
         {% if reg['age'] == '18+' %}
         <h1 class="text-center m-0" style="background-color: red; color: white;">ADULT</h1> 
         {% if reg['mbr'] == false %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER </h1>
+        <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER</h1>
         {% endif %}
         {% endif %}
         {% if reg['paypal_donation'] > 0 %}
@@ -149,8 +149,14 @@
         {% endif %}
     {% else %}
     <h1 class="text-center" style="background-color: red; color: white;">{{pay.type}} - ${{pay.amount}}</h1>
-        {% if reg['age'] == '18+' %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">OTHER: ${{pay.amount}}</h1> 
+        {% if pay.registration_amount > 0 %}
+        <h1 class="text-center m-0" style="background-color: red; color: white;">OTHER: ${{pay.registration_amount}}</h1> 
+        {% endif %}
+        {% if pay.nmr_amount > 0 %}
+        <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER</h1> 
+        {% endif %}
+        {% if pay.paypal_donation_amount > 0 %}
+        <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION - ${{pay.paypal_donation_amount}}</h1> 
         {% endif %}
     {% endif %}
     {% endfor %}
@@ -196,13 +202,15 @@
         </div>
     {%endif%}
     {% if current_user.has_role('Admin') or current_user.has_role('Department Head') or current_user.has_role('Troll Shift Lead')%}
-    <form method="post">
         <div class="row form-group no-print">
             <div class="col form-group">
+                {% if current_user.has_permission('registration_edit') %}
                 <a href="{{url_for('registration.editreg', regid=reg.id)}}"><button class="form-control btn btn-warning btn-lg custom-input-space" type="button">Edit</button></a>
+                {% elif current_user.has_permission('registration_edit_limited') %}
+                <a href="{{url_for('registration.editreg_limited', regid=reg.id)}}"><button class="form-control btn btn-warning btn-lg custom-input-space" type="button">Edit</button></a>
+                {% endif %}
             </div>
         </div>
-    </form>
     {% endif %}
         <!-- <br>
         <form method="post">
