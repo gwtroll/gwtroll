@@ -16,16 +16,10 @@ def myaccount():
 @login_required
 def changepassword():
     form = UpdatePasswordForm()
-    form.id.data = current_user.id
-    form.username.data = current_user.username
     if request.method == 'POST' and form.validate_on_submit():
-        current_user.set_password(form.password.data)
+        form.populate_object(current_user)
         db.session.commit()
         flash("Password Successfully Changed!")
         return redirect(url_for('user.myaccount'))
-    elif request.method == 'POST' and not form.validate_on_submit():
-        for field in form.errors:
-            flash(form.errors[field],'error')
-        return render_template('changepassword.html', form=form, user=current_user)
     else:
         return render_template('changepassword.html', form=form, user=current_user)

@@ -4,18 +4,20 @@
 
 <div class="row">
     <div class="col">
-            <form action="" method="post">
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
                 <div class="row form-group">
                     <div class="col form-group">
                         <p>
-                            {{ form.id.label }}
-                            {{ form.id(class_='form-control m-0', readonly=true) }}
+                            User ID
+                            <input type="text" class="form-control m-0" disabled value="{{user.id}}">
                         </p>
                     </div>
                     <div class="col form-group">
                         <p>
                             {{ form.username.label }}
-                            {{ form.username(class_='form-control m-0', readonly=true) }}
+                            {{ form.username(class_='form-control m-0') }}
+                            {% if form.username.errors %}{% for error in form.username.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
                         </p>
                     </div>
                     <div class="col form-group">
@@ -30,18 +32,22 @@
                         <p>
                             {{ form.fname.label }}
                             {{ form.fname(class_='form-control m-0') }}
+                            {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+
                         </p>
                     </div>
                     <div class="col form-group">
                         <p>
                             {{ form.lname.label }}
                             {{ form.lname(class_='form-control m-0') }}
+                            {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
                         </p>
                     </div>
                     <div class="col form-group">
                         <p>
                             {{ form.medallion.label }}
                             {{ form.medallion(class_='form-control m-0') }}
+                            {% if form.medallion.errors %}{% for error in form.medallion.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
                         </p>
                     </div>
                 </div>
@@ -50,6 +56,7 @@
                         <p>
                             {{ form.department.label }}
                             {{ form.department(class_='form-control m-0') }}
+                            {% if form.department.errors %}{% for error in form.department.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
                         </p>
                     </div>
                 </div>
@@ -58,6 +65,7 @@
                         <p>
                             {{ form.role.label }}
                             {{ form.role(class_='form-control m-0') }}
+                            {% if form.role.errors %}{% for error in form.role.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
                         </p>
                     </div>
                 </div>

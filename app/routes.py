@@ -32,7 +32,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = db.session.scalar(
-            sa.select(User).where(User.username == form.username.data))
+            sa.select(User).where(User.username == form.username.data.lower()))
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password','error')
             return redirect(url_for('login'))

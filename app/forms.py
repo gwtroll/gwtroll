@@ -1,9 +1,12 @@
 from flask_wtf import FlaskForm
+from app.utils.db_utils import *
 from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField, widgets
 from wtforms.fields import DateField, DateTimeLocalField, DateTimeField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length, NumberRange
+
 import pandas as pd
 import datetime
+import uuid
 
 agedata = [('-','-'),('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 12'), ('0-5', 'Child 0 - 5'),('Royals','Royals')]
 
@@ -62,7 +65,7 @@ class LoginForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     # id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    role = SelectMultipleField('Role', validators=[DataRequired()])
+    role = MultiCheckboxField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
@@ -71,11 +74,41 @@ class CreateUserForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+    def populate_object(self, obj):
+        # Username - Strip - Lower
+        if self.username.data:
+            obj.username = self.username.data.strip().lower()
+        # Roles - Iterate
+        for roleid in self.role.data:
+            obj.roles.append(get_role(roleid))
+        # First Name - Strip
+        if self.fname.data:
+            obj.fname = self.fname.data.strip()
+        # Last Name - Strip
+        if self.lname.data:
+            obj.lname = self.lname.data.strip()
+        # Department - Check '-'
+        print(self.department.data)
+        if self.department.data and self.department.data != 'None':
+            obj.department_id = self.department.data
+        # Medallion 
+        if self.medallion.data:
+            obj.medallion = self.medallion.data
+        # Password - Strip - Hash
+        if self.password.data:
+            obj.set_password(self.password.data.strip())
+        # Active
+        obj.active = True
+        #FS Uniqueifier
+        obj.fs_uniquifier = uuid.uuid4().hex
+
 class CreateRoleForm(FlaskForm):
     id = IntegerField('Id', validators=[DataRequired()])
     role_name = StringField('Role Name', validators=[DataRequired()])
     permissions = MultiCheckboxField('Permissions')
     submit = SubmitField('Submit')
+
+
 
 # class CreateEventForm(FlaskForm):
 #     event_name = StringField('Event Name', validators=[DataRequired()])
@@ -87,26 +120,75 @@ class CreateRoleForm(FlaskForm):
 #     submit = SubmitField('Submit')
 
 class EditUserForm(FlaskForm):
-    id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
-    role = SelectMultipleField('Role', validators=[DataRequired()])
+    role = MultiCheckboxField('Role', validators=[Optional()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
     # event = SelectField('Event', validators=[])
-    medallion = IntegerField('Medallion')
+    medallion = IntegerField('Medallion', validators=[Optional()])
     active = BooleanField('Active')
     submit = SubmitField('Submit')
 
+    def populate_object(self, obj):
+        # Username - Strip - Lower
+        if self.username.data:
+            obj.username = self.username.data.strip().lower()
+        # Roles - Iterate
+        role_array = []
+        for roleid in self.role.data:
+            role_array.append(get_role(roleid))
+        obj.roles = role_array
+        # First Name - Strip
+        if self.fname.data:
+            obj.fname = self.fname.data.strip()
+        # Last Name - Strip
+        if self.lname.data:
+            obj.lname = self.lname.data.strip()
+        # Department - Check '-'
+        if self.department.data and self.department.data != 'None':
+            obj.department_id = self.department.data
+        # Medallion 
+        if self.medallion.data:
+            obj.medallion = self.medallion.data
+        # Active
+        obj.active = self.active.data
+
+    def populate_form(self, obj):
+        # Username
+        if obj.username:
+            self.username.data = obj.username
+        # Roles - Iterate
+        if obj.roles:
+            role_array = []
+            for role in obj.roles:
+                role_array.append(str(role.id))
+            self.role.data = role_array
+        # First Name
+        if obj.fname:
+            self.fname.data = obj.fname
+        # Last Name
+        if obj.lname:
+            self.lname.data = obj.lname
+        # Department
+        if obj.department_id:
+            self.department.data = obj.department_id
+        # Medallion 
+        if obj.medallion:
+            self.medallion.data = obj.medallion
+        # Active
+        self.active.data = obj.active
+
 class UpdatePasswordForm(FlaskForm):
-    id = StringField('User Id', validators=[DataRequired()])
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[InputRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Password length must be between 6 and 32 characters')])
     confirm = PasswordField('Confirm Password', validators=[InputRequired(), EqualTo('password', message='Passwords Must Match')])
-    submit = SubmitField('Submit')
+    password = PasswordField('Password', validators=[InputRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Password length must be between 6 and 32 characters')])
+    submit = SubmitField('Reset Password')
+    def populate_object(self, obj):
+        # Password - Strip - Hash
+        if self.password.data.strip() == self.confirm.data.strip():
+            obj.set_password(self.password.data.strip())
 
 class CreateRegForm(FlaskForm):
-    #regid = HiddenField(None)
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     scaname = StringField('SCA Name', validators=[])
@@ -121,8 +203,6 @@ class CreateRegForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
     emergency_contact_name = StringField('Legal Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
-    #mbr_num
-    #mbr_exp
     submit = SubmitField('Submit')
 
 class CreatePreRegForm(FlaskForm):
@@ -388,7 +468,6 @@ class StandardUploadForm(FlaskForm):
     submit = SubmitField('Submit Upload')
 
 class MerchantForm(FlaskForm):
-    
     business_name = StringField('Business Name', validators=[DataRequired()])
     sca_name = StringField('SCA Name', validators=[Optional()])
     fname = StringField('First Name', validators=[DataRequired()])
@@ -420,13 +499,8 @@ class MerchantForm(FlaskForm):
     trailer_license_plate = StringField('Trailer License Plate', validators=[Optional()])
     trailer_state = StringField('Trailer State', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
-
     signature = StringField('By Typing your name here, you are signing this application electronically. You agree your electronic signature is the legal equivalent of your manual signature on this application.', validators=[DataRequired()])
-    
-    submit = SubmitField(
-        'Submit Merchant Application',
-        render_kw={'id':'submit','data_action':'save-svg'}
-    )
+    submit = SubmitField('Submit Merchant Application',render_kw={'id':'submit'})
 
 class EditMerchantForm(FlaskForm):
     

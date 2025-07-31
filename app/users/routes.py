@@ -4,7 +4,7 @@ from app.users import bp
 from flask_login import current_user, login_required
 from flask_security import roles_accepted
 from app.utils.security_utils import permission_required
-from flask import render_template, request, flash, redirect
+from flask import render_template, request, flash, redirect, url_for
 from app.forms import *
 from app.models import *
 from werkzeug.exceptions import abort
@@ -42,31 +42,18 @@ def createuser():
     form = CreateUserForm()
     form.role.choices = get_role_choices()
     form.department.choices = get_department_choices()
-    # form.event.choices = get_event_choices()
     
-    if request.method == 'POST':
-        dup_user_check = User.query.filter(User.username == form.username.data).first()
+    if request.method == 'POST' and form.validate_on_submit():
+        dup_user_check = User.query.filter(User.username == form.username.data.lower()).first()
         if dup_user_check:
             flash("Username Already Taken - Please Try Again",'error')
             return render_template('createuser.html', form=form)
         user = User()
-        user.username = form.username.data
-        user.department_id = form.department.data if form.department.data != 'None' else None
-        for roleid in form.role.data:
-            user.roles.append(get_role(roleid))
-        user.fname = form.fname.data
-        user.lname = form.lname.data
-        user.medallion = form.medallion.data
-        user.fs_uniquifier = uuid.uuid4().hex
-        user.active = True
-        # user.event_id = form.event.data if form.event.data != 0 else None
-        user.set_password(form.password.data)
-
+        form.populate_object(user)
         db.session.add(user)
         db.session.commit()
-        db.session.close()
 
-        return redirect('/users')
+        return redirect(url_for('users.users'))
 
     return render_template('createuser.html', form=form)
 
@@ -74,50 +61,21 @@ def createuser():
 @login_required
 @permission_required('edit_users')
 def edituser(userid):
-    user = get_user(userid)
-    if not currentuser_has_permission_on_user(current_user,user):
-        return redirect('/users')
-    if not currentuser_has_permission_on_user(current_user,user):
-        return redirect('/users')
-
-    role_array = []
-    for role in user.roles:
-        role_array.append(role.id)
-
-    form = EditUserForm(
-        id = user.id, 
-        username = user.username,
-        department = user.department_id if user.department_id else 0, 
-        role = role_array,
-        fname = user.fname,
-        lname = user.lname,
-        medallion = user.medallion,
-        active = user.active,
-        # event = user.event_id
-    )
+    form = EditUserForm()
     form.role.choices = get_role_choices()
     form.department.choices = get_department_choices()
-    # form.event.choices = get_event_choices()
+    user = get_user(userid)
 
-    if request.method == 'POST':
-        role_array = []
-        for roleid in form.role.data:
-            role_array.append(get_role(roleid))
-        user = get_user(form.id.data)
-        user.username = form.username.data
-        user.department_id = form.department.data if form.department.data != 'None' else None,
-        user.roles = role_array
-        user.fname = form.fname.data
-        user.lname = form.lname.data
-        user.medallion = form.medallion.data
-        user.medallion = form.medallion.data
-        user.active = bool(request.form.get('active'))
-        # user.event_id = form.event.data if form.event.data != 0 else None
-
+    if request.method == 'POST' and form.validate_on_submit():
+        form.populate_object(user)
         db.session.commit()
-
-        return redirect('/users')
+        return redirect(url_for('users.users'))
     
+    else:
+        if not currentuser_has_permission_on_user(current_user,user):
+            return redirect(url_for('users.users'))
+        form.populate_form(user)
+
     return render_template('edituser.html', user=user, form=form)
 
 @bp.route('/<userid>/pwreset', methods=('GET', 'POST'))
@@ -125,24 +83,15 @@ def edituser(userid):
 @permission_required('edit_users')
 def pwresetuser(userid):
     user = get_user(userid)
+
     if not currentuser_has_permission_on_user(current_user,user):
-        return redirect('/users')
-    if not currentuser_has_permission_on_user(current_user,user):
-        return redirect('/users')
-    edit_request = request.args.get("submitValue")
+        return redirect(url_for('users.users'))
         
-    form = UpdatePasswordForm(
-        id = user.id, 
-        username = user.username, 
-        password = ''
-    )
+    form = UpdatePasswordForm()
 
-    if request.method == 'POST':
-        user = get_user(form.id.data)
-        user.set_password(form.password.data)
-
+    if request.method == 'POST' and form.validate_on_submit():
+        form.populate_obj(user)
         db.session.commit()
-
-        return redirect('/users')
+        return redirect(url_for('users.users'))
     
-    return render_template('pwresetuser.html', user=user, form=form, edit_request=edit_request)
+    return render_template('pwresetuser.html', user=user, form=form)

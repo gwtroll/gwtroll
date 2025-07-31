@@ -4,37 +4,50 @@
 
 <div class="row">
     <div class="col">
-            <form action="" method="post">
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            {{ form.id.label }}
-                            {{ form.id(class_='form-control m-0', readonly=true) }}
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            {{ form.username.label }}
-                            {{ form.username(class_='form-control m-0', readonly=true) }}
-                        </p>
-                    </div>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        User ID
+                        <input type="text" class="form-control m-0" disabled value="{{user.id}}">
+                    </p>
                 </div>
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            {{ form.password.label }}
-                            {{ form.password(class_='form-control m-0') }}
-                        </p>
-                    </div>
+                <div class="col form-group">
+                    <p>
+                        Username
+                        <input type="text" class="form-control m-0" disabled value="{{user.username}}">
+                    </p>
                 </div>
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            <input class="form__submit form__input btn btn-primary form-control m-0" type="submit" value="Password Reset" name="select_value"/>
-                        </p>
-                    </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.password.label }}
+                        {{ form.password(class_='form-control m-0') }}
+                        {% if form.password.errors %}{% for error in form.password.errors %}<span class="error">{{ error
+                            }}</span>{% endfor %}{% endif %}
+                    </p>
                 </div>
-            </form>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.confirm.label }}
+                        {{ form.confirm(class_='form-control m-0') }}
+                        {% if form.confirm.errors %}{% for error in form.confirm.errors %}<span class="error">{{ error
+                            }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.submit(class_='form-control m-0 btn btn-primary btn-lg') }}
+                    </p>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
