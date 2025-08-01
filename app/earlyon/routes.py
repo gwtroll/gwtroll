@@ -105,7 +105,7 @@ def createearlyon(regid):
             rider_cost = 0
             free_riders = 1
             adult_riders = 0
-            if form.department.data == 'Merchants':
+            if form.department.data == 'Merchant':
                 free_riders = 2
 
             for idx, field in enumerate(form.riders):

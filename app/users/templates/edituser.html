@@ -4,79 +4,89 @@
 
 <div class="row">
     <div class="col">
-            <form action="" method="post" novalidate>
-                {{ form.hidden_tag() }}
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            User ID
-                            <input type="text" class="form-control m-0" disabled value="{{user.id}}">
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            {{ form.username.label }}
-                            {{ form.username(class_='form-control m-0') }}
-                            {% if form.username.errors %}{% for error in form.username.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            {{ form.active.label(class_='form-check-label') }}
-                            {{ form.active(class_='form-check-input big-checkbox') }}
-                        </p>
-                    </div>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        User ID
+                        <input type="text" class="form-control m-0" disabled value="{{user.id}}">
+                    </p>
                 </div>
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            {{ form.fname.label }}
-                            {{ form.fname(class_='form-control m-0') }}
-                            {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                <div class="col form-group">
+                    <p>
+                        {{ form.username.label }}
+                        {{ form.username(class_='form-control m-0') }}
+                        {% if form.username.errors %}{% for error in form.username.errors %}<span class="error">{{ error
+                            }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+                <div class="col form-group">
+                    <p>
+                        {{ form.active.label(class_='form-check-label') }}
+                        {{ form.active(class_='form-check-input big-checkbox') }}
+                    </p>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.fname.label }}
+                        {{ form.fname(class_='form-control m-0') }}
+                        {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error
+                            }}</span>{% endfor %}{% endif %}
 
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            {{ form.lname.label }}
-                            {{ form.lname(class_='form-control m-0') }}
-                            {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            {{ form.medallion.label }}
-                            {{ form.medallion(class_='form-control m-0') }}
-                            {% if form.medallion.errors %}{% for error in form.medallion.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-                        </p>
-                    </div>
+                    </p>
                 </div>
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            {{ form.department.label }}
-                            {{ form.department(class_='form-control m-0') }}
-                            {% if form.department.errors %}{% for error in form.department.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-                        </p>
-                    </div>
+                <div class="col form-group">
+                    <p>
+                        {{ form.lname.label }}
+                        {{ form.lname(class_='form-control m-0') }}
+                        {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error
+                            }}</span>{% endfor %}{% endif %}
+                    </p>
                 </div>
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            {{ form.role.label }}
-                            {{ form.role(class_='form-control m-0') }}
-                            {% if form.role.errors %}{% for error in form.role.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-                        </p>
-                    </div>
+                <div class="col form-group">
+                    <p>
+                        {{ form.medallion.label }}
+                        {{ form.medallion(class_='form-control m-0') }}
+                        {% if form.medallion.errors %}{% for error in form.medallion.errors %}<span class="error">{{
+                            error }}</span>{% endfor %}{% endif %}
+                    </p>
                 </div>
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            <input class="form__submit form__input btn btn-primary form-control m-0" type="submit" value="Submit" name="select_value"/>
-                        </p>
-                    </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.department.label }}
+                        {{ form.department(class_='form-control m-0') }}
+                        {% if form.department.errors %}{% for error in form.department.errors %}<span class="error">{{
+                            error }}</span>{% endfor %}{% endif %}
+                    </p>
                 </div>
-            </form>
+            </div>
+            <p>Roles</p>
+            <div class="row form-group">
+                <div class="col form-group">
+                        {% for role in form.role %}
+                        <div class="col form-group">
+                            {{ role(class_='form-check-input') }} {{ role.label }}
+                        </div>
+                    {% endfor %}
+                    {% if form.role.errors %}{% for error in form.role.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </div>
+            </div>
+            <br>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        <input class="form__submit form__input btn btn-primary btn-lg form-control m-0" type="submit"
+                            value="Submit" name="select_value" />
+                    </p>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 

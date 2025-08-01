@@ -37,23 +37,23 @@
             <li class="nav-item">
                 <a class="nav-link" href="/">Search</a>
             </li>
-            {% if current_user.has_role('Admin') or current_user.has_role('Department Head') %} 
+            {% if current_user.has_permission('registration_reports') %} 
             <li class="nav-item">
                 <a class="nav-link" href="/reports">Reports</a>
             </li>
             {% endif %}
-            {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') %} 
+            {% if current_user.has_permission('marshal_reports') %} 
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('marshal.reports')}}">Marshal Reports</a>
             </li>
             {% endif %}
-            {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Marshal User') %} 
+            {% if current_user.has_permission('marshal_view') or current_user.has_permission('marshal_edit') %} 
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('marshal.index')}}">Marshal</a>
             </li>
             {% endif %}
 
-            {% if current_user.has_role('Invoices') or current_user.has_role('Admin') %} 
+            {% if current_user.has_permission('invoice_view') or current_user.has_permission('invoice_edit') %} 
       
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="invoiceButtonMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -69,7 +69,7 @@
             </li>
             {% endif %}
 
-            {% if current_user.has_role('Merchant Head') or current_user.has_role('Admin') %} 
+            {% if current_user.has_permission('merchant_view') or current_user.has_permission('merchant_edit') %} 
       
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="merchantButtonMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -82,7 +82,7 @@
             </li>
             {% endif %}
 
-            {% if current_user.has_role('Department Head') or current_user.has_role('Admin') or current_user.has_role('Autocrat') %} 
+            {% if current_user.has_permission('earlyon_view') or current_user.has_permission('earlyon_edit') %} 
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="earlyonButtonMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Earlyon
@@ -94,7 +94,7 @@
             {% endif %}
 
 
-            {% if current_user.has_role('Admin') or current_user.has_role('Marshal Admin') or current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head') %} 
+            {% if current_user.has_permission('admin') or current_user.has_permission('edit_users') or current_user.has_permission('view_users')%} 
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="adminMenuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Admin

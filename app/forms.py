@@ -19,7 +19,7 @@ paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle'),('travlers_check','T
 preregstatusdata = [('',''),('SUCCEEDED','SUCCEEDED')]
 
 class MultiCheckboxField(SelectMultipleField):
-    widget = widgets.ListWidget(html_tag='ul', prefix_label=False)
+    widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
 
 class RequiredIfMembership(InputRequired):
@@ -134,10 +134,16 @@ class EditUserForm(FlaskForm):
         if self.username.data:
             obj.username = self.username.data.strip().lower()
         # Roles - Iterate
-        role_array = []
+        current_role_ids = []
+        user_role_permissions = [str(r[0]) for r in get_role_choices()]
+        for role in obj.roles:
+            current_role_ids.append(str(role.id))
         for roleid in self.role.data:
-            role_array.append(get_role(roleid))
-        obj.roles = role_array
+            if roleid in user_role_permissions and roleid not in current_role_ids:
+                obj.roles.append(get_role(roleid))
+        for roleid in current_role_ids:
+            if roleid in user_role_permissions and roleid not in self.role.data:
+                obj.roles.remove(get_role(roleid))
         # First Name - Strip
         if self.fname.data:
             obj.fname = self.fname.data.strip()

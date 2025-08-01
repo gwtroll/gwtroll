@@ -175,7 +175,7 @@ def get_role_choices():
     for r in roles:
         role_dict[r.name] = r
 
-    if current_user.has_role('Admin'):
+    if current_user.has_permission('admin'):
         for r in roles:
             role_choices.append([r.id, r.name])
         return role_choices
@@ -183,10 +183,10 @@ def get_role_choices():
     if current_user.has_role('Marshal Admin'):
         role_choices.append([role_dict['Marshal User'].id,'Marshal User'])
 
-    if current_user.has_role('Troll Shift Lead') or current_user.has_role('Department Head'):
+    if current_user.has_role('Troll Shift Lead') or current_user.has_role('Head Troll'):
         role_choices.append([role_dict['Troll User'].id,'Troll User'])
     
-    if current_user.has_role('Department Head'):
+    if current_user.has_role('Head Troll'):
         role_choices.append([role_dict['Troll Shift Lead'].id,'Troll Shift Lead'])
 
     return role_choices

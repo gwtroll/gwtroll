@@ -201,7 +201,7 @@
             </div>
         </div>
     {%endif%}
-    {% if current_user.has_role('Admin') or current_user.has_role('Department Head') or current_user.has_role('Troll Shift Lead')%}
+    {% if current_user.has_permission('registration_edit') or current_user.has_permission('registration_edit_limited')%}
         <div class="row form-group no-print">
             <div class="col form-group">
                 {% if current_user.has_permission('registration_edit') %}
