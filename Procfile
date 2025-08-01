@@ -1,1 +1,1 @@
-web: gunicorn -w 3 --bind=0.0.0.0:$PORT --timeout 300 gwtroll:app
+web: gunicorn --bind=0.0.0.0:$PORT --timeout 30 gwtroll:app
