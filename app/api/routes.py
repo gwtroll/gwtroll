@@ -122,7 +122,6 @@ def search_registration(key,value):
     data['prereg_price'] = pricesheet.prereg_price
     if key == 'name':
         regs = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + value + '%'))),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
-        print(regs)
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
         #     #(value, value, value))

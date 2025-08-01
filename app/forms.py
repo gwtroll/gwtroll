@@ -88,7 +88,6 @@ class CreateUserForm(FlaskForm):
         if self.lname.data:
             obj.lname = self.lname.data.strip()
         # Department - Check '-'
-        print(self.department.data)
         if self.department.data and self.department.data != 'None':
             obj.department_id = self.department.data
         # Medallion 
@@ -662,8 +661,6 @@ class EditLimitedForm(FlaskForm):
         if self.notes.data:
             obj.notes = self.notes.data
         
-
-
 class RiderForm(Form):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -859,7 +856,6 @@ class MerchantForm(FlaskForm):
     submit = SubmitField('Submit Merchant Application',render_kw={'id':'submit'})
 
 class EditMerchantForm(FlaskForm):
-    
     business_name = StringField('Business Name', validators=[DataRequired()])
     status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('WAITLIST','WAITLIST'),('DUPLICATE','DUPLICATE')], validators=[DataRequired()])
     sca_name = StringField('SCA Name', validators=[DataRequired()])
@@ -884,7 +880,7 @@ class EditMerchantForm(FlaskForm):
     merchant_fee = FloatField('Merchant Fee',validators=[DataRequired()], default=0)
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: Agreement to send menu and pricing', validators=[Optional()]) 
-    estimated_date_of_arrival = DateField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
+    estimated_date_of_arrival = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     service_animal = BooleanField('Service Animal', default=False, validators=[Optional()])
     last_3_years = BooleanField('Have you been a merchant at Gulf Wars in the last 3 years?', default=False, validators=[Optional()])
     vehicle_length = IntegerField('Vehicle Length (in feet)', validators=[Optional()])

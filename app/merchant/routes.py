@@ -168,7 +168,7 @@ def update(merch_id):
         merchant_fee = merchant.merchant_fee,
         electricity_request = merchant.electricity_request,
         food_merchant_agreement = merchant.food_merchant_agreement,
-        estimated_date_of_arrival = merchant.estimated_date_of_arrival,
+        estimated_date_of_arrival = merchant.estimated_date_of_arrival.strftime('%Y/%m/%d') if merchant.estimated_date_of_arrival else '-',
         service_animal = merchant.service_animal,
         last_3_years = merchant.last_3_years,
         vehicle_length = merchant.vehicle_length,
@@ -182,6 +182,7 @@ def update(merch_id):
         application_date = datetime.strptime(str(merchant.application_date), '%Y-%m-%d %H:%M:%S') if merchant.application_date else None,
         signature = merchant.signature if merchant.signature else ''
     )
+    form.estimated_date_of_arrival.choices = get_merch_arrival_dates()
 
     if request.method == 'POST':
         old_status = merchant.status
