@@ -5,7 +5,7 @@ from wtforms.fields import DateField, DateTimeLocalField, DateTimeField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length, NumberRange
 
 import pandas as pd
-import datetime
+from datetime import datetime
 import uuid
 
 agedata = [('-','-'),('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', 'Youth 6 - 12'), ('0-5', 'Child 0 - 5'),('Royals','Royals')]
@@ -200,13 +200,81 @@ class CreateRegForm(FlaskForm):
     mbr_num_exp = DateField('Exp Date', validators=[RequiredIfMembership('mbr')])
     zip = IntegerField('Zip', validators=[Optional()])
     phone = StringField('Phone', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(),Email()])
     emergency_contact_name = StringField('Legal Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+    def populate_object(self, obj):
+        # First Name - Strip
+        if self.fname.data:
+            obj.fname = self.fname.data.strip()
+        # Last Name - Strip
+        if self.lname.data:
+            obj.lname = self.lname.data.strip()
+        # SCA Name - Strip
+        if self.scaname.data:
+            obj.scaname = self.scaname.data.strip()
+        # Kingdom
+        if self.kingdom.data:
+            obj.kingdom_id = self.kingdom.data
+        # Lodging
+        if self.lodging.data:
+            obj.lodging_id = self.lodging.data
+        # Age
+        if self.age.data:
+            obj.age = self.age.data
+        # Member
+        if self.mbr.data:
+            obj.mbr = True if self.mbr.data == 'Member' else False
+        # Member Number
+        if self.mbr_num.data:
+            obj.mbr_num = self.mbr_num.data
+        # Member Expiration
+        if self.mbr_num_exp.data:
+            obj.mbr_num_exp = self.mbr_num_exp.data
+        # Zip
+        if self.zip.data:
+            obj.zip = self.zip.data
+        # Phone
+        if self.phone.data:
+            obj.phone = self.phone.data
+        # Email
+        if self.email.data:
+            obj.email = self.email.data
+        # Emergency Contact Name
+        if self.emergency_contact_name.data:
+            obj.emergency_contact_name = self.emergency_contact_name.data
+        # Emergency Contact Phone
+        if self.emergency_contact_phone.data:
+            obj.emergency_contact_phone = self.emergency_contact_phone.data
+        # Expected Arrival Date - Set to Today
+        obj.expected_arrival_date = datetime.now(pytz.timezone('America/Chicago')).date()
+        # Actual Arrival Date - Set to Today
+        obj.actual_arrival_date = datetime.now(pytz.timezone('America/Chicago')).date()
+        # Registration Price/Balance + NMR Price/Balance + PayPal Donation/Balance + Balance
+        if obj.age == '18+':
+            registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
+            obj.registration_price = registration_price
+            obj.registration_balance = registration_price
+            if obj.mbr != True:
+                obj.nmr_price = 10
+                obj.nmr_balance = 10
+            else:
+                obj.nmr_price = 0
+                obj.nmr_balance = 0
+        else:
+            obj.registration_price = 0
+            obj.registration_balance = 0
+            obj.nmr_price = 0
+            obj.nmr_balance = 0
+            
+        obj.paypal_donation = 0
+        obj.paypal_donation_balance = 0
+        
+        obj.balance = obj.registration_price + obj.nmr_price + obj.paypal_donation
+
 class CreatePreRegForm(FlaskForm):
-    #regid = HiddenField(None)
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     scaname = StringField('SCA Name', validators=[])
@@ -230,8 +298,104 @@ class CreatePreRegForm(FlaskForm):
     paypal_donation_amount = IntegerField("PayPal Donation Amount", default=5)
     royal_departure_date = DateField('Departure Date', validators=[Optional()])
     royal_title = StringField('Royal Title', validators=[Optional()])
-
     submit = SubmitField('Register')
+
+    def populate_object(self, obj):
+        # First Name - Strip
+        if self.fname.data:
+            obj.fname = self.fname.data.strip()
+        # Last Name - Strip
+        if self.lname.data:
+            obj.lname = self.lname.data.strip()
+        # SCA Name - Strip
+        if self.scaname.data:
+            obj.scaname = self.scaname.data.strip()
+        # Zip
+        if self.zip.data:
+            obj.zip = self.zip.data
+        # City - Strip
+        if self.city.data:
+            obj.city = self.city.data.strip()
+        # State/Province - Strip
+        if self.state_province.data:
+            obj.state_province = self.state_province.data.strip()
+        # Country - Strip
+        if self.country.data:
+            obj.country = self.country.data.strip()
+        # Phone
+        if self.phone.data:
+            obj.phone = self.phone.data
+        # Email - Strip - Lower
+        if self.email.data:
+            obj.email = self.email.data.strip().lower()
+        # Invoice Email - Strip - Lower
+        if self.invoice_email.data:
+            obj.invoice_email = self.invoice_email.data.strip().lower()
+        # Kingdom
+        if self.kingdom.data:
+            obj.kingdom_id = self.kingdom.data
+        # Lodging
+        if self.lodging.data:
+            obj.lodging_id = self.lodging.data
+        # Age
+        if self.age.data:
+            obj.age = self.age.data
+        # Member
+        if self.mbr.data:
+            obj.mbr = True if self.mbr.data == 'Member' else False
+        # Member Number
+        if self.mbr_num.data:
+            obj.mbr_num = self.mbr_num.data
+        # Member Expiration
+        if self.mbr_num_exp.data:
+            obj.mbr_num_exp = self.mbr_num_exp.data
+        # Expected Arrival
+        if self.expected_arrival_date.data:
+            obj.expected_arrival_date = self.expected_arrival_date.data
+        # Royal Departure
+        if self.royal_departure_date.data:
+            obj.royal_departure_date = self.royal_departure_date.data
+        # Royal Tital
+        if self.royal_title.data:
+            obj.royal_title = self.royal_title.data
+        # Emergency Contact Name
+        if self.emergency_contact_name.data:
+            obj.emergency_contact_name = self.emergency_contact_name.data
+        # Emergency Contact Phone
+        if self.emergency_contact_phone.data:
+            obj.emergency_contact_phone = self.emergency_contact_phone.data
+        # Pre-Registration
+        obj.prereg = True
+        # Pre-Registration Date/Time
+        obj.prereg_date_time = datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0).isoformat()
+        # Prices
+        # Registration Price/Balance + NMR Price/Balance
+        if obj.age == '18+':
+            registration_price = get_prereg_pricesheet_day(obj.expected_arrival_date)
+            obj.registration_price = registration_price
+            obj.registration_balance = registration_price
+            if not obj.mbr:
+                obj.nmr_price = 10
+                obj.nmr_balance = 10
+            else:
+                obj.nmr_price = 0
+                obj.nmr_balance = 0
+        else:
+            obj.registration_price = 0
+            obj.registration_balance = 0
+            obj.nmr_price = 0
+            obj.nmr_balance = 0
+        # PayPal Donation/Balance
+        if self.paypal_donation.data == True:
+            obj.paypal_donation = self.paypal_donation_amount.data
+            obj.paypal_donation_balance = self.paypal_donation_amount.data
+        else:
+            obj.paypal_donation = 0
+            obj.paypal_donation_balance = 0
+        # Balance
+        obj.balance = obj.registration_balance + obj.nmr_balance + obj.paypal_donation_balance
+
+        
 
 class CheckinForm(FlaskForm):
     regid = IntegerField()
@@ -250,45 +414,37 @@ class CheckinForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class EditForm(FlaskForm):
-    regid = IntegerField()
-    fname = StringField('First Name')
-    lname = StringField('Last Name')
+    fname = StringField('First Name', validators=[DataRequired()])
+    lname = StringField('Last Name', validators=[DataRequired()])
     scaname = StringField('SCA Name')
     city = StringField('City')
     state_province = StringField('State/Province')
     zip = IntegerField('Zip Code')
     country = StringField('Country', default='United States')
-    phone = StringField('Phone')
-    email = StringField('Communication Email')
-    invoice_email = StringField('Invoice Email')
+    phone = StringField('Phone', validators=[DataRequired()])
+    email = StringField('Communication Email', validators=[DataRequired()])
+    invoice_email = StringField('Invoice Email', validators=[DataRequired()])
     age = SelectField('Age Range', validators=[NoneOf('-', message='You must select an Age Range')], choices=agedata)
-    emergency_contact_name = StringField('Name')
-    emergency_contact_phone = StringField('Phone')
+    emergency_contact_name = StringField('Name', validators=[DataRequired()])
+    emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
     mbr_num = IntegerField('Member Number')
     mbr_num_exp = DateField('Member Exp Date')
     
     reg_date_time = DateTimeField('Registration Date/Time')
-    prereg = BooleanField('PreReg')
+    prereg = BooleanField('Pre-Registered')
     prereg_date_time = DateTimeField('PreReg Date/Time')
-    expected_arrival_date = DateField("Arrival Date")
+    expected_arrival_date = DateField("Expected Arrival Date", validators=[DataRequired()])
     early_on = BooleanField('Early On')
     notes = TextAreaField('Notes')
     duplicate = BooleanField('Duplicate Registration')
 
     registration_price = IntegerField('Registration Price', validators=[DataRequired()])
-    registration_balance = IntegerField('Registration Balance', validators=[DataRequired()])
     nmr_price = IntegerField('NMR Price', validators=[DataRequired()])
-    nmr_balance = IntegerField('NMR Balance', validators=[DataRequired()])
     paypal_donation = IntegerField('PayPal Donation', validators=[DataRequired()])
-    paypal_donation_balance = IntegerField('PayPal Donation Balance', validators=[DataRequired()])
-    nmr_donation = IntegerField('NMR Donation', validators=[DataRequired()])
-    total_due = IntegerField('Total Due', validators=[DataRequired()])
-    balance = IntegerField('Balance', validators=[DataRequired()])
-
-    minor_waiver = StringField('Minor Waiver', validators=[NoneOf('-', message='You must select a Minor Form Validation')])
+    
     checkin = DateTimeField('Checkin Date/Time')
-    medallion = IntegerField('Medallion #', validators=[DataRequired()])
+    medallion = IntegerField('Medallion #')
     actual_arrival_date = DateField('Actual Arrival Date')
 
     kingdom = SelectField('Kingdom', validators=[DataRequired()])
@@ -296,6 +452,171 @@ class EditForm(FlaskForm):
 
     #mbr_exp
     submit = SubmitField('Submit')
+
+    def populate_form(self, obj):
+        for field in self._fields:
+            print(field)
+        # First Name
+        if obj.fname:
+            self.fname.data = obj.fname
+        # Last Name
+        if obj.lname:
+            self.lname.data = obj.lname
+        # SCA Name
+        if obj.scaname:
+            self.scaname.data = obj.scaname
+        # Zip
+        if obj.zip:
+            self.zip.data = obj.zip
+        # City
+        if obj.city:
+            self.city.data = obj.city
+        # State/Province
+        if obj.state_province:
+            self.state_province.data = obj.state_province
+        # Country
+        if obj.country:
+            self.country.data = obj.country
+        # Phone
+        if obj.phone:
+            self.phone.data = obj.phone
+        # Email
+        if obj.email:
+            self.email.data = obj.email
+        # Invoice Email
+        if obj.invoice_email:
+            self.invoice_email.data = obj.invoice_email
+        # Kingdom
+        if obj.kingdom_id:
+            self.kingdom.data = str(obj.kingdom_id)
+        # Lodging
+        if obj.lodging_id:
+            self.lodging.data = str(obj.lodging_id)
+        # Age
+        if obj.age:
+            self.age.data = obj.age
+        # Member
+        self.mbr.data = 'Member' if obj.mbr == True else 'Non-Member'
+        # Member Number
+        if obj.mbr_num:
+            self.mbr_num.data = obj.mbr_num
+        # Member Expiration
+        if obj.mbr_num_exp:
+            self.mbr_num_exp.data = obj.mbr_num_exp
+        # Expected Arrival
+        if obj.expected_arrival_date:
+            self.expected_arrival_date.data = obj.expected_arrival_date        
+        # Emergency Contact Name
+        if obj.emergency_contact_name:
+            self.emergency_contact_name.data = obj.emergency_contact_name 
+        # Emergency Contact Phone
+        if obj.emergency_contact_phone:
+            self.emergency_contact_phone.data = obj.emergency_contact_phone 
+        # Pre-Registration
+        self.prereg.data = obj.prereg 
+        # EarlyOn Approved
+        self.early_on.data = obj.early_on_approved
+        # Duplicate
+        self.duplicate.data = obj.duplicate
+        # Notes
+        if obj.notes:
+            self.notes.data = obj.notes         
+        # Medallion
+        if obj.medallion:
+            self.medallion.data = obj.medallion
+        # Prices
+        # Registration Price
+        if obj.registration_price:
+            self.registration_price.data = obj.registration_price
+        # NMR Price
+        if obj.nmr_price:
+            self.nmr_price.data = obj.nmr_price
+        # PayPal Donation
+        if obj.paypal_donation:
+            self.paypal_donation.data = obj.paypal_donation         
+
+    def populate_object(self, obj):
+        # First Name - Strip
+        if self.fname.data:
+            obj.fname = self.fname.data.strip()
+        # Last Name - Strip
+        if self.lname.data:
+            obj.lname = self.lname.data.strip()
+        # SCA Name - Strip
+        if self.scaname.data:
+            obj.scaname = self.scaname.data.strip()
+        # Zip
+        if self.zip.data:
+            obj.zip = self.zip.data
+        # City - Strip
+        if self.city.data:
+            obj.city = self.city.data.strip()
+        # State/Province - Strip
+        if self.state_province.data:
+            obj.state_province = self.state_province.data.strip()
+        # Country - Strip
+        if self.country.data:
+            obj.country = self.country.data.strip()
+        # Phone
+        if self.phone.data:
+            obj.phone = self.phone.data
+        # Email - Strip - Lower
+        if self.email.data:
+            obj.email = self.email.data.strip().lower()
+        # Invoice Email - Strip - Lower
+        if self.invoice_email.data:
+            obj.invoice_email = self.invoice_email.data.strip().lower()
+        # Kingdom
+        if self.kingdom.data:
+            obj.kingdom_id = self.kingdom.data
+        # Lodging
+        if self.lodging.data:
+            obj.lodging_id = self.lodging.data
+        # Age
+        if self.age.data:
+            obj.age = self.age.data
+        # Member
+        if self.mbr.data:
+            obj.mbr = True if self.mbr.data == 'Member' else False
+        # Member Number
+        if self.mbr_num.data:
+            obj.mbr_num = self.mbr_num.data
+        # Member Expiration
+        if self.mbr_num_exp.data:
+            obj.mbr_num_exp = self.mbr_num_exp.data
+        # Expected Arrival
+        if self.expected_arrival_date.data:
+            obj.expected_arrival_date = self.expected_arrival_date.data
+
+        # Emergency Contact Name
+        if self.emergency_contact_name.data:
+            obj.emergency_contact_name = self.emergency_contact_name.data
+        # Emergency Contact Phone
+        if self.emergency_contact_phone.data:
+            obj.emergency_contact_phone = self.emergency_contact_phone.data
+        # Pre-Registration
+        obj.prereg = self.prereg.data
+        # EarlyOn Approved
+        obj.early_on_approved = self.early_on.data
+        # Duplicate
+        obj.duplicate = self.duplicate.data
+        # Notes
+        if self.notes.data:
+            obj.notes = self.notes.data
+        # Medallion
+        if self.medallion.data:
+            obj.medallion = self.medallion.data
+        # Prices
+        # Registration Price
+        if self.registration_price.data:
+            obj.registration_price = self.registration_price.data
+        # NMR Price
+        if self.nmr_price.data:
+            obj.nmr_price = self.nmr_price.data
+        # PayPal Donation
+        if self.paypal_donation.data:
+            obj.paypal_donation = self.paypal_donation.data
+        obj.recalculate_balance()
 
 class EditLimitedForm(FlaskForm):
     age = SelectField('Age Range', validators=[NoneOf('-', message='You must select an Age Range')], choices=agedata)
@@ -307,6 +628,41 @@ class EditLimitedForm(FlaskForm):
     lodging = SelectField('Camping Group', validators=[DataRequired()])
     notes = TextAreaField('Notes')
     submit = SubmitField('Submit')
+
+    def populate_form(self, obj):
+        # Member
+        self.mbr.data = 'Member' if obj.mbr else 'Non-Member'
+        # Member Number
+        if obj.mbr_num:
+            self.mbr_num.data = obj.mbr_num
+        # Member Expiration
+        if obj.mbr_num_exp:
+            self.mbr_num_exp.data = obj.mbr_num_exp
+        # Medallion
+        if obj.medallion:
+            self.medallion.data = obj.medallion
+        # Notes
+        if obj.notes:
+            self.notes.data = obj.notes
+
+    def populate_object(self, obj):
+        # Member
+        if self.mbr.data:
+            obj.mbr = True if self.mbr.data == 'Member' else False
+        # Member Number
+        if self.mbr_num.data:
+            obj.mbr_num = self.mbr_num.data
+        # Member Expiration
+        if self.mbr_num_exp.data:
+            obj.mbr_num_exp = self.mbr_num_exp.data
+        # Medallion
+        if self.medallion.data:
+            obj.medallion = self.medallion.data
+        # Notes
+        if self.notes.data:
+            obj.notes = self.notes.data
+        
+
 
 class RiderForm(Form):
     fname = StringField('First Name', validators=[DataRequired()])
@@ -449,7 +805,7 @@ class MarshalForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class IncidentForm(FlaskForm):
-    incident_date = DateTimeLocalField('Incident Date/Time', default=datetime.datetime.today)
+    incident_date = DateTimeLocalField('Incident Date/Time', default=datetime.today)
     notes = TextAreaField('Notes')
     submit = SubmitField('Submit Incident')
 

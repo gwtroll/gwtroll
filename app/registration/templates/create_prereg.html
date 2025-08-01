@@ -3,476 +3,537 @@
 
 {% block content %}
 <div style="background-color: rgb(255, 255, 255); padding: 10px; border-radius: 1em;">
-<h1>{% block title %} {{event.event_title}} – {{event.start_date.strftime('%B %d')}}-{{event.end_date.strftime('%d')}}, {{event.end_date.strftime('%Y')}} {% endblock %}</h1>
-<h3 class="text-center">King’s Arrow Ranch, Lumberton, Mississippi</h3>
-<p class="text-center"><a href="http://www.gulfwars.org">www.gulfwars.org</a></p>
+    <h1>{% block title %} {{event.event_title}} – {{event.start_date.strftime('%B
+        %d')}}-{{event.end_date.strftime('%d')}}, {{event.end_date.strftime('%Y')}} {% endblock %}</h1>
+    <h3 class="text-center">King’s Arrow Ranch, Lumberton, Mississippi</h3>
+    <p class="text-center"><a href="http://www.gulfwars.org">www.gulfwars.org</a></p>
 
-<div class="table-responsive">
-    <table class="table table-striped">
-    <tbody>
-      <tr>
-        <td scope="col">Autocrats:</td>
-        <td scope="col">
-            {{event.autocrat1}}<br>
-            {{event.autocrat2}}<br>
-            {{event.autocrat3}}<br>
-            <a href="mailto:autocrats@gulfwars.org">autocrats@gulfwars.org</a>
-        </td>
-        <td scope="col">Registration:</td>
-        <td scope="col">
-            Gulf Wars Registrations CST 918-640-5242 <br>
-            {{event.reservationist}} <br>
-            <a href="mailto:reservations@gulfwars.org">reservations@gulfwars.org</a><br>
-            209 S Dogwood Ave. <br>
-            Broken Arrow, OK 74012
-        </td>
-      </tr>
-    </tbody>
-    </table>  
-</div>
-
-<h5 class="text-center" style="color: red;">Deadline for online registration is 11:59 p.m. Central Time on {{event.preregistration_close_date.strftime('%b. %d, %Y')}}.</h5>  
-
-<div class="table-responsive">
-<table class="table table-striped">
-    <thead>
-      <tr>
-        <th scope="col" style="color: red;">Arrival Dates and Rates</th>
-        <th scope="col">Sat-Sun {{pricesheet[0].arrival_date.strftime('%m/%d')}}-{{pricesheet[1].arrival_date.strftime('%m/%d')}}</th>
-        <th scope="col">Mon-Tues {{pricesheet[2].arrival_date.strftime('%m/%d')}}-{{pricesheet[3].arrival_date.strftime('%m/%d')}}</th>
-        <th scope="col">Wed-Thurs {{pricesheet[4].arrival_date.strftime('%m/%d')}}-{{pricesheet[5].arrival_date.strftime('%m/%d')}}</th>
-        <th scope="col">Fri-Sat {{pricesheet[6].arrival_date.strftime('%m/%d')}}-{{pricesheet[7].arrival_date.strftime('%m/%d')}}</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th scope="row">Pre-Registered Member</th>
-        <td>${{pricesheet[0].prereg_price}}.00</td>
-        <td>${{pricesheet[2].prereg_price}}.00</td>
-        <td>${{pricesheet[4].prereg_price}}.00</td>
-        <td>${{pricesheet[6].prereg_price}}.00</td>
-      </tr>
-      <tr>
-        <th scope="row">At the Door Member</th>
-        <td>${{pricesheet[0].atd_price}}.00</td>
-        <td>${{pricesheet[2].atd_price}}.00</td>
-        <td>${{pricesheet[4].atd_price}}.00</td>
-        <td>${{pricesheet[6].atd_price}}.00</td>
-      </tr>
-      <tr>
-        <th scope="row">CHILDREN 17 AND UNDER</th>
-        <td>Free</td>
-        <td>Free</td>
-        <td>Free</td>
-        <td>Free</td>
-      </tr>
-      <tr>
-        <th scope="row">Pre-Registered Non-Member</th>
-        <td>${{pricesheet[0].prereg_price+10}}.00</td>
-        <td>${{pricesheet[2].prereg_price+10}}.00</td>
-        <td>${{pricesheet[4].prereg_price+10}}.00</td>
-        <td>${{pricesheet[6].prereg_price+10}}.00</td>
-      </tr>
-      <tr>
-        <th scope="row">At the Door Non-Member</th>
-        <td>${{pricesheet[0].atd_price+10}}.00</td>
-        <td>${{pricesheet[2].atd_price+10}}.00</td>
-        <td>${{pricesheet[4].atd_price+10}}.00</td>
-        <td>${{pricesheet[6].atd_price+10}}.00</td>
-      </tr>
-    </tbody>
-  </table>
-  </div>
-
-  <table class="table table-responsive">
-    <thead>
-      <tr>
-        <th scope="col" class="text-center" style="color: red;">THERE IS NO SEPARATE PRICING FOR DAYTRIPPERS. TRANSFERS OF RESERVATIONS ARE NOT ALLOWED.</th>
-      </tr>
-      <tr>
-        <th scope="col" class="text-center" style="color: red;">Please use the same Invoicing Email for all registrations on the same invoice</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th scope="row"><span style="color: red;">Proof of Membership</span> is defined as a membership card, mailing label from a Society publication showing membership # and expiration date, payment acknowledgement from the Society registry, or statement showing check payment or charge to Society registry.</th>
-      </tr>
-      <tr>
-        <th scope="row"><span style="color: red;">Refunds:</span> Requests for refunds must be made IN WRITING via mail or email to the Registration address (Gulf Wars Registrations, 209 S Dogwood Ave., Broken Arrow, OK 74012). They MUST be postmarked or dated ON OR BEFORE {{event.preregistration_close_date.strftime('%B %d, %Y')}} and MUST INCLUDE A COMPLETED REFUND <a href="https://gulfwars.org/wp-content/uploads/2025/01/GW-Refund-Request-Fillable-Site-Fee.pdf">REQUEST FORM</a>. Refunds for requests emailed or postmarked on or before {{event.preregistration_close_date.strftime('%B %d, %Y')}} will be made for any reason. Requests for refunds emailed or postmarked after {{event.preregistration_close_date.strftime('%B %d, %Y')}} will be at the discretion of the Gulf Wars Exchequer and the Gulf Wars Autocrat(s). There will be a processing fee of $10 (Ten Dollars) per canceled person, on ALL refunds. All refunds will be sent via check. You must include a valid mailing address with your request.</th>
-      </tr>
-      <tr>
-        <th scope="row" class="text-center" style="color: red;">EARLY ON - Requires Department Head Approval
-            Anyone not on the approved list will not be allowed to enter site until Troll opens on Saturday. 
-            </th>
-      </tr>
-      <tr>
-        <th scope="row" class="text-center" style="color: red;">ROYALS - Please select 'Royals' for Age Range</th>
-      </tr>
-      <tr>
-        <th scope="row" class="text-center" style="color: red;">Deadline for online registration is 11:59 p.m. Central Time on {{event.preregistration_close_date.strftime('%b. %d, %Y')}}.</th>
-      </tr>
-    </tbody>
-  </table>
-
-<form id='preregform' action="" method="POST" novalidate>
-    {{ form.hidden_tag() }}
-
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                <b>Registrations on same Invoice:</b>
-            </p>
-            {% if additional_registrations %}
-            {% for reg in additional_registrations %}
-            <div class="card">
-                <div class="card-header">
-                    {% if reg['age'] == '18+' %}
-                    Adult - 
-                    {% elif reg['age'] == 'Royal' %}
-                    Royal - 
-                    {% else %}
-                    Minor - 
-                    {% endif %}
-                    {% if reg['mbr'] %}
-                    Member
-                    {% else %}
-                    Non-Member
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                  <h5 class="card-title">{{reg['fname']}} {{reg['lname']}} - {{reg['scaname']}}</h5>
-                  <div class="row">
-                    <div class="col">
-                        <p>
-                            Email: {{reg['email']}}
-                        </p>
-                        <p>
-                            Phone: {{reg['phone']}}
-                        </p>
-                    </div>
-                    <div class="col">
-                        <p>
-                            {% if reg['mbr_num'] and reg['mbr_num_exp'] %}
-                            Member#/Exp: {{reg['mbr_num']}} / {{reg['mbr_num_exp']}}
-                            {% else %}
-                            Member#/Exp:
-                            {% endif %}
-                        </p>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col">
-                        <a class="btn btn-danger" href="/registration/removeregistration/{{loop.index0}}">Remove</a>
-                    </div>
-                  </div>
-              </div>
-            {% endfor %}
-            {% endif %}
-        </div>
-    </div>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <td scope="col">Autocrats:</td>
+                    <td scope="col">
+                        {{event.autocrat1}}<br>
+                        {{event.autocrat2}}<br>
+                        {{event.autocrat3}}<br>
+                        <a href="mailto:autocrats@gulfwars.org">autocrats@gulfwars.org</a>
+                    </td>
+                    <td scope="col">Registration:</td>
+                    <td scope="col">
+                        Gulf Wars Registrations CST 918-640-5242 <br>
+                        {{event.reservationist}} <br>
+                        <a href="mailto:reservations@gulfwars.org">reservations@gulfwars.org</a><br>
+                        209 S Dogwood Ave. <br>
+                        Broken Arrow, OK 74012
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                Please use the same Invoicing Email for all registrations on the same invoice.
-            </p>
-            <p>
-                {{ form.invoice_email.label }}<span style="color: red;">*</span>
-                {{ form.invoice_email(class_='form-control m-0') }}
-                {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+    <h5 class="text-center" style="color: red;">Deadline for online registration is 11:59 p.m. Central Time on
+        {{event.preregistration_close_date.strftime('%b. %d, %Y')}}.</h5>
 
-        </div>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col" style="color: red;">Arrival Dates and Rates</th>
+                    <th scope="col">Sat-Sun
+                        {{pricesheet[0].arrival_date.strftime('%m/%d')}}-{{pricesheet[1].arrival_date.strftime('%m/%d')}}
+                    </th>
+                    <th scope="col">Mon-Tues
+                        {{pricesheet[2].arrival_date.strftime('%m/%d')}}-{{pricesheet[3].arrival_date.strftime('%m/%d')}}
+                    </th>
+                    <th scope="col">Wed-Thurs
+                        {{pricesheet[4].arrival_date.strftime('%m/%d')}}-{{pricesheet[5].arrival_date.strftime('%m/%d')}}
+                    </th>
+                    <th scope="col">Fri-Sat
+                        {{pricesheet[6].arrival_date.strftime('%m/%d')}}-{{pricesheet[7].arrival_date.strftime('%m/%d')}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Pre-Registered Member</th>
+                    <td>${{pricesheet[0].prereg_price}}.00</td>
+                    <td>${{pricesheet[2].prereg_price}}.00</td>
+                    <td>${{pricesheet[4].prereg_price}}.00</td>
+                    <td>${{pricesheet[6].prereg_price}}.00</td>
+                </tr>
+                <tr>
+                    <th scope="row">At the Door Member</th>
+                    <td>${{pricesheet[0].atd_price}}.00</td>
+                    <td>${{pricesheet[2].atd_price}}.00</td>
+                    <td>${{pricesheet[4].atd_price}}.00</td>
+                    <td>${{pricesheet[6].atd_price}}.00</td>
+                </tr>
+                <tr>
+                    <th scope="row">CHILDREN 17 AND UNDER</th>
+                    <td>Free</td>
+                    <td>Free</td>
+                    <td>Free</td>
+                    <td>Free</td>
+                </tr>
+                <tr>
+                    <th scope="row">Pre-Registered Non-Member</th>
+                    <td>${{pricesheet[0].prereg_price+10}}.00</td>
+                    <td>${{pricesheet[2].prereg_price+10}}.00</td>
+                    <td>${{pricesheet[4].prereg_price+10}}.00</td>
+                    <td>${{pricesheet[6].prereg_price+10}}.00</td>
+                </tr>
+                <tr>
+                    <th scope="row">At the Door Non-Member</th>
+                    <td>${{pricesheet[0].atd_price+10}}.00</td>
+                    <td>${{pricesheet[2].atd_price+10}}.00</td>
+                    <td>${{pricesheet[4].atd_price+10}}.00</td>
+                    <td>${{pricesheet[6].atd_price+10}}.00</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.expected_arrival_date.label }}<span style="color: red;">*</span>
-                {{ form.expected_arrival_date(class_='form-control m-0', onchange_="recalc_price()") }}
-                {% if form.expected_arrival_date.errors %}{% for error in form.expected_arrival_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th scope="col" class="text-center" style="color: red;">THERE IS NO SEPARATE PRICING FOR DAYTRIPPERS.
+                    TRANSFERS OF RESERVATIONS ARE NOT ALLOWED.</th>
+            </tr>
+            <tr>
+                <th scope="col" class="text-center" style="color: red;">Please use the same Invoicing Email for all
+                    registrations on the same invoice</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row"><span style="color: red;">Proof of Membership</span> is defined as a membership card,
+                    mailing label from a Society publication showing membership # and expiration date, payment
+                    acknowledgement from the Society registry, or statement showing check payment or charge to Society
+                    registry.</th>
+            </tr>
+            <tr>
+                <th scope="row"><span style="color: red;">Refunds:</span> Requests for refunds must be made IN WRITING
+                    via mail or email to the Registration address (Gulf Wars Registrations, 209 S Dogwood Ave., Broken
+                    Arrow, OK 74012). They MUST be postmarked or dated ON OR BEFORE
+                    {{event.preregistration_close_date.strftime('%B %d, %Y')}} and MUST INCLUDE A COMPLETED REFUND <a
+                        href="https://gulfwars.org/wp-content/uploads/2025/01/GW-Refund-Request-Fillable-Site-Fee.pdf">REQUEST
+                        FORM</a>. Refunds for requests emailed or postmarked on or before
+                    {{event.preregistration_close_date.strftime('%B %d, %Y')}} will be made for any reason. Requests for
+                    refunds emailed or postmarked after {{event.preregistration_close_date.strftime('%B %d, %Y')}} will
+                    be at the discretion of the Gulf Wars Exchequer and the Gulf Wars Autocrat(s). There will be a
+                    processing fee of $10 (Ten Dollars) per canceled person, on ALL refunds. All refunds will be sent
+                    via check. You must include a valid mailing address with your request.</th>
+            </tr>
+            <tr>
+                <th scope="row" class="text-center" style="color: red;">EARLY ON - Requires Department Head Approval
+                    Anyone not on the approved list will not be allowed to enter site until Troll opens on Saturday.
+                </th>
+            </tr>
+            <tr>
+                <th scope="row" class="text-center" style="color: red;">ROYALS - Please select 'Royals' for Age Range
+                </th>
+            </tr>
+            <tr>
+                <th scope="row" class="text-center" style="color: red;">Deadline for online registration is 11:59 p.m.
+                    Central Time on {{event.preregistration_close_date.strftime('%b. %d, %Y')}}.</th>
+            </tr>
+        </tbody>
+    </table>
 
-            </p>
-        </div>
-        <div class="col">
-            <p>
-                {{ form.age.label }}<span style="color: red;">*</span>
-                {{ form.age(class_='form-control m-0', onchange="royalCheck()") }}
-                {% if form.age.errors %}{% for error in form.age.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+    <form id='preregform' action="" method="POST" novalidate>
+        {{ form.hidden_tag() }}
 
-            </p>
-        </div>
-    </div>
-    <div id="royals" style="display: none;">
-        <h4>Royals</h4>
         <div class="row form-group">
-
             <div class="col form-group">
                 <p>
-                    {{ form.royal_departure_date.label }}
-                    {{ form.royal_departure_date(class_='form-control m-0') }}
-                    {% if form.royal_departure_date.errors %}{% for error in form.royal_departure_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                    <b>Registrations on same Invoice:</b>
+                </p>
+                {% if additional_registrations %}
+                {% for reg in additional_registrations %}
+                <div class="card">
+                    <div class="card-header">
+                        {% if reg['age'] == '18+' %}
+                        Adult -
+                        {% elif reg['age'] == 'Royal' %}
+                        Royal -
+                        {% else %}
+                        Minor -
+                        {% endif %}
+                        {% if reg['mbr'] %}
+                        Member
+                        {% else %}
+                        Non-Member
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{reg['fname']}} {{reg['lname']}} - {{reg['scaname']}}</h5>
+                        <div class="row">
+                            <div class="col">
+                                <p>
+                                    Email: {{reg['email']}}
+                                </p>
+                                <p>
+                                    Phone: {{reg['phone']}}
+                                </p>
+                            </div>
+                            <div class="col">
+                                <p>
+                                    {% if reg['mbr_num'] and reg['mbr_num_exp'] %}
+                                    Member#/Exp: {{reg['mbr_num']}} / {{reg['mbr_num_exp']}}
+                                    {% else %}
+                                    Member#/Exp:
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <a class="btn btn-danger"
+                                    href="/registration/removeregistration/{{loop.index0}}">Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Please use the same Invoicing Email for all registrations on the same invoice.
+                </p>
+                <p>
+                    {{ form.invoice_email.label }}<span style="color: red;">*</span>
+                    {{ form.invoice_email(class_='form-control m-0') }}
+                    {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{
+                        error }}</span>{% endfor %}{% endif %}
+                </p>
+
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.expected_arrival_date.label }}<span style="color: red;">*</span>
+                    {{ form.expected_arrival_date(class_='form-control m-0', onchange_="recalc_price()") }}
+                    {% if form.expected_arrival_date.errors %}{% for error in form.expected_arrival_date.errors %}<span
+                        class="error">{{ error }}</span>{% endfor %}{% endif %}
+
                 </p>
             </div>
             <div class="col">
                 <p>
-                    {{ form.royal_title.label }}<br>
-                    {{ form.royal_title(class_='form-control m-0') }}
-                    {% if form.royal_title.errors %}{% for error in form.royal_title.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                    {{ form.age.label }}<span style="color: red;">*</span>
+                    {{ form.age(class_='form-control m-0', onchange="royalCheck()") }}
+                    {% if form.age.errors %}{% for error in form.age.errors %}<span class="error">{{ error }}</span>{%
+                    endfor %}{% endif %}
+
                 </p>
             </div>
         </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.fname.label }}<span style="color: red;">*</span>
-                {{ form.fname(class_='form-control m-0') }}
-                {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-        <div class="col">
-            <p>
-                {{ form.lname.label }}<span style="color: red;">*</span>
-                {{ form.lname(class_='form-control m-0') }}
-                {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-        <div class="col">
-            <p>
-                {{ form.scaname.label }}
-                {{ form.scaname(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.city.label }}<span style="color: red;">*</span>
-                {{ form.city(class_='form-control m-0') }}
-                {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-        <div class="col">
-            <p>
-                {{ form.state_province.label }}<span style="color: red;">*</span>
-                {{ form.state_province(class_='form-control m-0') }}
-                {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+        <div id="royals" style="display: none;">
+            <h4>Royals</h4>
+            <div class="row form-group">
 
+                <div class="col form-group">
+                    <p>
+                        {{ form.royal_departure_date.label }}
+                        {{ form.royal_departure_date(class_='form-control m-0') }}
+                        {% if form.royal_departure_date.errors %}{% for error in form.royal_departure_date.errors
+                        %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+                <div class="col">
+                    <p>
+                        {{ form.royal_title.label }}<br>
+                        {{ form.royal_title(class_='form-control m-0') }}
+                        {% if form.royal_title.errors %}{% for error in form.royal_title.errors %}<span class="error">{{
+                            error }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.zip.label }}<span style="color: red;">*</span>
-                {{ form.zip(class_='form-control m-0') }}
-                {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+        <div class="row form-group">
+            <div class="col">
+                <p>
+                    {{ form.fname.label }}<span style="color: red;">*</span>
+                    {{ form.fname(class_='form-control m-0') }}
+                    {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.lname.label }}<span style="color: red;">*</span>
+                    {{ form.lname(class_='form-control m-0') }}
+                    {% if form.lname.errors %}{% for error in form.lname.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.scaname.label }}
+                    {{ form.scaname(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col">
+                <p>
+                    {{ form.city.label }}<span style="color: red;">*</span>
+                    {{ form.city(class_='form-control m-0') }}
+                    {% if form.city.errors %}{% for error in form.city.errors %}<span class="error">{{ error }}</span>{%
+                    endfor %}{% endif %}
+                </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.state_province.label }}<span style="color: red;">*</span>
+                    {{ form.state_province(class_='form-control m-0') }}
+                    {% if form.state_province.errors %}{% for error in form.state_province.errors %}<span
+                        class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
 
+            </div>
         </div>
-        <div class="col">
-            <p>
-                {{ form.country.label }}<span style="color: red;">*</span>
-                {{ form.country(class_='form-control m-0') }}
-                {% if form.country.errors %}{% for error in form.country.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.phone.label }}<span style="color: red;">*</span>
-                {{ form.phone(class_='form-control m-0') }}
-                {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+        <div class="row form-group">
+            <div class="col">
+                <p>
+                    {{ form.zip.label }}<span style="color: red;">*</span>
+                    {{ form.zip(class_='form-control m-0') }}
+                    {% if form.zip.errors %}{% for error in form.zip.errors %}<span class="error">{{ error }}</span>{%
+                    endfor %}{% endif %}
+                </p>
 
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.country.label }}<span style="color: red;">*</span>
+                    {{ form.country(class_='form-control m-0') }}
+                    {% if form.country.errors %}{% for error in form.country.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
         </div>
-        <div class="col">
-            <p>
-                {{ form.email.label }}<span style="color: red;">*</span>
-                {{ form.email(class_='form-control m-0') }}
-                {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+        <div class="row form-group">
+            <div class="col">
+                <p>
+                    {{ form.phone.label }}<span style="color: red;">*</span>
+                    {{ form.phone(class_='form-control m-0') }}
+                    {% if form.phone.errors %}{% for error in form.phone.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
 
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.kingdom.label }}<span style="color: red;">*</span>
-                {{ form.kingdom(class_='form-control m-0') }}
-                {% if form.kingdom.errors %}{% for error in form.kingdom.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.email.label }}<span style="color: red;">*</span>
+                    {{ form.email(class_='form-control m-0') }}
+                    {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
 
+            </div>
         </div>
-        <div class="col">
-            <p>
-                {{ form.lodging.label }}<span style="color: red;">*</span>
-                {{ form.lodging(class_='form-control m-0') }}
-                {% if form.lodging.errors %}{% for error in form.lodging.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+        <div class="row form-group">
+            <div class="col">
+                <p>
+                    {{ form.kingdom.label }}<span style="color: red;">*</span>
+                    {{ form.kingdom(class_='form-control m-0') }}
+                    {% if form.kingdom.errors %}{% for error in form.kingdom.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
 
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.mbr.label }}<span style="color: red;">*</span>
-                {{ form.mbr(class_='form-control m-0', onchange_="mbr_check()") }}
-                {% if form.mbr.errors %}{% for error in form.mbr.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-        <div id="mbr_num_col" class="col" style="display: none;">
-            <p>
-                {{ form.mbr_num.label }}
-                {{ form.mbr_num(class_='form-control m-0') }}
-                {% if form.mbr_num.errors %}{% for error in form.mbr_num.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-        <div id="mbr_exp_col" class="col" style="display: none;">
-            <p>
-                {{ form.mbr_num_exp.label }}
-                {{ form.mbr_num_exp(class_='form-control m-0') }}
-                {% if form.mbr_num_exp.errors %}{% for error in form.mbr_num_exp.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-    </div>
-    <h4>Emergency Contact</h4>
-    <div class="row form-group">
-        <div class="col">
-            <p>
-                {{ form.emergency_contact_name.label }}<span style="color: red;">*</span>
-                {{ form.emergency_contact_name(class_='form-control m-0') }}
-                {% if form.emergency_contact_name.errors %}{% for error in form.emergency_contact_name.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.lodging.label }}<span style="color: red;">*</span>
+                    {{ form.lodging(class_='form-control m-0') }}
+                    {% if form.lodging.errors %}{% for error in form.lodging.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
 
+            </div>
         </div>
-        <div class="col">
-            <p>
-                {{ form.emergency_contact_phone.label }}<span style="color: red;">*</span>
-                {{ form.emergency_contact_phone(class_='form-control m-0') }}
-                {% if form.emergency_contact_phone.errors %}{% for error in form.emergency_contact_phone.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
+        <div class="row form-group">
+            <div class="col">
+                <p>
+                    {{ form.mbr.label }}<span style="color: red;">*</span>
+                    {{ form.mbr(class_='form-control m-0', onchange_="mbr_check()") }}
+                    {% if form.mbr.errors %}{% for error in form.mbr.errors %}<span class="error">{{ error }}</span>{%
+                    endfor %}{% endif %}
+                </p>
+            </div>
+            <div id="mbr_num_col" class="col" style="display: none;">
+                <p>
+                    {{ form.mbr_num.label }}
+                    {{ form.mbr_num(class_='form-control m-0') }}
+                    {% if form.mbr_num.errors %}{% for error in form.mbr_num.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+            <div id="mbr_exp_col" class="col" style="display: none;">
+                <p>
+                    {{ form.mbr_num_exp.label }}
+                    {{ form.mbr_num_exp(class_='form-control m-0') }}
+                    {% if form.mbr_num_exp.errors %}{% for error in form.mbr_num_exp.errors %}<span class="error">{{
+                        error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+        </div>
+        <h4>Emergency Contact</h4>
+        <div class="row form-group">
+            <div class="col">
+                <p>
+                    {{ form.emergency_contact_name.label }}<span style="color: red;">*</span>
+                    {{ form.emergency_contact_name(class_='form-control m-0') }}
+                    {% if form.emergency_contact_name.errors %}{% for error in form.emergency_contact_name.errors
+                    %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
 
+            </div>
+            <div class="col">
+                <p>
+                    {{ form.emergency_contact_phone.label }}<span style="color: red;">*</span>
+                    {{ form.emergency_contact_phone(class_='form-control m-0') }}
+                    {% if form.emergency_contact_phone.errors %}{% for error in form.emergency_contact_phone.errors
+                    %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+
+            </div>
         </div>
-    </div>
-    <br/>
-    <div class="row form-group">
-        <div class="col">
-            <p class="text-center fs-3" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
-                Please check here if you would like to <b><span style="color: red;">DONATE</span></b> to cover your Paypal processing fees.
-                {{ form.paypal_donation(class_='form-check-input big-checkbox', onchange_='donation_check()') }}
-            </p>
+        <br />
+        <div class="row form-group">
+            <div class="col">
+                <p class="text-center fs-3"
+                    style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
+                    Please check here if you would like to <b><span style="color: red;">DONATE</span></b> to cover your
+                    Paypal processing fees.
+                    {{ form.paypal_donation(class_='form-check-input big-checkbox', onchange_='donation_check()') }}
+                </p>
+            </div>
+            <div id='paypal_donation_display' class="col form-group" style="display:none">
+                <p class="text-center">
+                    <b>{{ form.paypal_donation_amount.label }}</b><br>
+                    {{ form.paypal_donation_amount(class_='form-control m-0', oninput_="recalc_price()") }}
+                </p>
+            </div>
         </div>
-        <div id='paypal_donation_display' class="col form-group" style="display:none">
-            <p class="text-center">
-                <b>{{ form.paypal_donation_amount.label }}</b><br>
-                {{ form.paypal_donation_amount(class_='form-control m-0', oninput_="recalc_price()") }}
-            </p>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <th>Registration</th>
+                    <th>Registration</th>
+                    <th>NMR</th>
+                    <th>PayPal Donation</th>
+                    <th>Total</th>
+                </thead>
+                <tbody>
+                    {% if additional_registrations %}
+                    {% for reg in additional_registrations %}
+                    <tr>
+                        <td>{{reg.fname}} {{reg.lname}}</td>
+                        <td>${{reg.registration_price}}</td>
+                        <td>${{reg.nmr_price}}</td>
+                        <td>${{reg.paypal_donation}}</td>
+                        <td>${{reg.balance}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                    <tr>
+                        <td><b>Current Registration</b></td>
+                        <td id="current_reg_registration">$125</td>
+                        <td id="current_reg_nmr">$0</td>
+                        <td id="current_reg_donation">$0</td>
+                        <td id="current_reg_total">$125</td>
+                    </tr>
+                    <tr>
+                        <td><b>Totals</b></td>
+                        <td id="total_invoice_registration">${{invoice_totals['registration'] + 125}}</td>
+                        <td id="total_invoice_nmr">${{invoice_totals['nmr']}}</td>
+                        <td id="total_invoice_donation">${{invoice_totals['donation']}}</td>
+                        <td id="total_invoice_total">${{invoice_totals['total']}}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-    </div>
-    
-    <div class="table-responsive">
-    <table class="table table-striped">
-        <thead>
-            <th>Registration</th>
-            <th>Registration</th>
-            <th>NMR</th>
-            <th>PayPal Donation</th>
-            <th>Total</th>
-        </thead>
-        <tbody>
-            {% if additional_registrations %}
-            {% for reg in additional_registrations %}
-            <tr>
-                <td>{{reg.fname}} {{reg.lname}}</td>
-                <td>${{reg.registration_price}}</td>
-                <td>${{reg.nmr_price}}</td>
-                <td>${{reg.paypal_donation}}</td>
-                <td>${{reg.balance}}</td>
-            </tr>
-            {% endfor %}
-            {% endif %}
-            <tr>
-                <td><b>Current Registration</b></td>
-                <td id="current_reg_registration">$125</td>
-                <td id="current_reg_nmr">$0</td>
-                <td id="current_reg_donation">$0</td>
-                <td id="current_reg_total">$125</td>
-            </tr>
-            <tr>
-                <td><b>Totals</b></td>
-                <td id="total_invoice_registration">${{invoice_totals['registration'] + 125}}</td>
-                <td id="total_invoice_nmr">${{invoice_totals['nmr']}}</td>
-                <td id="total_invoice_donation">${{invoice_totals['donation']}}</td>
-                <td id="total_invoice_total">${{invoice_totals['total']}}</td>
-            </tr>
-        </tbody>
-    </table>
-    </div>
+
+        <div class="row">
+            <div class="col">
+                <button type="submit" name="action" value="Complete"
+                    class="form-control btn-primary btn btn-lg custom-input-space">Complete</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <button type="submit" name="action" value="Submit_Another"
+                    class="form-control btn-secondary btn btn-lg custom-input-space">Submit Another
+                    Registration</button>
+            </div>
+        </div>
+
+    </form>
 
     <div class="row">
         <div class="col">
-            <button type="submit" name="action" value="Complete" class="form-control btn-primary btn btn-lg custom-input-space">Complete</button>
+            Land Questions? Please visit the Land Page here: <a href="https://gulfwars.org/site-info/land/">Land
+                Information</a>
+            <br />
+            Site Rules for camps are also located here: <a href="https://gulfwars.org/policies/site-rules/">Site
+                Rules</a>
+            <br />
+            <span style="color: red;">ALL attendees are responsible for knowing Land and Site rules.</span>
+            <br />
+            <br />
         </div>
     </div>
     <div class="row">
         <div class="col">
-            <button type="submit" name="action" value="Submit_Another" class="form-control btn-secondary btn btn-lg custom-input-space">Submit Another Registration</button>
+            Merchants: If you are interested in receiving a merchant packet contact <a
+                href="mailto:merchantcrat@gulfwars.org">merchantcrat@gulfwars.org</a>
+            <br />
+            <br />
         </div>
     </div>
-
-</form>
-
-<div class="row">
-    <div class="col">
-        Land Questions? Please visit the Land Page here: <a href="https://gulfwars.org/site-info/land/">Land Information</a>
-        <br/>
-        Site Rules for camps are also located here: <a href="https://gulfwars.org/policies/site-rules/">Site Rules</a>
-        <br/>
-        <span style="color: red;">ALL attendees are responsible for knowing Land and Site rules.</span>
-        <br/>
-        <br/>
+    <div class="row">
+        <div class="col">
+            Animals: Any person bringing a service animal is asked to pre-register at: <a
+                href="mailto:animalliaison@gulfwars.org">animalliaison@gulfwars.org</a>
+            <br />
+            <br />
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col">
-        Merchants: If you are interested in receiving a merchant packet contact <a href="mailto:merchantcrat@gulfwars.org">merchantcrat@gulfwars.org</a>
-        <br/>
-        <br/>
+    <div class="row">
+        <div class="col">
+            Equestrians: For more information please visit: <a
+                href="https://gulfwars.org/activities/animals/equestrian/">Equestrion Information</a><br>
+            To Register your horse please visit: <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSfEsxwkK8v5eihH9ktAtf1LmzNEQXIszvxEPiJAwpzaUuw6og/viewform">Horse
+                Registration</a>
+            <br />
+            <br />
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col">
-        Animals: Any person bringing a service animal is asked to pre-register at: <a href="mailto:animalliaison@gulfwars.org">animalliaison@gulfwars.org</a>
-        <br/>
-        <br/>
+    <div class="row">
+        <div class="col">
+            Please visit <a href="http://www.gulfwars.org">www.gulfwars.org</a> for more information on attending and
+            participating at the War
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col">
-        Equestrians: For more information please visit: <a href="https://gulfwars.org/activities/animals/equestrian/">Equestrion Information</a><br>
-        To Register your horse please visit: <a href="https://docs.google.com/forms/d/e/1FAIpQLSfEsxwkK8v5eihH9ktAtf1LmzNEQXIszvxEPiJAwpzaUuw6og/viewform">Horse Registration</a>
-        <br/>
-        <br/>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        Please visit <a href="http://www.gulfwars.org">www.gulfwars.org</a> for more information on attending and participating at the War
-    </div>
-</div>
 
 </div>
 
 <script>
 
-    let clear = "{{ clear|tojson|safe }}"; 
+    let clear = "{{ clear|tojson|safe }}";
     if (clear == 'true') {
         document.onload = clearform()
-        window.onload = function() {
+        window.onload = function () {
             const targetElement = document.getElementById("preregform");
             if (targetElement) {
                 targetElement.scrollIntoView({ behavior: 'smooth' }); // Scrolls smoothly to the element
@@ -512,15 +573,15 @@
         }
         recalc_price();
     }
-    
+
 </script>
 
 <script>
-    function mbr_check(){
+    function mbr_check() {
         const mbr_num_col = document.getElementById("mbr_num_col");
         const mbr_exp_col = document.getElementById("mbr_exp_col");
         const mbr = document.getElementById("mbr");
-        if (mbr.value == 'Member'){
+        if (mbr.value == 'Member') {
             mbr_num_col.style.display = 'block';
             mbr_exp_col.style.display = 'block';
         } else {
@@ -529,24 +590,24 @@
         }
         recalc_price()
     }
-  </script>
+</script>
 
-  <script>
-    function donation_check(){
+<script>
+    function donation_check() {
         const paypal_donation_display = document.getElementById("paypal_donation_display");
         const paypal_donation = document.getElementById("paypal_donation");
-        if (paypal_donation.checked == true){
+        if (paypal_donation.checked == true) {
             paypal_donation_display.style.display = 'block';
         } else {
             paypal_donation_display.style.display = 'none';
         }
         recalc_price()
     }
-  </script>
+</script>
 
-  <script>
-    function recalc_price(){
-        const arrival_date = String(document.getElementById("expected_arrival_date").selectedIndex);
+<script>
+    function recalc_price() {
+        const arrival_date = String(document.getElementById("expected_arrival_date").selectedIndex - 1);
         const age = document.getElementById("age");
         const member = document.getElementById("mbr");
         const paypal_donation = document.getElementById("paypal_donation");
@@ -563,14 +624,14 @@
         const total_invoice_total = document.getElementById("total_invoice_total");
 
         const price_dict = {
-            0:parseInt("{{pricesheet[0].prereg_price}}"),
-            1:parseInt("{{pricesheet[1].prereg_price}}"),
-            2:parseInt("{{pricesheet[2].prereg_price}}"),
-            3:parseInt("{{pricesheet[3].prereg_price}}"),
-            4:parseInt("{{pricesheet[4].prereg_price}}"),
-            5:parseInt("{{pricesheet[5].prereg_price}}"),
-            6:parseInt("{{pricesheet[6].prereg_price}}"),
-            7:parseInt("{{pricesheet[7].prereg_price}}"),
+            0: parseInt("{{pricesheet[0].prereg_price}}"),
+            1: parseInt("{{pricesheet[1].prereg_price}}"),
+            2: parseInt("{{pricesheet[2].prereg_price}}"),
+            3: parseInt("{{pricesheet[3].prereg_price}}"),
+            4: parseInt("{{pricesheet[4].prereg_price}}"),
+            5: parseInt("{{pricesheet[5].prereg_price}}"),
+            6: parseInt("{{pricesheet[6].prereg_price}}"),
+            7: parseInt("{{pricesheet[7].prereg_price}}"),
         }
 
         let cur_reg = 0;
@@ -578,20 +639,22 @@
         let cur_donation = 0;
         let cur_total = 0;
 
-        if (age.value == '18+'){
-            cur_reg = price_dict[arrival_date]
-            if (member.value == 'Non-Member'){
-                cur_nmr = 10;
-            } else {
-                cur_nmr = 0;
+        if (age.value == '18+') {
+            if (arrival_date != -1) {
+                cur_reg = price_dict[arrival_date]
+                if (member.value == 'Non-Member') {
+                    cur_nmr = 10;
+                } else {
+                    cur_nmr = 0;
+                }
             }
         } else {
             cur_reg = 0;
             cur_nmr = 0;
         }
-        
-        if (paypal_donation.checked == true){
-            if (paypal_donation_amount.value == null){
+
+        if (paypal_donation.checked == true) {
+            if (paypal_donation_amount.value == null) {
                 cur_donation = 0;
             } else {
                 cur_donation = parseInt(paypal_donation_amount.value);
@@ -599,23 +662,23 @@
         } else {
             cur_donation = 0;
         }
-        cur_total = cur_reg+cur_nmr+cur_donation;
+        cur_total = cur_reg + cur_nmr + cur_donation;
 
-        current_reg_registration.innerHTML = '$'+cur_reg;
-        current_reg_nmr.innerHTML = '$'+cur_nmr;
-        current_reg_donation.innerHTML = '$'+parseInt(cur_donation);
-        current_reg_total.innerHTML = '$'+cur_total;
+        current_reg_registration.innerHTML = '$' + cur_reg;
+        current_reg_nmr.innerHTML = '$' + cur_nmr;
+        current_reg_donation.innerHTML = '$' + parseInt(cur_donation);
+        current_reg_total.innerHTML = '$' + cur_total;
 
-        let inv_reg = parseInt("{{invoice_totals['registration']}}")+cur_reg;
-        let inv_nmr = parseInt("{{invoice_totals['nmr']}}")+cur_nmr;
-        let inv_donation = parseInt("{{invoice_totals['donation']}}")+parseInt(cur_donation);
-        let inv_total = parseInt("{{invoice_totals['total']}}")+cur_total;
+        let inv_reg = parseInt("{{invoice_totals['registration']}}") + parseInt(cur_reg);
+        let inv_nmr = parseInt("{{invoice_totals['nmr']}}") + parseInt(cur_nmr);
+        let inv_donation = parseInt("{{invoice_totals['donation']}}") + parseInt(cur_donation);
+        let inv_total = parseInt("{{invoice_totals['total']}}") + parseInt(cur_total);
 
-        total_invoice_registration.innerHTML = '$'+inv_reg
-        total_invoice_nmr.innerHTML = '$'+inv_nmr
-        total_invoice_donation.innerHTML = '$'+inv_donation
-        total_invoice_total.innerHTML = '$'+inv_total
+        total_invoice_registration.innerHTML = '$' + inv_reg
+        total_invoice_nmr.innerHTML = '$' + inv_nmr
+        total_invoice_donation.innerHTML = '$' + inv_donation
+        total_invoice_total.innerHTML = '$' + inv_total
     }
 
-  </script>
+</script>
 {% endblock %}

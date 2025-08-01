@@ -291,8 +291,8 @@ def get_prereg_pricesheet_day(date):
     global pre_reg_pricesheet_cache_time
     global pre_reg_pricesheet
     if pre_reg_pricesheet != None and pre_reg_pricesheet_cache_time > datetime.now() + timedelta(hours=-1):
-        if date.strftime("%Y/%m/%d") in pre_reg_pricesheet:
-            return pre_reg_pricesheet[date.strftime("%Y/%m/%d")]
+        if date in pre_reg_pricesheet:
+            return pre_reg_pricesheet[date]
         else:
             return get_prereg_pricesheet_day_not_in_sheet()
     else:
@@ -301,8 +301,8 @@ def get_prereg_pricesheet_day(date):
         for price in pricesheet:
             prices[price.arrival_date.strftime("%Y/%m/%d")] = price.prereg_price
         pre_reg_pricesheet = prices
-        if date.strftime("%Y/%m/%d") in pre_reg_pricesheet:
-            return pre_reg_pricesheet[date.strftime("%Y/%m/%d")]
+        if date in pre_reg_pricesheet:
+            return pre_reg_pricesheet[date]
         else:
             return get_prereg_pricesheet_day_not_in_sheet()
 
@@ -436,7 +436,7 @@ def get_earlyon_arrival_dates():
     event_end = event.start_date
     event_dates = pd.date_range(start=event_start, end=event_end).tolist()
     for date in event_dates:
-        date_tup = (date.strftime('%Y-%m-%d'), date.strftime('%A - %B %d, %Y'))
+        date_tup = (date.strftime('%Y/%m/%d'), date.strftime('%A - %B %d, %Y'))
         returned_dates.append(date_tup)
     return returned_dates
 
@@ -447,7 +447,7 @@ def get_reg_arrival_dates():
     event_end = event.end_date + timedelta(days=-1)
     event_dates = pd.date_range(start=event_start, end=event_end).tolist()
     for date in event_dates:
-        date_tup = (date.strftime('%Y-%m-%d'), date.strftime('%A - %B %d, %Y'))
+        date_tup = (date.strftime('%Y/%m/%d'), date.strftime('%A - %B %d, %Y'))
         returned_dates.append(date_tup)
     return returned_dates
 
@@ -458,7 +458,7 @@ def get_merch_arrival_dates():
     event_end = event.end_date + timedelta(days=-8)
     event_dates = pd.date_range(start=event_start, end=event_end).tolist()
     for date in event_dates:
-        date_tup = (date.strftime('%Y-%m-%d'), date.strftime('%A - %B %d, %Y'))
+        date_tup = (date.strftime('%Y/%m/%d'), date.strftime('%A - %B %d, %Y'))
         returned_dates.append(date_tup)
     return returned_dates
 

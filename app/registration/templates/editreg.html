@@ -6,72 +6,6 @@
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
 
-    {% if current_user.has_role('Troll Shift Lead') %}
-    <h2>Personal Information</h2>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.fname.label }}
-                {{ form.fname(class_='form-control m-0', readonly=true) }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.lname.label }}
-                {{ form.lname(class_='form-control m-0', readonly=true) }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.scaname.label }}
-                {{ form.scaname(class_='form-control m-0', readonly=true) }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.age.label }}
-                {{ form.age(class_='form-control m-0', readonly=true) }}
-            </p>
-        </div>
-    </div>
-    <h2>Membership</h2>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.mbr.label }}
-                {{ form.mbr(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.mbr_num.label }}
-                {{ form.mbr_num(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.mbr_num_exp.label }}
-                {{ form.mbr_num_exp(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    <div class="col form-group">
-        <p>
-            {{ form.medallion.label }}
-            {{ form.medallion(class_='form-control m-0') }}
-        </p>
-    </div>
-    <h2>Notes</h2>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.notes.label }}
-                {{ form.notes(class_='form-control m-0') }}
-            </p>
-        </div>
-    </div>
-    {% else %}
-
     <h2>Personal Information</h2>
     <div class="row form-group">
         <div class="col form-group">
@@ -143,14 +77,20 @@
                 {{ form.email(class_='form-control m-0') }}
             </p>
         </div>
+        <div class="col form-group">
+            <p>
+                {{ form.invoice_email.label }}
+                {{ form.invoice_email(class_='form-control m-0') }}
+            </p>
+        </div>
     </div>
 
     <h2>Site Information</h2>
     <div class="row form-group">
-        <div class="col form-group">
+        <div class="col">
             <p>
-                {{ form.regid.label }}
-                {{ form.regid(class_='form-control m-0', readonly=true) }}
+                Registration ID
+                <input type="text" class="form-control" disabled value="{{ reg.id }}" />
             </p>
         </div>
         <div class="col form-group">
@@ -231,12 +171,6 @@
     <div class="row form-group">
         <div class="col form-group">
             <p class="text-center">
-                {{ form.paypal_donation.label }}
-                {{ form.paypal_donation(class_='form-check-input big-checkbox') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
                 {{ form.prereg.label }}
                 {{ form.prereg(class_='form-check-input big-checkbox') }}
             </p>
@@ -245,8 +179,14 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                {{ form.total_due.label }}
-                {{ form.total_due(class_='form-control m-0') }}
+                {{ form.registration_price.label }}
+                {{ form.registration_price(class_='form-control m-0') }}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.nmr_price.label }}
+                {{ form.nmr_price(class_='form-control m-0') }}
             </p>
         </div>
         <div class="col form-group">
@@ -255,14 +195,41 @@
                 {{ form.paypal_donation(class_='form-control m-0') }}
             </p>
         </div>
-        <div class="col form-group">
+    </div>
+        <div class="row form-group">
+        <div class="col">
             <p>
-                {{ form.balance.label }}
-                {{ form.balance(class_='form-control m-0') }}
+                Registration Balance
+                <input type="text" class="form-control" disabled value="{{ reg.registration_balance }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                NMR Balance
+                <input type="text" class="form-control" disabled value="{{ reg.nmr_balance }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                PayPal Donation Balance
+                <input type="text" class="form-control" disabled value="{{ reg.paypal_donation_balance }}" />
             </p>
         </div>
     </div>
-
+    <div class="row form-group">
+        <div class="col">
+            <p>
+                Total
+                <input type="text" class="form-control" disabled value="{{ reg.total_due }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                Balance
+                <input type="text" class="form-control" disabled value="{{ reg.balance }}" />
+            </p>
+        </div>
+    </div>
     <h2>Notes</h2>
     <div class="row form-group">
         <div class="col form-group">
@@ -272,7 +239,15 @@
             </p>
         </div>
     </div>
-    {% endif %}
+    <h2>Admin</h2>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.duplicate.label }}
+                {{ form.duplicate(class_='form-check-input big-checkbox') }}
+            </p>
+        </div>
+    </div>
     <div class="row form-group">
         <div class="col form-group">
             <p>
