@@ -2,56 +2,42 @@
 
 {% block content %}
 
-    <a href="{{ url_for('department.createdepartment') }}" class="btn btn-primary">Create New Department</a>
+<a href="{{ url_for('department.createdepartment') }}" class="btn btn-primary">Create New Department</a>
 
-    {% if departments %}
-    <table id="departmentTable"
-    data-toggle="table"
-    data-filter-control="true"
-    data-sortable="true"
-    data-pagination="true"
-    data-show-columns="true"
-    data-show-columns-toggle-all="true"
-    data-toolbar="#toolbar"
-    data-show-toggle="true"
-    data-show-fullscreen="true"
-    data-show-export="true"
-    data-export-types="['csv', 'excel', 'pdf']"
-    data-minimum-count-columns="2"
-    data-show-pagination-switch="true"
-    data-page-list="[10, 25, 50, 100, all]"
-    data-response-handler="responseHandler"
-    data-detail-view="true"
-    data-detail-view-icon="false"
-    data-mobile-responsive="true"
-    data-check-on-init="true"
-    data-classes="table table-striped table-responsive">
+{% if departments %}
+<table id="departmentTable" data-toggle="table" data-filter-control="true" data-sortable="true" data-pagination="true"
+    data-show-columns="true" data-show-columns-toggle-all="true" data-toolbar="#toolbar" data-show-toggle="true"
+    data-show-fullscreen="true" data-show-export="true" data-export-types="['csv', 'excel', 'pdf']"
+    data-minimum-count-columns="2" data-show-pagination-switch="true" data-page-list="[10, 25, 50, 100, all]"
+    data-response-handler="responseHandler" data-detail-view="true" data-detail-view-icon="false"
+    data-mobile-responsive="true" data-check-on-init="true" data-classes="table table-striped table-responsive">
 
-        <thead>
-            <th data-field="id">ID</th>
-            <th data-field="name" data-filter-control="input">Name</th>
-            <th data-field="edit">Edit</th>
-            <th data-field="delete">Delete</th>
-        </thead>
-        <tbody>
-            {% for department in departments %}
-            <tr>
-                <td>
-                    {{department.id}}
-                </td>
-                <td>
-                    {{department.name}}
-                </td>
-                <td>
-                    <a class="btn btn-primary" href="{{url_for('department.editdepartment', departmentid=department.id)}}" role="button">Edit</a>
-                </td>
-                <td>
-                    <a class="btn btn-danger" href="{{url_for('department.deletedepartment', departmentid=department.id)}}" role="button">Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
+    <thead>
+        <th data-field="id">ID</th>
+        <th data-field="name" data-filter-control="input">Name</th>
+        <th data-field="related_actions">Related Actions</th>
+    </thead>
+    <tbody>
+        {% for department in departments %}
+        <tr>
+            <td>
+                {{department.id}}
+            </td>
+            <td>
+                {{department.name}}
+            </td>
+            <td>
+                <div class="btn-group" role="group" aria-label="Related Actions">
+                    <a class="btn btn-primary btn-lg" href="{{url_for('department.editdepartment', departmentid=department.id)}}"
+                    role="button">Edit</a>
+                    <a class="btn btn-danger btn-lg" href="{{url_for('department.deletedepartment', departmentid=department.id)}}"
+                    role="button">Delete</a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
 
 {% endblock %}

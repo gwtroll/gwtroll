@@ -11,26 +11,28 @@
     <div class="row form-group">
         <div class="col form-group">
             <p>
-                Registration <br/>
-                <a href="{{url_for('registration.editreg', regid=earlyon.registration.id)}}">Registration {{earlyon.registration.id}}</a>
+                Registration <br />
+                <a href="{{url_for('registration.editreg', regid=earlyon.registration.id)}}">Registration
+                    {{earlyon.registration.id}}</a>
             </p>
         </div>
         <div class="col form-group">
             <p>
-                First Name <br/>
+                First Name <br />
                 <input type="input" value="{{ earlyon.registration.fname }}" class="form-control m-0" disabled readonly>
             </p>
         </div>
         <div class="col form-group">
             <p>
-                Last Name <br/>
-                <input type="input" value="{{ earlyon.registration.lname }}" class="form-control m-0" disabled readonly>            
+                Last Name <br />
+                <input type="input" value="{{ earlyon.registration.lname }}" class="form-control m-0" disabled readonly>
             </p>
         </div>
         <div class="col form-group">
             <p>
-                SCA Name <br/>
-                <input type="input" value="{{ earlyon.registration.scaname }}" class="form-control m-0" disabled readonly>            
+                SCA Name <br />
+                <input type="input" value="{{ earlyon.registration.scaname }}" class="form-control m-0" disabled
+                    readonly>
             </p>
         </div>
     </div>
@@ -39,28 +41,19 @@
     <h2>Application Information</h2>
 
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.arrival_date.label }}
-                {{ form.arrival_date(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.department.label }}
-                {{ form.department(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.arrival_date, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.department, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
     </div>
 
     <h2>Notes</h2>
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.notes.label }}
-                {{ form.notes(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.notes %}
+        {% include 'form_field.html' %}
+        {% endwith %}
     </div>
 
     {% if form.riders %}
@@ -68,75 +61,58 @@
     {% for rider in form.riders %}
     <div class="row form-group">
         <div class="col form-group">
-                <h4>Rider {{loop.index0 + 1}}</h4>
-                <div class="row form-group">
-                    <div class="col form-group">
-                        <p>
-                            {{ rider.fname.label }}
-                            {{ rider.fname(class_='form-control m-0', readonly=true, disabled=true) }}
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            {{ rider.lname.label }}
-                            {{ rider.lname(class_='form-control m-0', readonly=true, disabled=true) }}
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            {{ rider.scaname.label }}
-                            {{ rider.scaname(class_='form-control m-0', readonly=true, disabled=true) }}
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            Registration
-                            <br/>
-                            <a href="{{url_for('registration.editreg', regid=rider.regid.data)}}">Registration {{rider.regid.data}}</a>
-                        </p>
-                    </div>
-                    <div class="col form-group">
-                        <p>
-                            {{ rider.minor.label }}
-                            {{ rider.minor(class_='form-check-input big-checkbox', disabled=true) }}
-                        </p>
-                    </div>
+            <h4>Rider {{loop.index0 + 1}}</h4>
+            <div class="row form-group">
+                {% with field=rider.fname, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+                {% with field=rider.lname, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+                {% with field=rider.scaname %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+                <div class="col form-group">
+                    <p>
+                        Registration
+                        <br />
+                        <a href="{{url_for('registration.editreg', regid=rider.regid.data)}}">Registration
+                            {{rider.regid.data}}</a>
+                    </p>
                 </div>
+                {% with field=rider.minor, checkbox=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+            </div>
         </div>
-    {% endfor %}
-    {% endif %}
+        {% endfor %}
+        {% endif %}
 
-    {% if current_user.has_role('Admin') or current_user.has_role('Department Head') %}
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.dept_approval_status.label }}
-                {{ form.dept_approval_status(class_='form-control m-0') }}
-            </p>
+        {% if current_user.has_role('Admin') or current_user.has_role('Department Head') %}
+        <div class="row form-group">
+            {% with field=form.dept_approval_status %}
+            {% include 'form_field.html' %}
+            {% endwith %}
         </div>
-    </div>
-    {% endif %}
-    {% if current_user.has_role('Admin') or current_user.has_role('Autocrat') %}
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.autocrat_approval_status.label }}
-                {{ form.autocrat_approval_status(class_='form-control m-0') }}
-            </p>
+        {% endif %}
+        {% if current_user.has_role('Admin') or current_user.has_role('Autocrat') %}
+        <div class="row form-group">
+            {% with field=form.autocrat_approval_status %}
+            {% include 'form_field.html' %}
+            {% endwith %}
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}
-            </p>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}
+                </p>
+            </div>
         </div>
-    </div>
 </form>
 
-   
+
 {% endblock %}
 
 {% block script %}

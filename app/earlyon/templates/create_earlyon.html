@@ -6,138 +6,122 @@
 <div class="row">
     <div class="col">
         <p>Use this form to request an Early On at Gulf Wars. Please fill out all required fields.</p>
-    </div>
-<div class="row" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
-    <div class="col">
-        <p>You will receive an email confirmation of your application. This is not an acceptance email.</p>
 
-        <p>If you don't get the auto response email, your application did not go through.  (Don't forget to check your spam folder)</p>
-    </div>
-</div>
-<div class="row" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
-    <div class="col">
-        <p>Staff receive 1 adult rider for FREE. To add an additional rider will be $15 per adult.</p>
-        <p>Merchants receive 2 adult rider for FREE. To add an additional rider will be $15 per adult.</p>
-    </div>
-</div>
+        <div class="row"
+            style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
+            <div class="col">
+                <p>You will receive an email confirmation of your application. This is not an acceptance email.</p>
 
-
-<form id='earlyonform' action="" method="POST" novalidate>
-    {{ form.hidden_tag() }}
-
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{reg.fname}}
-            </p>
-        </div> 
-        <div class="col form-group">
-            <p>
-                {{reg.lname}}
-            </p>
+                <p>If you don't get the auto response email, your application did not go through. (Don't forget to check
+                    your spam folder)</p>
+            </div>
+        </div>
+        <div class="row"
+            style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
+            <div class="col">
+                <p>Staff receive 1 adult rider for FREE. To add an additional rider will be $15 per adult.</p>
+                <p>Merchants receive 2 adult rider for FREE. To add an additional rider will be $15 per adult.</p>
+            </div>
         </div>
     </div>
 
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{reg.email}}
-            </p>
-        </div> 
-    </div>
 
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.arrival_date.label }} <span style="color: red;">*</span>
-                {{ form.arrival_date(class_='form-control m-0') }}
-                {% if form.arrival_date.errors %}{% for error in form.arrival_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>  
-        <div class="col form-group">
-            <p>
-                {{ form.department.label }} <span style="color: red;">*</span>
-                {{ form.department(class_='form-control m-0') }}
-                {% if form.department.errors %}{% for error in form.department.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.notes.label }}
-                {{ form.notes(class_='form-control m-0') }}            
-            </p>
-        </div>  
-    </div>
+    <form id='earlyonform' action="" method="POST" novalidate>
+        {{ form.hidden_tag() }}
 
-    {% for rider in form.riders %}
-    <div>
         <div class="row form-group">
             <div class="col form-group">
+                <p>
+                    First Name
+                    <input type="input" class="form-control m-0" name="fname" value="{{reg.fname}}" disabled>
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    Last Name
+                    <input type="input" class="form-control m-0" name="lname" value="{{reg.lname}}" disabled>
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    Communication Email
+                    <input type="input" class="form-control m-0" name="email" value="{{reg.email}}" disabled>
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            {% with field=form.arrival_date, required=true %}
+            {% include 'form_field.html' %}
+            {% endwith %}
+            {% with field=form.department, required=true %}
+            {% include 'form_field.html' %}
+            {% endwith %}
+        </div>
+        <div class="row form-group">
+            {% with field=form.notes %}
+            {% include 'form_field.html' %}
+            {% endwith %}
+        </div>
+
+        {% for rider in form.riders %}
+        <div>
+            <div class="row form-group">
+                <div class="col form-group">
                     <h4>Rider {{loop.index0 + 1}}</h4>
                     <div class="row form-group">
+                        {% with field=rider.fname, required=true %}
+                        {% include 'form_field.html' %}
+                        {% endwith %}
+                        {% with field=rider.lname, required=true %}
+                        {% include 'form_field.html' %}
+                        {% endwith %}
+                        {% with field=rider.scaname %}
+                        {% include 'form_field.html' %}
+                        {% endwith %}
+                        {% with field=rider.regid, required=true %}
+                        {% include 'form_field.html' %}
+                        {% endwith %}
+                        {% with field=rider.minor, checkbox=true %}
+                        {% include 'form_field.html' %}
+                        {% endwith %}
                         <div class="col form-group">
-                            <p>
-                                {{ rider.fname.label }}
-                                {{ rider.fname(class_='form-control m-0') }}
-                            </p>
-                        </div>
-                        <div class="col form-group">
-                            <p>
-                                {{ rider.lname.label }}
-                                {{ rider.lname(class_='form-control m-0') }}
-                            </p>
-                        </div>
-                        <div class="col form-group">
-                            <p>
-                                {{ rider.scaname.label }}
-                                {{ rider.scaname(class_='form-control m-0') }}
-                            </p>
-                        </div>
-                        <div class="col form-group">
-                            <p>
-                                {{ rider.regid.label }}
-                                {{ rider.regid(class_='form-control m-0') }}
-                            </p>
-                        </div>
-                        <div class="col form-group">
-                            <p>
-                                {{ rider.minor.label }}
-                                {{ rider.minor(class_='form-check-input big-checkbox') }}
-                            </p>
-                        </div>
-                        <div class="col form-group">
-                            <br/>
-                            <button value="{{ loop.index -1 }}" name="remove" class="btn form-control btn-danger btn-lg">Delete</button>
+                            <br />
+                            <button value="{{ loop.index -1 }}" name="remove"
+                                class="btn form-control btn-danger btn-lg">Delete</button>
                         </div>
                     </div>
+                </div>
+
+                <br />
             </div>
-        
-        <br/>
-    </div>
-    {% endfor %}
-    {% if form.riders.errors %}{% for error in form.riders.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            {% endfor %}
+            {% if form.riders.errors %}{% for error in form.riders.errors %}<span class="error">{{ error }}</span>{%
+            endfor %}{% endif %}
 
 
-    <div class="row">
-        <div class="col">
-            <button name="add" value="addRider" class="btn save form-control btn-warning btn-lg">Add Rider</button>
-        </div>
-    </div>
-<br/>
+            <div class="row">
+                <div class="col">
+                    <button name="add" value="addRider" class="btn save form-control btn-warning btn-lg">Add
+                        Rider</button>
+                </div>
+            </div>
+            <br />
 
-    <div class="row">
-        <div class="col">
-            {{form.submit(class_='btn save form-control btn-primary btn-lg')}}
-        </div>
-    </div>
-</form>
+            <div class="row">
+                <div class="col">
+                    {{form.submit(class_='btn save form-control btn-primary btn-lg')}}
+                </div>
+            </div>
+    </form>
 
 </div>
 
-    {% endblock %}
+{% endblock %}
 
-    {% block script %}
-    
-    {% endblock %}
+{% block script %}
+
+{% endblock %}

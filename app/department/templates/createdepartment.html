@@ -5,26 +5,20 @@
     <form action="" method="post">
         <h2>Create Kingdom</h2>
         <div class="row form-group">
-            <div class="col form-group">
-                <p>
-                    {{ form.name.label }}
-                    {{ form.name(class_='form-control m-0') }}
-                </p>
-            </div>
+                {% with field=form.name, required=true %}
+                    {% include 'form_field.html' %}
+                {% endwith %}
         </div>
         <div class="row form-group">
-            <div class="col form-group">
-                <p>
-                    {{ form.description.label }}
-                    {{ form.description(class_='form-control m-0') }}
-                </p>
-            </div>
+                {% with field=form.description %}
+                    {% include 'form_field.html' %}
+                {% endwith %}
         </div>
         <div class="row form-group">
             <div class="col form-group">
                 <p>
                     {{ form.submit.label }}
-                    {{ form.submit(class_='form-control m-0') }}
+                    {{ form.submit(class_='form-control btn btn-lg btn-primary m-0') }}
                 </p>
             </div>
         </div>

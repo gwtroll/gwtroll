@@ -1,0 +1,16 @@
+<div class="col form-group">
+  <p>
+    {{ field.label }}{% if required==true %}<span style="color: red;">*</span>{%endif%}
+    {%if checkbox==true%}
+    {{ fieldlabel }}
+    {{ field(class_='form-check-input big-checkbox') }}
+    {%else%}
+    {%if disabled==true%}
+    {{ field(class_='form-control m-0',disabled=true) }}
+    {%else%}
+    {{ field(class_='form-control m-0') }}
+    {%endif%}
+    {%endif%}
+    {% if field.errors %}{% for error in field.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+  </p>
+</div>
