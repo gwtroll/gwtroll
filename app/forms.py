@@ -315,7 +315,7 @@ class CreatePreRegForm(FlaskForm):
     scaname = StringField('SCA Name', validators=[])
     city = StringField('City', validators=[DataRequired()])
     state_province = StringField('State/Province', validators=[DataRequired()])
-    zip = IntegerField('Zip', validators=[DataRequired()])
+    zip = IntegerField('Zip', validators=[DataRequired(),NumberRange(min=0,max=99999,message="Zip Code must match ##### format")])
     country = StringField('Country', validators=[DataRequired()], default='United States')
     phone = StringField('Phone', validators=[DataRequired()])
     email = StringField('Communication Email', validators=[DataRequired(),Email()])
