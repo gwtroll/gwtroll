@@ -39,7 +39,6 @@ def unsent():
         if earlyon.registration.invoice_email not in earlyon_invoices:
             earlyon_invoices[earlyon.registration.invoice_email] = {'invoice_type':'EARLYON','invoice_email':earlyon.registration.invoice_email,'invoice_number':earlyon.invoice_number, 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
         earlyon_invoices[earlyon.registration.invoice_email]['registrations'].append(earlyon.id)
-
     return render_template('unsent_list.html', reg_invoices=reg_invoices, merchant_invoices=merchant_invoices, earlyon_invoices=earlyon_invoices, counts=inv_prereg_unsent_counts())
 
 @bp.route('/open', methods=('GET', 'POST'))

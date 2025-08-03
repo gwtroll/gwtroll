@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<h1>{% block title %} Kingdoms {% endblock %}</h1>
     <a href="{{ url_for('kingdom.createkingdom') }}" class="btn btn-primary">Create New Kingdom</a>
     <a href="{{ url_for('kingdom.uploadkingdom') }}" class="btn btn-primary">Upload Kingdoms</a>
 

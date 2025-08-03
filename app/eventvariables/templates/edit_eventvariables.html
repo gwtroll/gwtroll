@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+        <h1>{% block title %} Event Variables {% endblock %}</h1>
     <form action="" method="post">
         {{ form.hidden_tag() }}
         {% if form.errors %}

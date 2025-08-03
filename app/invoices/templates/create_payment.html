@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+        <h1>{% block title %} Create Invoice Payment {% endblock %}</h1>
 {% if inv.invoice_type == 'REGISTRATION' %}
 <form action="" method="post">
     {{ form.hidden_tag() }}

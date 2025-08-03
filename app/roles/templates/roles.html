@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Roles</h2>
+    <h1>{% block title %} Roles {% endblock %}</h1>
+    <a href="{{ url_for('roles.createrole') }}" class="btn btn-primary">Create New Role</a>
     {% if roles %}
     <table id="rolesTable" class="table table-striped">
         <thead>

@@ -1,0 +1,81 @@
+{% extends 'base_restricted.html' %}
+
+
+{% block content %}
+<h1>{% block title %} Scheduled Event {% endblock %}</h1>
+        <div class="row">
+            <div class="col">
+                <p>
+                    Name
+                    <input class="form-control" disabled value="{{scheduledevent.name}}">
+                </p>
+            </div>
+        </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                Instructor
+                <input class="form-control" disabled value="{{scheduledevent.instructor}}">
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <p>
+                Start Date/Time
+                <input class="form-control" disabled value="{{scheduledevent.start_datetime.strftime('%m/%d/%Y %I:%M %p')}}">
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                End Date/Time
+                <input class="form-control" disabled value="{{scheduledevent.end_datetime.strftime('%m/%d/%Y %I:%M %p')}}">
+            </p>
+        </div>
+    </div>
+ 
+
+    <div class="row">
+        <div class="col">
+            <p>
+                Start Date/Time
+                <input class="form-control" disabled value="{{scheduledevent.start_datetime}}">
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <p>
+                Short Description
+                <textarea class="form-control" disabled>{{scheduledevent.short_description}}</textarea>
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                Description
+                <textarea class="form-control" disabled>{{scheduledevent.description}}</textarea>
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <p>
+                Start Date/Time
+                <input class="form-control" disabled value="{{scheduledevent.location}}">
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

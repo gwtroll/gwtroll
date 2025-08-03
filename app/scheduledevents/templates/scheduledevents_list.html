@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Scheduled Events {% endblock %}</h1>
+<div class="row">
+  <div class="col">
+    <table id="scheduledeventTable" data-toggle="table" data-filter-control="true" data-sortable="true"
+      data-pagination="true" data-show-columns="true" data-show-columns-toggle-all="true" data-toolbar="#toolbar"
+      data-show-toggle="true" data-show-fullscreen="true" data-show-export="true"
+      data-export-types="['csv', 'excel', 'pdf']" data-minimum-count-columns="2" data-show-pagination-switch="true"
+      data-page-list="[10, 25, 50, 100, all]" data-response-handler="responseHandler" data-detail-view="true"
+      data-detail-view-icon="false" data-mobile-responsive="true" data-check-on-init="true"
+      data-classes="table table-striped table-responsive">
+      <thead>
+        <tr>
+          <th data-field="name" data-filter-control="input">Name</th>
+          <th data-field="instructor" data-filter-control="select">Instructor</th>
+          <th data-field="topic" data-filter-control="select">Topic</th>
+          <th data-field="date" data-filter-control="select">Date</th>
+          <th data-field="start_time" data-filter-control="select">Start Time</th>
+          <th data-field="end_time" data-filter-control="select">End Time</th>
+          <th data-field="add">Add</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if scheduledevents %}
+        {%for se in scheduledevents %}
+        <tr>
+          <td>
+            <a href="{{url_for('scheduledevents.scheduledevent',scheduledeventid=se.id)}}">{{se.name}}</a>
+          </td>
+          <td>
+            {{se.instructor}}
+          </td>
+          <td>
+            {{se.topic.name}}
+          </td>
+          <td>
+            {{se.start_datetime.date()}}
+          </td>
+          <td>
+            {{se.start_datetime.strftime("%I:%M %p")}}
+          </td>
+          <td>
+            {{se.end_datetime.strftime("%I:%M %p")}}
+          </td>
+          <td>
+            {% if se.id in current_user.get_scheduledevent_ids() %}
+            <button class="btn btn-danger" onclick="remove_scheduledevent(this,'{{se.id}}')">Remove</button>
+            {% else %}
+            <button class="btn btn-primary" onclick="add_scheduledevent(this,'{{se.id}}')">Add</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  async function add_scheduledevent(btn, scheduledeventid) {
+    try {
+      const response = await fetch("/api/scheduledevents/" + scheduledeventid + "/add",
+        {
+          method: 'POST'
+        });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error add scheduled event:', error);
+    }
+    const remove_btn = document.createElement('button')
+    remove_btn.classList.add('btn')
+    remove_btn.classList.add('btn-danger')
+    remove_btn.innerText = 'Remove'
+    remove_btn.onclick = function(){ remove_scheduledevent(this,scheduledeventid) }
+    btn.replaceWith(remove_btn)
+  }
+  async function remove_scheduledevent(btn, scheduledeventid) {
+    try {
+      const response = await fetch("/api/scheduledevents/" + scheduledeventid + "/remove",
+        {
+          method: 'POST'
+        });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error add scheduled event:', error);
+    }
+    const add_btn = document.createElement('button')
+    add_btn.classList.add('btn')
+    add_btn.classList.add('btn-primary')
+    add_btn.innerText = 'Add'
+    add_btn.onclick = function(){ add_scheduledevent(this,scheduledeventid) }
+    btn.replaceWith(add_btn)
+  }
+</script>
+
+{% endblock %}

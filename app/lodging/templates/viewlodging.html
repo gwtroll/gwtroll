@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<h1>{% block title %} Lodgings {% endblock %}</h1>
     <a href="{{ url_for('lodging.createlodging') }}" class="btn btn-primary">Create New Lodging</a>
     <a href="{{ url_for('lodging.uploadlodging') }}" class="btn btn-primary">Upload Lodging</a>
 

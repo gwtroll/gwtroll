@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+        <h1>{% block title %} Create Department {% endblock %}</h1>
     <form action="" method="post">
-        <h2>Create Kingdom</h2>
         <div class="row form-group">
                 {% with field=form.name, required=true %}
                     {% include 'form_field.html' %}
