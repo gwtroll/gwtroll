@@ -25,6 +25,24 @@ regcount = 0
 def unauthorized_callback():
     return redirect('/login?next=' + request.path)
 
+@app.route('/register', methods=('GET', 'POST'))
+def register():
+
+    form = RegisterUserForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        dup_user_check = User.query.filter(User.username == form.username.data.lower()).first()
+        if dup_user_check:
+            flash("Username Already Taken - Please Try Again",'error')
+            return render_template('register.html', form=form)
+        user = User()
+        form.populate_object(user)
+        db.session.add(user)
+        db.session.commit()
+
+        return redirect(url_for('login'))
+
+    return render_template('register.html', form=form)
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -50,8 +68,9 @@ def logout():
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
-@permission_required('registration_view')
 def index():
+    if len(current_user.roles) == 0:
+        return redirect(url_for('user.myaccount'))
     today = datetime.now(pytz.timezone('America/Chicago')).date()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==today).first()
     if pricesheet == None:

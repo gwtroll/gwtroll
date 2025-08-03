@@ -40,7 +40,7 @@ class User(UserMixin, db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     username: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
                                                 unique=True)
-    email: so.Mapped[str] = so.mapped_column(sa.String(120))
+    email: so.Mapped[str] = so.mapped_column(sa.String(120), nullable=True)
     
     #email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True,
     #                                        unique=True)
@@ -56,6 +56,8 @@ class User(UserMixin, db.Model):
 
     department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'))
     department = db.relationship("Department", backref="user_department", viewonly=True)
+
+    scheduled_events = db.relationship('ScheduledEvent', secondary='user_scheduledevents')
 
     active = db.Column(db.Boolean())
 
@@ -91,6 +93,9 @@ class User(UserMixin, db.Model):
                 if query_permission == permission.name or permission.name == 'admin':
                     return True
         return False
+
+    def get_scheduledevent_ids(self):
+        return [event.id for event in self.scheduled_events]
 
 #Role Data Model
 class Role(db.Model, RoleMixin):
@@ -608,3 +613,43 @@ class Merchant(db.Model):
         if electricity_balance < 0:
             self.electricity_balance = 0
         self.electricity_balance = electricity_balance
+
+class ScheduledEvent(db.Model):
+    __tablename__ = 'scheduledevent'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+    start_datetime = db.Column(db.DateTime())
+    end_datetime = db.Column(db.DateTime())
+    instructor = db.Column(db.String())
+    short_description = db.Column(db.Text())
+    description = db.Column(db.Text())
+    location = db.Column(db.String())
+    topic_id = db.Column(db.Integer(), db.ForeignKey('topic.id'))
+    topic = db.relationship("Topic", backref="scheduledevent_topic", viewonly=True)
+    tags = db.relationship('Tag', secondary='scheduledevent_tags')
+    user_instructor_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    user_instructor = db.relationship("User", backref="user_instructor", viewonly=True)
+
+class Tag(db.Model):
+    __tablename__ = 'tag'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+
+class ScheduledEvent_Tags(db.Model):
+    __tablename__ = 'scheduledevent_tags'
+    id = db.Column(db.Integer(), primary_key=True)
+    scheduledevent_id = db.Column(db.Integer(), db.ForeignKey('scheduledevent.id', ondelete='CASCADE'))
+    tag_id = db.Column(db.Integer(), db.ForeignKey('tag.id', ondelete='CASCADE'))
+
+class Topic(db.Model):
+    __tablename__ = 'topic'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+
+class User_ScheduledEvents(db.Model):
+    __tablename__ = 'user_scheduledevents'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
+    scheduledevent_id = db.Column(db.Integer(), db.ForeignKey('scheduledevent.id', ondelete='CASCADE'))
+    
+

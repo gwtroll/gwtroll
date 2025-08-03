@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<h1>Create Scheduled Event</h1>
+
+<form id='scheduledeventform' action="" method="POST" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="row form-group">
+        {% with field=form.name, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.instructor, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.user_instructor %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+
+    <div class="row form-group">
+        {% with field=form.start_datetime, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.end_datetime, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+
+    <div class="row form-group">
+        {% with field=form.short_description, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row form-group">
+        {% with field=form.description, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row form-group">
+        {% with field=form.location, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+
+    <div class="row form-group">
+        {% with field=form.topic, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% for topic in form.new_topic %}
+        {{ topic.hidden_tag() }}
+        <div class="row form-group">
+            {% with field=topic.topic_name, required=true %}
+            {% include 'form_field.html' %}
+            {% endwith %}
+            <div class="col form-group">
+                <br />
+                <button value="{{ loop.index -1 }}" name="removetopic"
+                    class="btn form-control btn-danger btn-lg">Delete</button>
+            </div>
+        </div>
+        <br />
+        {% endfor %}
+        {% if form.new_topic.errors %}{% for error in form.new_topic.errors %}<span class="error">{{ error }}</span>{%
+        endfor %}{% endif %}
+        <div class="row mb-1">
+            <div class="col">
+                <button name="addtopic" value="addtopic" class="btn save form-control btn-warning btn-lg">Add
+                    New Topic</button>
+            </div>
+        </div>
+    </div>
+    <div class="row form-group">
+        {% with field=form.tags, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% for tag in form.new_tag %}
+        {{ tag.hidden_tag() }}
+        <div class="row form-group">
+            <div class="col form-group">
+                <div class="row form-group">
+                    {% with field=tag.tag_name, required=true %}
+                    {% include 'form_field.html' %}
+                    {% endwith %}
+                    <div class="col form-group">
+                        <br />
+                        <button value="{{ loop.index -1 }}" name="removetag"
+                            class="btn form-control btn-danger btn-lg">Delete</button>
+                    </div>
+                </div>
+            </div>
+            <br />
+        </div>
+        {% endfor %}
+        {% if form.new_tag.errors %}{% for error in form.new_tag.errors %}<span class="error">{{ error }}</span>{%
+        endfor %}{% endif %}
+        <div class="row mb-1">
+            <div class="col">
+                <button name="addtag" value="addtag" class="btn save form-control btn-warning btn-lg">Add New
+                    Tag</button>
+            </div>
+        </div>
+    </div>
+    <br />
+
+    <div class="row">
+        <div class="col">
+            {{form.submit(class_='btn save form-control btn-primary btn-lg')}}
+        </div>
+    </div>
+</form>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

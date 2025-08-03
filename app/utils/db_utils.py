@@ -25,6 +25,15 @@ atd_reg_pricesheet = None
 checkin_count_cache_time = datetime.now()
 checkin_count = None
 
+topic_cache_time = datetime.now()
+topic_choices = None
+
+tag_cache_time = datetime.now()
+tag_choices = None
+
+scheduledevents_cache_time = datetime.now()
+scheduledevents_cache = None
+
 def get_db_connection():
     conn = psycopg2.connect(os.environ
         
@@ -234,6 +243,61 @@ def get_kingdom_choices():
         kingdom_choices = local_kingdom_choices
         kindgom_cache_time = datetime.now()
         return kingdom_choices
+
+def get_topic_choices():
+    global topic_cache_time
+    global topic_choices
+    if topic_choices != None and topic_cache_time > datetime.now() + timedelta(hours=-1):
+        return topic_choices
+    else:
+        topics = Topic.query.order_by(Topic.name).all()
+        local_topic_choices = [('-', '-')]
+        for t in topics:
+            local_topic_choices.append([t.id, t.name])
+        topic_choices = local_topic_choices
+        topic_cache_time = datetime.now()
+        return topic_choices
+    
+def get_tag(tagid):
+    tag = Tag.query.filter(Tag.id==tagid).first()
+    return tag
+
+def get_tags(tagids):
+    tags = Tag.query.filter(Tag.id.id.in_(ast.literal_eval(tagids))).all()
+    return tags
+
+def get_tag_choices():
+    global tag_cache_time
+    global tag_choices
+    if tag_choices != None and tag_cache_time > datetime.now() + timedelta(hours=-1):
+        return tag_choices
+    else:
+        tags = Tag.query.order_by(Tag.name).all()
+        local_tag_choices = [('-', '-')]
+        for t in tags:
+            local_tag_choices.append([t.id, t.name])
+        tag_choices = local_tag_choices
+        tag_cache_time = datetime.now()
+        return tag_choices
+    
+def get_user_instructor_choices():
+    local_user_instructors_choices = []
+    user_instructors = User.query.join(UserRoles, UserRoles.user_id==User.id).join(Role, Role.id==UserRoles.role_id).filter(Role.name=='Teacher').order_by(User.fname).all()
+    local_user_instructors_choices = [('-', '-')]
+    for u in user_instructors:
+        local_user_instructors_choices.append([u.id, u.fname + ' ' + u.lname])
+    return local_user_instructors_choices
+
+def get_scheduledevents():
+    global scheduledevents_cache_time
+    global scheduledevents_cache
+    if scheduledevents_cache != None and scheduledevents_cache_time > datetime.now() + timedelta(hours=-1):
+        return scheduledevents_cache
+    else:
+        scheduledevents = ScheduledEvent.query.order_by(ScheduledEvent.start_datetime, ScheduledEvent.name).all()
+        scheduledevents_cache = scheduledevents
+        scheduledevents_cache_time = datetime.now()
+        return scheduledevents_cache
 
 # def get_event_choices():
 #     events = Event.query.all()

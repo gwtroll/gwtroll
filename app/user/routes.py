@@ -9,8 +9,7 @@ from app.models import *
 @bp.route('/myaccount', methods=['GET', 'POST'])
 @login_required
 def myaccount():
-    checkedincount = len(RegLogs.query.filter(RegLogs.userid == current_user.id, RegLogs.action == 'CHECKIN').all())
-    return render_template('myaccount.html', acc=current_user, checkedincount=checkedincount)
+    return render_template('myaccount.html', acc=current_user, checkedincount=reg_count())
 
 @bp.route('/changepassword', methods=['GET', 'POST'])
 @login_required

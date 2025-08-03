@@ -23,7 +23,6 @@ def users():
 
     return render_template('users.html', users=users)
 
-
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
 @permission_required('edit_users')

@@ -5,6 +5,7 @@ from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
 from datetime import datetime
+from flask import jsonify
 
 from flask_security import roles_accepted
 
@@ -152,3 +153,22 @@ def search_registration(key,value):
             data['regs'].append(json.dumps(reg_json))
 
     return data
+
+@bp.route('/scheduledevents/<int:scheduledeventid>/add', methods=('','POST'))
+@login_required
+def addscheduledevent(scheduledeventid):
+    scheduledevent = ScheduledEvent.query.get_or_404(int(scheduledeventid))
+    if scheduledevent not in current_user.scheduled_events:
+        current_user.scheduled_events.append(scheduledevent)
+        db.session.commit()
+    return jsonify({"message": "Request successful!"}), 200
+
+
+@bp.route('/scheduledevents/<int:scheduledeventid>/remove', methods=('','POST'))
+@login_required
+def removescheduledevent(scheduledeventid):
+    scheduledevent = ScheduledEvent.query.get_or_404(scheduledeventid)
+    if scheduledevent in current_user.scheduled_events:
+        current_user.scheduled_events.remove(scheduledevent)
+        db.session.commit()
+    return jsonify({"message": "Request successful!"}), 200
