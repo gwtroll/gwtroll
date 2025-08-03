@@ -1,0 +1,48 @@
+{% extends "base_restricted.html" %}
+
+{% block content %}
+<h1>{% block title %}Register{% endblock %}</h1>
+<div class="row">
+    <div class="col">
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row form-group">
+                {% with field=form.username, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+            </div>
+            <div class="row form-group">
+                {% with field=form.email, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+            </div>
+            <div class="row form-group">
+                {% with field=form.fname, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+                {% with field=form.lname, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+            </div>
+            <div class="row form-group">
+                {% with field=form.password, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+            </div>
+            <div class="row form-group">
+                {% with field=form.confirm, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
+                        {{ form.submit(class_='form-control m-0 btn btn-primary btn-lg') }}
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

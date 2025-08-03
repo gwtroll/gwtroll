@@ -6,12 +6,6 @@
 <div class="row form-group">
     <div class="col form-group">
         <p>
-            User Id
-        </p>
-        <p class="form-control">
-            {{ acc.id }}
-        </p>
-        <p>
             Username
         </p>
         <p class="form-control">
@@ -28,12 +22,6 @@
         </p>
         <p class="form-control">
             {{ acc.lname }}
-        </p>
-        <p>
-            Checkin Count:
-        </p>
-        <p class="form-control">
-            {{ checkedincount }}
         </p>
 
         <form action="{{ url_for('user.changepassword') }}" >

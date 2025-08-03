@@ -101,6 +101,36 @@ class CreateUserForm(FlaskForm):
         #FS Uniqueifier
         obj.fs_uniquifier = uuid.uuid4().hex
 
+class RegisterUserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email',validators=[DataRequired(),Email()])
+    fname = StringField('First Name', validators=[DataRequired()])
+    lname = StringField('Last Name', validators=[DataRequired()])
+    confirm = PasswordField('Confirm Password', validators=[InputRequired(), EqualTo('password', message='Passwords Must Match')])
+    password = PasswordField('Password', validators=[InputRequired(), EqualTo('confirm', message='Passwords Must Match'), Length(min=6, max=32, message='Password length must be between 6 and 32 characters')])
+    submit = SubmitField('Submit')
+
+    def populate_object(self, obj):
+        # Username - Strip - Lower
+        if self.username.data:
+            obj.username = self.username.data.strip().lower()
+        # First Name - Strip
+        if self.fname.data:
+            obj.fname = self.fname.data.strip()
+        # Last Name - Strip
+        if self.lname.data:
+            obj.lname = self.lname.data.strip()
+        # Email - Strip - Lower
+        if self.lname.data:
+            obj.lname = self.lname.data.strip().lower()         
+        # Password - Strip - Hash
+        if self.password.data:
+            obj.set_password(self.password.data.strip())
+        # Active
+        obj.active = True
+        #FS Uniqueifier
+        obj.fs_uniquifier = uuid.uuid4().hex
+
 class CreateRoleForm(FlaskForm):
     id = IntegerField('Id', validators=[DataRequired()])
     role_name = StringField('Role Name', validators=[DataRequired()])
@@ -285,7 +315,7 @@ class CreatePreRegForm(FlaskForm):
     scaname = StringField('SCA Name', validators=[])
     city = StringField('City', validators=[DataRequired()])
     state_province = StringField('State/Province', validators=[DataRequired()])
-    zip = IntegerField('Zip', validators=[DataRequired()])
+    zip = IntegerField('Zip', validators=[DataRequired(),NumberRange(min=0,max=99999,message="Zip Code must match ##### format")])
     country = StringField('Country', validators=[DataRequired()], default='United States')
     phone = StringField('Phone', validators=[DataRequired()])
     email = StringField('Communication Email', validators=[DataRequired(),Email()])
@@ -969,4 +999,91 @@ class DepartmentForm(FlaskForm):
     name = StringField('Department Name', validators=[DataRequired()])
     description = TextAreaField('Department Description', validators=[])
     submit = SubmitField('Create Department')
-    
+
+class TopicForm(FlaskForm):
+    topic_name = StringField('Name Topic', validators=[DataRequired()])
+
+class TagForm(FlaskForm):
+    tag_name = StringField('New Tag', validators=[DataRequired()])
+
+class ScheduledEventForm(FlaskForm):
+    name = StringField('Scheduled Event Name', validators=[DataRequired()])
+    start_datetime = DateTimeLocalField('Event Date/Time', validators=[DataRequired()])
+    end_datetime = DateTimeLocalField('Event Date/Time', validators=[DataRequired()])
+    instructor = StringField('Instructor', validators=[DataRequired()])
+    short_description = TextAreaField('Short Description', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
+    topic = SelectField('Topic', validators=[])
+    new_topic = FieldList(FormField(TopicForm), min_entries=0, max_entries=1)
+    tags = SelectMultipleField('Tags',validators=[])
+    new_tag = FieldList(FormField(TagForm), min_entries=0, max_entries=10)
+    user_instructor = SelectField('User Instructor',validators=[Optional()])
+    submit = SubmitField('Create Scheduled Event')
+
+    def populate_object(self, obj):
+        # Name
+        if self.name.data:
+            obj.name = self.name.data.strip()
+        # Start Date/Time
+        if self.start_datetime.data:
+            obj.start_datetime = self.start_datetime.data
+        # End Date/Time
+        if self.end_datetime.data:
+            obj.end_datetime = self.end_datetime.data
+        # Instructor
+        if self.instructor.data:
+            obj.instructor = self.instructor.data.strip()
+        # Short Description
+        if self.short_description.data:
+            obj.short_description = self.short_description.data
+        # Description
+        if self.description.data:
+            obj.description = self.description.data
+        # Location
+        if self.location.data:
+            obj.location = self.location.data.strip()        
+        # Topic
+        if self.topic.data and self.topic.data != '-':
+            obj.topic_id = self.topic.data      
+        # Tags - Iterate
+        obj.tags = []
+        for tagid in self.tags.data:
+            if tagid != '-':
+                obj.tags.append(get_tag(tagid))
+        # User Instructor
+        if self.user_instructor.data and self.user_instructor.data != '-':
+            obj.user_instructor_id = self.user_instructor.data    
+
+    def populate_form(self, obj):
+        # Name
+        if obj.name:
+            self.name.data = obj.name
+        # Start Date/Time
+        if obj.start_datetime:
+            self.start_datetime.data = obj.start_datetime
+        # End Date/Time
+        if obj.end_datetime:
+            self.end_datetime.data = obj.end_datetime
+        # Instructor
+        if obj.instructor:
+            self.instructor.data = obj.instructor
+        # Short Description
+        if obj.short_description:
+            self.short_description.data = obj.short_description
+        # Description
+        if obj.description:
+            self.description.data = obj.description
+        # Location
+        if obj.location:
+            self.location.data = obj.location     
+        # Topic
+        if obj.topic_id:
+            self.topic.data = str(obj.topic_id)        
+        # Tags - Iterate
+        for tag in obj.tags:
+            self.tags.data.append(str(tag.id))
+        # User Instructor
+        if obj.user_instructor_id:
+            self.self.user_instructor.data = obj.user_instructor_id
+
