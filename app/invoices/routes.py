@@ -328,7 +328,8 @@ def createpayment():
                     pay.calculate_payment_amounts(payment_balance)
                     db.session.add(pay)
                     payment_balance -= (reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance)
-                    reg.notes = notes
+                    if notes is not None:
+                        reg.notes += "\nInvocie Notes: " + notes
                     reg.recalculate_balance()
                     db.session.commit()
 
@@ -340,7 +341,7 @@ def createpayment():
                         r.invoice_number = None
                     else:
                         send_fastpass_email(r.email, r)
-            inv.notes = notes
+            inv.notes += notes
 
             db.session.commit()
 
