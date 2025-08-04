@@ -8,81 +8,48 @@
 
     <h2>Personal Information</h2>
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.fname.label }}
-                {{ form.fname(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.lname.label }}
-                {{ form.lname(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.scaname.label }}
-                {{ form.scaname(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.age.label }}
-                {{ form.age(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.fname, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.lname, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.scaname %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.age, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
     </div>
 
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.city.label }}
-                {{ form.city(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.state_province.label }}
-                {{ form.state_province(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.city %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.state_province %}
+        {% include 'form_field.html' %}
+        {% endwith %}
     </div>
 
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.zip.label }}
-                {{ form.zip(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.country.label }}
-                {{ form.country(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.zip %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.country, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
 
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.phone.label }}
-                {{ form.phone(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.email.label }}
-                {{ form.email(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.invoice_email.label }}
-                {{ form.invoice_email(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.phone, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
+        {% with field=form.email, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
+        {% with field=form.invoice_email %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
 
     <h2>Site Information</h2>
@@ -93,110 +60,68 @@
                 <input type="text" class="form-control" disabled value="{{ reg.id }}" />
             </p>
         </div>
-        <div class="col form-group">
-            <p>
-                {{ form.medallion.label }}
-                {{ form.medallion(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.medallion %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.kingdom.label }}
-                {{ form.kingdom(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.lodging.label }}
-                {{ form.lodging(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.kingdom, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
+        {% with field=form.lodging, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
     <div class="row form-group">
-        <div class="col form-group">
-            <p class="text-center">
-                {{ form.expected_arrival_date.label }}
-                {{ form.expected_arrival_date(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p class="text-center">
-                {{ form.early_on.label(class_='form-check-label') }}
-                {{ form.early_on(class_='form-check-input big-checkbox') }}
-            </p>
-        </div>
+        {% with field=form.expected_arrival_date %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
+        {% with field=form.early_on, checkbox=true%}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
 
     <h2>Membership</h2>
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.mbr.label }}
-                {{ form.mbr(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.mbr_num.label }}
-                {{ form.mbr_num(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.mbr_num_exp.label }}
-                {{ form.mbr_num_exp(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.mbr, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
+        {% with field=form.mbr_num %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
+        {% with field=form.mbr_num_exp %}
+        {% include 'form_field.html' %}
+        {% endwith %}            
     </div>
 
     <h2>Emergency Contact</h2>
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.emergency_contact_name.label }}
-                {{ form.emergency_contact_name(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.emergency_contact_phone.label }}
-                {{ form.emergency_contact_phone(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.emergency_contact_name, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
+        {% with field=form.emergency_contact_phone, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
 
     <h2>Pricing Information</h2>
     <div class="row form-group">
-        <div class="col form-group">
-            <p class="text-center">
-                {{ form.prereg.label }}
-                {{ form.prereg(class_='form-check-input big-checkbox') }}
-            </p>
-        </div>
+        {% with field=form.prereg, checkbox=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.registration_price.label }}
-                {{ form.registration_price(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.nmr_price.label }}
-                {{ form.nmr_price(class_='form-control m-0') }}
-            </p>
-        </div>
-        <div class="col form-group">
-            <p>
-                {{ form.paypal_donation.label }}
-                {{ form.paypal_donation(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.registration_price, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.nmr_price, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
+        {% with field=form.paypal_donation, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
-        <div class="row form-group">
+    <div class="row form-group">
         <div class="col">
             <p>
                 Registration Balance
@@ -232,21 +157,15 @@
     </div>
     <h2>Notes</h2>
     <div class="row form-group">
-        <div class="col form-group">
-            <p>
-                {{ form.notes.label }}
-                {{ form.notes(class_='form-control m-0') }}
-            </p>
-        </div>
+        {% with field=form.notes %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
     <h2>Admin</h2>
     <div class="row form-group">
-        <div class="col form-group">
-            <p class="text-center">
-                {{ form.duplicate.label }}
-                {{ form.duplicate(class_='form-check-input big-checkbox') }}
-            </p>
-        </div>
+        {% with field=form.duplicate, checkbox=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}        
     </div>
     <div class="row form-group">
         <div class="col form-group">
@@ -257,7 +176,7 @@
     </div>
 </form>
 
-   
+
 {% endblock %}
 
 {% block script %}

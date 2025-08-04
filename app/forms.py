@@ -461,8 +461,8 @@ class EditForm(FlaskForm):
     emergency_contact_name = StringField('Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
-    mbr_num = IntegerField('Member Number')
-    mbr_num_exp = DateField('Member Exp Date')
+    mbr_num = IntegerField('Member Number', validators=[Optional()])
+    mbr_num_exp = DateField('Member Exp Date', validators=[Optional()])
     
     reg_date_time = DateTimeField('Registration Date/Time')
     prereg = BooleanField('Pre-Registered')
@@ -471,12 +471,12 @@ class EditForm(FlaskForm):
     notes = TextAreaField('Notes')
     duplicate = BooleanField('Duplicate Registration')
 
-    registration_price = IntegerField('Registration Price', validators=[DataRequired()], default=0)
-    nmr_price = IntegerField('NMR Price', validators=[DataRequired()], default=0)
-    paypal_donation = IntegerField('PayPal Donation', validators=[DataRequired()], default=0)
+    registration_price = IntegerField('Registration Price', validators=[NumberRange(min=0,max=999)], default=0)
+    nmr_price = IntegerField('NMR Price', validators=[NumberRange(min=0,max=999)], default=0)
+    paypal_donation = IntegerField('PayPal Donation', validators=[NumberRange(min=0,max=999)], default=0)
     
-    checkin = DateTimeField('Checkin Date/Time')
-    medallion = IntegerField('Medallion #')
+    checkin = DateTimeField('Checkin Date/Time', validators=[Optional()])
+    medallion = IntegerField('Medallion #', validators=[Optional()])
     actual_arrival_date = DateField('Actual Arrival Date')
 
     kingdom = SelectField('Kingdom', validators=[DataRequired()])

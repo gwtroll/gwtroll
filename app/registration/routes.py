@@ -268,15 +268,15 @@ def editreg(regid):
     form.kingdom.choices = get_kingdom_choices()
 
     if request.method == 'POST' and form.validate_on_submit():
+        medallion_check = None
         if form.medallion.data != '' and form.medallion.data != None:
             medallion_check = Registrations.query.filter_by(medallion=form.medallion.data).first()
 
         if medallion_check is not None and int(regid) != int(medallion_check.id):
-            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.id),'error')
             dup_url = '<a href=' + url_for('troll.reg', regid=str(medallion_check.id)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-            flash(Markup(dup_url),'error')
+            flash("Medallion # " + str(medallion_check.medallion) + " already assigned to " + str(medallion_check.id) + ": " + Markup(dup_url),'error')
             form.populate_form(reg)
-            render_template('editreg.html', regid=reg.id, reg=reg, form=form)
+            return render_template('editreg.html', regid=reg.id, reg=reg, form=form)
 
         form.populate_object(reg)
         db.session.commit()
