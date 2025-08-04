@@ -215,7 +215,6 @@ class Registrations(db.Model):
     #Prereg/Reg
     reg_date_time = db.Column(db.DateTime(), default=lambda: datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0).isoformat())
     prereg = db.Column(db.Boolean(), default=False)
-    prereg_date_time = db.Column(db.DateTime())
     expected_arrival_date = db.Column(db.Date())
     early_on_approved = db.Column(db.Boolean(), default=False)
     notes = db.Column(db.Text)

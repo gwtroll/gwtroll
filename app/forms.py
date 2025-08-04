@@ -401,8 +401,6 @@ class CreatePreRegForm(FlaskForm):
             obj.emergency_contact_phone = self.emergency_contact_phone.data
         # Pre-Registration
         obj.prereg = True
-        # Pre-Registration Date/Time
-        obj.prereg_date_time = datetime.now(pytz.timezone('America/Chicago')).replace(microsecond=0).isoformat()
         # Prices
         # Registration Price/Balance + NMR Price/Balance
         if obj.age == '18+':
@@ -468,15 +466,14 @@ class EditForm(FlaskForm):
     
     reg_date_time = DateTimeField('Registration Date/Time')
     prereg = BooleanField('Pre-Registered')
-    prereg_date_time = DateTimeField('PreReg Date/Time')
     expected_arrival_date = DateField("Expected Arrival Date", validators=[DataRequired()])
     early_on = BooleanField('Early On')
     notes = TextAreaField('Notes')
     duplicate = BooleanField('Duplicate Registration')
 
-    registration_price = IntegerField('Registration Price', validators=[DataRequired()])
-    nmr_price = IntegerField('NMR Price', validators=[DataRequired()])
-    paypal_donation = IntegerField('PayPal Donation', validators=[DataRequired()])
+    registration_price = IntegerField('Registration Price', validators=[DataRequired()], default=0)
+    nmr_price = IntegerField('NMR Price', validators=[DataRequired()], default=0)
+    paypal_donation = IntegerField('PayPal Donation', validators=[DataRequired()], default=0)
     
     checkin = DateTimeField('Checkin Date/Time')
     medallion = IntegerField('Medallion #')

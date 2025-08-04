@@ -49,7 +49,6 @@ def DicttoReg(dict):
     #     mbr_num_exp = dict['mbr_num_exp'] if dict['mbr_num_exp'] != 'null' else None, 
     #     mbr_num = int(dict['mbr_num']) if dict['mbr_num'] != 'null' else None,
     #     prereg = True,
-    #     prereg_date_time = dict['prereg_date_time'],
     #     paypal_donation = int(dict['paypal_donation']),
     #     paypal_donation_balance = int(dict['paypal_donation_balance']),
     #     royal_departure_date = dict['royal_departure_date'] if dict['royal_departure_date'] != 'null' else None,
