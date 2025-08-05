@@ -19,7 +19,6 @@ def earlyon():
         earlyons = EarlyOnRequest.query.all()
     elif current_user.has_role('Department Head'):
         earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
-    db.session.close()
     return render_template('earlyon_list.html', earlyons=earlyons)
 
 @bp.route('/<int:earlyon_id>', methods=('GET','POST'))
@@ -27,8 +26,9 @@ def earlyon():
 @permission_required('earlyon_edit')
 def update(earlyon_id):
     earlyon = EarlyOnRequest.query.get_or_404(earlyon_id)
+
     form = EarlyOnApprovalForm(
-        arrival_date=earlyon.arrival_date,
+        arrival_date=earlyon.arrival_date.strftime('%Y/%m/%d'),
         department=earlyon.department_id,
         notes=earlyon.notes,
         dept_approval_status=earlyon.dept_approval_status,
@@ -56,10 +56,8 @@ def update(earlyon_id):
                 for rider in earlyon.earlyonriders:
                     rider.reg.early_on_approved = True
             db.session.commit()
-            db.session.close()
             return render_template('earlyon_list.html', earlyons=EarlyOnRequest.query.all())
         flash('There was an error with your submission. Please check the form and try again.', 'error')
-    db.session.close()
     return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
 
 
@@ -70,6 +68,10 @@ def createearlyon(regid):
     #     return render_template("prereg_closed.html")
 
     reg = Registrations.query.get_or_404(regid)
+
+    if len(reg.earlyonrequests_ref) > 0 or len(reg.earlyonriders_ref) > 0:
+        flash('You have perviously submitted an Early On Request or as a rider on another request.\nPlease contact your department head for more information.','error')
+        return redirect(url_for('earlyon.success'))
     form = EarlyOnForm()
     form.arrival_date.choices = get_earlyon_arrival_dates()
     form.department.choices = get_department_choices()
@@ -77,18 +79,14 @@ def createearlyon(regid):
     if request.method == 'POST':
         if form.department.data == 'None':
             flash('Please select a department.', 'error')
-            db.session.close()
             return render_template('create_earlyon.html', form=form, reg=reg)
         if request.form.get('remove'):
             remove = request.form.get('remove')
             form.riders.entries.pop(int(remove))
-            db.session.close()
             return render_template('create_earlyon.html', form=form, reg=reg)
         if form.validate_on_submit():
- 
             if request.form.get('add'):
                 form.riders.append_entry()
-                db.session.close()
                 return render_template('create_earlyon.html', form=form, reg=reg)
 
             rider_ids = []
@@ -99,12 +97,15 @@ def createearlyon(regid):
 
             rider_registrations = Registrations.query.filter(Registrations.id.in_(rider_ids)).all()
             for rider in rider_registrations:
-                rider_registration_ids.append(rider.id)
+                if len(rider.earlyonrequests_ref) > 0 or len(rider.earlyonriders_ref) > 0:
+                    flash(f'Your rider Regid: {rider.id} - {rider.fname} {rider.lname} has perviously been submitted an Early On Request or as a rider on another request.\nPlease contact your department head for more information.','error')
+                    return render_template('create_earlyon.html', form=form, reg=reg)
+                else:
+                    rider_registration_ids.append(rider.id)
 
             for id in rider_ids:
                 if id not in rider_registration_ids:
                     flash(f"Rider with registration ID {id} does not exist.", 'error')
-                    db.session.close()
                     return render_template('create_earlyon.html', form=form, reg=reg)
                 
             riders = []
@@ -151,9 +152,7 @@ def createearlyon(regid):
             
 
             # TODO: send_earlyon_confirmation_email(earlyon.email,earlyon)
-            db.session.close()
             return redirect(url_for('earlyon.success', earlyonid=earlyon.id))
-    db.session.close()
     return render_template('create_earlyon.html', form=form, reg=reg)
 
 @bp.route('/success')

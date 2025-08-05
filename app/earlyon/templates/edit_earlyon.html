@@ -12,8 +12,7 @@
         <div class="col form-group">
             <p>
                 Registration <br />
-                <a href="{{url_for('registration.editreg', regid=earlyon.registration.id)}}">Registration
-                    {{earlyon.registration.id}}</a>
+                <a href="{{url_for('registration.viewreg', regid=earlyon.registration.id)}}">{{earlyon.registration.fname}} {{earlyon.registration.lname}} - {{earlyon.registration.id}}</a>
             </p>
         </div>
         <div class="col form-group">
@@ -76,8 +75,7 @@
                     <p>
                         Registration
                         <br />
-                        <a href="{{url_for('registration.editreg', regid=rider.regid.data)}}">Registration
-                            {{rider.regid.data}}</a>
+                        <a href="{{url_for('registration.viewreg', regid=rider.regid.data)}}">{{rider.fname.data}} {{rider.lname.data}} - {{rider.regid.data}}</a>
                     </p>
                 </div>
                 {% with field=rider.minor, checkbox=true %}

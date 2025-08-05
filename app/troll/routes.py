@@ -158,7 +158,7 @@ def waiver(regid):
 
         reg.signature = form.signature.data
 
-        reg.balance = recalculate_reg_balance(reg)
+        reg.recalculate_balance()
         
         db.session.commit()
 
@@ -177,8 +177,9 @@ def updatedonation(regid):
         reg.paypal_donation = 0
         reg.paypal_donation_balance = 0
     elif bool(request.form.get('paypal_donation')) == True:
-        reg.paypal_donation = request.form.get('paypal_donation_amount')
-        reg.paypal_donation_balance = request.form.get('paypal_donation_amount')
+        reg.paypal_donation = int(request.form.get('paypal_donation_amount'))
+        reg.paypal_donation_balance = int(request.form.get('paypal_donation_amount'))
+    reg.recalculate_balance()
     db.session.commit()
     return redirect(url_for('troll.payment', regid=regid))
 
@@ -207,6 +208,7 @@ def payment(regid):
         #     reg.price_due = 0
         # else:
         #     reg.price_due = reg.price_calc - (reg.price_paid + reg.atd_paid)
+        
         pay = Payment(
             type = request.form.get('payment_type'),
             payment_date = datetime.now(pytz.timezone('America/Chicago')).date(),
@@ -218,9 +220,12 @@ def payment(regid):
             # event_id = reg.event_id
         )
 
-        db.session.add(pay)
-        reg.balance = recalculate_reg_balance(reg)
-        db.session.commit()
+        if pay.amount > 0:
+            db.session.add(pay)
+            db.session.commit()
+
+            reg.recalculate_balance()
+            db.session.commit()
 
         # log_reg_action(reg, 'PAYMENT')
 

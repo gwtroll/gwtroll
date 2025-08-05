@@ -397,16 +397,16 @@ def get_atd_pricesheet_day_not_in_sheet():
     pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
     return pricesheet.atd_price
 
-def recalculate_reg_balance(reg):
-    total_payments = 0
-    total_due = reg.registration_price + reg.nmr_price + reg.paypal_donation
-    if len(reg.payments) > 0:
-        for payment in reg.payments:
-            total_payments += payment.amount
-        new_balance = total_due - total_payments
-    else:
-        new_balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
-    return new_balance
+# def recalculate_reg_balance(reg):
+#     total_payments = 0
+#     total_due = reg.registration_price + reg.nmr_price + reg.paypal_donation
+#     if len(reg.payments) > 0:
+#         for payment in reg.payments:
+#             total_payments += payment.amount
+#         new_balance = total_due - total_payments
+#     else:
+#         new_balance = reg.registration_price + reg.nmr_price + reg.paypal_donation
+#     return new_balance
 
 def inv_prereg_unsent_counts():
     return {'Prereg':prereg_total(),'Regs':unsent_reg_count(),'Inv':unsent_count()}

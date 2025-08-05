@@ -177,10 +177,10 @@ def createinvoice():
         form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
         form.invoice_email.data = reg.invoice_email
     elif type == 'MERCHANT':
-        regs = get_merchants(regids)
+        merchants = get_merchants(regids)
         processing_fee = 0
         space_fee = 0
-        for merchant in regs:
+        for merchant in merchants:
             processing_fee += merchant.processing_fee
             space_fee += merchant.space_fee
         form.space_fee.data = space_fee
@@ -188,14 +188,16 @@ def createinvoice():
         form.merchant_fee.data = space_fee + processing_fee
         form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
         form.invoice_email.data = merchant.email
+        regs = merchants
     elif type == 'EARLYON':
-        regs = get_earlyon(regids)
+        earlyons = get_earlyon(regids)
         rider_fee = 0
-        for earlyon in regs:
+        for earlyon in earlyons:
             rider_fee += earlyon.rider_cost
         form.rider_fee.data = rider_fee
         form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
         form.invoice_email.data = earlyon.registration.invoice_email
+        regs = earlyons
     
     if request.method == 'POST' and form.validate_on_submit():
         invoice_number = request.form.get('invoice_number')
@@ -225,8 +227,9 @@ def createinvoice():
                 notes = notes,
                 # event_id = regs[0].event_id,
             )
-            for reg in regs:      
-                reg.invoices.append(inv)
+            for reg in regs:
+                if reg.duplicate == False:      
+                    reg.invoices.append(inv)
 
             db.session.add(inv)
             db.session.commit()
@@ -245,8 +248,11 @@ def createinvoice():
                 notes = notes,
                 # event_id = regs[0].event_id,
             )
-            for reg in regs:      
-                reg.invoice_number = invoice_number
+            for merchant in merchants:      
+                merchant.invoice_number = invoice_number
+            
+            db.session.add(inv)
+            db.session.commit()
 
         elif invoice_number is not None and type == 'EARLYON':
             # Create a new invoice for the merchant
@@ -260,9 +266,8 @@ def createinvoice():
                 balance = rider_fee,
                 notes = notes,
             )
-            for reg in regs:
-                if reg.duplicate == False:
-                    reg.invoice_number = invoice_number
+            for earlyon in earlyons:
+                earlyon.invoice_number = invoice_number
 
             db.session.add(inv)
             db.session.commit()
@@ -300,7 +305,7 @@ def createpayment():
     form.space_fee.data = inv.space_fee
     form.rider_fee.data = inv.rider_fee
     
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         # payment_date = DateField('Payment Date')
         # payment_amount = IntegerField('Payment Amount')
         # payment_type = SelectField('Payment Type',choices=[('PAYPAL','PAYPAL'),('CHECK','CHECK')])
@@ -328,8 +333,10 @@ def createpayment():
                     pay.calculate_payment_amounts(payment_balance)
                     db.session.add(pay)
                     payment_balance -= (reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance)
-                    if notes is not None:
+                    if notes is not None and reg.notes is not None:
                         reg.notes += "\nInvocie Notes: " + notes
+                    elif notes is not None and reg.notes is None:
+                        reg.notes = "\nInvocie Notes: " + notes
                     reg.recalculate_balance()
                     db.session.commit()
 
@@ -360,7 +367,7 @@ def createpayment():
 
                     pay.calculate_payment_amounts(payment_balance)
                     db.session.add(pay)
-                    payment_balance -= (reg.space_fee_balance + reg.processing_fee_balance + reg.electricity_balance)
+                    payment_balance -= (float(reg.space_fee_balance) + reg.processing_fee_balance + float(reg.electricity_balance))
                     reg.notes = notes
                     reg.recalculate_balance()
                     db.session.commit()

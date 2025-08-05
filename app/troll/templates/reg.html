@@ -4,216 +4,227 @@
 <h1>{% block title %} Registration {% endblock %}</h1>
 <div id="print_body">
     <div class="row">
+        {% if reg['prereg'] == True %}
         {% if reg['early_on_approved'] == True %}
         <div class="col text-center" style="background-color:green; color:white; border-radius:30px">
             <h2>EARLY ON - APPROVED</h2>
-        {% else %}
-        <div class="col text-center" style="background-color:red; color:white; border-radius:30px">
-            <h2>EARLY ON - NOT APPROVED</h2>
-        {% endif %}
-        </div>
-    </div>
-<div class="row">
-    <div class="col">
-        <table class="table table-reg table-reg-display table-responsive">
-            <colgroup>
-                <col span="1" style="background-color: #D6EEEE">
-            </colgroup>
-        <tbody>
-            <tr> 
-                <th style="background-color: #D6EEEE">Name: </th>
-                <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
-            </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">SCA Name: </th>
-                <td>{{ reg['scaname'] }}</td>
-            </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">Registration ID: </th>
-                <td>{{ reg['id'] }}</td>
-            </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">Invoice Number: </th>
-                <td>{{ reg['invoice_number'] }}</td>
-            </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">Age Range: </th>
-                <td>{{ reg['age'] }}</td>
-            </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">Membership: </th>
-                <td>{{ reg['mbr'] }}</td>
-            </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">Kingdom: </th>
-                <td>{{ reg['kingdom']['name'] }}</td>
-            </tr>
-            <tr>
-                <th style="background-color: #D6EEEE">Camp Group: </th>
-                <td>{{ reg['lodging']['name'] }}</td>
-            </tr>
-        </tbody>
-        </table>
-    </div>
-    <div class="col">
-        <table class="table table-reg table-reg-display table-responsive">
-            <tbody>
-                <tr>
-                    <th style="background-color: #D6EEEE">Medallion Number: </th>
-                    <td>{{ reg['medallion'] }}</td>
-                </tr>
-                <tr>
-                    <th style="background-color: #D6EEEE">Check-In Date: </th>
-                    {% if reg['checkin'] %}
-                    <td>{{ reg['checkin'].strftime('%m/%d/%Y %I:%M %p') }}</td>
-                    {% else %}
-                    <td>{{reg['checkin']}}</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <th style="background-color: #D6EEEE">Waiver Signature: </th>
-                    {% if reg['signature'] %}
-                    <td><img src="{{ reg['signature'] }}" style="height: 15a0px; width:300px"> </td>
-                    {% else %}
-                    <td></td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <th style="background-color: #D6EEEE">Emergency Contact: </th>
-                    <td>{{ reg.emergency_contact_name }} <br>
-                        Phone: {{ reg.emergency_contact_phone }} </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-<h5>Cost</h5>
-    <div class="row">
-        <div class="col">
-            <table class="table table-reg table-reg-display table-responsive">
-                <tr>
-                    <th>Registration</th>
-                    <th>NMR</th>
-                    <th>PayPal Donation</th>
-                    <th>Total Price</th>
-                    <th>Balance</th>
-                </tr>
-                <tr>
-                    <td>{{ reg['registration_price'] }}</td>
-                    <td>{{ reg['nmr_price'] }}</td>
-                    <td>{{ reg['paypal_donation'] }}</td>
-                    <td>{{ reg['total_due']}}</td>
-                    <td>{{ reg['balance']}}</td>
-                </tr>
-            </table>   
-        </div>
-        <div class="col">
-            <h5>Notes:</h5>
-            {{ reg['notes'] }}
-        </div>
-    </div>
-
-    <h5 class="no-print">Payments</h5>
-    <div class="row no-print">
-        <div class="col">
-            <table class="table table-reg table-reg-display table-responsive">
-                <tr>
-                    <th>Payment Type</th>
-                    <th>Amount</th>
-                </tr>
-            
-                {% if reg.payments %}
-                {% for payment in reg.payments %}
-                <tr>
-                    <td>{{ payment.type }}</td>
-                    <td>{{ payment.amount }}</td>
-                </tr>
-                {% endfor %}
+            {% else %}
+            <div class="col text-center" style="background-color:red; color:white; border-radius:30px">
+                <h2>EARLY ON - NOT APPROVED</h2>
                 {% endif %}
-            </table>   
-        </div>
-    </div>
-
-    <br>
-    {% if atd_payments %}
-    {% for pay in atd_payments %}
-    {% if reg.invoices|length <= 0 %}
-    <h1 class="text-center" style="background-color: red; color: white;">{{pay.type}} - ${{pay.amount}}</h1>
-        {% if reg['age'] == '18+' %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">ADULT</h1> 
-        {% if reg['mbr'] == false %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER</h1>
-        {% endif %}
-        {% endif %}
-        {% if reg['paypal_donation'] > 0 %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION - ${{pay.paypal_donation_amount}}</h1>
-        {% endif %}
-    {% else %}
-    <h1 class="text-center" style="background-color: red; color: white;">{{pay.type}} - ${{pay.amount}}</h1>
-        {% if pay.registration_amount > 0 %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">OTHER: ${{pay.registration_amount}}</h1> 
-        {% endif %}
-        {% if pay.nmr_amount > 0 %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER</h1> 
-        {% endif %}
-        {% if pay.paypal_donation_amount > 0 %}
-        <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION - ${{pay.paypal_donation_amount}}</h1> 
-        {% endif %}
-    {% endif %}
-    {% endfor %}
-    {% endif %}
-</div>
-
-    {% if not reg['signature'] %}
-        <div class="row form-group no-print">
-            <div class="col form-group">
-                <a href="{{url_for('troll.waiver', regid=reg.id)}}"><button class="form-control btn btn-success btn-lg custom-input-space" type="button">Waivers</button></a>
+                {% endif %}
             </div>
         </div>
+        <div class="row">
+            <div class="col">
+                <table class="table table-reg table-reg-display table-responsive">
+                    <colgroup>
+                        <col span="1" style="background-color: #D6EEEE">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Name: </th>
+                            <td>{{ reg['fname'] }} {{ reg['lname'] }}</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">SCA Name: </th>
+                            <td>{{ reg['scaname'] }}</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Registration ID: </th>
+                            <td>{{ reg['id'] }}</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Invoice Number: </th>
+                            <td>{{ reg['invoice_number'] }}</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Age Range: </th>
+                            <td>{{ reg['age'] }}</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Membership: </th>
+                            <td>{{ reg['mbr'] }}</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Kingdom: </th>
+                            <td>{{ reg['kingdom']['name'] }}</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Camp Group: </th>
+                            <td>{{ reg['lodging']['name'] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <table class="table table-reg table-reg-display table-responsive">
+                    <tbody>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Medallion Number: </th>
+                            <td>{{ reg['medallion'] }}</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Check-In Date: </th>
+                            {% if reg['checkin'] %}
+                            <td>{{ reg['checkin'].strftime('%m/%d/%Y %I:%M %p') }}</td>
+                            {% else %}
+                            <td>{{reg['checkin']}}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Waiver Signature: </th>
+                            {% if reg['signature'] %}
+                            <td><img src="{{ reg['signature'] }}" style="height: 15a0px; width:300px"> </td>
+                            {% else %}
+                            <td></td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <th style="background-color: #D6EEEE">Emergency Contact: </th>
+                            <td>{{ reg.emergency_contact_name }} <br>
+                                Phone: {{ reg.emergency_contact_phone }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <h5>Cost</h5>
+        <div class="row">
+            <div class="col">
+                <table class="table table-reg table-reg-display table-responsive">
+                    <tr>
+                        <th>Registration</th>
+                        <th>NMR</th>
+                        <th>PayPal Donation</th>
+                        <th>Total Price</th>
+                        <th>Balance</th>
+                    </tr>
+                    <tr>
+                        <td>{{ reg['registration_price'] }}</td>
+                        <td>{{ reg['nmr_price'] }}</td>
+                        <td>{{ reg['paypal_donation'] }}</td>
+                        <td>{{ reg['total_due']}}</td>
+                        <td>{{ reg['balance']}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col">
+                <h5>Notes:</h5>
+                {{ reg['notes'] }}
+            </div>
+        </div>
+
+        <h5 class="no-print">Payments</h5>
+        <div class="row no-print">
+            <div class="col">
+                <table class="table table-reg table-reg-display table-responsive">
+                    <tr>
+                        <th>Payment Type</th>
+                        <th>Amount</th>
+                    </tr>
+
+                    {% if reg.payments %}
+                    {% for payment in reg.payments %}
+                    <tr>
+                        <td>{{ payment.type }}</td>
+                        <td>{{ payment.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <br>
+        {% if atd_payments %}
+        {% for pay in atd_payments %}
+        {% if reg.invoices|length <= 0 %} <h1 class="text-center" style="background-color: red; color: white;">
+            {{pay.type}} - ${{pay.amount}}</h1>
+            {% if reg['age'] == '18+' %}
+            <h1 class="text-center m-0" style="background-color: red; color: white;">ADULT</h1>
+            {% if reg['mbr'] == false %}
+            <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER</h1>
+            {% endif %}
+            {% endif %}
+            {% if reg['paypal_donation'] > 0 %}
+            <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION -
+                ${{pay.paypal_donation_amount}}</h1>
+            {% endif %}
+            {% else %}
+            <h1 class="text-center" style="background-color: red; color: white;">{{pay.type}} - ${{pay.amount}}</h1>
+            {% if pay.registration_amount > 0 %}
+            <h1 class="text-center m-0" style="background-color: red; color: white;">OTHER: ${{pay.registration_amount}}
+            </h1>
+            {% endif %}
+            {% if pay.nmr_amount > 0 %}
+            <h1 class="text-center m-0" style="background-color: red; color: white;">NON-MEMBER</h1>
+            {% endif %}
+            {% if pay.paypal_donation_amount > 0 %}
+            <h1 class="text-center m-0" style="background-color: red; color: white;">PAYPAL DONATION -
+                ${{pay.paypal_donation_amount}}</h1>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+    </div>
+
+    {% if not reg['signature'] %}
+    <div class="row form-group no-print">
+        <div class="col form-group">
+            <a href="{{url_for('troll.waiver', regid=reg.id)}}"><button
+                    class="form-control btn btn-success btn-lg custom-input-space" type="button">Waivers</button></a>
+        </div>
+    </div>
     {% endif %}
 
     {% if (not reg['checkin']) and (reg['signature']) %}
-        <div class="row form-group no-print">
-            <div class="col form-group">
-                <a href="{{url_for('troll.checkin', regid=reg.id)}}"><button class="form-control btn btn-success btn-lg custom-input-space" type="button">Check-In</button></a>
-            </div>
+    <div class="row form-group no-print">
+        <div class="col form-group">
+            <a href="{{url_for('troll.checkin', regid=reg.id)}}"><button
+                    class="form-control btn btn-success btn-lg custom-input-space" type="button">Check-In</button></a>
         </div>
+    </div>
     {% endif %}
 
     {% if reg['balance'] > 0 and reg['checkin'] and reg['signature'] %}
-        <div class="row form-group no-print">
-            <div class="col form-group">
-                <a href="{{url_for('troll.payment', regid=reg.id)}}"><button class="form-control btn btn-success btn-lg custom-input-space" type="button">Payment</button></a>
-            </div>
+    <div class="row form-group no-print">
+        <div class="col form-group">
+            <a href="{{url_for('troll.payment', regid=reg.id)}}"><button
+                    class="form-control btn btn-success btn-lg custom-input-space" type="button">Payment</button></a>
         </div>
-{% endif %}
-    
+    </div>
+    {% endif %}
+
     {% if reg['checkin'] %}
     {% if atd_payments %}
-        <div class="row form-group no-print">
-            <div class="col form-group">
-                <button value='Print' type='button' class="btn btn-primary btn-lg form-control custom-input-space" onclick='handlePrint()'>Print</button>        
-            </div>
+    <div class="row form-group no-print">
+        <div class="col form-group">
+            <button value='Print' type='button' class="btn btn-primary btn-lg form-control custom-input-space"
+                onclick='handlePrint()'>Print</button>
         </div>
+    </div>
     {% endif %}
-        <div class="row form-group no-print">
-            <div class="col form-group">
-                <a href="/" class="btn btn-success btn-lg form-control custom-input-space" role="button">Done</a>         
-            </div>
+    <div class="row form-group no-print">
+        <div class="col form-group">
+            <a href="/" class="btn btn-success btn-lg form-control custom-input-space" role="button">Done</a>
         </div>
+    </div>
     {%endif%}
     {% if current_user.has_permission('registration_edit') or current_user.has_permission('registration_edit_limited')%}
-        <div class="row form-group no-print">
-            <div class="col form-group">
-                {% if current_user.has_permission('registration_edit') %}
-                <a href="{{url_for('registration.editreg', regid=reg.id)}}"><button class="form-control btn btn-warning btn-lg custom-input-space" type="button">Edit</button></a>
-                {% elif current_user.has_permission('registration_edit_limited') %}
-                <a href="{{url_for('registration.editreg_limited', regid=reg.id)}}"><button class="form-control btn btn-warning btn-lg custom-input-space" type="button">Edit</button></a>
-                {% endif %}
-            </div>
+    <div class="row form-group no-print">
+        <div class="col form-group">
+            {% if current_user.has_permission('registration_edit') %}
+            <a href="{{url_for('registration.editreg', regid=reg.id)}}"><button
+                    class="form-control btn btn-warning btn-lg custom-input-space" type="button">Edit</button></a>
+            {% elif current_user.has_permission('registration_edit_limited') %}
+            <a href="{{url_for('registration.editreg_limited', regid=reg.id)}}"><button
+                    class="form-control btn btn-warning btn-lg custom-input-space" type="button">Edit</button></a>
+            {% endif %}
         </div>
+    </div>
     {% endif %}
-        <!-- <br>
+    <!-- <br>
         <form method="post">
         <a href="/editreg">
             <button type="submit" name="action" value="editreg" class="btn btn-primary">Edit</button>
@@ -226,14 +237,14 @@
                 console.error("Element not found.");
                 return;
             }
-    
+
             const originalContent = contentToPrint.innerHTML;
             let allContent = '';
-    
+
             for (let i = 0; i < numCopies; i++) {
                 allContent += originalContent + '<div style="page-break-after: always;"></div>'; // Add page break
             }
-    
+
             const printWindow = window.open('', '_blank');
             printWindow.document.write('<html><head><title>Print</title>');
             printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">');
@@ -246,11 +257,11 @@
             printWindow.print();
             printWindow.close();
         }
-    
+
         // Example usage: print 3 copies of content within an element with id 'print_body'
-        function handlePrint(){
+        function handlePrint() {
             printMultipleCopies('print_body', 2);
         }
     </script>
 
-{% endblock %}
+    {% endblock %}
