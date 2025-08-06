@@ -131,9 +131,6 @@ def reports():
 
         file = 'full_export_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.csv'
 
-        # rptquery = "SELECT * FROM registrations"
-        # df = pd.read_sql_query(rptquery, engine)
-
         regs = Registrations.query.all()
 
         df = orm_to_df(regs)

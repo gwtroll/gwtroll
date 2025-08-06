@@ -34,9 +34,6 @@ def update(earlyon_id):
         dept_approval_status=earlyon.dept_approval_status,
         autocrat_approval_status=earlyon.autocrat_approval_status,
     )
-    if earlyon.earlyonriders:
-        for rider in earlyon.earlyonriders:
-            form.riders.append_entry(rider)
     form.arrival_date.choices = get_earlyon_arrival_dates()
     form.department.choices = get_department_choices()
 
@@ -57,7 +54,14 @@ def update(earlyon_id):
                     rider.reg.early_on_approved = True
             db.session.commit()
             return render_template('earlyon_list.html', earlyons=EarlyOnRequest.query.all())
-        flash('There was an error with your submission. Please check the form and try again.', 'error')
+        else:
+            flash('There was an error with your submission. Please check the form and try again.', 'error')
+            return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
+    else:
+        if earlyon.earlyonriders:
+            for rider in earlyon.earlyonriders:
+                form.riders.append_entry(rider)
+    
     return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
 
 

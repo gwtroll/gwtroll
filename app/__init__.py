@@ -43,6 +43,7 @@ from app.department import bp as department_bp
 from app.merchant import bp as merchant_bp
 from app.payment import bp as payment_bp
 from app.scheduledevents import bp as scheduledevents_bp
+from app.report import bp as report_bp
 from app.api import bp as api_bp
 
 app.register_blueprint(user_bp)
@@ -61,4 +62,5 @@ app.register_blueprint(department_bp)
 app.register_blueprint(merchant_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(scheduledevents_bp)
+app.register_blueprint(report_bp)
 app.register_blueprint(api_bp)

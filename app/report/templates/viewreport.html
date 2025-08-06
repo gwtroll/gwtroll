@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Report {% endblock %}</h1>
+
+
+<table id="myTable" data-show-columns="true"
+    data-show-columns-toggle-all="true" data-filter-control="true" data-sortable="true" data-pagination="true"
+    data-show-fullscreen="true" data-show-export="true" data-export-types="['csv', 'excel', 'pdf']"
+    data-minimum-count-columns="2" data-show-pagination-switch="true" data-page-list="[10, 25, 50, 100, all]"
+    data-detail-view="true" data-detail-view-icon="false" data-mobile-responsive="true" data-check-on-init="true"
+    data-classes="table table-striped table-responsive">
+
+</table>
+
+<script>
+    populate_table();
+    async function populate_table() {
+        await fetch("/api/full_checkin_report")
+            .then(response => response.json())
+            .then((data) => {
+                console.log(data.columns)
+                $('#myTable').bootstrapTable({
+                    columns: data.columns,
+                    data: data.rows
+                })
+            });
+    }
+</script>
+{% endblock %}
