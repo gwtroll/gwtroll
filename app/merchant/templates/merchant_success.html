@@ -1,12 +1,24 @@
 {% extends 'base_restricted.html' %}
 
 {% block content %}
-<h1>{% block title %} Merchant Application Submitted {% endblock %}</h1>
-<h1>Thank you for Applying to Merchant for Gulf Wars 2026!</h1>
-<h2>You will receive an email confirming your application.</h2>
-<h3>You will receive an email if you are approved or denied.</h3>
-<br>
-<h2 style="color:red"><b>This is NOT your Gulf Wars REGISTARTION</b></h2>
-<h3>To register for Gulf Wars please click the link below.</h3>
-<h4><a href="{{url_for('registration.createprereg', merchantid=merchantid)}}">Register for Gulf Wars</a></h4>
+    <div class="row">
+        <div class="col-8 offset-2" style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
+            <h2 class="text-center">{% block title %}Application Submitted Successfully{% endblock %}</h2>
+            <p class="text-center">Thank you for Applying to Merchant at Gulf Wars 2026!</p>
+            <ul>
+                <li>You will receive an email confirmation of your application submission. Also check your spam folder.</li>
+                <li>Confirmation of the merchant application being received does not imply that you have been accepted as a merchant for Gulf Wars XXXIV. </li>
+                <li>Missing information or documentation, your application will not be considered received until it is complete.</li>
+                <li>You will receive a separate email confirming if you are approved or denied.</li>
+                <li style="color: red;">Your Merchant Application is Not Your Gulf Wars Registration.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row text-center">
+        <div class="col">
+            <h3>Go Ahead and Register for Gulf Wars Here!</h3>
+            <a href="{{url_for('registration.createprereg', merchantid=merchantid)}}"><button
+                    class="btn btn-primary btn-lg custom-input-space" type="button"><h3>Register for Gulf Wars 34</h3></button></a>
+        </div>
+    </div>
 {% endblock %}

@@ -73,7 +73,7 @@ def send_merchant_confirmation_email(recipient, merchant):
     
     msg.html = "<p>Greetings,</p>" \
     "<p>Your Merchant Application for Gulf Wars XXXIV has been successfully submitted. You will receive another email once you are approved.</p>" \
-    "<p>If you have any questions or need to submit further information please contact the Merchantcrats at merchantcrat@gulfwars.org</p>" \
+    "<p>If you have any questions or need to submit further information please contact the Merchantcrats at <a href='mailto:merchantcrat@gulfwars.org'>merchantcrat@gulfwars.org</a></p>" \
     "<p>In Service,<br/>" \
     "Master Odhrán macc Corbáin<br/>" \
     "THL Dante Matteo Ricci</p>" \
@@ -95,7 +95,7 @@ def send_merchant_approval_email(recipient, merchant):
     
     msg.html = "<p>Greetings,</p>" \
     "<p>Your Merchant Application has been Approved for Gulf Wars XXXIV! We are excited to have you join us this March. Be on the lookout for your invoices from Gulf Wars PayPal team and get those taken care of.</p>" \
-    "<p>If you have any questions or need further information please contact the Merchantcrats at merchantcrat@gulfwars.org</p>"\
+    "<p>If you have any questions or need further information please contact the Merchantcrats at <a href='mailto:merchantcrat@gulfwars.org'>merchantcrat@gulfwars.org</a></p>"\
     "<p>In Service,<br/>" \
     "Master Odhrán macc Corbáin<br/>" \
     "THL Dante Matteo Ricci</p>" \
