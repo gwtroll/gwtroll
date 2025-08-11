@@ -71,6 +71,9 @@
                 {% with field=rider.scaname %}
                 {% include 'form_field.html' %}
                 {% endwith %}
+                {% with field=rider.regid, required=true %}
+                {% include 'form_field.html' %}
+                {% endwith %}
                 <div class="col form-group">
                     <p>
                         Registration
