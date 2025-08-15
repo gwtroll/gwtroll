@@ -73,17 +73,20 @@ def removeregistration(index):
 def createprereg():
 
     event = EventVariables.query.first()
+    event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
     # Close Pre-Reg at Midnight 02/22/2025
+    if datetime.now(pytz.timezone('America/Chicago')).date() <= event.preregistration_open_date:
+        return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
     if datetime.now(pytz.timezone('America/Chicago')).date() >= event.preregistration_close_date:
-        return render_template("prereg_closed.html", event=event)
+        return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
     invoice_totals = {'registration':0, 'nmr':0, 'donation':0, 'total':0}
 
     form = CreatePreRegForm()
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
     form.expected_arrival_date.choices = get_reg_arrival_dates()
-    event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
-    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
+
     if 'additional_registrations' in session and len(session['additional_registrations']) > 0:
         additional_registrations = [json.loads(r) for r in session['additional_registrations']]
         form.invoice_email.data = additional_registrations[0]['invoice_email']
