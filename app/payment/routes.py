@@ -7,6 +7,7 @@ from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
 from app.utils.security_utils import *
+from app.utils.email_utils import *
 
 from flask_security import roles_accepted
 
@@ -104,5 +105,105 @@ def deletepayment(paymentid):
 @bp.route('/paypal', methods=('', 'POST'))
 def paypalpayment():
     data = request.get_json()
+    invoice_data = data['resource']['invoice']
+    payment_data = data['resource']['invoice']['payments']['transactions']
+    if data['event_type'] == "INVOICING.INVOICE.PAID" and invoice_data is not None:
+        inv = Invoice.query.filter(Invoice.invoice_id==data['resource']['invoice']['id']).first()
+        if inv is not None and payment_data is not None:
+            for payment in payment_data:
+                payment_check = Payment.query.filter(Payment.paypal_id==payment['payment_id']).first()
+                if payment_check is None:
+                    payment_amount = float(payment['amount']['value'])
+                    invoice_number = inv.invoice_number
+                    payment_date = datetime.strptime(payment['payment_data'],'%Y-%m-%d').date()
+                    if inv.invoice_type == 'REGISTRATION':
+                        regs = []
+                        for r in inv.regs:
+                            if r.duplicate == False:
+                                regs.append(r)
+                    elif inv.invoice_type == 'MERCHANT':
+                        regs = inv.merchants
+                    elif inv.invoice_type == 'EARLYON':
+                        regs = inv.earlyonrequests
+                    if payment_amount is not None and inv.invoice_type == 'REGISTRATION':
+                        payment_balance = payment_amount
+                        for reg in regs:
+                            if payment_balance > 0 and reg.balance > 0:
+                                pay = Payment(
+                                    type = 'PAYPAL',
+                                    payment_date = payment_date,
+                                    reg_id = reg.id,
+                                    reg = reg,
+                                    invoice_number = invoice_number,
+                                )
+                                pay.calculate_payment_amounts(payment_balance)
+                                db.session.add(pay)
+                                payment_balance -= (reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance)
+                                reg.recalculate_balance()
+                                db.session.commit()
+
+                        inv.balance = float(inv.balance) - float(payment_amount)
+                        if inv.balance <= 0:
+                            inv.invoice_status = 'PAID'
+                            for r in inv.regs:
+                                if r.duplicate == True:
+                                    r.invoice_number = None
+                                else:
+                                    send_fastpass_email(r.email, r)
+
+                        db.session.commit()
+
+                    elif payment_amount is not None and inv.invoice_type == 'MERCHANT':
+                        payment_balance = payment_amount
+                        for reg in regs:
+                            if payment_balance > 0:
+                                pay = Payment(
+                                    type = 'PAYPAL',
+                                    payment_date = payment_date,
+                                    merchant_id = reg.id,
+                                    merchant = reg,
+                                    invoice_number  = invoice_number,
+                                )
+
+                                pay.calculate_payment_amounts(payment_balance)
+                                db.session.add(pay)
+                                payment_balance -= (float(reg.space_fee_balance) + reg.processing_fee_balance + float(reg.electricity_balance))
+                                reg.recalculate_balance()
+                                db.session.commit()
+
+                        inv.balance = float(inv.balance) - float(payment_amount)
+                        if inv.balance <= 0:
+                            inv.invoice_status = 'PAID'
+
+                        db.session.commit()
+
+                    elif payment_amount is not None and inv.invoice_type == 'EARLYON':
+                        payment_balance = payment_amount
+                        for reg in regs:
+                            if payment_balance > 0:
+                                pay = Payment(
+                                    type = 'PAYPAL',
+                                    payment_date = payment_date,
+                                    earlyonrequest_id = reg.id,
+                                    earlyonrequest = reg,
+                                    invoice_number  = invoice_number,
+                                )
+                                pay.calculate_payment_amounts(payment_balance)
+                                db.session.add(pay)
+                                payment_balance -= reg.rider_balance
+                                reg.recalculate_balance()
+                                db.session.commit()
+
+                        inv.balance = float(inv.balance) - float(payment_amount)
+                        if inv.balance <= 0:
+                            inv.invoice_status = 'PAID'
+                            #TODO: CREATE EARLY ON EMAIL
+
+                        if reg.rider_balance <= 0 and reg.dept_approval_status == 'APPROVED' and reg.autocrat_approval_status == 'APPROVED':
+                            reg.registration.early_on_approved = True
+                            for rider in reg.earlyonriders:
+                                rider.reg.early_on_approved = True
+
+                        db.session.commit()
     print(data)
     return jsonify({"message": "Operation successful"}), 200

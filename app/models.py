@@ -453,6 +453,7 @@ class Registration_Invoices(db.Model):
 class Payment(db.Model):
     __tablename__ = "payment"
     id = db.Column(db.Integer(), primary_key=True)
+    paypal_id = db.Column(db.String(), nullable=True)
     type = db.Column(db.String(), nullable=False)
     check_num = db.Column(db.Integer())
     payment_date = db.Column(db.DateTime(), nullable=False)
