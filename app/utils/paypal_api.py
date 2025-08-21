@@ -116,4 +116,6 @@ def get_invoice_number():
 
     data_dict = response.json()
 
+    print(data_dict)
+
     return data_dict['invoice_number']
