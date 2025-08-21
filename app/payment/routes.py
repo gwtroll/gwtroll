@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, jsonify
 from app.payment import bp
 
 from flask_login import login_required
@@ -100,3 +100,9 @@ def deletepayment(paymentid):
         db.session.commit()
         return redirect(url_for('payment.payment'))
     return render_template('deletepayment.html', payment=payment)
+
+@bp.route('/paypal', methods=('', 'POST'))
+def paypalpayment():
+    data = request.get_json()
+    print(data)
+    return jsonify({"message": "Operation successful"}), 200

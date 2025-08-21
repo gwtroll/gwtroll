@@ -744,7 +744,6 @@ class SendInvoiceForm(FlaskForm):
     merchant_fee = FloatField('Total Invoice Amount')
     rider_fee = IntegerField('Rider Fee')
     registration_amount = IntegerField('Registration Amount')
-    invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
     invoice_email = StringField('Invoice Email')
     paypal_donation = IntegerField('PayPal Donation')
     nmr_amount = IntegerField('NMR Amount')

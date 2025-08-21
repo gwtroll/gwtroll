@@ -187,6 +187,21 @@ class EarlyOnRequest(db.Model):
         if rider_balance < 0:
             rider_balance = 0
         self.rider_balance = rider_balance
+    
+    def get_invoice_items(self):
+        items = []
+        if self.rider_balance > 0:
+            items.append({
+                'name':'Extra Riders Fee',
+                'description':'Gulf Wars Early On Extra Riders Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.rider_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 
 class EarlyOnRider(db.Model):
@@ -334,11 +349,49 @@ class Registrations(db.Model):
         if paypal_donation_balance < 0:
             paypal_donation_balance = 0
         self.paypal_donation_balance = paypal_donation_balance
+    
+    def get_invoice_items(self):
+        items = []
+        if self.age == '18+' and self.registration_balance > 0:
+            items.append({
+                'name':'Registration - Adult',
+                'description':'Gulf Wars Registration - ' + self.fname + ' ' + self.lname + ' - ' + self.expected_arrival_date.strftime('%m/%d/%Y'),
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.registration_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.nmr_balance > 0:
+            items.append({
+                'name':'NMR',
+                'description':'Non-Member Fee - ' + self.fname + ' ' + self.lname,
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.nmr_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.paypal_donation_balance > 0:
+            items.append({
+                'name':'PayPal Donation',
+                'description':'PayPal Donation - ' + self.fname + ' ' + self.lname,
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.paypal_donation_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 
 class Invoice(db.Model):
     __tablename__ = "invoice"
     invoice_number = db.Column(db.Integer(), primary_key=True)
+    invoice_id = db.Column(db.String())
     invoice_type = db.Column(db.String(), nullable=False)
     invoice_email = db.Column(db.String(), nullable=False)
     invoice_date = db.Column(db.DateTime(), nullable=False)
@@ -385,7 +438,6 @@ class Invoice(db.Model):
         self.balance = balance
         if self.balance > 0:
             self.invoice_status = "OPEN"
-
 
 class Registration_Invoices(db.Model):
     __tablename__ = "registration_invoices"
@@ -727,6 +779,42 @@ class Merchant(db.Model):
             self.electricity_balance = 0
         self.electricity_balance = electricity_balance
 
+    def get_invoice_items(self):
+        items = []
+        if self.space_fee_balance > 0:
+            items.append({
+                'name':'Space Fee',
+                'description':'Gulf Wars Merchant Space Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.space_fee_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.processing_fee_balance > 0:
+            items.append({
+                'name':'Processing Fee',
+                'description':'Gulf Wars Merchant Processing Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.processing_fee_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.electricity_balance > 0:
+            items.append({
+                'name':'Electricity Fee',
+                'description':'Gulf Wars Merchant Electricity Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.electricity_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 class ScheduledEvent(db.Model):
     __tablename__ = "scheduledevent"

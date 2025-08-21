@@ -68,13 +68,6 @@
                 {% if form.invoice_date.errors %}{% for error in form.invoice_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
-        <div class="col">
-            <p>
-                {{ form.invoice_number.label }}<br>
-                {{ form.invoice_number(class_='form-control') }}
-                {% if form.invoice_number.errors %}{% for error in form.invoice_number.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
     </div>
     <div class="row">
                 <div class="col">
@@ -167,13 +160,6 @@
                 {{ form.invoice_date.label }}<br>
                 {{ form.invoice_date(class_='form-control') }}
                 {% if form.invoice_date.errors %}{% for error in form.invoice_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
-            </p>
-        </div>
-        <div class="col">
-            <p>
-                {{ form.invoice_number.label }}<br>
-                {{ form.invoice_number(class_='form-control') }}
-                {% if form.invoice_number.errors %}{% for error in form.invoice_number.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>

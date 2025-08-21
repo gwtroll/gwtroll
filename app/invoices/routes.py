@@ -5,6 +5,7 @@ from app.models import *
 from app.utils.db_utils import *
 from app.utils.email_utils import *
 from app.utils.security_utils import *
+from app.utils.paypal_api import *
 from flask_security import roles_accepted
 from markupsafe import Markup
 
@@ -200,23 +201,26 @@ def createinvoice():
         regs = earlyons
     
     if request.method == 'POST' and form.validate_on_submit():
-        invoice_number = request.form.get('invoice_number')
+        # invoice_number = request.form.get('invoice_number')
         invoice_date = request.form.get('invoice_date')
         invoice_email = request.form.get('invoice_email')
         notes = request.form.get('notes')
 
-        dup_inv = Invoice.query.filter(Invoice.invoice_number==invoice_number).first()
+        # dup_inv = Invoice.query.filter(Invoice.invoice_number==invoice_number).first()
 
-        if dup_inv is not None:
-            dup_url = '<a href=' + url_for('invoices.update', invnumber=str(dup_inv.invoice_number)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-            flash("Invoice Number " + str(dup_inv.invoice_number) +" already exists. " + Markup(dup_url),'error')
-            return render_template('create_invoice.html', form=form, regs=regs, type=type)
+        # if dup_inv is not None:
+        #     dup_url = '<a href=' + url_for('invoices.update', invnumber=str(dup_inv.invoice_number)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+        #     flash("Invoice Number " + str(dup_inv.invoice_number) +" already exists. " + Markup(dup_url),'error')
+        #     return render_template('create_invoice.html', form=form, regs=regs, type=type)
         
-        if invoice_number is not None and type == 'REGISTRATION':
+        if type == 'REGISTRATION':
             # Create a new invoice for the registrations
+            paypal_invoice = create_invoice(regs, invoice_email)
+
             inv = Invoice(
                 invoice_type = 'REGISTRATION',
-                invoice_number = invoice_number,
+                invoice_number = paypal_invoice['detail']['invoice_number'],
+                invoice_id = paypal_invoice['id'],
                 invoice_email = invoice_email,
                 invoice_date = invoice_date,
                 invoice_status = 'OPEN',
@@ -227,6 +231,9 @@ def createinvoice():
                 notes = notes,
                 # event_id = regs[0].event_id,
             )
+
+            send_invoice(paypal_invoice['id'])
+
             for reg in regs:
                 if reg.duplicate == False:      
                     reg.invoices.append(inv)
@@ -234,11 +241,14 @@ def createinvoice():
             db.session.add(inv)
             db.session.commit()
         
-        elif invoice_number is not None and type == 'MERCHANT':
+        elif type == 'MERCHANT':
             # Create a new invoice for the merchant
+            paypal_invoice = create_invoice(merchants, invoice_email)
+
             inv = Invoice(
                 invoice_type = 'MERCHANT',
-                invoice_number = invoice_number,
+                invoice_number = paypal_invoice['detail']['invoice_number'],
+                invoice_id = paypal_invoice['id'],
                 invoice_email = invoice_email,
                 invoice_date = invoice_date,
                 invoice_status = 'OPEN',
@@ -248,17 +258,23 @@ def createinvoice():
                 notes = notes,
                 # event_id = regs[0].event_id,
             )
+
+            send_invoice(paypal_invoice['id'])
+
             for merchant in merchants:      
-                merchant.invoice_number = invoice_number
+                merchant.invoice_number = inv.invoice_number
             
             db.session.add(inv)
             db.session.commit()
 
-        elif invoice_number is not None and type == 'EARLYON':
-            # Create a new invoice for the merchant
+        elif type == 'EARLYON':
+            # Create a new invoice for the earlyons
+            paypal_invoice = create_invoice(earlyons, invoice_email)
+
             inv = Invoice(
                 invoice_type = 'EARLYON',
-                invoice_number = invoice_number,
+                invoice_number = paypal_invoice['detail']['invoice_number'],
+                invoice_id = paypal_invoice['id'],
                 invoice_email = invoice_email,
                 invoice_date = invoice_date,
                 invoice_status = 'OPEN',
@@ -266,8 +282,11 @@ def createinvoice():
                 balance = rider_fee,
                 notes = notes,
             )
+
+            send_invoice(paypal_invoice['id'])
+
             for earlyon in earlyons:
-                earlyon.invoice_number = invoice_number
+                earlyon.invoice_number = inv.invoice_number
 
             db.session.add(inv)
             db.session.commit()

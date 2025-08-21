@@ -76,8 +76,9 @@ def createprereg():
     event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
     # Close Pre-Reg at Midnight 02/22/2025
-    if datetime.now(pytz.timezone('America/Chicago')).date() <= event.preregistration_open_date:
-        return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
+    ### UNCOMMENT
+    # if datetime.now(pytz.timezone('America/Chicago')).date() <= event.preregistration_open_date:
+    #     return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
     if datetime.now(pytz.timezone('America/Chicago')).date() >= event.preregistration_close_date:
         return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
     invoice_totals = {'registration':0, 'nmr':0, 'donation':0, 'total':0}
