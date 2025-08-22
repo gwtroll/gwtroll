@@ -131,4 +131,9 @@ def verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_
         data=json.dumps(data),
     )
 
-    print(response.json())
+    data_dict = response.json()
+
+    if data_dict['verification_status'] == "SUCCESS":
+        return True
+    else:
+        return False
