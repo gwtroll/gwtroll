@@ -115,7 +115,7 @@ def paypalpayment():
                 if payment_check is None:
                     payment_amount = float(payment['amount']['value'])
                     invoice_number = inv.invoice_number
-                    payment_date = datetime.strptime(payment['payment_data'],'%Y-%m-%d').date()
+                    payment_date = datetime.strptime(payment['payment_date'],'%Y-%m-%d').date()
                     if inv.invoice_type == 'REGISTRATION':
                         regs = []
                         for r in inv.regs:
