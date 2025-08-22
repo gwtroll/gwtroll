@@ -105,6 +105,18 @@ def deletepayment(paymentid):
 @bp.route('/paypal', methods=('', 'POST'))
 def paypalpayment():
     data = request.get_json()
+    headers = request.headers.keys(True)
+    print(headers)
+    auth_algo = request.headers.get('PAYPAL-AUTH-ALGO')
+    print(auth_algo)
+    cert_url = request.headers.get('PAYPAL-CERT-URL')
+    print(cert_url)
+    transmission_id = request.headers.get('PAYPAL-TRANSMISSION-ID')
+    print(transmission_id)
+    transmission_sig = request.headers.get('PAYPAL-TRANSMISSION-SIG')
+    print(transmission_sig)
+    transmission_time = request.headers.get('PAYPAL-TRANSMISSION-TIME')
+    print(transmission_time)
     invoice_data = None
     payment_data = None
     #Check if invoice in data
