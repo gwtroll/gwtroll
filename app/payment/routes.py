@@ -111,7 +111,7 @@ def paypalpayment():
     transmission_id = request.headers.get('PAYPAL-TRANSMISSION-ID')
     transmission_sig = request.headers.get('PAYPAL-TRANSMISSION-SIG')
     transmission_time = request.headers.get('PAYPAL-TRANSMISSION-TIME')
-    if verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_sig, transmission_time) == False:
+    if verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_sig, transmission_time, data) == False:
         return jsonify({"message": "Webhook Unverified"}), 200
     invoice_data = None
     payment_data = None

@@ -108,7 +108,7 @@ def get_invoice_number():
     return data_dict["invoice_number"]
 
 
-def verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_sig, transmission_time):
+def verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_sig, transmission_time, webhook_event):
 
     headers = {
         "Authorization": get_accesstoken(),
@@ -122,7 +122,7 @@ def verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_
         "transmission_sig": transmission_sig,
         "transmission_time": transmission_time,
         "webhook_id": "53K43429G57369229",
-        "webhook_event": {"event_version": "1.0", "resource_version": "1.0"},
+        "webhook_event": webhook_event,
     }
 
     response = requests.post(
@@ -132,6 +132,8 @@ def verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_
     )
 
     data_dict = response.json()
+
+    print(data_dict)
 
     if data_dict['verification_status'] == "SUCCESS":
         return True
