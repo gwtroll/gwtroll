@@ -130,6 +130,7 @@ def paypalpayment():
                         for reg in regs:
                             if payment_balance > 0 and reg.balance > 0:
                                 pay = Payment(
+                                    paypal_id = payment['payment_id'],
                                     type = 'PAYPAL',
                                     payment_date = payment_date,
                                     reg_id = reg.id,
@@ -158,6 +159,7 @@ def paypalpayment():
                         for reg in regs:
                             if payment_balance > 0:
                                 pay = Payment(
+                                    paypal_id = payment['payment_id'],
                                     type = 'PAYPAL',
                                     payment_date = payment_date,
                                     merchant_id = reg.id,
@@ -182,6 +184,7 @@ def paypalpayment():
                         for reg in regs:
                             if payment_balance > 0:
                                 pay = Payment(
+                                    paypal_id = payment['payment_id'],
                                     type = 'PAYPAL',
                                     payment_date = payment_date,
                                     earlyonrequest_id = reg.id,
