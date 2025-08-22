@@ -105,8 +105,10 @@ def deletepayment(paymentid):
 @bp.route('/paypal', methods=('', 'POST'))
 def paypalpayment():
     data = request.get_json()
-    invoice_data = data['resource']['invoice']
-    payment_data = data['resource']['invoice']['payments']['transactions']
+    if data['resource']['invoice']:
+        invoice_data = data['resource']['invoice']
+    if data['resource']['invoice']['payments']['transactions']:
+        payment_data = data['resource']['invoice']['payments']['transactions']
     if data['event_type'] == "INVOICING.INVOICE.PAID" and invoice_data is not None:
         inv = Invoice.query.filter(Invoice.invoice_id==data['resource']['invoice']['id']).first()
         if inv is not None and payment_data is not None:
