@@ -469,20 +469,6 @@ def remind():
     flash('Reminder Sent to Invoice '+str(inv.invoice_number))
     return redirect(url_for('invoices.open'))
 
-@bp.route('/paypal', methods=('', 'POST'))
-def paypalpayment():
-    data = request.get_json()
-    # auth_algo = request.headers.get('PAYPAL-AUTH-ALGO')
-    # cert_url = request.headers.get('PAYPAL-CERT-URL')
-    # transmission_id = request.headers.get('PAYPAL-TRANSMISSION-ID')
-    # transmission_sig = request.headers.get('PAYPAL-TRANSMISSION-SIG')
-    # transmission_time = request.headers.get('PAYPAL-TRANSMISSION-TIME')
-    # if verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_sig, transmission_time, data) == False:
-    #     return jsonify({"message": "Webhook Unverified"}), 200
-    print(data)
-
-    return jsonify({"message": "Operation successful"}), 200
-
 # @bp.route('/payment', methods=('GET', 'POST'))
 # @login_required
 # @roles_accepted('Admin','Invoices','Department Head')
