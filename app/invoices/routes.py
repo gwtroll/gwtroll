@@ -115,41 +115,24 @@ def update():
     form.invoice_email.data = inv.invoice_email
     form.notes.data = inv.notes
     
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         invoice_number = request.form.get('invoice_number')
         invoice_date = request.form.get('invoice_date')
-        invoice_email = request.form.get('invoice_email')
-        payment_date = request.form.get('payment_date')
-        payment_amount = int(request.form.get('payment_amount'))
-        payment_type = request.form.get('payment_type')
-        check_num = request.form.get('check_num')
         notes = request.form.get('notes')
 
-        if invoice_number is not None:
+        if invoice_number is not None and invoice_number != '':
             inv.invoice_number = invoice_number
-            inv.invoice_email = invoice_email
             inv.invoice_date = invoice_date
             inv.invoice_status = request.form.get('invoice_status')
-            inv.registration_total = request.form.get('registration_total')
-            inv.nmr_total = request.form.get('nmr_total')
-            inv.donation_total = request.form.get('donation_total')
             inv.notes = notes
-
-        if payment_amount is not None:
-            pays[0].type = payment_type
-            pays[0].check_num = check_num if check_num != '' else None
-            pays[0].payment_date = payment_date
-            pays[0].amount = payment_amount
-
-            inv.balance = inv.balance - pays[0].amount
 
             for reg in regs:      
                 reg.invoice_number = invoice_number
 
         db.session.commit()
-
+        flash('Invoice Information Successfully Updated')
         # log_reg_action(reg, 'INVOICE UPDATED')
-
+    
     return render_template('update_invoice.html', form=form, regs=regs, inv=inv)
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -201,97 +184,104 @@ def createinvoice():
         regs = earlyons
     
     if request.method == 'POST' and form.validate_on_submit():
-        # invoice_number = request.form.get('invoice_number')
+
         invoice_date = request.form.get('invoice_date')
         invoice_email = request.form.get('invoice_email')
         notes = request.form.get('notes')
 
-        # dup_inv = Invoice.query.filter(Invoice.invoice_number==invoice_number).first()
+        if request.form.get('action') == 'manualinvoice':
+            if request.form.get('invoice_number') is None or request.form.get('invoice_number') == '':
+                flash("Invoice Number required when submitting a Manual Invoice",'error')
+                return render_template('create_invoice.html', form=form, regs=regs, type=type)
+            invoice_number = request.form.get('invoice_number')
+            dup_inv = Invoice.query.filter(Invoice.invoice_number==invoice_number).first()
 
-        # if dup_inv is not None:
-        #     dup_url = '<a href=' + url_for('invoices.update', invnumber=str(dup_inv.invoice_number)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-        #     flash("Invoice Number " + str(dup_inv.invoice_number) +" already exists. " + Markup(dup_url),'error')
-        #     return render_template('create_invoice.html', form=form, regs=regs, type=type)
-        
-        if type == 'REGISTRATION':
-            # Create a new invoice for the registrations
+            if dup_inv is not None:
+                dup_url = '<a href=' + url_for('invoices.update', invnumber=str(dup_inv.invoice_number)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+                flash("Invoice Number " + str(dup_inv.invoice_number) +" already exists. " + Markup(dup_url),'error')
+                return render_template('create_invoice.html', form=form, regs=regs, type=type)
+            inv = Invoice(
+                invoice_number = invoice_number,
+                invoice_id = None,
+                invoice_email = invoice_email,
+                invoice_date = invoice_date,
+                invoice_status = 'OPEN',
+                notes = notes,
+            )
+            match type:
+                case 'REGISTRATION':
+                    inv.invoice_type = 'REGISTRATION'
+                    inv.registration_total = registration_price
+                    inv.nmr_total = nmr_price
+                    inv.donation_total = paypal_donation
+                    inv.balance = total_due
+                    for reg in regs:
+                        if reg.duplicate == False:      
+                            reg.invoices.append(inv)
+                case 'MERCHANT':
+                    inv.invoice_type = 'MERCHANT'
+                    inv.space_fee = space_fee
+                    inv.processing_fee = processing_fee
+                    inv.balance = space_fee + processing_fee
+                    for merchant in merchants:      
+                        merchant.invoice_number = inv.invoice_number
+                case 'EARLYON':
+                    inv.invoice_type = 'EARLYON'
+                    inv.rider_fee = rider_fee
+                    inv.balance = rider_fee
+                    for earlyon in earlyons:
+                        earlyon.invoice_number = inv.invoice_number
+
+            db.session.add(inv)
+            db.session.commit()
+
+            return redirect(url_for('invoices.unsent'))
+        else:
             paypal_invoice = create_invoice(regs, invoice_email)
 
             inv = Invoice(
-                invoice_type = 'REGISTRATION',
                 invoice_number = paypal_invoice['detail']['invoice_number'],
                 invoice_id = paypal_invoice['id'],
                 invoice_email = invoice_email,
                 invoice_date = invoice_date,
                 invoice_status = 'OPEN',
-                registration_total = registration_price,
-                nmr_total = nmr_price,
-                donation_total = paypal_donation,
-                balance = total_due,
                 notes = notes,
-                # event_id = regs[0].event_id,
             )
+            match type:
+                case 'REGISTRATION':
+                    inv.invoice_type = 'REGISTRATION'
+                    inv.registration_total = registration_price
+                    inv.nmr_total = nmr_price
+                    inv.donation_total = paypal_donation
+                    inv.balance = total_due
+                case 'MERCHANT':
+                    inv.invoice_type = 'MERCHANT'
+                    inv.space_fee = space_fee
+                    inv.processing_fee = processing_fee
+                    inv.balance = space_fee + processing_fee
+                case 'EARLYON':
+                    inv.invoice_type = 'EARLYON'
+                    inv.rider_fee = rider_fee
+                    inv.balance = rider_fee
 
             send_invoice(paypal_invoice['id'])
 
-            for reg in regs:
-                if reg.duplicate == False:      
-                    reg.invoices.append(inv)
-
-            db.session.add(inv)
-            db.session.commit()
-        
-        elif type == 'MERCHANT':
-            # Create a new invoice for the merchant
-            paypal_invoice = create_invoice(merchants, invoice_email)
-
-            inv = Invoice(
-                invoice_type = 'MERCHANT',
-                invoice_number = paypal_invoice['detail']['invoice_number'],
-                invoice_id = paypal_invoice['id'],
-                invoice_email = invoice_email,
-                invoice_date = invoice_date,
-                invoice_status = 'OPEN',
-                space_fee = space_fee,
-                processing_fee = processing_fee,
-                balance = space_fee + processing_fee,
-                notes = notes,
-                # event_id = regs[0].event_id,
-            )
-
-            send_invoice(paypal_invoice['id'])
-
-            for merchant in merchants:      
-                merchant.invoice_number = inv.invoice_number
-            
-            db.session.add(inv)
-            db.session.commit()
-
-        elif type == 'EARLYON':
-            # Create a new invoice for the earlyons
-            paypal_invoice = create_invoice(earlyons, invoice_email)
-
-            inv = Invoice(
-                invoice_type = 'EARLYON',
-                invoice_number = paypal_invoice['detail']['invoice_number'],
-                invoice_id = paypal_invoice['id'],
-                invoice_email = invoice_email,
-                invoice_date = invoice_date,
-                invoice_status = 'OPEN',
-                rider_fee = rider_fee,
-                balance = rider_fee,
-                notes = notes,
-            )
-
-            send_invoice(paypal_invoice['id'])
-
-            for earlyon in earlyons:
-                earlyon.invoice_number = inv.invoice_number
+            match type:
+                case 'REGISTRATION':
+                    for reg in regs:
+                        if reg.duplicate == False:      
+                            reg.invoices.append(inv)
+                case 'MERCHANT':
+                    for merchant in merchants:      
+                        merchant.invoice_number = inv.invoice_number
+                case 'EARLYON':
+                    for earlyon in earlyons:
+                        earlyon.invoice_number = inv.invoice_number
 
             db.session.add(inv)
             db.session.commit()
 
-        return redirect(url_for('invoices.unsent'))
+            return redirect(url_for('invoices.unsent'))
 
     return render_template('create_invoice.html', form=form, regs=regs, type=type)
 

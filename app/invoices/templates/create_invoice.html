@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-        <h1>{% block title %} Create Invoice {% endblock %}</h1>
+<h1>{% block title %} Create Invoice {% endblock %}</h1>
 {% if type=="REGISTRATION" %}
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
@@ -18,12 +18,12 @@
                     <th>NMR</th>
                     <th>PayPal Donation</th>
                     <th>Balance</th>
-                    <th>Mark Duplicate</th>
+                    <th>Related Actions</th>
                 </thead>
                 <tbody>
                     {% if regs %}
                     {% for reg in regs %}
-                    <tr> 
+                    <tr>
                         <td>{{ reg.id }}</td>
                         <td>{{ reg.fname }} {{ reg.lname }}</td>
                         <td>{{ reg.scaname }}</td>
@@ -33,7 +33,15 @@
                         <td>{{ reg.nmr_price }}</td>
                         <td>{{ reg.paypal_donation }}</td>
                         <td>{{ reg.balance }}</td>
-                        <td><a href="{{url_for('registration.duplicate', regid=reg.id)}}"><button class="btn btn-danger" type="button">Mark Duplicate</button></a></td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Related Actions">
+                                <a href="{{url_for('registration.editreg', regid=reg.id)}}"><button
+                                        class="btn btn-primary" type="button">Edit</button></a>
+                                <a href="{{url_for('registration.duplicate', regid=reg.id)}}"><button
+                                        class="btn btn-danger" type="button">Mark Duplicate</button></a>
+                            </div>
+                        </td>
+                        <td></td>
                     </tr>
                     {% endfor %}
                     {% endif %}
@@ -56,7 +64,8 @@
             <p>
                 {{ form.invoice_email.label }}<br>
                 {{ form.invoice_email(class_='form-control') }}
-                {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{
+                    error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -65,12 +74,21 @@
             <p>
                 {{ form.invoice_date.label }}<br>
                 {{ form.invoice_date(class_='form-control') }}
-                {% if form.invoice_date.errors %}{% for error in form.invoice_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                {% if form.invoice_date.errors %}{% for error in form.invoice_date.errors %}<span class="error">{{ error
+                    }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.invoice_number.label }}<br>
+                {{ form.invoice_number(class_='form-control') }}
+                {% if form.invoice_number.errors %}{% for error in form.invoice_number.errors %}<span class="error">{{
+                    error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
     <div class="row">
-                <div class="col">
+        <div class="col">
             <p>
                 {{ form.registration_amount.label }}<br>
                 {{ form.registration_amount(class_='form-control') }}
@@ -98,8 +116,10 @@
         </div>
     </div>
     <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
-</div>
-    </form>
+    <p><button type="submit" name="action" value="manualinvoice" class="form-control btn btn-warning btn-lg">Create
+            Manual Invoice</button></p>
+    </div>
+</form>
 {% elif type=="MERCHANT" %}
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
@@ -119,7 +139,7 @@
                 <tbody>
                     {% if regs %}
                     {% for reg in regs %}
-                    <tr> 
+                    <tr>
                         <td>{{ reg.id }}</td>
                         <td>{{ reg.fname }} {{ reg.lname }}</td>
                         <td>{{ reg.sca_name }}</td>
@@ -150,7 +170,8 @@
             <p>
                 {{ form.invoice_email.label }}<br>
                 {{ form.invoice_email(class_='form-control') }}
-                {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                {% if form.invoice_email.errors %}{% for error in form.invoice_email.errors %}<span class="error">{{
+                    error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -159,7 +180,16 @@
             <p>
                 {{ form.invoice_date.label }}<br>
                 {{ form.invoice_date(class_='form-control') }}
-                {% if form.invoice_date.errors %}{% for error in form.invoice_date.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                {% if form.invoice_date.errors %}{% for error in form.invoice_date.errors %}<span class="error">{{ error
+                    }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                {{ form.invoice_number.label }}<br>
+                {{ form.invoice_number(class_='form-control') }}
+                {% if form.invoice_number.errors %}{% for error in form.invoice_number.errors %}<span class="error">{{
+                    error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
     </div>
@@ -186,8 +216,10 @@
         </div>
     </div>
     <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
-</div>
-    </form>
+    <p><button type="submit" name="action" value="manualinvoice" class="form-control btn btn-warning btn-lg">Create
+            Manual Invoice</button></p>
+    </div>
+</form>
 {% elif type=='EARLYON' %}
 <form action="" method="post">
     {{ form.hidden_tag() }}
@@ -206,7 +238,7 @@
                 <tbody>
                     {% if regs %}
                     {% for reg in regs %}
-                    <tr> 
+                    <tr>
                         <td>{{ reg.id }}</td>
                         <td>{{ reg.registration.fname }} {{ reg.lname }}</td>
                         <td>{{ reg.registration.scaname }}</td>
@@ -262,11 +294,13 @@
         </div>
     </div>
     <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
-</div>
-    </form>
+    <p><button type="submit" name="action" value="manualinvoice" class="form-control btn btn-warning btn-lg">Create
+            Manual Invoice</button></p>
+    </div>
+</form>
 {% endif %}
 
-   
+
 {% endblock %}
 
 {% block script %}

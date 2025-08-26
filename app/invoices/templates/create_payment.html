@@ -91,7 +91,7 @@
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
-    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+    <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
     </div>
 </form>
 {% elif inv.invoice_type=='MERCHANT' %}
@@ -177,7 +177,7 @@
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
-    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+    <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
     </div>
 </form>
 {% elif inv.invoice_type=='EARLYON' %}
@@ -265,7 +265,7 @@
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
-    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+    <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
     </div>
 </form>
 {% endif %}
