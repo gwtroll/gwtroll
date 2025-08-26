@@ -62,7 +62,7 @@ def paid():
 @login_required
 @permission_required('invoice_view')
 def canceled():
-    all_inv = Invoice.query.filter(Invoice.invoice_status == 'CANCELED').all()
+    all_inv = Invoice.query.filter(Invoice.invoice_status == 'DUPLICATE' or Invoice.invoice_status == 'NO PAYMNET').all()
     # invoices = {}
     # for reg in all_inv:
     #     if reg.invoice_email not in invoices:
@@ -423,6 +423,52 @@ def createpayment():
         return redirect(url_for('invoices.open'))
 
     return render_template('create_payment.html', form=form, regs=regs, inv=inv)
+
+@bp.route('/marknonpayment', methods=('GET', 'POST'))
+@login_required
+@permission_required('invoice_edit')
+def nonpayment():
+    invnumber = request.args.get('invnumber')
+    inv = get_inv(invnumber)
+
+    if inv.invoice_id is not None:
+        cancel_invoice(inv.invoice_id)
+
+    inv.invoice_status = 'NO PAYMNET'
+    db.session.commit()
+        
+    flash('Invoice '+str(inv.invoice_number)+' Canceled')
+    return redirect(url_for('invoices.open'))
+
+@bp.route('/markduplicate', methods=('GET', 'POST'))
+@login_required
+@permission_required('invoice_edit')
+def markduplicate():
+    invnumber = request.args.get('invnumber')
+    inv = get_inv(invnumber)
+
+    if inv.invoice_id is not None:
+        cancel_invoice(inv.invoice_id)
+
+    inv.invoice_status = 'DUPLICATE'
+    db.session.commit()
+        
+    flash('Invoice '+str(inv.invoice_number)+' Canceled')
+    return redirect(url_for('invoices.open'))
+
+@bp.route('/remind', methods=('GET', 'POST'))
+@login_required
+@permission_required('invoice_edit')
+def remind():
+    invnumber = request.args.get('invnumber')
+    inv = get_inv(invnumber)
+
+    if inv.invoice_id is not None:
+        send_reminder(inv.invoice_id)
+        
+    flash('Reminder Sent to Invoice '+str(inv.invoice_number))
+    return redirect(url_for('invoices.open'))
+
 
 
 # @bp.route('/payment', methods=('GET', 'POST'))

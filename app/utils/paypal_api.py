@@ -87,8 +87,30 @@ def send_invoice(invoice_id):
     data = '{ "send_to_invoicer": true }'
 
     response = requests.post(url, headers=headers, data=data)
-    print(response.json())
 
+def cancel_invoice(invoice_id):
+    url = f"https://api-m.sandbox.paypal.com/v2/invoicing/invoices/{invoice_id}/cancel"
+
+    headers = {
+        "Authorization": get_accesstoken(),
+        "Content-Type": "application/json",
+    }
+
+    data = '{ "send_to_invoicer": true, "send_to_recipient": true }'
+
+    response = requests.post(url, headers=headers, data=data)
+
+def send_reminder(invoice_id):
+    url = f"https://api-m.sandbox.paypal.com/v2/invoicing/invoices/{invoice_id}/remind"
+
+    headers = {
+        "Authorization": get_accesstoken(),
+        "Content-Type": "application/json",
+    }
+
+    data = '{ "send_to_invoicer": true, "send_to_recipient": true }'
+
+    response = requests.post(url, headers=headers, data=data)
 
 def get_invoice_number():
     url = "https://api-m.sandbox.paypal.com/v2/invoicing/generate-next-invoice-number"
@@ -102,8 +124,6 @@ def get_invoice_number():
     response = requests.post(url, headers=headers, data=data)
 
     data_dict = response.json()
-
-    print(data_dict)
 
     return data_dict["invoice_number"]
 
@@ -132,8 +152,6 @@ def verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_
     )
 
     data_dict = response.json()
-
-    print(data_dict)
 
     if data_dict['verification_status'] == "SUCCESS":
         return True
