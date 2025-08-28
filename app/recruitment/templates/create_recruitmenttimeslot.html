@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<h1>Create Scheduled Event</h1>
+
+<form id='scheduledeventform' action="" method="POST" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="row form-group">
+        {% with field=form.start_datetime, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.end_datetime, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+
+    <div class="row form-group">
+        {% with field=form.volunteer, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row form-group">
+        {% with field=form.volunteerposition, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row form-group">
+        {% with field=form.department, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+
+    <div class="row">
+        <div class="col">
+            {{form.submit(class_='btn save form-control btn-primary btn-lg')}}
+        </div>
+    </div>
+</form>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

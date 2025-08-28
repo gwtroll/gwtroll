@@ -1085,3 +1085,75 @@ class ScheduledEventForm(FlaskForm):
         if obj.user_instructor_id:
             self.self.user_instructor.data = obj.user_instructor_id
 
+class RecruitmentScheduleForm(FlaskForm):
+    start_datetime = DateTimeLocalField('Event Date/Time', validators=[DataRequired()])
+    end_datetime = DateTimeLocalField('Event Date/Time', validators=[DataRequired()])
+    volunteer = SelectField('Volunteer', validators=[])
+    volunteerposition = SelectField('Position', validators=[])
+    department = SelectField('Department', validators=[])
+
+    submit = SubmitField('Create Volunteer Timeslot')
+
+    def populate_object(self, obj):
+        # Start Date/Time
+        if self.start_datetime.data:
+            obj.start_datetime = self.start_datetime.data
+        # End Date/Time
+        if self.end_datetime.data:
+            obj.end_datetime = self.end_datetime.data
+        # Volunteer
+        if self.volunteer.data != 'None' and self.volunteer.data != '-':
+            obj.volunteer_id = self.volunteer.data    
+        # Position
+        if self.volunteerposition.data != 'None' and self.volunteerposition.data != '-':
+            obj.volunteerposition_id = self.volunteerposition.data    
+        # Department
+        if self.department.data != 'None' and self.department.data != '-':
+            obj.department_id = self.department.data    
+
+    def populate_form(self, obj):
+        # Start Date/Time
+        if obj.start_datetime:
+            self.start_datetime.data = obj.start_datetime
+        # End Date/Time
+        if obj.end_datetime:
+            self.end_datetime.data = obj.end_datetime
+        # Volunteer
+        if obj.volunteer_id:
+            self.volunteer.data = str(obj.volunteer_id)
+        # Position
+        if obj.volunteerposition_id:
+            self.volunteerposition.data = str(obj.volunteerposition_id)
+        # Department
+        if obj.department_id:
+            self.department.data = str(obj.department_id)
+
+class VolunteerPositionForm(FlaskForm):
+    name = StringField('Position Title', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    department = SelectField('Department', validators=[])
+
+    submit = SubmitField('Create Position')
+
+    def populate_object(self, obj):
+        # Potition Title
+        if self.name.data:
+            obj.name = self.name.data
+        # Description
+        if self.description.data:
+            obj.description = self.description.data
+        # Department
+        if self.department.data != 'None' and self.department.data != '-':
+            obj.department_id = self.department.data    
+
+    def populate_form(self, obj):
+        # Position Title
+        if obj.name:
+            self.name.data = obj.name
+        # Description
+        if obj.description:
+            self.description.data = obj.description
+        # Department
+        if obj.department_id:
+            self.department.data = str(obj.department_id)
+

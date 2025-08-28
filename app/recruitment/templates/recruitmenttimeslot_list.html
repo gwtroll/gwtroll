@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col">
+    <table id="recruitmentscheduleTable" data-toggle="table" data-filter-control="true" data-sortable="true"
+      data-pagination="true" data-show-columns="true" data-show-columns-toggle-all="true" data-toolbar="#toolbar"
+      data-show-toggle="true" data-show-fullscreen="true" data-show-export="true"
+      data-export-types="['csv', 'excel', 'pdf']" data-minimum-count-columns="2" data-show-pagination-switch="true"
+      data-page-list="[10, 25, 50, 100, all]" data-response-handler="responseHandler" data-detail-view="true"
+      data-detail-view-icon="false" data-mobile-responsive="true" data-check-on-init="true"
+      data-classes="table table-striped table-responsive">
+      <thead>
+        <tr>
+          <th data-field="position" data-filter-control="select">Position</th>
+          <th data-field="date" data-filter-control="select">Date</th>
+          <th data-field="day" data-filter-control="select">Day</th>
+          <th data-field="start_time" data-filter-control="select">Start Time</th>
+          <th data-field="end_time" data-filter-control="select">End Time</th>
+          <th data-field="add">Add</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if timeslots %}
+        {%for ts in timeslots %}
+        <tr>
+          <td>
+            <a href="{{url_for('recruitment.recruitmentschedule_item', recruitmentscheduleid=ts.id)}}">{{ts.volunteerposition.name}}</a>
+          </td>
+          <td>
+            {{ts.start_datetime.date()}}
+          </td>
+          <td>
+            {{ts.start_datetime.strftime("%A")}}
+          </td>
+          <td>
+            {{ts.start_datetime.strftime("%I:%M %p")}}
+          </td>
+          <td>
+            {{ts.end_datetime.strftime("%I:%M %p")}}
+          </td>
+          <td>
+            {% if ts.id in current_user.get_recruitmentschedule_ids() %}
+            <button class="btn btn-danger" onclick="remove_recruitmentschedule(this,'{{ts.id}}')">Remove</button>
+            {% else %}
+            <button class="btn btn-primary" onclick="add_recruitmentschedule(this,'{{ts.id}}')">Sign Up</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  async function add_recruitmentschedule(btn, recruitmentscheduleid) {
+    try {
+      const response = await fetch("/api/recruitmentschedule/" + recruitmentscheduleid + "/add",
+        {
+          method: 'POST'
+        });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error add recruitment event:', error);
+    }
+    const remove_btn = document.createElement('button')
+    remove_btn.classList.add('btn')
+    remove_btn.classList.add('btn-danger')
+    remove_btn.innerText = 'Remove'
+    remove_btn.onclick = function(){ remove_recruitmentschedule(this,recruitmentscheduleid) }
+    btn.replaceWith(remove_btn)
+  }
+  async function remove_recruitmentschedule(btn, recruitmentscheduleid) {
+    try {
+      const response = await fetch("/api/recruitmentschedule/" + recruitmentscheduleid + "/remove",
+        {
+          method: 'POST'
+        });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error remove recruitment event:', error);
+    }
+    const add_btn = document.createElement('button')
+    add_btn.classList.add('btn')
+    add_btn.classList.add('btn-primary')
+    add_btn.innerText = 'Add'
+    add_btn.onclick = function(){ add_recruitmentschedule(this,recruitmentscheduleid) }
+    btn.replaceWith(add_btn)
+  }
+</script>
+
+{% endblock %}

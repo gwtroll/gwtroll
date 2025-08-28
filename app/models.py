@@ -62,6 +62,10 @@ class User(UserMixin, db.Model):
         "ScheduledEvent", secondary="user_scheduledevents"
     )
 
+    recruitmentschedules = db.relationship(
+        "RecruitmentSchedule", secondary="user_recruitmentschedule"
+    )
+
     active = db.Column(db.Boolean())
 
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
@@ -99,6 +103,9 @@ class User(UserMixin, db.Model):
 
     def get_scheduledevent_ids(self):
         return [event.id for event in self.scheduled_events]
+
+    def get_recruitmentschedule_ids(self):
+        return [event.id for event in self.recruitmentschedules]
 
 
 # Role Data Model
@@ -772,4 +779,33 @@ class User_ScheduledEvents(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey("users.id", ondelete="CASCADE"))
     scheduledevent_id = db.Column(
         db.Integer(), db.ForeignKey("scheduledevent.id", ondelete="CASCADE")
+    )
+
+class VolunteerPosition(db.Model):
+    __tablename__ = "volunteerposition"
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(), nullable=False)
+    description = db.Column(db.Text(), nullable=False)
+    department_id = db.Column(db.Integer(), db.ForeignKey("departments.id"))
+    department = db.relationship("Department", backref="volunteerposition_department", viewonly=True)
+
+class RecruitmentSchedule(db.Model):    
+    __tablename__ = "recruitmentschedule"
+    id = db.Column(db.Integer(), primary_key=True)
+    start_datetime = db.Column(db.DateTime(), nullable=False)
+    end_datetime = db.Column(db.DateTime(), nullable=False)
+    status = db.Column(db.String(), nullable=False, default='OPEN')
+    volunteer_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
+    volunteer = db.relationship("User", backref="volunteer", viewonly=True)
+    volunteerposition_id = db.Column(db.Integer(), db.ForeignKey("volunteerposition.id"))
+    volunteerposition = db.relationship("VolunteerPosition", backref="volunteerposition", viewonly=True)
+    department_id = db.Column(db.Integer(), db.ForeignKey("departments.id"))
+    department = db.relationship("Department", backref="recruitmentschedule_department", viewonly=True)
+
+class User_RecruitmentSchedule(db.Model):
+    __tablename__ = "user_recruitmentschedule"
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey("users.id", ondelete="CASCADE"))
+    recruitmentschedule_id = db.Column(
+        db.Integer(), db.ForeignKey("recruitmentschedule.id", ondelete="CASCADE")
     )

@@ -1,0 +1,59 @@
+{% extends 'base_restricted.html' %}
+
+{% block content %}
+<h1>Volunteer Timeslot</h1>
+        <div class="row">
+            <div class="col">
+                <p>
+                    Position
+                    <input class="form-control" disabled value="{{timeslot.volunteerposition.name}}">
+                </p>
+            </div>
+        </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                Description
+                <textarea class="form-control" disabled>{{timeslot.volunteerposition.description}}</textarea>
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <p>
+                Start Date/Time
+                <input class="form-control" disabled value="{{timeslot.start_datetime.strftime('%m/%d/%Y %I:%M %p')}}">
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>
+                End Date/Time
+                <input class="form-control" disabled value="{{timeslot.end_datetime.strftime('%m/%d/%Y %I:%M %p')}}">
+            </p>
+        </div>
+    </div>
+    {% if timeslot.volunteer and current_user.has_permission('view_recruitment')%}
+        <div class="row">
+            <div class="col">
+                <p>
+                    Volunteer
+                    <input class="form-control" disabled value="{{timeslot.volunteer.lname}}, {{timeslot.volunteer.fname}}">
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+            {% if timeslot.id in current_user.get_recruitmentschedule_ids() %}
+            <button class="form-control btn btn-lg btn-danger" onclick="remove_recruitmentschedule(this,'{{timeslot.id}}')">Remove</button>
+            {% else %}
+            <button class="form-control btn btn-lg btn-primary" onclick="add_recruitmentschedule(this,'{{timeslot.id}}')">Sign Up</button>
+            {% endif %}
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

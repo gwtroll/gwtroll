@@ -533,3 +533,19 @@ def get_department_choices():
         department_tup = (d.id, d.name)
         department_choices.append(department_tup)
     return department_choices
+
+def get_volunteer_choices():
+    volunteers = User.query.order_by(User.lname,User.fname).all()
+    volunteer_choices = [(None, '-')]
+    for d in volunteers:
+        volunteer_tup = (d.id, d.lname+", "+ d.fname)
+        volunteer_choices.append(volunteer_tup)
+    return volunteer_choices
+
+def get_volunteerposition_choices():
+    positions = VolunteerPosition.query.order_by(VolunteerPosition.name).all()
+    position_choices = [(None, '-')]
+    for d in positions:
+        position_tup = (d.id, d.name)
+        position_choices.append(position_tup)
+    return position_choices
