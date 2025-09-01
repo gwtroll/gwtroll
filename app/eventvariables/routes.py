@@ -95,7 +95,6 @@ def eventvariables():
             eventvariables.merchant_bounced_check_fee = form.merchant_bounced_check_fee.data
         
         db.session.commit()
-        db.session.close()
         flash('Event Variables saved successfully!', 'success')
         return redirect(url_for('eventvariables.eventvariables', form=form))
 
@@ -106,7 +105,6 @@ def eventvariables():
 @permission_required('admin')
 def pricesheet():
     pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).all()
-    db.session.close()
     return render_template('viewpricesheet.html', pricesheet=pricesheet)
 
 
@@ -116,12 +114,17 @@ def pricesheet():
 def editpricesheet(date):
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
     form = PriceSheetForm(
-        arrival_date = pricesheet.arrival_date,
+        arrival_date = pricesheet.arrival_date.strftime('%Y/%m/%d'),
         prereg_price = pricesheet.prereg_price,
         atd_price = pricesheet.atd_price
     )
     form.arrival_date.choices = get_reg_arrival_dates()
-    db.session.close()
+    if request.method == 'POST' and form.validate_on_submit():
+        pricesheet.prereg_price = form.prereg_price.data
+        pricesheet.atd_price = form.atd_price.data
+        db.session.commit()
+        return redirect(url_for('eventvariables.pricesheet'))
+    print(form.errors)
     return render_template('editpricesheet.html', form=form, pricesheet=pricesheet)
 
 
