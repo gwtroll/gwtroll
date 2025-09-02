@@ -4,19 +4,6 @@ from flask import url_for, copy_current_request_context
 import base64, binascii
 import threading
 
-
-# hold = "<p>To apply for Early On please use the following link: <a href="
-#         + url_for("earlyon.createearlyon", regid=reg.id, _external=True)
-#         + ">APPLY FOR EARLY ON</a></p>"
-#         "<p>All staff can have 1 FREE ADULT RIDER - Additional Early On riders will cost $15 per adult.</p>"
-#         "<p>If you owe any money for additional riders, you will receive a seperate invoice.</p>"
-#         "<p>Once the Department Head and Autocrats have approved your application, as well as paid any balance, you will receive an email confirming your Early On Approval.</p>"
-#         "<p>{INSERT RULES/INFO/STATEMENTS}</p>"
-#         "<p>{INSERT IF YOU RECEIVED THIS IN ERROR MESSAGE}</p>"
-#         "<p>In Service,<br/>"
-#         "Salim Al'Hahlil<br/>"
-#         "Testing SMTP Deputy</p>"
-
 def send_async_mail(message):
 
     @copy_current_request_context
@@ -29,7 +16,7 @@ def send_async_mail(message):
 
 def send_confirmation_email(recipient, regs):
     msg = Message(
-        subject="Gulf Wars Registration Confirmation",
+        subject="Gulf Wars XXXIV - Registration Acknowledgement",
         recipients=[recipient],
     )
 
@@ -60,7 +47,7 @@ def send_confirmation_email(recipient, regs):
 def send_fastpass_email(recipient, reg):
     qrcode_str = qrcode(url_for("troll.reg", regid=reg.id), border=1)
     msg = Message(
-        subject="Gulf Wars Fast Pass",
+        subject="Gulf Wars XXXIV - Payment Confirmation and Fast Pass",
         recipients=[recipient],
     )
 
@@ -79,6 +66,21 @@ def send_fastpass_email(recipient, reg):
 
     msg.html = (
         "<p>Greetings,</p>"
+        f"<p>This is confirmation that we have received payment for your Gulf Wars registration, {reg.id}. We look forward to seeing you at War!</p>"
+        f"<p>Mundane Name: {reg.fname} {reg.lname}<br/>"
+        f"SCA Name: {reg.scaname}<br/>"
+        f"Member Number: {reg.mbr_num}<br/>"
+        f"Arriving On: {reg.expected_arrival_date}</p>"
+        "<br/><br/>"
+        "<p><b>Regarding Early-On</b></p>"
+        "<p>If you need to <b>apply</b> for EARLY-ON, please use the following link: "
+        "<p>To apply for Early On please use the following link: <a href="
+        + url_for("earlyon.createearlyon", regid=reg.id, _external=True)
+        + ">APPLY FOR EARLY ON</a></p>"
+        "<p>Each Staff is allowed one free Adult rider. Additional early-on riders will be charged $15 per Adult. If you apply to have additional riders, once your Department Head and the Autocrats have approved your application, you will receive a confirmation and a separate invoice. You must request early-on access for all riders coming in your vehicle, including minors. There is no additional fee for early-on minors, but they must be on the list.</p>"
+        "<p>Please note, ALL EARLY-ON registrants, whether they are staff, the free rider, or an additional rider must have pre-paid for the entire week, and be on the approved list, or they will NOT be allowed on-site until Saturday at noon, when Site opens for everyone.</p>"
+        "<br/><br/>"
+        "<p><b>Fast Pass</b></p>"
         "<p>Welcome to Fast Pass! Please print this and bring it with you to Gulf Wars. If everyone in your vehicle has this with them, you will be able to participate in Fast Pass Troll. Please follow the signs to Troll.  You will be asked to show this letter, photo ID, and proof of membership if you are a member. Those not on fast pass will park and walk in to troll. If EVERYONE in your vehicle has their letter printed, you will be flagged through to the fast pass lanes. The troll will scan this letter, go over the waiver with you, and give you your site token. You may then proceed to your campsite. You will not be able to leave your vehicle once in the fast pass lane.</p>"
         "<p>Fast Pass is only open Opening Saturday 1pm until dark. If you do not have this letter, you will need to park and walk inside. Troll will attempt to scan the QR code off a mobile device if it is not printed.</p>"
         "<br/><br/>"
