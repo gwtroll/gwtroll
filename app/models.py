@@ -270,6 +270,7 @@ class Registrations(db.Model):
     early_on_approved = db.Column(db.Boolean(), default=False)
     notes = db.Column(db.Text)
     duplicate = db.Column(db.Boolean, default=False)
+    canceled = db.Column(db.Boolean, default=False) 
 
     # Pricing
     registration_price = db.Column(db.Integer(), default=0)

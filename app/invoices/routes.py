@@ -19,7 +19,7 @@ from flask_login import login_required
 @login_required
 @permission_required('invoice_view')
 def unsent():
-    all_regs = Registrations.query.filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0, EarlyOnRequest.dept_approval_status == 'APPROVED', EarlyOnRequest.autocrat_approval_status == 'APPROVED')).all()
 
@@ -188,8 +188,33 @@ def createinvoice():
         invoice_date = request.form.get('invoice_date')
         invoice_email = request.form.get('invoice_email')
         notes = request.form.get('notes')
+        if request.form.get('action') == 'zeroinvoice':
+            if total_due > 0:
+                flash('Invoice Amount is greater than $0, an Invoice must be created.')
+                return render_template('create_invoice.html', form=form, regs=regs, type=type)
+            zero_invoice = Invoice.query.filter(Invoice.invoice_number==0).first()
+            if zero_invoice is None:
+                zero_invoice = Invoice(
+                    invoice_number = 0,
+                    invoice_id = None,
+                    invoice_email = 'no-reply@gulfwars.org',
+                    invoice_date = datetime.strptime('01/01/1900','%m/%d/%Y'),
+                    invoice_type = 'REGISTRATION',
+                    registration_total = 0,
+                    nmr_total = 0,
+                    donation_total = 0,
+                    balance = 0,
+                    invoice_status = 'PAID',
+                )
+                db.session.add(zero_invoice)
+            for reg in regs:
+                if reg.duplicate == False:      
+                    reg.invoices.append(zero_invoice)
+            
+            db.session.commit()
+            return redirect(url_for('invoices.unsent'))
 
-        if request.form.get('action') == 'manualinvoice':
+        elif request.form.get('action') == 'manualinvoice':
             if request.form.get('invoice_number') is None or request.form.get('invoice_number') == '':
                 flash("Invoice Number required when submitting a Manual Invoice",'error')
                 return render_template('create_invoice.html', form=form, regs=regs, type=type)
@@ -237,6 +262,8 @@ def createinvoice():
 
             return redirect(url_for('invoices.unsent'))
         else:
+            if total_due <= 0:
+                flash('$0 Invoices should be acknowledged using the \'Acknowledge Zero Dollar Invoice\' action.')
             paypal_invoice = create_invoice(regs, invoice_email)
 
             inv = Invoice(
@@ -430,6 +457,10 @@ def createpayment():
 def nonpayment():
     invnumber = request.args.get('invnumber')
     inv = get_inv(invnumber)
+
+    if inv.regs is not None:
+        for reg in inv.regs:
+            reg.canceled == True
 
     if inv.invoice_id is not None:
         cancel_invoice(inv.invoice_id)

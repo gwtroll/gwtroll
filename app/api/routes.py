@@ -122,20 +122,20 @@ def search_registration(key,value):
         pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
     data['prereg_price'] = pricesheet.prereg_price
     if key == 'name':
-        regs = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + value + '%'))),Registrations.duplicate==False).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + value + '%'))),Registrations.duplicate==False, or_(Registrations.canceled == False, Registrations.canceled == None)).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
         #     #(value, value, value))
         #     ('%' + value + '%', '%' + value + '%', '%' + value + '%'))
 
     elif key == 'inv':
-        regs = Registrations.query.join(Registration_Invoices, Registration_Invoices.reg_id==Registrations.id).filter(and_(sa.cast(Registration_Invoices.invoice_id,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False)).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.join(Registration_Invoices, Registration_Invoices.reg_id==Registrations.id).filter(and_(sa.cast(Registration_Invoices.invoice_id,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
         #     ('%' + value + '%',))
 
     elif key == 'mbr':
-        regs = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False)).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE CAST(mbr_num AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
         #     ('%' + value + '%',))
