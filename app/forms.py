@@ -207,7 +207,7 @@ class EditUserForm(FlaskForm):
             self.lname.data = obj.lname
         # Department
         if obj.department_id:
-            self.department.data = obj.department_id
+            self.department.data = str(obj.department_id)
         # Medallion 
         if obj.medallion:
             self.medallion.data = obj.medallion
@@ -220,7 +220,8 @@ class UpdatePasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
     def populate_object(self, obj):
         # Password - Strip - Hash
-        if self.password.data.strip() == self.confirm.data.strip():
+        # Password - Strip - Hash
+        if self.password.data:
             obj.set_password(self.password.data.strip())
 
 class CreateRegForm(FlaskForm):
