@@ -97,8 +97,8 @@
         {% endwith %}
     </div>
     <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
-<p><a href="{{url_for('invoices.nonpayment', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-danger btn-lg" type="button">Mark Non-Payment</button></a></p>
-<p><a href="{{url_for('invoices.nonpayment', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-danger btn-lg" type="button">Mark Duplicate</button></a></p>
+<p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal" data-bs-target="#confirmNonPaymentModal">Mark Non-Payment</button></p>
+<p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal" data-bs-target="#confirmDuplicateModal">Mark Duplicate</button></p>
 <p><a href="{{url_for('invoices.remind', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-primary btn-lg" type="button">Send Reminder</button></a></p>
     </div>
 </form>
@@ -191,8 +191,8 @@
         {% endwith %}
     </div>
     <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
-<p><a href="{{url_for('invoices.nonpayment', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-danger btn-lg" type="button">Mark Non-Payment</button></a></p>
-<p><a href="{{url_for('invoices.nonpayment', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-danger btn-lg" type="button">Mark Duplicate</button></a></p>
+<p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal" data-bs-target="#confirmNonPaymentModal">Mark Non-Payment</button></p>
+<p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal" data-bs-target="#confirmDuplicateModal">Mark Duplicate</button></p>
 <p><a href="{{url_for('invoices.remind', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-primary btn-lg" type="button">Send Reminder</button></a></p>
     </div>
 </form>
@@ -281,11 +281,51 @@
     <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
     </div>
 </form>
-<p><a href="{{url_for('invoices.nonpayment', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-danger btn-lg" type="button">Mark Non-Payment</button></a></p>
-<p><a href="{{url_for('invoices.nonpayment', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-danger btn-lg" type="button">Mark Duplicate</button></a></p>
+<p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal" data-bs-target="#confirmNonPaymentModal">Mark Non-Payment</button></p>
+<p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal" data-bs-target="#confirmDuplicateModal">Mark Duplicate</button></p>
 <p><a href="{{url_for('invoices.remind', invnumber=inv.invoice_number)}}"><button class="form-control btn btn-primary btn-lg" type="button">Send Reminder</button></a></p>
 {% endif %}
 
+
+<!-- Confirm Non-Payment Modal -->
+<div class="modal fade" id="confirmNonPaymentModal" tabindex="-1" role="dialog" aria-labelledby="confirmNonPaymentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmNonPaymentModalLabel">Confirm Non-Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Please Confirm the Cancellation of Invoice {{inv.invoice_number}} for Non-Payment</h5>
+            </div>
+            <div class="modal-footer">
+                <p><a href="{{url_for('invoices.nonpayment', invnumber=inv.invoice_number)}}"><button class="btn btn-success" type="button">Confirm Non-Payment</button></a></p>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Duplicate Modal -->
+<div class="modal fade" id="confirmDuplicateModal" tabindex="-1" role="dialog" aria-labelledby="confirmDuplicateModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDuplicateModalLabel">Confirm Duplicate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Please Confirm the Cancellation of Invoice {{inv.invoice_number}} for Duplicate</h5>
+            </div>
+            <div class="modal-footer">
+                <p><a href="{{url_for('invoices.markduplicate', invnumber=inv.invoice_number)}}"><button class="btn btn-success" type="button">Confirm Duplicate</button></a></p>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 

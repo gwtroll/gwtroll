@@ -155,7 +155,7 @@ def createinvoice():
                 nmr_price += reg.nmr_price
                 total_due += reg.total_due
         form.paypal_donation.data = paypal_donation
-        form.registration_amount.data = registration_price + nmr_price
+        form.registration_amount.data = registration_price
         form.nmr_amount.data = nmr_price
         form.invoice_amount.data = total_due
         form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
@@ -264,7 +264,7 @@ def createinvoice():
         else:
             if total_due <= 0:
                 flash('$0 Invoices should be acknowledged using the \'Acknowledge Zero Dollar Invoice\' action.')
-            paypal_invoice = create_invoice(regs, invoice_email)
+            paypal_invoice = create_invoice(regs, invoice_email, type)
 
             inv = Invoice(
                 invoice_number = paypal_invoice['detail']['invoice_number'],
@@ -276,6 +276,7 @@ def createinvoice():
             )
             match type:
                 case 'REGISTRATION':
+                    
                     inv.invoice_type = 'REGISTRATION'
                     inv.registration_total = registration_price
                     inv.nmr_total = nmr_price
@@ -463,7 +464,7 @@ def nonpayment():
             reg.canceled == True
 
     if inv.invoice_id is not None:
-        cancel_invoice(inv.invoice_id)
+        cancel_invoice_non_payment(inv.invoice_id)
 
     inv.invoice_status = 'NO PAYMNET'
     db.session.commit()
@@ -478,8 +479,12 @@ def markduplicate():
     invnumber = request.args.get('invnumber')
     inv = get_inv(invnumber)
 
+    if inv.regs is not None:
+        for reg in inv.regs:
+            reg.duplicate == True
+
     if inv.invoice_id is not None:
-        cancel_invoice(inv.invoice_id)
+        cancel_invoice_duplicate(inv.invoice_id)
 
     inv.invoice_status = 'DUPLICATE'
     db.session.commit()

@@ -352,10 +352,20 @@ class Registrations(db.Model):
         self.paypal_donation_balance = paypal_donation_balance
     
     def get_invoice_items(self):
+        reg_arrival_dict = {
+            "03/14/2026":"Adult Pre-Registration Sat-Sun",
+            "03/15/2026":"Adult Pre-Registration Sat-Sun",
+            "03/16/2026":"Adult Pre-Registration Mon-Tues",
+            "03/17/2026":"Adult Pre-Registration Mon-Tues",
+            "03/18/2026":"Adult Pre-Registration Wed-Thurs",
+            "03/19/2026":"Adult Pre-Registration Wed-Thurs",
+            "03/20/2026":"Adult Pre-Registration Fri-Sat",
+            "03/21/2026":"Adult Pre-Registration Fri-Sat",
+        }
         items = []
         if self.age == '18+' and self.registration_balance > 0:
             items.append({
-                'name':'Registration - Adult',
+                'name':reg_arrival_dict[self.expected_arrival_date.strftime('%m/%d/%Y')],
                 'description':'Gulf Wars Registration - ' + self.fname + ' ' + self.lname + ' - ' + self.expected_arrival_date.strftime('%m/%d/%Y'),
                 'quantity':'1',
                 'unit_amount':{
