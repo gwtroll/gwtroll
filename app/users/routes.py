@@ -79,7 +79,7 @@ def pwresetuser(userid):
     form = UpdatePasswordForm()
 
     if request.method == 'POST' and form.validate_on_submit():
-        form.populate_obj(user)
+        user.set_password(form.password.data.strip())
         db.session.commit()
         return redirect(url_for('users.users'))
     

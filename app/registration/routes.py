@@ -73,17 +73,20 @@ def removeregistration(index):
 def createprereg():
 
     event = EventVariables.query.first()
-    # Close Pre-Reg at Midnight 02/22/2025
+    event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
+    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
+    # Open and Close Pre-Reg
+    if datetime.now(pytz.timezone('America/Chicago')).date() < event.preregistration_open_date:
+        return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
     if datetime.now(pytz.timezone('America/Chicago')).date() >= event.preregistration_close_date:
-        return render_template("prereg_closed.html", event=event)
+        return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
     invoice_totals = {'registration':0, 'nmr':0, 'donation':0, 'total':0}
 
     form = CreatePreRegForm()
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
     form.expected_arrival_date.choices = get_reg_arrival_dates()
-    event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
-    pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
+
     if 'additional_registrations' in session and len(session['additional_registrations']) > 0:
         additional_registrations = [json.loads(r) for r in session['additional_registrations']]
         form.invoice_email.data = additional_registrations[0]['invoice_email']
@@ -157,14 +160,11 @@ def createprereg():
                 del session['additional_registrations']
 
             flash_string = ''
+            all_regs = [reg]
             for add_reg in additional_registrations:
-                send_confirmation_email(add_reg.email,add_reg)
-                if add_reg.balance<=0:
-                    send_fastpass_email(add_reg.email,add_reg)
+                all_regs.append(add_reg)
                 flash_string += ('\nRegistration {} created for {} {}.'.format(add_reg.id, add_reg.fname, add_reg.lname))
-            send_confirmation_email(reg.email,reg)
-            if reg.balance<=0:
-                    send_fastpass_email(reg.email,reg)
+            send_confirmation_email(reg.invoice_email,all_regs)
             flash_string += 'Registration {} created for {} {}.'.format(reg.id, reg.fname, reg.lname)
             flash(flash_string)
             return redirect(url_for('registration.success'))

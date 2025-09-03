@@ -54,14 +54,13 @@ def update(earlyon_id):
                     rider.reg.early_on_approved = True
             db.session.commit()
             return render_template('earlyon_list.html', earlyons=EarlyOnRequest.query.all())
-        else:
-            flash('There was an error with your submission. Please check the form and try again.', 'error')
-            return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
-    else:
-        if earlyon.earlyonriders:
-            for rider in earlyon.earlyonriders:
-                form.riders.append_entry(rider)
-    
+        flash('There was an error with your submission. Please check the form and try again.', 'error')
+        return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
+        
+    if earlyon.earlyonriders:
+        for rider in earlyon.earlyonriders:
+            form.riders.append_entry(rider)
+            
     return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
 
 
