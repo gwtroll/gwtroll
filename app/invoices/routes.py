@@ -19,14 +19,14 @@ from flask_login import login_required
 @login_required
 @permission_required('invoice_view')
 def unsent():
-    all_regs = Registrations.query.filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.invoice_email).all()
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0, EarlyOnRequest.dept_approval_status == 'APPROVED', EarlyOnRequest.autocrat_approval_status == 'APPROVED')).all()
 
     reg_invoices = {}
     for reg in all_regs:
         if reg.invoice_email not in reg_invoices:
-            reg_invoices[reg.invoice_email] = {'invoice_type':'REGISTRATION','invoice_email':reg.invoice_email,'invoice_number':[inv.invoice_number for inv in reg.invoices], 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
+            reg_invoices[reg.invoice_email] = {'invoice_type':'REGISTRATION','invoice_email':reg.invoice_email,'invoice_number':reg.invoice_number, 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
         reg_invoices[reg.invoice_email]['registrations'].append(reg.id)
     
     merchant_invoices = {}
@@ -62,7 +62,7 @@ def paid():
 @login_required
 @permission_required('invoice_view')
 def canceled():
-    all_inv = Invoice.query.filter(Invoice.invoice_status == 'DUPLICATE' or Invoice.invoice_status == 'NO PAYMNET').all()
+    all_inv = Invoice.query.filter(Invoice.invoice_status == 'DUPLICATE' or Invoice.invoice_status == 'NO PAYMENT').all()
     # invoices = {}
     # for reg in all_inv:
     #     if reg.invoice_email not in invoices:
@@ -209,7 +209,7 @@ def createinvoice():
                 db.session.add(zero_invoice)
             for reg in regs:
                 if reg.duplicate == False:      
-                    reg.invoices.append(zero_invoice)
+                    reg.invoice_number = zero_invoice.invoice_number
             
             db.session.commit()
             return redirect(url_for('invoices.unsent'))
@@ -242,7 +242,7 @@ def createinvoice():
                     inv.balance = total_due
                     for reg in regs:
                         if reg.duplicate == False:      
-                            reg.invoices.append(inv)
+                            reg.invoice_number = inv.invoice_number
                 case 'MERCHANT':
                     inv.invoice_type = 'MERCHANT'
                     inv.space_fee = space_fee
@@ -298,7 +298,7 @@ def createinvoice():
                 case 'REGISTRATION':
                     for reg in regs:
                         if reg.duplicate == False:      
-                            reg.invoices.append(inv)
+                            reg.invoice_number = inv.invoice_number
                 case 'MERCHANT':
                     for merchant in merchants:      
                         merchant.invoice_number = inv.invoice_number
@@ -466,7 +466,7 @@ def nonpayment():
     if inv.invoice_id is not None:
         cancel_invoice_non_payment(inv.invoice_id)
 
-    inv.invoice_status = 'NO PAYMNET'
+    inv.invoice_status = 'NO PAYMENT'
     db.session.commit()
         
     flash('Invoice '+str(inv.invoice_number)+' Canceled')

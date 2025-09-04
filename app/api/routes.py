@@ -90,10 +90,11 @@ def invoice_status():
 # invoice_status
 # invoice_total
     results = Invoice.query.filter(Invoice.invoice_status != 'DUPLICATE').all()
-    unsent = Registrations.query.filter(Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoices == None)
+    unsent = Registrations.query.filter(Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoice_number == None)
     results_counts = {'UNSENT':0,'OPEN':0,'PAID':0,'NO PAYMENT':0}
     for r in results:
-        results_counts[r.invoice_status] += float(r.invoice_total)
+        if r.invoice_status is not None and r.invoice_total is not None:
+            results_counts[r.invoice_status] += float(r.invoice_total)
     
     for u in unsent:
         results_counts['UNSENT'] += float(u.total_due)
@@ -129,7 +130,7 @@ def search_registration(key,value):
         #     ('%' + value + '%', '%' + value + '%', '%' + value + '%'))
 
     elif key == 'inv':
-        regs = Registrations.query.join(Registration_Invoices, Registration_Invoices.reg_id==Registrations.id).filter(and_(sa.cast(Registration_Invoices.invoice_id,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.filter(and_(sa.cast(Registrations.invoice_number,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
         #     ('%' + value + '%',))

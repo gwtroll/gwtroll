@@ -252,14 +252,12 @@
                     <th>Total</th>
                 </thead>
                 <tbody>
-                    {% if reg.invoices %}
-                    {% for invoice in reg.invoices %}
+                    {% if reg.invoice %}
                     <tr>
                         <td>{{invoice.invoice_number}}</td>
                         <td>{{invoice.invoice_status}}</td>
                         <td>{{invoice.invoice_total}}</td>
                     </tr>
-                    {% endfor %}
                     {% endif %}
                 </tbody>
             </table>

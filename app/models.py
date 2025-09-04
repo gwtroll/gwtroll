@@ -293,7 +293,8 @@ class Registrations(db.Model):
     actual_arrival_date = db.Column(db.Date())
 
     # Relationships
-    invoices = db.relationship("Invoice", secondary="registration_invoices")
+    invoice_number = db.Column(db.Integer(), db.ForeignKey("invoice.invoice_number"))
+    invoice = db.relationship("Invoice", backref="inv_regs")
     payments = db.relationship("Payment", back_populates="reg")
     bows = db.relationship("Bows", secondary="reg_bows")
     crossbows = db.relationship("Crossbows", secondary="reg_crossbows")
@@ -426,7 +427,7 @@ class Invoice(db.Model):
     )
     balance = db.Column(db.Numeric(10, 2))
     notes = db.Column(db.Text())
-    regs = db.relationship("Registrations", secondary="registration_invoices", viewonly=True)
+    regs = db.relationship("Registrations", back_populates="invoice")
     merchants = db.relationship("Merchant", back_populates="invoice")
     earlyonrequests = db.relationship("EarlyOnRequest", back_populates="invoice")
     payments = db.relationship("Payment", back_populates="invoice")
@@ -449,17 +450,6 @@ class Invoice(db.Model):
         self.balance = balance
         if self.balance > 0:
             self.invoice_status = "OPEN"
-
-class Registration_Invoices(db.Model):
-    __tablename__ = "registration_invoices"
-    id = db.Column(db.Integer(), primary_key=True)
-    reg_id = db.Column(
-        db.Integer(), db.ForeignKey("registrations.id", ondelete="CASCADE")
-    )
-    invoice_id = db.Column(
-        db.Integer(), db.ForeignKey("invoice.invoice_number", ondelete="CASCADE")
-    )
-
 
 class Payment(db.Model):
     __tablename__ = "payment"

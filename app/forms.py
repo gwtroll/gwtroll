@@ -724,7 +724,7 @@ class UpdateInvoiceForm(FlaskForm):
     registration_amount = IntegerField('Registration Amount')
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])
-    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMNET','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
     processing_fee = IntegerField('Processing Fee')
     space_fee = FloatField('Space Fee')
     merchant_fee = FloatField('Merchant Fee')
@@ -758,7 +758,7 @@ class PayInvoiceForm(FlaskForm):
     space_fee = FloatField('Space Fee', validators=[Optional()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired()])
     invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
-    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMNET','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
     paypal_donation = IntegerField('PayPal Donation', validators=[Optional()])
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
     payment_date = DateField('Payment Date', validators=[DataRequired()])
@@ -1080,4 +1080,3 @@ class ScheduledEventForm(FlaskForm):
         # User Instructor
         if obj.user_instructor_id:
             self.self.user_instructor.data = obj.user_instructor_id
-
