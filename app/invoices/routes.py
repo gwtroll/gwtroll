@@ -150,10 +150,10 @@ def createinvoice():
         total_due = 0
         for reg in regs:
             if reg.duplicate == False:
-                paypal_donation += reg.paypal_donation
-                registration_price += reg.registration_price
-                nmr_price += reg.nmr_price
-                total_due += reg.total_due
+                paypal_donation += reg.paypal_donation_balance
+                registration_price += reg.registration_balance
+                nmr_price += reg.nmr_balance
+                total_due += reg.balance
         form.paypal_donation.data = paypal_donation
         form.registration_amount.data = registration_price
         form.nmr_amount.data = nmr_price
