@@ -14,5 +14,5 @@ from flask_security import roles_accepted
 @login_required
 @permission_required("admin")
 def reports():
-
-    return render_template("viewreport.html")
+    form = ReportForm()
+    return render_template("viewreport.html", form=form)
