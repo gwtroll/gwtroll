@@ -21,7 +21,7 @@ class PayPal_Invoice:
                 "currency_code": "USD",
                 "invoice_number": str(get_invoice_number()),
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
-                "note": "Gulf Wars XXXIII- A war with no enemies! "
+                "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
                 "\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
                 "payment_term": {
@@ -42,7 +42,7 @@ class PayPal_Invoice:
                 "currency_code": "USD",
                 "invoice_number": str(get_invoice_number()),
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
-                "note": "Gulf Wars XXXIII- A war with no enemies! "
+                "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
                 "\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
                 "payment_term": {
@@ -62,7 +62,7 @@ class PayPal_Invoice:
                 "currency_code": "USD",
                 "invoice_number": str(get_invoice_number()),
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
-                "note": "Gulf Wars XXXIII- A war with no enemies! "
+                "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED.  "
                 "\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
                 "payment_term": {
@@ -77,8 +77,8 @@ class PayPal_Invoice:
             }
         self.invoicer = {
             "business_name": "Society For Creative Anachronism-Gulf Wars, Inc",
-            # 'email_address':'gwincpp@gmail.com',
-            "email_address": "sb-6x1ar45446347@business.example.com",
+            'email_address':'gwincpp@gmail.com',
+            # "email_address": "sb-6x1ar45446347@business.example.com",
             "website": "www.gulfwars.org",
         }
         self.primary_recipients = [{"billing_info": {"email_address": invoice_email}}]
