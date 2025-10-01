@@ -262,8 +262,9 @@ def createinvoice():
 
             return redirect(url_for('invoices.unsent'))
         else:
-            if total_due <= 0:
-                flash('$0 Invoices should be acknowledged using the \'Acknowledge Zero Dollar Invoice\' action.')
+            # if form.invoice_amount.data <= 0:
+            #     flash('$0 Invoices should be acknowledged using the \'Acknowledge Zero Dollar Invoice\' action.','error')
+            #     render_template('create_invoice.html', form=form, regs=regs, type=type)
             paypal_invoice = create_invoice(regs, invoice_email, type)
 
             inv = Invoice(
@@ -291,6 +292,11 @@ def createinvoice():
                     inv.invoice_type = 'EARLYON'
                     inv.rider_fee = rider_fee
                     inv.balance = rider_fee
+
+            # for reg in regs:
+            #     if reg.duplicate == False and reg.invoice_number is not None:      
+            #         flash('Invoice already sent.','error')
+            #         return redirect(url_for('invoices.unsent'))
 
             send_invoice(paypal_invoice['id'])
 
