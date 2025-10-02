@@ -105,10 +105,10 @@ def orm_to_df(orm_obj, columns=[]):
     df = pd.DataFrame(return_data)
     return df
 
-@app.route('/reports', methods=['GET', 'POST'])
+@app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_reports')
-def reports():
+def dashboard():
     form = ReportForm()
     # s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
     # conndict = dict(item.split("=") for item in s.split(" "))

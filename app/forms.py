@@ -810,7 +810,7 @@ class PaymentForm(FlaskForm):
     submit = SubmitField('Update Payment')
 
 class ReportForm(FlaskForm):
-    report_type = SelectField('Report Type', validators=[DataRequired()], choices=reporttypedata)
+    report_type = SelectField('Report Type', validators=[DataRequired()], choices=None)
     dt_start = DateField('Start Date', format='%Y-%m-%d')
     dt_end = DateField('End Date', format='%Y-%m-%d')
     submit = SubmitField('Submit')

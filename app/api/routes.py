@@ -484,3 +484,69 @@ def royal_registrations():
     data['columns'] = columns
     data['rows'] = rows
     return jsonify(data)
+
+@bp.route("/merchant_full_export", methods=("GET", ""))
+@login_required
+@permission_required('merchant_reports')
+def merchant_fullexport():
+    data = {}
+
+    # {"field": "", "title": "", "filterControl":"input"}
+    # invoice_number = db.Column(db.Integer(), db.ForeignKey("invoice.invoice_number"))
+    # {"field": "", "title": "", "filterControl":"input"}
+    # invoice = db.relationship("Invoice", back_populates="merchants")
+    # {"field": "", "title": "", "filterControl":"input"}
+    # payments = db.relationship("Payment", back_populates="merchant")
+    # {"field": "", "title": "", "filterControl":"input"}
+
+    columns = [{"field": "id", "title": "ID", "filterControl": 'input'},
+    {"field": "status", "title": "Status", "filterControl": 'select'},
+    {"field": "business_name", "title": "Business Name", "filterControl": 'input'},
+    {"field": "sca_name", "title": "SCA Name", "filterControl": 'input'},
+    {"field": "fname", "title": "First Name", "filterControl":"input"},
+    {"field": "lname", "title": "Last Name", "filterControl":"input"},
+    {"field": "email", "title": "Email", "filterControl":"input"},
+    {"field": "lname", "phone": "Phone", "filterControl":"input"},
+    {"field": "lname", "text_permission": "Text Permission", "filterControl":"select"},
+    {"field": "address", "title": "Address", "filterControl":"input"},
+    {"field": "city", "title": "City", "filterControl":"input"},
+    {"field": "state_province", "title": "State/Province", "filterControl":"input"},
+    {"field": "zip", "title": "Zip", "filterControl":"input"},
+    {"field": "frontage_width", "title": "Frontage Width", "filterControl":"input"},
+    {"field": "frontage_depth", "title": "Frontage Depth", "filterControl":"input"},
+    {"field": "ropes_front", "title": "Ropes Front", "filterControl":"input"},
+    {"field": "ropes_back", "title": "Ropes Back", "filterControl":"input"},
+    {"field": "ropes_left", "title": "Ropes Left", "filterControl":"input"},
+    {"field": "ropes_right", "title": "Ropes Right", "filterControl":"input"},
+    {"field": "space_fee", "title": "Space Fee", "filterControl":"input"},
+    {"field": "space_fee_balance", "title": "Space Fee Balance", "filterControl":"input"},
+    {"field": "additional_space_information", "title": "Additional Space Information", "filterControl":"input"},
+    {"field": "processing_fee", "title": "Processing Fee", "filterControl":"input"},
+    {"field": "processing_fee_balance", "title": "Processing Fee Balance", "filterControl":"input"},
+    {"field": "merchant_fee", "title": "Merchant Fee", "filterControl":"input"},
+    {"field": "electricity_fee", "title": "Electricity Fee", "filterControl":"input"},
+    {"field": "electricity_balance", "title": "Electricity Fee Balance", "filterControl":"input"},
+    {"field": "electricity_request", "title": "Electricity Request", "filterControl":"input"},
+    {"field": "food_merchant_agreement", "title": "Food Merchant Agreement", "filterControl":"select"},
+    {"field": "estimated_date_of_arrival", "title": "Estimated Date of Arrival", "filterControl":"select"},
+    {"field": "service_animal", "title": "Service Animal", "filterControl":"select"},
+    {"field": "last_3_years", "title": "Last 3 Years", "filterControl":"select"},
+    {"field": "vehicle_length", "title": "Vehicle Length", "filterControl":"input"},
+    {"field": "vehicle_license_plate", "title": "Vehicle License Plate", "filterControl":"input"},
+    {"field": "vehicle_state", "title": "Vehicle State", "filterControl":"input"},
+    {"field": "trailer_length", "title": "Trailer Length", "filterControl":"input"},
+    {"field": "trailer_license_plate", "title": "Trailer License Plate", "filterControl":"input"},
+    {"field": "trailer_state", "title": "Trailer State", "filterControl":"input"},
+    {"field": "notes", "title": "notes", "filterControl":"input"},
+    {"field": "application_date", "title": "Application Date", "filterControl":"input"},
+    {"field": "checkin_date", "title": "Checkin Date", "filterControl":"input"},
+    {"field": "signature", "title": "Signature", "filterControl":"input"}
+    ]
+    rows = []
+    full = Merchant.query.filter().all()
+    for merch in full:
+        reg_json = json.loads(merch.toJSON())
+        rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
