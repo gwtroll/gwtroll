@@ -9,6 +9,7 @@ from flask import jsonify, request
 import json
 from sqlalchemy import between
 import requests
+from app.utils.paypal_api import get_accesstoken
 
 from flask_security import roles_accepted
 
@@ -215,19 +216,11 @@ def paypal_info():
 @login_required
 @permission_required('admin')
 def paypal_auth_test():
-    url = f"{os.environ.get('PAYPAL_API_BASE_URL')}/v1/oauth2/token"
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    data = {"grant_type": "client_credentials"}
-    response = requests.post(
-        url, headers=headers, data=data, auth=(os.environ.get("PAYPAL_CLIENT_ID"), os.environ.get("PAYPAL_SECRET"))
-    )
+    try:
+        return get_accesstoken()
+    except Exception as e:
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
-    if response.status_code == 200:
-        data_dict = response.json()
-        access_token = "Bearer " + data_dict["access_token"]
-        return access_token
-    else:
-        return response.json()
 @bp.route("/full_export", methods=("GET", ""))
 @login_required
 def fullexport():

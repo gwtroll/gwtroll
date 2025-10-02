@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 import json
 import pytz
+from app.models import EventVariables
 
 PAYPAL_API_BASE_URL = os.environ.get('PAYPAL_API_BASE_URL')
 PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID")
@@ -93,10 +94,11 @@ def get_accesstoken():
     global PAYPAL_CLIENT_ID
     global PAYPAL_SECRET
     global PAYPAL_PAYMENT_WEBHOOK_ID
-    if PAYPAL_API_BASE_URL is None: PAYPAL_API_BASE_URL = os.environ.get('PAYPAL_API_BASE_URL') 
-    if PAYPAL_CLIENT_ID is None: PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID") 
-    if PAYPAL_SECRET is None: PAYPAL_SECRET = os.environ.get("PAYPAL_SECRET") 
-    if PAYPAL_PAYMENT_WEBHOOK_ID is None: PAYPAL_PAYMENT_WEBHOOK_ID = os.environ.get("PAYPAL_PAYMENT_WEBHOOK_ID") 
+    env_vars = EventVariables.query.filter(EventVariables.id==1).first()
+    PAYPAL_API_BASE_URL = env_vars.bas
+    PAYPAL_CLIENT_ID = env_vars.cli 
+    PAYPAL_SECRET = env_vars.sec
+    PAYPAL_PAYMENT_WEBHOOK_ID = env_vars.web
     global access_token
     global access_token_cache
     if access_token is not None and access_token_cache > datetime.now():

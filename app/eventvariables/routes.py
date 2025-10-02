@@ -133,9 +133,11 @@ def editpricesheet(date):
 def paypal_info():
     form=PayPalForm()
     if request.method=='POST':
-        os.environ['PAYPAL_API_BASE_URL']=form.base_url.data
-        os.environ['PAYPAL_CLIENT_ID']=form.client_id.data
-        os.environ['PAYPAL_SECRET']=form.client_secret.data
-        os.environ['PAYPAL_PAYMENT_WEBHOOK_ID']=form.webhook_id.data
-        redirect(url_for('eventvariables.eventvariables'))
+        env_vars=EventVariables.query.filter(EventVariables.id==1).first()
+        env_vars.bas=form.base_url.data
+        env_vars.cli=form.client_id.data
+        env_vars.sec=form.client_secret.data
+        env_vars.web=form.webhook_id.data
+        db.session.commit()
+        return redirect(url_for('eventvariables.eventvariables'))
     return render_template('paypal_info.html', form=form)

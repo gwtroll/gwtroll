@@ -35,7 +35,10 @@ class EventVariables(db.Model):
     merchant_late_processing_fee = db.Column(db.Integer(), default=45, nullable=False)
     merchant_squarefoot_fee = db.Column(db.Numeric(10, 2), default=0.10, nullable=False)
     merchant_bounced_check_fee = db.Column(db.Integer(), default=35, nullable=False)
-
+    bas = db.Column(db.String(), nullable=True)
+    cli = db.Column(db.String(), nullable=True)
+    sec = db.Column(db.String(), nullable=True)
+    web = db.Column(db.String(), nullable=True)
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
