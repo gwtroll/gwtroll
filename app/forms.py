@@ -462,18 +462,16 @@ class EditForm(FlaskForm):
     emergency_contact_name = StringField('Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
-    mbr_num = IntegerField('Member Number', validators=[Optional()])
-    mbr_num_exp = DateField('Member Exp Date', validators=[Optional()])
+    mbr_num = IntegerField('Member Number', validators=[RequiredIfMembership('mbr')])
+    mbr_num_exp = DateField('Member Exp Date', validators=[RequiredIfMembership('mbr')])
     
     reg_date_time = DateTimeField('Registration Date/Time')
     prereg = BooleanField('Pre-Registered')
-    expected_arrival_date = DateField("Expected Arrival Date", validators=[DataRequired()])
+    expected_arrival_date = SelectField('Arrival Date', validators=[NoneOf('-', message='You must select an Arrival Date')])
     early_on = BooleanField('Early On')
     notes = TextAreaField('Notes')
     duplicate = BooleanField('Duplicate Registration')
 
-    registration_price = IntegerField('Registration Price', validators=[NumberRange(min=0,max=999)], default=0)
-    nmr_price = IntegerField('NMR Price', validators=[NumberRange(min=0,max=999)], default=0)
     paypal_donation = IntegerField('PayPal Donation', validators=[NumberRange(min=0,max=999)], default=0)
     
     checkin = DateTimeField('Checkin Date/Time', validators=[Optional()])
@@ -538,7 +536,7 @@ class EditForm(FlaskForm):
             self.mbr_num_exp.data = obj.mbr_num_exp
         # Expected Arrival
         if obj.expected_arrival_date:
-            self.expected_arrival_date.data = obj.expected_arrival_date        
+            self.expected_arrival_date.data = obj.expected_arrival_date.strftime('%Y/%m/%d')       
         # Emergency Contact Name
         if obj.emergency_contact_name:
             self.emergency_contact_name.data = obj.emergency_contact_name 
@@ -558,12 +556,6 @@ class EditForm(FlaskForm):
         if obj.medallion:
             self.medallion.data = obj.medallion
         # Prices
-        # Registration Price
-        if obj.registration_price:
-            self.registration_price.data = obj.registration_price
-        # NMR Price
-        if obj.nmr_price:
-            self.nmr_price.data = obj.nmr_price
         # PayPal Donation
         if obj.paypal_donation:
             self.paypal_donation.data = obj.paypal_donation         
@@ -640,15 +632,23 @@ class EditForm(FlaskForm):
         if self.medallion.data:
             obj.medallion = self.medallion.data
         # Prices
-        # Registration Price
-        if self.registration_price.data:
-            obj.registration_price = self.registration_price.data
-        # NMR Price
-        if self.nmr_price.data:
-            obj.nmr_price = self.nmr_price.data
-        # PayPal Donation
-        if self.paypal_donation.data:
-            obj.paypal_donation = self.paypal_donation.data
+        if obj.age == '18+':
+            if obj.prereg == True:
+                registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date if obj.actual_arrival_date else obj.expected_arrival_date)
+            else:
+                registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
+            obj.registration_price = registration_price
+            if obj.mbr != True:
+                obj.nmr_price = 10
+            else:
+                obj.nmr_price = 0
+        else:
+            obj.registration_price = 0
+            obj.nmr_price = 0
+            
+        obj.paypal_donation = self.paypal_donation.data
+        
+        obj.balance = obj.registration_price + obj.nmr_price + obj.paypal_donation
         obj.recalculate_balance()
 
 class EditLimitedForm(FlaskForm):
@@ -720,38 +720,34 @@ class EarlyOnApprovalForm(FlaskForm):
     submit = SubmitField('Submit Early On Request')
 
 class UpdateInvoiceForm(FlaskForm):
-    invoice_amount = IntegerField('Invoice Amount')
+    invoice_amount = FloatField('Invoice Amount')
     registration_amount = IntegerField('Registration Amount')
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])
-    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMNET','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
     processing_fee = IntegerField('Processing Fee')
     space_fee = FloatField('Space Fee')
     merchant_fee = FloatField('Merchant Fee')
     rider_fee = IntegerField('Rider Fee')
     paypal_donation = IntegerField('PayPal Donation')
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
-    payment_date = DateField('Payment Date')
-    payment_amount = IntegerField('Payment Amount')
-    payment_type = SelectField('Payment Type',choices=[('PAYPAL','PAYPAL'),('CHECK','CHECK')])
-    check_num = IntegerField('Check Number')
     notes = TextAreaField('Notes')
     submit = SubmitField('Update Invoice')
 
 class SendInvoiceForm(FlaskForm):
-    invoice_amount = IntegerField('Invoice Amount')
+    invoice_amount = FloatField('Invoice Amount')
     space_fee = FloatField('Space Fee')
     processing_fee = IntegerField('Processing Fee')
     merchant_fee = FloatField('Total Invoice Amount')
     rider_fee = IntegerField('Rider Fee')
     registration_amount = IntegerField('Registration Amount')
-    invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
+    invoice_number = IntegerField('Invoice Number', validators=[Optional()])
     invoice_email = StringField('Invoice Email')
     paypal_donation = IntegerField('PayPal Donation')
     nmr_amount = IntegerField('NMR Amount')
     invoice_date = DateField('Invoice Date', validators=[DataRequired()])
     notes = TextAreaField('Notes')
-    submit = SubmitField('Create Invoice')
+    submit = SubmitField('Send Invoice with PayPal')
 
 class PayInvoiceForm(FlaskForm):
     invoice_amount = FloatField('Invoice Amount', validators=[DataRequired()])
@@ -762,7 +758,7 @@ class PayInvoiceForm(FlaskForm):
     space_fee = FloatField('Space Fee', validators=[Optional()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired()])
     invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
-    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMNET','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
     paypal_donation = IntegerField('PayPal Donation', validators=[Optional()])
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
     payment_date = DateField('Payment Date', validators=[DataRequired()])
@@ -770,7 +766,7 @@ class PayInvoiceForm(FlaskForm):
     payment_type = SelectField('Payment Type',choices=[('PAYPAL','PAYPAL'),('CHECK','CHECK')])
     check_num = IntegerField('Check Number', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
-    submit = SubmitField('Update Invoice')
+    submit = SubmitField('Create Manual Payment')
 
 class PayRegistrationForm(FlaskForm):
     total_due = IntegerField('Total Due')
@@ -1084,4 +1080,3 @@ class ScheduledEventForm(FlaskForm):
         # User Instructor
         if obj.user_instructor_id:
             self.self.user_instructor.data = obj.user_instructor_id
-

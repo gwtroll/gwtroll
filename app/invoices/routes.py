@@ -5,12 +5,13 @@ from app.models import *
 from app.utils.db_utils import *
 from app.utils.email_utils import *
 from app.utils.security_utils import *
+from app.utils.paypal_api import *
 from flask_security import roles_accepted
 from markupsafe import Markup
 
 from sqlalchemy import and_, or_
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 
 from flask_login import login_required
 
@@ -18,14 +19,14 @@ from flask_login import login_required
 @login_required
 @permission_required('invoice_view')
 def unsent():
-    all_regs = Registrations.query.filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.invoice_email).all()
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0, EarlyOnRequest.dept_approval_status == 'APPROVED', EarlyOnRequest.autocrat_approval_status == 'APPROVED')).all()
 
     reg_invoices = {}
     for reg in all_regs:
         if reg.invoice_email not in reg_invoices:
-            reg_invoices[reg.invoice_email] = {'invoice_type':'REGISTRATION','invoice_email':reg.invoice_email,'invoice_number':[inv.invoice_number for inv in reg.invoices], 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
+            reg_invoices[reg.invoice_email] = {'invoice_type':'REGISTRATION','invoice_email':reg.invoice_email,'invoice_number':reg.invoice_number, 'invoice_status':'UNSENT', 'invoice_date':None, 'registrations':[]}
         reg_invoices[reg.invoice_email]['registrations'].append(reg.id)
     
     merchant_invoices = {}
@@ -61,7 +62,7 @@ def paid():
 @login_required
 @permission_required('invoice_view')
 def canceled():
-    all_inv = Invoice.query.filter(Invoice.invoice_status == 'CANCELED').all()
+    all_inv = Invoice.query.filter(Invoice.invoice_status == 'DUPLICATE' or Invoice.invoice_status == 'NO PAYMENT').all()
     # invoices = {}
     # for reg in all_inv:
     #     if reg.invoice_email not in invoices:
@@ -114,41 +115,24 @@ def update():
     form.invoice_email.data = inv.invoice_email
     form.notes.data = inv.notes
     
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         invoice_number = request.form.get('invoice_number')
         invoice_date = request.form.get('invoice_date')
-        invoice_email = request.form.get('invoice_email')
-        payment_date = request.form.get('payment_date')
-        payment_amount = int(request.form.get('payment_amount'))
-        payment_type = request.form.get('payment_type')
-        check_num = request.form.get('check_num')
         notes = request.form.get('notes')
 
-        if invoice_number is not None:
+        if invoice_number is not None and invoice_number != '':
             inv.invoice_number = invoice_number
-            inv.invoice_email = invoice_email
             inv.invoice_date = invoice_date
             inv.invoice_status = request.form.get('invoice_status')
-            inv.registration_total = request.form.get('registration_total')
-            inv.nmr_total = request.form.get('nmr_total')
-            inv.donation_total = request.form.get('donation_total')
             inv.notes = notes
-
-        if payment_amount is not None:
-            pays[0].type = payment_type
-            pays[0].check_num = check_num if check_num != '' else None
-            pays[0].payment_date = payment_date
-            pays[0].amount = payment_amount
-
-            inv.balance = inv.balance - pays[0].amount
 
             for reg in regs:      
                 reg.invoice_number = invoice_number
 
         db.session.commit()
-
+        flash('Invoice Information Successfully Updated')
         # log_reg_action(reg, 'INVOICE UPDATED')
-
+    
     return render_template('update_invoice.html', form=form, regs=regs, inv=inv)
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -166,12 +150,12 @@ def createinvoice():
         total_due = 0
         for reg in regs:
             if reg.duplicate == False:
-                paypal_donation += reg.paypal_donation
-                registration_price += reg.registration_price
-                nmr_price += reg.nmr_price
-                total_due += reg.total_due
+                paypal_donation += reg.paypal_donation_balance
+                registration_price += reg.registration_balance
+                nmr_price += reg.nmr_balance
+                total_due += reg.balance
         form.paypal_donation.data = paypal_donation
-        form.registration_amount.data = registration_price + nmr_price
+        form.registration_amount.data = registration_price
         form.nmr_amount.data = nmr_price
         form.invoice_amount.data = total_due
         form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
@@ -200,79 +184,138 @@ def createinvoice():
         regs = earlyons
     
     if request.method == 'POST' and form.validate_on_submit():
-        invoice_number = request.form.get('invoice_number')
+
         invoice_date = request.form.get('invoice_date')
         invoice_email = request.form.get('invoice_email')
         notes = request.form.get('notes')
-
-        dup_inv = Invoice.query.filter(Invoice.invoice_number==invoice_number).first()
-
-        if dup_inv is not None:
-            dup_url = '<a href=' + url_for('invoices.update', invnumber=str(dup_inv.invoice_number)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
-            flash("Invoice Number " + str(dup_inv.invoice_number) +" already exists. " + Markup(dup_url),'error')
-            return render_template('create_invoice.html', form=form, regs=regs, type=type)
-        
-        if invoice_number is not None and type == 'REGISTRATION':
-            # Create a new invoice for the registrations
-            inv = Invoice(
-                invoice_type = 'REGISTRATION',
-                invoice_number = invoice_number,
-                invoice_email = invoice_email,
-                invoice_date = invoice_date,
-                invoice_status = 'OPEN',
-                registration_total = registration_price,
-                nmr_total = nmr_price,
-                donation_total = paypal_donation,
-                balance = total_due,
-                notes = notes,
-                # event_id = regs[0].event_id,
-            )
+        if request.form.get('action') == 'zeroinvoice':
+            if total_due > 0:
+                flash('Invoice Amount is greater than $0, an Invoice must be created.')
+                return render_template('create_invoice.html', form=form, regs=regs, type=type)
+            zero_invoice = Invoice.query.filter(Invoice.invoice_number==0).first()
+            if zero_invoice is None:
+                zero_invoice = Invoice(
+                    invoice_number = 0,
+                    invoice_id = None,
+                    invoice_email = 'no-reply@gulfwars.org',
+                    invoice_date = datetime.strptime('01/01/1900','%m/%d/%Y'),
+                    invoice_type = 'REGISTRATION',
+                    registration_total = 0,
+                    nmr_total = 0,
+                    donation_total = 0,
+                    balance = 0,
+                    invoice_status = 'PAID',
+                )
+                db.session.add(zero_invoice)
             for reg in regs:
                 if reg.duplicate == False:      
-                    reg.invoices.append(inv)
-
-            db.session.add(inv)
-            db.session.commit()
-        
-        elif invoice_number is not None and type == 'MERCHANT':
-            # Create a new invoice for the merchant
-            inv = Invoice(
-                invoice_type = 'MERCHANT',
-                invoice_number = invoice_number,
-                invoice_email = invoice_email,
-                invoice_date = invoice_date,
-                invoice_status = 'OPEN',
-                space_fee = space_fee,
-                processing_fee = processing_fee,
-                balance = space_fee + processing_fee,
-                notes = notes,
-                # event_id = regs[0].event_id,
-            )
-            for merchant in merchants:      
-                merchant.invoice_number = invoice_number
+                    reg.invoice_number = zero_invoice.invoice_number
             
-            db.session.add(inv)
             db.session.commit()
+            return redirect(url_for('invoices.unsent'))
 
-        elif invoice_number is not None and type == 'EARLYON':
-            # Create a new invoice for the merchant
+        elif request.form.get('action') == 'manualinvoice':
+            if request.form.get('invoice_number') is None or request.form.get('invoice_number') == '':
+                flash("Invoice Number required when submitting a Manual Invoice",'error')
+                return render_template('create_invoice.html', form=form, regs=regs, type=type)
+            invoice_number = request.form.get('invoice_number')
+            dup_inv = Invoice.query.filter(Invoice.invoice_number==invoice_number).first()
+
+            if dup_inv is not None:
+                dup_url = '<a href=' + url_for('invoices.update', invnumber=str(dup_inv.invoice_number)) + ' target="_blank" rel="noopener noreferrer">Duplicate</a>'
+                flash("Invoice Number " + str(dup_inv.invoice_number) +" already exists. " + Markup(dup_url),'error')
+                return render_template('create_invoice.html', form=form, regs=regs, type=type)
             inv = Invoice(
-                invoice_type = 'EARLYON',
                 invoice_number = invoice_number,
+                invoice_id = None,
                 invoice_email = invoice_email,
                 invoice_date = invoice_date,
                 invoice_status = 'OPEN',
-                rider_fee = rider_fee,
-                balance = rider_fee,
                 notes = notes,
             )
-            for earlyon in earlyons:
-                earlyon.invoice_number = invoice_number
+            match type:
+                case 'REGISTRATION':
+                    inv.invoice_type = 'REGISTRATION'
+                    inv.registration_total = registration_price
+                    inv.nmr_total = nmr_price
+                    inv.donation_total = paypal_donation
+                    inv.balance = total_due
+                    for reg in regs:
+                        if reg.duplicate == False:      
+                            reg.invoice_number = inv.invoice_number
+                case 'MERCHANT':
+                    inv.invoice_type = 'MERCHANT'
+                    inv.space_fee = space_fee
+                    inv.processing_fee = processing_fee
+                    inv.balance = space_fee + processing_fee
+                    for merchant in merchants:      
+                        merchant.invoice_number = inv.invoice_number
+                case 'EARLYON':
+                    inv.invoice_type = 'EARLYON'
+                    inv.rider_fee = rider_fee
+                    inv.balance = rider_fee
+                    for earlyon in earlyons:
+                        earlyon.invoice_number = inv.invoice_number
 
             db.session.add(inv)
             db.session.commit()
 
-        return redirect(url_for('invoices.unsent'))
+            return redirect(url_for('invoices.unsent'))
+        else:
+            # if form.invoice_amount.data <= 0:
+            #     flash('$0 Invoices should be acknowledged using the \'Acknowledge Zero Dollar Invoice\' action.','error')
+            #     render_template('create_invoice.html', form=form, regs=regs, type=type)
+            paypal_invoice = create_invoice(regs, invoice_email, type)
+
+            inv = Invoice(
+                invoice_number = paypal_invoice['detail']['invoice_number'],
+                invoice_id = paypal_invoice['id'],
+                invoice_email = invoice_email,
+                invoice_date = invoice_date,
+                invoice_status = 'OPEN',
+                notes = notes,
+            )
+            match type:
+                case 'REGISTRATION':
+                    
+                    inv.invoice_type = 'REGISTRATION'
+                    inv.registration_total = registration_price
+                    inv.nmr_total = nmr_price
+                    inv.donation_total = paypal_donation
+                    inv.balance = total_due
+                case 'MERCHANT':
+                    inv.invoice_type = 'MERCHANT'
+                    inv.space_fee = space_fee
+                    inv.processing_fee = processing_fee
+                    inv.balance = space_fee + processing_fee
+                case 'EARLYON':
+                    inv.invoice_type = 'EARLYON'
+                    inv.rider_fee = rider_fee
+                    inv.balance = rider_fee
+
+            # for reg in regs:
+            #     if reg.duplicate == False and reg.invoice_number is not None:      
+            #         flash('Invoice already sent.','error')
+            #         return redirect(url_for('invoices.unsent'))
+
+            send_invoice(paypal_invoice['id'])
+
+            match type:
+                case 'REGISTRATION':
+                    for reg in regs:
+                        if reg.duplicate == False:      
+                            reg.invoice_number = inv.invoice_number
+                case 'MERCHANT':
+                    for merchant in merchants:      
+                        merchant.invoice_number = inv.invoice_number
+                case 'EARLYON':
+                    for earlyon in earlyons:
+                        earlyon.invoice_number = inv.invoice_number
+
+            db.session.add(inv)
+            db.session.commit()
+
+            return redirect(url_for('invoices.unsent'))
 
     return render_template('create_invoice.html', form=form, regs=regs, type=type)
 
@@ -415,6 +458,58 @@ def createpayment():
 
     return render_template('create_payment.html', form=form, regs=regs, inv=inv)
 
+@bp.route('/marknonpayment', methods=('GET', 'POST'))
+@login_required
+@permission_required('invoice_edit')
+def nonpayment():
+    invnumber = request.args.get('invnumber')
+    inv = get_inv(invnumber)
+
+    if inv.regs is not None:
+        for reg in inv.regs:
+            reg.canceled == True
+
+    if inv.invoice_id is not None:
+        cancel_invoice_non_payment(inv.invoice_id)
+
+    inv.invoice_status = 'NO PAYMENT'
+    db.session.commit()
+        
+    flash('Invoice '+str(inv.invoice_number)+' Canceled')
+    return redirect(url_for('invoices.open'))
+
+@bp.route('/markduplicate', methods=('GET', 'POST'))
+@login_required
+@permission_required('invoice_edit')
+def markduplicate():
+    invnumber = request.args.get('invnumber')
+    inv = get_inv(invnumber)
+
+    if inv.regs is not None:
+        for reg in inv.regs:
+            reg.duplicate == True
+
+    if inv.invoice_id is not None:
+        cancel_invoice_duplicate(inv.invoice_id)
+
+    inv.invoice_status = 'DUPLICATE'
+    db.session.commit()
+        
+    flash('Invoice '+str(inv.invoice_number)+' Canceled')
+    return redirect(url_for('invoices.open'))
+
+@bp.route('/remind', methods=('GET', 'POST'))
+@login_required
+@permission_required('invoice_edit')
+def remind():
+    invnumber = request.args.get('invnumber')
+    inv = get_inv(invnumber)
+
+    if inv.invoice_id is not None:
+        send_reminder(inv.invoice_id)
+        
+    flash('Reminder Sent to Invoice '+str(inv.invoice_number))
+    return redirect(url_for('invoices.open'))
 
 # @bp.route('/payment', methods=('GET', 'POST'))
 # @login_required

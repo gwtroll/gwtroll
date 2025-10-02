@@ -185,8 +185,7 @@ def duplicate():
     reg = get_reg(regid)
     reg.duplicate = True
     db.session.commit()
-
-    all_regs = Registrations.query.filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoice_email==reg.invoice_email, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_email==reg.invoice_email, Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.invoice_email).all()
 
     for r in all_regs:
         regids.append(r.id)
@@ -266,6 +265,7 @@ def editreg(regid):
     form = EditForm()
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
+    form.expected_arrival_date.choices = get_reg_arrival_dates()
 
     if request.method == 'POST' and form.validate_on_submit():
         medallion_check = None

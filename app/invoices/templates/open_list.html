@@ -69,7 +69,7 @@
                       {{invoice['invoice_email']}}
                   </td>
                   <td>
-                    <a class="btn btn-primary" href="{{url_for('invoices.createpayment', invnumber=invoice['invoice_number'])}}" role="button">Create Payment</a>
+                    <a class="btn btn-primary" href="{{url_for('invoices.createpayment', invnumber=invoice['invoice_number'])}}" role="button">Update</a>
                   </td>
           </tr>
           {% endfor %}

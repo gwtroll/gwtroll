@@ -111,12 +111,18 @@
         {% endwith %}        
     </div>
     <div class="row form-group">
-        {% with field=form.registration_price, required=true %}
-        {% include 'form_field.html' %}
-        {% endwith %}
-        {% with field=form.nmr_price, required=true %}
-        {% include 'form_field.html' %}
-        {% endwith %}        
+        <div class="col">
+            <p>
+                Registration Price
+                <input type="text" class="form-control" disabled value="{{ reg.registration_price }}" />
+            </p>
+        </div>
+        <div class="col">
+            <p>
+                NMR Price
+                <input type="text" class="form-control" disabled value="{{ reg.nmr_price}}" />
+            </p>
+        </div>       
         {% with field=form.paypal_donation, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}        

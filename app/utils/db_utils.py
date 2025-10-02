@@ -417,7 +417,7 @@ def prereg_total():
 
 def unsent_count():
     unsent=0
-    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
+    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
     unsent += len(unsent_reg)
     unsent_merch = Merchant.query.with_entities(Merchant.id).filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     unsent += len(unsent_merch)
@@ -426,7 +426,7 @@ def unsent_count():
     return unsent
 
 def unsent_reg_count():
-    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).all()
+    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).all()
     return len(unsent_reg)
 
 def inv_prereg_open_counts():
@@ -465,12 +465,12 @@ def inv_prereg_canceled_counts():
     return {'Prereg':prereg_total(),'Regs':canceled_reg_count(),'Inv':canceled_count()}
 
 def canceled_count():
-    canceled_inv = Invoice.query.with_entities(Invoice.invoice_number).filter(or_(Invoice.invoice_status=='NO PAYMNET', Invoice.invoice_status=='DUPLICATE')).all()
+    canceled_inv = Invoice.query.with_entities(Invoice.invoice_number).filter(or_(Invoice.invoice_status=='NO PAYMENT', Invoice.invoice_status=='DUPLICATE')).all()
     return len(canceled_inv)
 
 def canceled_reg_count():
     count = 0
-    canceled_reg = Invoice.query.filter(or_(Invoice.invoice_status=='NO PAYMNET', Invoice.invoice_status=='DUPLICATE')).all()
+    canceled_reg = Invoice.query.filter(or_(Invoice.invoice_status=='NO PAYMENT', Invoice.invoice_status=='DUPLICATE')).all()
     for inv in canceled_reg:
         for reg in inv.regs:
             if reg.duplicate == False: 
@@ -481,12 +481,12 @@ def inv_prereg_all_counts():
     return {'Prereg':prereg_total(),'Regs':all_reg_count(),'Inv':all_count()}
 
 def all_count():
-    invs = Invoice.query.with_entities(Invoice.invoice_number).filter(and_(Invoice.invoice_status!='NO PAYMNET', Invoice.invoice_status!='DUPLICATE')).all()
+    invs = Invoice.query.with_entities(Invoice.invoice_number).filter(and_(Invoice.invoice_status!='NO PAYMENT', Invoice.invoice_status!='DUPLICATE')).all()
     return len(invs)
 
 def all_reg_count():
     count = 0
-    regs = Invoice.query.filter(and_(Invoice.invoice_status!='NO PAYMNET', Invoice.invoice_status!='DUPLICATE')).all()
+    regs = Invoice.query.filter(and_(Invoice.invoice_status!='NO PAYMENT', Invoice.invoice_status!='DUPLICATE')).all()
     for inv in regs:
         for reg in inv.regs:
             if reg.duplicate == False: 

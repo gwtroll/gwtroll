@@ -8,7 +8,7 @@ class Config:
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://')
         SQLALCHEMY_DATABASE_URI = database_url
-    else:
+    elif os.environ.get('AZURE_POSTGRESQL_CONNECTIONSTRING'):
         s = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
         conndict = dict(item.split("=") for item in s.split(" "))
         SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://" + conndict["user"] + ":" + conndict["password"] + "@" + conndict["host"] + ":5432/" + conndict["dbname"] 
@@ -25,3 +25,5 @@ class Config:
     MAIL_MAX_EMAILS = None
     MAIL_SUPPRESS_SEND = False
     MAIL_ASCII_ATTACHMENTS = False
+    PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
+    PAYPAL_SECRET = os.environ.get('PAYPAL_SECRET')

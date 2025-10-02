@@ -187,6 +187,21 @@ class EarlyOnRequest(db.Model):
         if rider_balance < 0:
             rider_balance = 0
         self.rider_balance = rider_balance
+    
+    def get_invoice_items(self):
+        items = []
+        if self.rider_balance > 0:
+            items.append({
+                'name':'Extra Riders Fee',
+                'description':'Gulf Wars Early On Extra Riders Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.rider_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 
 class EarlyOnRider(db.Model):
@@ -255,6 +270,7 @@ class Registrations(db.Model):
     early_on_approved = db.Column(db.Boolean(), default=False)
     notes = db.Column(db.Text)
     duplicate = db.Column(db.Boolean, default=False)
+    canceled = db.Column(db.Boolean, default=False) 
 
     # Pricing
     registration_price = db.Column(db.Integer(), default=0)
@@ -277,7 +293,8 @@ class Registrations(db.Model):
     actual_arrival_date = db.Column(db.Date())
 
     # Relationships
-    invoices = db.relationship("Invoice", secondary="registration_invoices")
+    invoice_number = db.Column(db.Integer(), db.ForeignKey("invoice.invoice_number"))
+    invoice = db.relationship("Invoice", backref="inv_regs")
     payments = db.relationship("Payment", back_populates="reg")
     bows = db.relationship("Bows", secondary="reg_bows")
     crossbows = db.relationship("Crossbows", secondary="reg_crossbows")
@@ -334,11 +351,59 @@ class Registrations(db.Model):
         if paypal_donation_balance < 0:
             paypal_donation_balance = 0
         self.paypal_donation_balance = paypal_donation_balance
+    
+    def get_invoice_items(self):
+        reg_arrival_dict = {
+            "03/14/2026":"Adult Pre-Registration Sat-Sun",
+            "03/15/2026":"Adult Pre-Registration Sat-Sun",
+            "03/16/2026":"Adult Pre-Registration Mon-Tues",
+            "03/17/2026":"Adult Pre-Registration Mon-Tues",
+            "03/18/2026":"Adult Pre-Registration Wed-Thurs",
+            "03/19/2026":"Adult Pre-Registration Wed-Thurs",
+            "03/20/2026":"Adult Pre-Registration Fri-Sat",
+            "03/21/2026":"Adult Pre-Registration Fri-Sat",
+        }
+        items = []
+        if self.age == '18+' and self.registration_balance > 0:
+            items.append({
+                'name':reg_arrival_dict[self.expected_arrival_date.strftime('%m/%d/%Y')],
+                'description':'Gulf Wars Registration - ' + self.fname + ' ' + self.lname + ' - ' + self.expected_arrival_date.strftime('%m/%d/%Y'),
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.registration_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.nmr_balance > 0:
+            items.append({
+                'name':'NMR',
+                'description':'Non-Member Fee - ' + self.fname + ' ' + self.lname,
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.nmr_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.paypal_donation_balance > 0:
+            items.append({
+                'name':'PayPal Donation',
+                'description':'PayPal Donation - ' + self.fname + ' ' + self.lname,
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.paypal_donation_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 
 class Invoice(db.Model):
     __tablename__ = "invoice"
     invoice_number = db.Column(db.Integer(), primary_key=True)
+    invoice_id = db.Column(db.String())
     invoice_type = db.Column(db.String(), nullable=False)
     invoice_email = db.Column(db.String(), nullable=False)
     invoice_date = db.Column(db.DateTime(), nullable=False)
@@ -362,7 +427,7 @@ class Invoice(db.Model):
     )
     balance = db.Column(db.Numeric(10, 2))
     notes = db.Column(db.Text())
-    regs = db.relationship("Registrations", secondary="registration_invoices", viewonly=True)
+    regs = db.relationship("Registrations", back_populates="invoice")
     merchants = db.relationship("Merchant", back_populates="invoice")
     earlyonrequests = db.relationship("EarlyOnRequest", back_populates="invoice")
     payments = db.relationship("Payment", back_populates="invoice")
@@ -386,21 +451,10 @@ class Invoice(db.Model):
         if self.balance > 0:
             self.invoice_status = "OPEN"
 
-
-class Registration_Invoices(db.Model):
-    __tablename__ = "registration_invoices"
-    id = db.Column(db.Integer(), primary_key=True)
-    reg_id = db.Column(
-        db.Integer(), db.ForeignKey("registrations.id", ondelete="CASCADE")
-    )
-    invoice_id = db.Column(
-        db.Integer(), db.ForeignKey("invoice.invoice_number", ondelete="CASCADE")
-    )
-
-
 class Payment(db.Model):
     __tablename__ = "payment"
     id = db.Column(db.Integer(), primary_key=True)
+    paypal_id = db.Column(db.String(), nullable=True)
     type = db.Column(db.String(), nullable=False)
     check_num = db.Column(db.Integer())
     payment_date = db.Column(db.DateTime(), nullable=False)
@@ -727,6 +781,42 @@ class Merchant(db.Model):
             self.electricity_balance = 0
         self.electricity_balance = electricity_balance
 
+    def get_invoice_items(self):
+        items = []
+        if self.space_fee_balance > 0:
+            items.append({
+                'name':'Space Fee',
+                'description':'Gulf Wars Merchant Space Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.space_fee_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.processing_fee_balance > 0:
+            items.append({
+                'name':'Processing Fee',
+                'description':'Gulf Wars Merchant Processing Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.processing_fee_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.electricity_balance > 0:
+            items.append({
+                'name':'Electricity Fee',
+                'description':'Gulf Wars Merchant Electricity Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.electricity_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 class ScheduledEvent(db.Model):
     __tablename__ = "scheduledevent"
