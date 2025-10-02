@@ -90,15 +90,15 @@ class PayPal_Invoice:
 
 
 def get_accesstoken():
-    global PAYPAL_API_BASE_URL
-    global PAYPAL_CLIENT_ID
-    global PAYPAL_SECRET
-    global PAYPAL_PAYMENT_WEBHOOK_ID
-    env_vars = EventVariables.query.filter(EventVariables.id==1).first()
-    PAYPAL_API_BASE_URL = env_vars.bas
-    PAYPAL_CLIENT_ID = env_vars.cli 
-    PAYPAL_SECRET = env_vars.sec
-    PAYPAL_PAYMENT_WEBHOOK_ID = env_vars.web
+    # global PAYPAL_API_BASE_URL
+    # global PAYPAL_CLIENT_ID
+    # global PAYPAL_SECRET
+    # global PAYPAL_PAYMENT_WEBHOOK_ID
+    # env_vars = EventVariables.query.filter(EventVariables.id==1).first()
+    # PAYPAL_API_BASE_URL = env_vars.bas
+    # PAYPAL_CLIENT_ID = env_vars.cli 
+    # PAYPAL_SECRET = env_vars.sec
+    # PAYPAL_PAYMENT_WEBHOOK_ID = env_vars.web
     global access_token
     global access_token_cache
     if access_token is not None and access_token_cache > datetime.now():
