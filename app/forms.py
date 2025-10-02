@@ -1080,3 +1080,10 @@ class ScheduledEventForm(FlaskForm):
         # User Instructor
         if obj.user_instructor_id:
             self.self.user_instructor.data = obj.user_instructor_id
+
+class PayPalForm(FlaskForm):
+    base_url = StringField('Base URL', validators=[DataRequired()])
+    client_id = StringField('Client ID', validators=[DataRequired()])
+    client_secret = StringField('Client Secret', validators=[DataRequired()])
+    webhook_id = StringField('Webhook ID', validators=[DataRequired()])
+    submit = SubmitField('Update PayPal Info')

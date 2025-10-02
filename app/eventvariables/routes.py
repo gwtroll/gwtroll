@@ -127,4 +127,15 @@ def editpricesheet(date):
     print(form.errors)
     return render_template('editpricesheet.html', form=form, pricesheet=pricesheet)
 
-
+@bp.route('/paypal_info', methods=('GET', 'POST'))
+@login_required
+@permission_required('admin')
+def paypal_info():
+    form=PayPalForm()
+    if request.method=='POST':
+        os.environ['PAYPAL_API_BASE_URL']=form.base_url.data
+        os.environ['PAYPAL_CLIENT_ID']=form.client_id.data
+        os.environ['PAYPAL_SECRET']=form.client_secret.data
+        os.environ['PAYPAL_PAYMENT_WEBHOOK_ID']=form.webhook_id.data
+        redirect(url_for('eventvariables.eventvariables'))
+    return render_template('paypal_info.html', form=form)
