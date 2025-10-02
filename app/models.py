@@ -756,6 +756,16 @@ class Merchant(db.Model):
 
     def __repr__(self):
         return "<Merchant {}>".format(self.business_name)
+    
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
     def recalculate_balance(self):
         balance = self.space_fee + self.processing_fee
