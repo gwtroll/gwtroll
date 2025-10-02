@@ -6,6 +6,7 @@ from app.models import *
 from app.utils.db_utils import *
 from datetime import datetime
 from flask import jsonify
+import requests
 
 from flask_security import roles_accepted
 
@@ -173,3 +174,33 @@ def removescheduledevent(scheduledeventid):
         current_user.scheduled_events.remove(scheduledevent)
         db.session.commit()
     return jsonify({"message": "Request successful!"}), 200
+
+@bp.route('/paypal/info', methods=('GET',''))
+@login_required
+@permission_required('admin')
+def paypal_info():
+    data={
+        'url':os.environ.get('PAYPAL_API_BASE_URL'),
+        'client':os.environ.get("PAYPAL_CLIENT_ID"),
+        'secret':os.environ.get("PAYPAL_SECRET"),
+        'webhook':os.environ.get("PAYPAL_PAYMENT_WEBHOOK_ID")
+    }
+    return data
+
+@bp.route('/paypal/test_auth', methods=('GET',''))
+@login_required
+@permission_required('admin')
+def paypal_auth_test():
+    url = f"{os.environ.get('PAYPAL_API_BASE_URL')}/v1/oauth2/token"
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    data = {"grant_type": "client_credentials"}
+    response = requests.post(
+        url, headers=headers, data=data, auth=(os.environ.get("PAYPAL_CLIENT_ID"), os.environ.get("PAYPAL_SECRET"))
+    )
+
+    if response.status_code == 200:
+        data_dict = response.json()
+        access_token = "Bearer " + data_dict["access_token"]
+        return access_token
+    else:
+        return response.json()
