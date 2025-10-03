@@ -137,11 +137,9 @@ def create_invoice(registrations, invoice_email, type):
 
     response = requests.post(url, headers=headers, data=data)
 
-    if response.status_code == 200:
-        data_dict = response.json()
-        return data_dict
-    elif response.status_code != 200:
-        raise Exception(response.json())
+    data_dict = response.json()
+    
+    return data_dict
 
 
 def send_invoice(invoice_id):
