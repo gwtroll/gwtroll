@@ -244,11 +244,29 @@
         </div>
         <div class="col form-group">
             <p>
+                {{ form.space_fee_balance.label }}
+                {{ form.space_fee_balance(class_='form-control m-0') }}
+                {% if form.space_fee_balance.errors %}{% for error in form.space_fee_balance.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>  
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
                 {{ form.processing_fee.label }}
                 {{ form.processing_fee(class_='form-control m-0') }}
                 {% if form.processing_fee.errors %}{% for error in form.processing_fee.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
+        <div class="col form-group">
+            <p>
+                {{ form.processing_fee_balance.label }}
+                {{ form.processing_fee_balance(class_='form-control m-0') }}
+                {% if form.processing_fee_balance.errors %}{% for error in form.processing_fee_balance.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
         <div class="col form-group">
             <p>
                 {{ form.merchant_fee.label(class_='form-check-label') }}

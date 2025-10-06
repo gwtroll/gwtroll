@@ -163,8 +163,10 @@ def update(merch_id):
         ropes_left = merchant.ropes_left,
         ropes_right = merchant.ropes_right,
         space_fee = merchant.space_fee,
+        space_fee_balance = merchant.space_fee_balance,
         additional_space_information = merchant.additional_space_information,
         processing_fee = merchant.processing_fee,
+        processing_fee_balance = merchant.processing_fee_balance,
         merchant_fee = merchant.merchant_fee,
         electricity_request = merchant.electricity_request,
         food_merchant_agreement = merchant.food_merchant_agreement,
@@ -222,6 +224,7 @@ def update(merch_id):
             merchant.space_fee = (int(form.frontage_width.data) + int(form.ropes_left.data) + int(form.ropes_right.data)) * (int(form.frontage_depth.data) + int(form.ropes_front.data) + int(form.ropes_back.data)) * event.merchant_squarefoot_fee if form.frontage_width.data and form.frontage_depth.data else 0
             merchant.processing_fee = int(form.processing_fee.data)
             merchant.merchant_fee = merchant.processing_fee + merchant.space_fee
+            merchant.recalculate_balance()
             db.session.commit()
             if old_status != merchant.status:
                 if merchant.status == 'APPROVED':
