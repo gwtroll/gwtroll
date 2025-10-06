@@ -114,6 +114,7 @@ def update():
     form.notes.data  = inv.notes
     form.invoice_email.data = inv.invoice_email
     form.notes.data = inv.notes
+    form.paypal_id.data = inv.invoice_id
     
     if request.method == 'POST' and form.validate_on_submit():
         invoice_number = request.form.get('invoice_number')

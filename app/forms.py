@@ -724,6 +724,7 @@ class UpdateInvoiceForm(FlaskForm):
     registration_amount = IntegerField('Registration Amount')
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])
+    paypal_id = StringField('PayPal ID', validators=[])
     invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
     processing_fee = IntegerField('Processing Fee')
     space_fee = FloatField('Space Fee')
