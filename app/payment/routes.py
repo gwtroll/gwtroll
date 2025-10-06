@@ -186,7 +186,7 @@ def paypalpayment():
 
                                     pay.calculate_payment_amounts(payment_balance)
                                     db.session.add(pay)
-                                    payment_balance -= (float(reg.space_fee_balance) + reg.processing_fee_balance + float(reg.electricity_balance))
+                                    payment_balance -= (float(reg.space_fee_balance) + float(reg.processing_fee_balance) + float(reg.electricity_balance))
                                     reg.recalculate_balance()
                                     db.session.commit()
 

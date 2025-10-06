@@ -539,9 +539,9 @@ class Payment(db.Model):
             # Check if Payment is enough to cover all costs
             if (
                 payment_amount
-                >= self.merchant.space_fee_balance
+                >= float(self.merchant.space_fee_balance)
                 + self.merchant.processing_fee_balance
-                + self.merchant.electricity_balance
+                + float(self.merchant.electricity_balance)
             ):
                 self.space_fee_amount = self.merchant.space_fee_balance
                 self.processing_fee_amount = self.merchant.processing_fee_balance
@@ -549,7 +549,7 @@ class Payment(db.Model):
             # Space Fee Payment
             if payment_amount >= self.merchant.space_fee_balance:
                 payment_amount -= float(self.merchant.space_fee_balance)
-                self.space_fee_amount = self.merchant.space_fee_balance
+                self.space_fee_amount = float(self.merchant.space_fee_balance)
             else:
                 self.space_fee_amount = payment_amount
                 payment_amount = 0
@@ -563,15 +563,15 @@ class Payment(db.Model):
             # Electricity Fee Payment
             if payment_amount >= self.merchant.electricity_balance:
                 payment_amount -= float(self.merchant.electricity_balance)
-                self.electricity_fee_amount = self.merchant.electricity_balance
+                self.electricity_fee_amount = float(self.merchant.electricity_balance)
             else:
-                self.electricity_fee_amount = payment_amount
+                self.electricity_fee_amount = float(payment_amount)
                 payment_amount = 0
 
             self.amount = (
-                self.space_fee_amount
+                float(self.space_fee_amount)
                 + self.processing_fee_amount
-                + self.electricity_fee_amount
+                + float(self.electricity_fee_amount)
             )
 
         # EarlyOn
@@ -781,10 +781,10 @@ class Merchant(db.Model):
         return json.dumps(data_dict, sort_keys=True, default=str)
 
     def recalculate_balance(self):
-        balance = self.space_fee + self.processing_fee
-        space_fee_balance = self.space_fee
+        balance = float(self.space_fee) + self.processing_fee + float(self.electricity_fee)
+        space_fee_balance = float(self.space_fee)
         processing_fee_balance = self.processing_fee
-        electricity_balance = self.electricity_fee
+        electricity_balance = float(self.electricity_fee)
         for payment in self.payments:
             balance -= payment.space_fee_amount
             balance -= payment.processing_fee_amount
