@@ -529,8 +529,8 @@ def merchant_fullexport():
     {"field": "fname", "title": "First Name", "filterControl":"input"},
     {"field": "lname", "title": "Last Name", "filterControl":"input"},
     {"field": "email", "title": "Email", "filterControl":"input"},
-    {"field": "lname", "phone": "Phone", "filterControl":"input"},
-    {"field": "lname", "text_permission": "Text Permission", "filterControl":"select"},
+    {"field": "phone", "title": "Phone", "filterControl":"input"},
+    {"field": "text_permission", "title": "Text Permission", "filterControl":"select"},
     {"field": "address", "title": "Address", "filterControl":"input"},
     {"field": "city", "title": "City", "filterControl":"input"},
     {"field": "state_province", "title": "State/Province", "filterControl":"input"},
@@ -567,6 +567,40 @@ def merchant_fullexport():
     ]
     rows = []
     full = Merchant.query.filter().all()
+    for merch in full:
+        reg_json = json.loads(merch.toJSON())
+        rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
+@bp.route("/merchant_invoices", methods=("GET", ""))
+@login_required
+@permission_required('merchant_reports')
+def merchant_invoices():
+    data = {}
+
+    # {"field": "", "title": "", "filterControl":"input"}
+    # invoice_number = db.Column(db.Integer(), db.ForeignKey("invoice.invoice_number"))
+    # {"field": "", "title": "", "filterControl":"input"}
+    # invoice = db.relationship("Invoice", back_populates="merchants")
+    # {"field": "", "title": "", "filterControl":"input"}
+    # payments = db.relationship("Payment", back_populates="merchant")
+    # {"field": "", "title": "", "filterControl":"input"}
+
+    columns = [{"field": "invoice_number", "title": "Invoice Number", "filterControl": 'input'},
+    {"field": "invoice_type", "title": "Invoice Type", "filterControl": 'select'},
+    {"field": "invoice_email", "title": "Invoice Email", "filterControl": 'input'},
+    {"field": "invoice_date", "title": "Invoice Date", "filterControl":"select"},
+    {"field": "invoice_status", "title": "Invoice Status", "filterControl":"select"},
+    {"field": "space_fee", "title": "Space Fee", "filterControl":"input"},
+    {"field": "processing_fee", "title": "Processing Fee", "filterControl":"select"},
+    {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
+    {"field": "balance", "title": "Balance", "filterControl":"input"},
+    {"field": "notes", "title": "Notes", "filterControl":"input"},
+    ]
+    rows = []
+    full = Invoice.query.filter(Invoice.invoice_type == 'MERCHANT').order_by(Invoice.invoice_number).all()
     for merch in full:
         reg_json = json.loads(merch.toJSON())
         rows.append(reg_json)

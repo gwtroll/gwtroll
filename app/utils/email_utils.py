@@ -116,25 +116,10 @@ def send_merchant_confirmation_email(recipient, merchant):
 
 
 def send_merchant_approval_email(recipient, merchant):
-    qrcode_str = qrcode(
-        url_for("merchant.merchant_checkin", merchantid=merchant.id), border=1
-    )
+
     msg = Message(
         subject="Gulf Wars - Merchant Approval",
         recipients=[recipient],
-    )
-
-    qrcode_str = qrcode_str[22:]
-    image = base64.b64decode(qrcode_str, validate=True)
-
-    msg.attach(
-        "fastpass.png",
-        "image/png",
-        image,
-        "inline",
-        headers=[
-            ["Content-ID", "<fastpass>"],
-        ],
     )
 
     msg.html = (
@@ -152,7 +137,6 @@ def send_merchant_approval_email(recipient, merchant):
         "Name: " + merchant.fname + " " + merchant.lname + "<br/>"
         "Business Name: " + merchant.business_name + "<br/>"
         "Arrival Date: " + str(merchant.estimated_date_of_arrival) + "</p>"
-        '<img src="cid:fastpass" alt="Fast Pass QR Code">'
     )
 
     send_async_mail(msg)

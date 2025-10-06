@@ -437,6 +437,16 @@ class Invoice(db.Model):
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='invoice')
 
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
+
     def recalculate_balance(self):
         balance = (
             self.registration_total

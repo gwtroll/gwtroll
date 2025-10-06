@@ -24,5 +24,5 @@ def reports():
 @permission_required('merchant_reports')
 def merchant_reports():
     form = ReportForm()
-    form.report_type.choices = [('merchant_full_export','Full Export')]
+    form.report_type.choices = [('merchant_full_export','Full Export'),('merchant_invoices','Merchant Invoices')]
     return render_template("viewreport.html", form=form)
