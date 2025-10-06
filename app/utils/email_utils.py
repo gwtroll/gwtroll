@@ -13,6 +13,17 @@ def send_async_mail(message):
     sender = threading.Thread(name="mail_sender", target=send_message, args=(message,))
     sender.start()
 
+def send_webhook_error_email(e):
+    msg = Message(
+        subject="Webhook Error",
+        recipients='apps.deputy@gulfwars.org',
+    )
+
+    msg.html = (
+        "<p>"+e+"</p>"
+    )
+    send_async_mail(msg)
+
 
 def send_confirmation_email(recipient, regs):
     msg = Message(

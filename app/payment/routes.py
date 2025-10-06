@@ -227,4 +227,5 @@ def paypalpayment():
         print(data)
         return jsonify({"message": "Operation successful"}), 200
     except Exception as e:
+        send_webhook_error_email(e)
         return jsonify({"message": "Error: "+e}), 500
