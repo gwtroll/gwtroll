@@ -16,11 +16,11 @@ def send_async_mail(message):
 def send_webhook_error_email(e):
     msg = Message(
         subject="Webhook Error",
-        recipients='apps.deputy@gulfwars.org',
+        recipients=['apps.deputy@gulfwars.org'],
     )
 
     msg.html = (
-        "<p>"+e+"</p>"
+        e
     )
     send_async_mail(msg)
 
