@@ -44,6 +44,7 @@
               <th data-field="invoice_date" data-filter-control="select">Invoice Date</th>
               <th data-field="email" data-filter-control="input">Email</th>
               <th data-field="update">Update</th>
+              <th data-field="create_payment">Create Payment</th>
           </tr>
       </thead>
       <tbody>
@@ -69,7 +70,10 @@
                       {{invoice['invoice_email']}}
                   </td>
                   <td>
-                    <a class="btn btn-primary" href="{{url_for('invoices.createpayment', invnumber=invoice['invoice_number'])}}" role="button">Update</a>
+                    <a class="btn btn-primary" href="{{url_for('invoices.update', invnumber=invoice['invoice_number'])}}" role="button">Update</a>
+                  </td>
+                  <td>
+                    <a class="btn btn-primary" href="{{url_for('invoices.createpayment', invnumber=invoice['invoice_number'])}}" role="button">Create Payment</a>
                   </td>
           </tr>
           {% endfor %}

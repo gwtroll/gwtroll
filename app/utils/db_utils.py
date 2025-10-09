@@ -80,7 +80,7 @@ def reg_count():
     if checkin_count != None and checkin_count_cache_time > datetime.now() + timedelta(minutes=-10):
         return checkin_count
     else:
-        count = len(Registrations.query.with_entities(Registrations.id).filter(Registrations.checkin is not None).all())
+        count = len(Registrations.query.with_entities(Registrations.id).filter(Registrations.checkin != None).all())
         checkin_count = count
         checkin_count_cache_time = datetime.now()
         return checkin_count

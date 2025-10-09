@@ -105,16 +105,6 @@ def update():
     pays = inv.payments
 
     form = UpdateInvoiceForm()
-    form.invoice_amount.data = inv.invoice_total
-    form.registration_amount.data = inv.registration_total
-    form.invoice_number.data  = inv.invoice_number
-    form.invoice_status.data  = inv.invoice_status
-    form.paypal_donation.data  = inv.donation_total
-    form.invoice_date.data  = inv.invoice_date
-    form.notes.data  = inv.notes
-    form.invoice_email.data = inv.invoice_email
-    form.notes.data = inv.notes
-    form.paypal_id.data = inv.invoice_id
     
     if request.method == 'POST' and form.validate_on_submit():
         invoice_number = request.form.get('invoice_number')
@@ -124,7 +114,6 @@ def update():
         if invoice_number is not None and invoice_number != '':
             inv.invoice_number = invoice_number
             inv.invoice_date = invoice_date
-            inv.invoice_status = request.form.get('invoice_status')
             inv.notes = notes
 
             for reg in regs:      
@@ -133,6 +122,16 @@ def update():
         db.session.commit()
         flash('Invoice Information Successfully Updated')
         # log_reg_action(reg, 'INVOICE UPDATED')
+
+    form.invoice_amount.data = inv.invoice_total
+    form.registration_amount.data = inv.registration_total
+    form.invoice_number.data  = inv.invoice_number
+    form.paypal_donation.data  = inv.donation_total
+    form.invoice_date.data  = inv.invoice_date
+    form.notes.data  = inv.notes
+    form.invoice_email.data = inv.invoice_email
+    form.notes.data = inv.notes
+    form.paypal_id.data = inv.invoice_id
     
     return render_template('update_invoice.html', form=form, regs=regs, inv=inv)
 
@@ -380,10 +379,7 @@ def createpayment():
                     pay.calculate_payment_amounts(payment_balance)
                     db.session.add(pay)
                     payment_balance -= (reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance)
-                    if notes is not None and reg.notes is not None:
-                        reg.notes += "\nInvocie Notes: " + notes
-                    elif notes is not None and reg.notes is None:
-                        reg.notes = "\nInvocie Notes: " + notes
+                    reg.notes = "Invocie Notes: " + notes
                     reg.recalculate_balance()
                     db.session.commit()
 
@@ -395,7 +391,7 @@ def createpayment():
                         r.invoice_number = None
                     else:
                         send_fastpass_email(r.email, r)
-            inv.notes += notes
+            inv.notes = notes
 
             db.session.commit()
 
