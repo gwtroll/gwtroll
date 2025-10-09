@@ -79,10 +79,11 @@ class PayPal_Invoice:
         self.invoicer = {
             "business_name": "Society For Creative Anachronism-Gulf Wars, Inc",
             'email_address':'gwincpp@gmail.com',
-            # "email_address": "sb-6x1ar45446347@business.example.com",
+            # "email_address": "sb-ymn2z15577308@business.example.com",
             "website": "www.gulfwars.org",
         }
         self.primary_recipients = [{"billing_info": {"email_address": invoice_email}}]
+        self.additional_recipients = [ "reservations@gulfwars.org" ]
         items = []
         for reg in registrations:
             items.extend(reg.get_invoice_items())
@@ -150,7 +151,7 @@ def send_invoice(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "send_to_invoicer": true }'
+    data = '{ "send_to_invoicer": true, "additional_recipients": [ "reservations@gulfwars.org" ]  }'
 
     response = requests.post(url, headers=headers, data=data)
 
@@ -162,7 +163,10 @@ def cancel_invoice_non_payment(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "send_to_invoicer": true, "send_to_recipient": true, "note":"This is to inform you that we have cancelled your invoice and associaited registrations due to non-payment. \nIf you still plan to attend Gulf Wars XXXIV (2026), please reregister at https://gulfwars.org/registration." }'
+    data = '{ "note":"This is to inform you that we have cancelled your invoice and associaited registrations due to non-payment. \nIf you still plan to attend Gulf Wars XXXIV (2026), please reregister at https://gulfwars.org/registration.",' \
+    ' "send_to_invoicer": true,' \
+    ' "send_to_recipient": true,' \
+    ' "additional_recipients": [ "reservations@gulfwars.org" ] }'
 
     response = requests.post(url, headers=headers, data=data)
 
@@ -174,7 +178,10 @@ def cancel_invoice_duplicate(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "send_to_invoicer": true, "send_to_recipient": true, "note":"It has come to our attention that a duplicate invoice was issued to you. \nThis is to inform you that we have cancelled this invoice to avoid confusion. \nIf you have questions or concerns, please contact the Gulf Wars Reservationist at reservations@gulfwars.org." }'
+    data = '{ "note":"It has come to our attention that a duplicate invoice was issued to you. \nThis is to inform you that we have cancelled this invoice to avoid confusion. \nIf you have questions or concerns, please contact the Gulf Wars Reservationist at reservations@gulfwars.org.",' \
+    '"send_to_invoicer": true, ' \
+    '"send_to_recipient": true, ' \
+    '"additional_recipients": [ "reservations@gulfwars.org" ] }'
 
     response = requests.post(url, headers=headers, data=data)
 
@@ -186,7 +193,10 @@ def send_reminder(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "send_to_invoicer": true, "send_to_recipient": true, "note":"This is a reminder that your invoice has not been paid. Please note, it will be cancelled, if not paid in full, as will all registrations associated with this invoice." }'
+    data = '{ "note":"This is a reminder that your invoice has not been paid. Please note, it will be cancelled, if not paid in full, as will all registrations associated with this invoice.",' \
+    '"send_to_invoicer": true,' \
+    ' "send_to_recipient": true,' \
+    ' "additional_recipients": [ "reservations@gulfwars.org" ] }'
 
     response = requests.post(url, headers=headers, data=data)
 
