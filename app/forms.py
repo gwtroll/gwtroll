@@ -905,6 +905,8 @@ class EditMerchantForm(FlaskForm):
     ropes_back = IntegerField('Ropes Back (in feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0)
     ropes_left = IntegerField('Ropes Left (in feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0)
     ropes_right = IntegerField('Ropes Right (in feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0)
+    personal_space = FloatField('Personal Space (Square Feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0.00)
+    extra_space = FloatField('Extra Space (Square Feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0.00)
     space_fee = FloatField('Space Fee', default=0)
     space_fee_balance = FloatField('Space Fee Balance', default=0)
     additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])

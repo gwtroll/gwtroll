@@ -172,6 +172,7 @@ def createinvoice():
         form.merchant_fee.data = space_fee + processing_fee
         form.invoice_date.data = datetime.now(pytz.timezone('America/Chicago'))
         form.invoice_email.data = merchant.email
+        form.notes.data = merchant.notes
         regs = merchants
     elif type == 'EARLYON':
         earlyons = get_earlyon(regids)
@@ -210,6 +211,7 @@ def createinvoice():
             for reg in regs:
                 if reg.duplicate == False:      
                     reg.invoice_number = zero_invoice.invoice_number
+                    reg.notes = inv.notes
             
             db.session.commit()
             return redirect(url_for('invoices.unsent'))
@@ -243,6 +245,7 @@ def createinvoice():
                     for reg in regs:
                         if reg.duplicate == False:      
                             reg.invoice_number = inv.invoice_number
+                            reg.notes = inv.notes
                 case 'MERCHANT':
                     inv.invoice_type = 'MERCHANT'
                     inv.space_fee = space_fee
@@ -250,12 +253,14 @@ def createinvoice():
                     inv.balance = space_fee + processing_fee
                     for merchant in merchants:      
                         merchant.invoice_number = inv.invoice_number
+                        merchant.notes = inv.notes
                 case 'EARLYON':
                     inv.invoice_type = 'EARLYON'
                     inv.rider_fee = rider_fee
                     inv.balance = rider_fee
                     for earlyon in earlyons:
                         earlyon.invoice_number = inv.invoice_number
+                        earlyon.notes = inv.notes
 
             db.session.add(inv)
             db.session.commit()
@@ -280,7 +285,6 @@ def createinvoice():
             )
             match type:
                 case 'REGISTRATION':
-                    
                     inv.invoice_type = 'REGISTRATION'
                     inv.registration_total = registration_price
                     inv.nmr_total = nmr_price
@@ -308,12 +312,15 @@ def createinvoice():
                     for reg in regs:
                         if reg.duplicate == False:      
                             reg.invoice_number = inv.invoice_number
+                            reg.notes = inv.notes
                 case 'MERCHANT':
                     for merchant in merchants:      
                         merchant.invoice_number = inv.invoice_number
+                        merchant.notes = inv.notes
                 case 'EARLYON':
                     for earlyon in earlyons:
                         earlyon.invoice_number = inv.invoice_number
+                        earlyon.notes = inv.notes
 
             db.session.add(inv)
             db.session.commit()

@@ -726,6 +726,8 @@ class Merchant(db.Model):
     ropes_back = db.Column(db.Integer(), nullable=False, default=0)
     ropes_left = db.Column(db.Integer(), nullable=False, default=0)
     ropes_right = db.Column(db.Integer(), nullable=False, default=0)
+    personal_space = db.Column(db.Numeric(10, 2), nullable=True, default=0.0)
+    extra_space = db.Column(db.Numeric(10, 2), nullable=True, default=0.0)
     space_fee = db.Column(db.Numeric(10, 2), nullable=False, default=0.0)
     space_fee_balance = db.Column(db.Numeric(10, 2), nullable=False, default=0.0)
     additional_space_information = db.Column(db.Text())
