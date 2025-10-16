@@ -202,28 +202,6 @@ def removescheduledevent(scheduledeventid):
         db.session.commit()
     return jsonify({"message": "Request successful!"}), 200
 
-@bp.route('/dbupgrade', methods=('GET',''))
-@login_required
-@permission_required('admin')
-def perform_db_upgrade():
-    try:
-        upgrade()
-        return "Database upgrade successful!"
-    except Exception as e:
-        return f"Database upgrade failed: {e}", 500
-        
-@bp.route('/dbgetversion', methods=('GET',''))
-@login_required
-@permission_required('admin')
-def get_db_version():
-    return os.environ.get('DATABASE_URL')
-
-@bp.route('/dbgetversion2', methods=('GET',''))
-@login_required
-@permission_required('admin')
-def get_db_version2():
-    return os.environ.get('AZURE_POSTGRESQL_CONNECTIONSTRING')
-
 @bp.route("/full_export", methods=("GET", ""))
 @login_required
 def fullexport():
