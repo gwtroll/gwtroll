@@ -10,6 +10,8 @@ import json
 from sqlalchemy import between
 import requests
 from app.utils.paypal_api import get_accesstoken
+from app import app
+from flask_migrate import upgrade, current
 
 from flask_security import roles_accepted
 
@@ -200,26 +202,21 @@ def removescheduledevent(scheduledeventid):
         db.session.commit()
     return jsonify({"message": "Request successful!"}), 200
 
-@bp.route('/paypal/info', methods=('GET',''))
+@bp.route('/dbupgrade', methods=('GET',''))
 @login_required
 @permission_required('admin')
-def paypal_info():
-    data={
-        'url':os.environ.get('PAYPAL_API_BASE_URL'),
-        'client':os.environ.get("PAYPAL_CLIENT_ID"),
-        'secret':os.environ.get("PAYPAL_SECRET"),
-        'webhook':os.environ.get("PAYPAL_PAYMENT_WEBHOOK_ID")
-    }
-    return data
-
-@bp.route('/paypal/test_auth', methods=('GET',''))
-@login_required
-@permission_required('admin')
-def paypal_auth_test():
+def perform_db_upgrade():
     try:
-        return get_accesstoken()
+        upgrade()
+        return "Database upgrade successful!"
     except Exception as e:
-        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+        return f"Database upgrade failed: {e}", 500
+        
+@bp.route('/dbgetversion', methods=('GET',''))
+@login_required
+@permission_required('admin')
+def get_db_version():
+    return os.environ.get('DATABASE_URL')
 
 @bp.route("/full_export", methods=("GET", ""))
 @login_required
