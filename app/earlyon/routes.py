@@ -37,6 +37,9 @@ def update(earlyon_id):
     form.arrival_date.choices = get_earlyon_arrival_dates()
     form.department.choices = get_department_choices()
 
+    current_dept_approval = earlyon.dept_approval_status
+    current_autocrat_approval = earlyon.autocrat_approval_status
+
     if request.method == 'POST':
         if form.validate_on_submit():
             if form.department.data == None:
@@ -50,8 +53,17 @@ def update(earlyon_id):
 
             if earlyon.dept_approval_status == 'APPROVED' and earlyon.autocrat_approval_status == 'APPROVED' and earlyon.rider_balance <= 0:
                 earlyon.registration.early_on_approved = True
+                earlyon.registration.expected_arrival_date = earlyon.arrival_date
                 for rider in earlyon.earlyonriders:
                     rider.reg.early_on_approved = True
+                    rider.reg.expected_arrival_date= earlyon.arrival_date
+
+            if earlyon.dept_approval_status == 'APPROVED' and earlyon.autocrat_approval_status == 'APPROVED' and (current_dept_approval != 'APPROVED' or current_autocrat_approval != 'APPROVED'):
+                regs = [earlyon.registration]
+                for rider in earlyon.earlyonriders:
+                    regs.append(rider.reg)
+                send_earlyon_approval_email(earlyon.registration.email,regs)
+                
             db.session.commit()
             return render_template('earlyon_list.html', earlyons=EarlyOnRequest.query.all())
         flash('There was an error with your submission. Please check the form and try again.', 'error')
@@ -152,9 +164,14 @@ def createearlyon(regid):
 
             db.session.add(earlyon)
             db.session.commit()
-            
 
-            # TODO: send_earlyon_confirmation_email(earlyon.email,earlyon)
+            regs = [reg]
+            for rider in earlyon.earlyonriders:
+                r = get_reg(rider.regid)
+                regs.append(r)
+
+            send_earlyon_confirmation_email(reg.email,regs)
+            
             return redirect(url_for('earlyon.success', earlyonid=earlyon.id))
     return render_template('create_earlyon.html', form=form, reg=reg)
 

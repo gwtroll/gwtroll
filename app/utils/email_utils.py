@@ -151,3 +151,66 @@ def send_merchant_approval_email(recipient, merchant):
     )
 
     send_async_mail(msg)
+
+    #EARLYON
+
+def send_earlyon_confirmation_email(recipient, regs):
+    msg = Message(
+        subject="Gulf Wars XXXIV - Early-On Confirmation",
+        recipients=[recipient],
+    )
+
+    regs_string = ""
+    for reg in regs:
+        regs_string += f"<tr><td style='border: 1px solid black; border-collapse: collapse;'>{reg.fname} {reg.lname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.scaname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.mbr_num}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.expected_arrival_date}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.id}</td><tr>"
+
+    msg.html = (
+        "<p>Greetings,</p>"
+        "<p>We have received your application for Early-On entry to Gulf Wars XXXIV (2026) for the following people:</p>"
+        "<table style='border: 1px solid black; border-collapse: collapse;'>"
+        "<tr>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Mundane Name</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>SCA Name</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Member Number</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Arrival Date</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Registration ID</b></th>"
+        "</tr>"
+        +regs_string+
+        "</table>"
+        "<p>Please note, this confirmation does not guarantee acceptance. Your Department Head and the Autocrats will review all requests and will make a determination prior to the closing of early registration.</p>"
+        "<p>You will receive a separate notification if your application is approved, and an invoice if you have more than the allocated allotment of free passengers. That invoice must be paid prior to arriving on-site.</p>"
+        "<p>If you do not receive confirmation that your application was approved, please do not arrive on-site until Saturday, 3/14 at noon, or you will be turned away.</p>"
+    )
+    send_async_mail(msg)
+
+
+def send_earlyon_approval_email(recipient, regs):
+    msg = Message(
+        subject="Gulf Wars XXXIV - Early-On Approval",
+        recipients=[recipient],
+    )
+
+    regs_string = ""
+    for reg in regs:
+        regs_string += f"<tr><td style='border: 1px solid black; border-collapse: collapse;'>{reg.fname} {reg.lname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.scaname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.mbr_num}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.expected_arrival_date}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.id}</td><tr>"
+
+    msg.html = (
+        "<p>Greetings,</p>"
+        "<p>Your application for Early-On admittance to Gulf Wars XXXIV (2026) has been approved for the following people:</p>"
+        "<table style='border: 1px solid black; border-collapse: collapse;'>"
+        "<tr>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Mundane Name</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>SCA Name</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Member Number</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Arrival Date</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Registration ID</b></th>"
+        "</tr>"
+        +regs_string+
+        "</table>"
+        "<p>Your registrations have automatically been updated to show your new arrival date</p>"
+        "<br><br>"
+        "<p><b>If money is owed for additional riders.</b></p>"
+        "<p>Please expect to see an invoice for your additional riders within the next 3 days (72 hours). If not paid within seven (7) days, all early-on access approval will be withdrawn.</p>"
+    )
+
+    send_async_mail(msg)
