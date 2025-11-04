@@ -32,6 +32,14 @@
                         <td>{{ reg.nmr_price }}</td>
                         <td>{{ reg.paypal_donation }}</td>
                         <td>{{ reg.balance }}</td>
+                        {% if inv.invoice_status != 'PAID' %}
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Related Actions">
+                                <a href="{{url_for('registration.cancel', regid=reg.id)}}"><button
+                                        class="btn btn-danger" type="button">Cancel Registration</button></a>
+                            </div>
+                        </td>
+                        {%endif%}
                     </tr>
                     {% endfor %}
                     {% endif %}

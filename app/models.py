@@ -464,6 +464,33 @@ class Invoice(db.Model):
         if self.balance > 0:
             self.invoice_status = "OPEN"
 
+    def recalculate_balance_from_registrations(self):
+        self.registration_total = 0
+        self.nmr_total = 0
+        self.donation_total = 0
+
+        for reg in self.regs:
+            if reg.duplicate == False and reg.canceled == False:
+                self.registration_total += reg.registration_balance
+                self.nmr_total += reg.nmr_balance
+                self.donation_total += reg.paypal_donation_balance
+
+        balance = (
+            self.registration_total
+            + self.nmr_total
+            + self.donation_total
+            + self.space_fee
+            + self.processing_fee
+            + self.rider_fee
+        )
+        for payment in self.payments:
+            balance -= payment.amount
+        if balance < 0:
+            balance = 0
+        self.balance = balance
+        if self.balance > 0:
+            self.invoice_status = "OPEN"
+
 class Payment(db.Model):
     __tablename__ = "payment"
     id = db.Column(db.Integer(), primary_key=True)

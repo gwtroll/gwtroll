@@ -184,6 +184,7 @@ def duplicate():
 
     reg = get_reg(regid)
     reg.duplicate = True
+    reg.invoice_number = None
     db.session.commit()
     all_regs = Registrations.query.filter(and_(Registrations.invoice_email==reg.invoice_email, Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.invoice_email).all()
 
@@ -194,6 +195,21 @@ def duplicate():
         return redirect(url_for('invoices.unsent'))
 
     return redirect(url_for('invoices.createinvoice', regids=[regids], type="REGISTRATION"))
+
+@bp.route('/markcancel', methods=('GET', 'POST'))
+@login_required
+@permission_required('registration_edit')
+def cancel():
+    regid = request.args.get('regid')
+
+    reg = get_reg(regid)
+    reg.canceled = True
+    inv = get_inv(reg.invoice_number)
+    inv.recalculate_balance_from_registrations()
+    reg.invoice_number = None
+    db.session.commit()
+
+    return redirect(url_for('invoices.update', invnumber=inv.invoice_number, type="REGISTRATION"))
 
 @bp.route('/atd', methods=('GET', 'POST'))
 @login_required

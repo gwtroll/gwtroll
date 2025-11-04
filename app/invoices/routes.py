@@ -96,7 +96,7 @@ def update():
     if inv.invoice_type == 'REGISTRATION':
         regs = []
         for r in inv.regs:
-            if r.duplicate == False:
+            if r.duplicate == False and r.canceled == False:
                 regs.append(r)
     elif inv.invoice_type == 'MERCHANT':
         regs = inv.merchants

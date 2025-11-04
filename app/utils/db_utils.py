@@ -198,6 +198,12 @@ def get_role_choices():
     if current_user.has_role('Head Troll'):
         role_choices.append([role_dict['Troll Shift Lead'].id,'Troll Shift Lead'])
 
+    if current_user.has_role('Exchequer'):
+        for r in roles:
+            if r.name != 'Admin':
+                role_choices.append([r.id, r.name])
+        return role_choices
+
     return role_choices
 
 def get_permission(permissionid):
