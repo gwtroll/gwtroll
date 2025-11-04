@@ -209,7 +209,7 @@ def createinvoice():
                 )
                 db.session.add(zero_invoice)
             for reg in regs:
-                if reg.duplicate == False:      
+                if reg.duplicate == False and reg.canceled == False:      
                     reg.invoice_number = zero_invoice.invoice_number
                     reg.notes = inv.notes
             
@@ -243,7 +243,7 @@ def createinvoice():
                     inv.donation_total = paypal_donation
                     inv.balance = total_due
                     for reg in regs:
-                        if reg.duplicate == False:      
+                        if reg.duplicate == False and reg.canceled == False:      
                             reg.invoice_number = inv.invoice_number
                             reg.notes = inv.notes
                 case 'MERCHANT':
@@ -338,7 +338,7 @@ def createpayment():
     if inv.invoice_type == 'REGISTRATION':
         regs = []
         for r in inv.regs:
-            if r.duplicate == False:
+            if r.duplicate == False and r.canceled == False:
                 regs.append(r)
     elif inv.invoice_type == 'MERCHANT':
         regs = inv.merchants

@@ -19,20 +19,6 @@ def payment():
     all_payments = Payment.query.order_by(Payment.id).all()
     return render_template('viewpayment.html', payments=all_payments)
 
-# @bp.route('/create', methods=('GET', 'POST'))
-# @login_required
-# @permission_required('admin')
-# def createkingdom():
-#     form = KingdomForm()
-#     if request.method == 'POST':
-#         kingdom = Kingdom(
-#             name=request.form.get('name'),
-#         )
-#         db.session.add(kingdom)
-#         db.session.commit()
-#         return redirect('/')
-#     return render_template('createkingdom.html', form=form)
-
 @bp.route('/<paymentid>', methods=('GET', 'POST'))
 @login_required
 @permission_required('admin')
@@ -136,7 +122,7 @@ def paypalpayment():
                         if inv.invoice_type == 'REGISTRATION':
                             regs = []
                             for r in inv.regs:
-                                if r.duplicate == False:
+                                if r.duplicate == False and r.canceled == False:
                                     regs.append(r)
                         elif inv.invoice_type == 'MERCHANT':
                             regs = inv.merchants

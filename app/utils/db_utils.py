@@ -447,7 +447,7 @@ def open_reg_count():
     open_reg = Invoice.query.filter(and_(Invoice.invoice_status=='OPEN')).all()
     for inv in open_reg:
         for reg in inv.regs:
-            if reg.duplicate == False: 
+            if reg.duplicate == False and reg.canceled == False: 
                 count+=1
     return count
 
@@ -463,7 +463,7 @@ def paid_reg_count():
     paid_reg = Invoice.query.filter(and_(Invoice.invoice_status=='PAID')).all()
     for inv in paid_reg:
         for reg in inv.regs:
-            if reg.duplicate == False: 
+            if reg.duplicate == False and reg.canceled == False: 
                 count+=1
     return count
 
@@ -495,7 +495,7 @@ def all_reg_count():
     regs = Invoice.query.filter(and_(Invoice.invoice_status!='NO PAYMENT', Invoice.invoice_status!='DUPLICATE')).all()
     for inv in regs:
         for reg in inv.regs:
-            if reg.duplicate == False: 
+            if reg.duplicate == False and reg.canceled == False: 
                 count+=1
     return count
 
