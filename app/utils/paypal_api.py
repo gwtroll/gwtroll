@@ -78,8 +78,8 @@ class PayPal_Invoice:
             }
         self.invoicer = {
             "business_name": "Society For Creative Anachronism-Gulf Wars, Inc",
-            # 'email_address':'gwincpp@gmail.com',
-            "email_address": "sb-ymn2z15577308@business.example.com",
+            'email_address':'gwincpp@gmail.com',
+            # "email_address": "sb-ymn2z15577308@business.example.com",
             "website": "www.gulfwars.org",
         }
         self.primary_recipients = [{"billing_info": {"email_address": invoice_email}}]
