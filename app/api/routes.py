@@ -654,14 +654,15 @@ def mapping_registration_report(obj,temp_obj,count,paypal_invoices):
             temp_obj['nmr']=obj.nmr_price
             temp_obj['donation']=obj.paypal_donation
             temp_obj['total_price_paid']=obj.total_due - obj.balance
-            temp_obj['paypal_body']=paypal_invoices[obj.invoice.invoice_id] if obj.invoice.invoice_id != None and obj.invoice.invoice_id in paypal_invoices else None
+            # temp_obj['paypal_body']=paypal_invoices[obj.invoice.invoice_id] if obj.invoice.invoice_id != None and obj.invoice.invoice_id in paypal_invoices else None
             if obj.invoice.payments != None:
                 for payment in obj.invoice.payments:
                     temp_obj['paypal_fee']=0
                     temp_obj['paypal_net']=0
-                    pay = get_paypal_payment(payment)
-                    temp_obj['paypal_fee']+=pay['seller_receivable_breakdown']['paypal_fee']
-                    temp_obj['paypal_net']+=pay['seller_receivable_breakdown']['net_amount']
+                    if payment.paypal_id != None:
+                        pay = get_paypal_payment(payment.paypal_id)
+                        temp_obj['paypal_fee']+=pay['seller_receivable_breakdown']['paypal_fee']
+                        temp_obj['paypal_net']+=pay['seller_receivable_breakdown']['net_amount']
 
     return temp_obj
 
