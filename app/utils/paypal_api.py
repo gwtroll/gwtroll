@@ -274,7 +274,7 @@ def get_paypal_invoices():
     return paypal_invoices
 
 def get_paypal_payment(payment_id):
-    url = f"{PAYPAL_API_BASE_URL}/v2/payments/authorizations/{payment_id}"
+    url = f"{PAYPAL_API_BASE_URL}/v2/payments/captures/{payment_id}"
 
     headers = {
         "Authorization": get_accesstoken(),
