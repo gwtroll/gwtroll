@@ -7,14 +7,8 @@ from app.utils.db_utils import *
 from datetime import datetime
 from flask import jsonify, request
 import json
-from sqlalchemy import between
-import requests
-from app.utils.paypal_api import get_accesstoken
-from app import app
-from flask_migrate import upgrade, current
-
-from flask_security import roles_accepted
-
+import copy
+from app.utils.paypal_api import get_paypal_invoices
 
 def init_data_obj(labels=[]):
     data = {}
@@ -204,6 +198,7 @@ def removescheduledevent(scheduledeventid):
 
 @bp.route("/full_export", methods=("GET", ""))
 @login_required
+@permission_required('registration_reports')
 def fullexport():
     data = {}
     columns = [{"field": "id", "title": "ID", "filterControl": 'input'},
@@ -256,6 +251,7 @@ def fullexport():
 
 @bp.route("/full_checkin_report", methods=("GET", ""))
 @login_required
+@permission_required('registration_reports')
 def fullcheckinreport():
     dt_start = request.args.get('dt_start')
     dt_end = request.args.get('dt_end')
@@ -315,6 +311,7 @@ def fullcheckinreport():
 
 @bp.route("/at_door_count", methods=("GET", ""))
 @login_required
+@permission_required('registration_reports')
 def at_door_count():
     dt_start = request.args.get('dt_start')
     dt_end = request.args.get('dt_end')
@@ -342,6 +339,7 @@ def at_door_count():
 
 @bp.route("/kingdom_count", methods=("GET", ""))
 @login_required
+@permission_required('registration_reports')
 def kingdom_count():
     data = {'columns':[],'rows':[]}
     columns = [{"field": "kingdom", "title": "Kingdom", "filterControl": 'select'}]
@@ -375,6 +373,7 @@ def kingdom_count():
 
 @bp.route("/early_on_report", methods=("GET", ""))
 @login_required
+@permission_required('registration_reports')
 def earlyon():
     data = {}
     columns = [{"field": "id", "title": "ID", "filterControl": 'input'},
@@ -402,6 +401,7 @@ def earlyon():
 
 @bp.route("/ghost_report", methods=("GET", ""))
 @login_required
+@permission_required('registration_reports')
 def ghost_report():
     data = {}
     columns = [{"field": "invoice_number", "title": "Invoice Number", "filterControl": 'input'},
@@ -435,6 +435,7 @@ def ghost_report():
 
 @bp.route("/royal_registrations", methods=("GET", ""))
 @login_required
+@permission_required('registration_reports')
 def royal_registrations():
     data = {}
     columns = [{"field": "id", "title": "ID", "filterControl": 'input'},
@@ -588,3 +589,82 @@ def merchant_invoices():
     data['columns'] = columns
     data['rows'] = rows
     return jsonify(data)
+
+@bp.route("/registration_report", methods=("GET", ""))
+@login_required
+@permission_required('registration_reports')
+def registration_report():
+    data = {}
+    columns = [{"field": "count", "title": "Count"},
+        {"field": "date", "title": "Date", "filterControl":"select"},
+        {"field": "time", "title": "Time CT", "filterControl":"input"},
+        {"field": "name", "title": "Name", "filterControl":"input"},
+        {"field": "email", "title": "Email", "filterControl":"input"},
+        {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
+        {"field": "reg_id", "title": "Registration Number", "filterControl":"input"},
+        {"field": "reg_type", "title": "Registration Type", "filterControl":"select"},
+        {"field": "invoice_total", "title": "invoice_total", "filterControl":"input"},
+        {"field": "paypal_fee", "title": "PayPal Fee", "filterControl":"input"},
+        {"field": "paypal_net", "title": "PayPal Net", "filterControl":"input"},
+        {"field": "mbr", "title": "Member", "filterControl":"select"},
+        {"field": "adult_minor", "title": "Adult/Minor", "filterControl":"select"},
+        {"field": "reg_base", "title": "Registration Base", "filterControl":"select"},
+        {"field": "nmr", "title": "NMR", "filterControl":"input"},
+        {"field": "donation", "title": "Donation", "filterControl":"input"},
+        {"field": "total_price_paid", "title": "Total Price Paid", "filterControl":"input"},
+        {"field": "paypal_body", "title": "PayPal Body"},
+    ]
+    rows = []
+    # invoices = Invoice.query.filter().all()
+    regs = Registrations.query.filter().all()
+    # merchants = Merchant.query.filter().all()
+    # earlyons = EarlyOnRequest.query.filter().all()
+    obj = {}
+    paypal_invoices = get_paypal_invoices()
+    for field in columns:
+        obj[field["field"]]=None
+        count=1
+    for reg in regs:
+        if reg.invoice != None:
+            temp_obj = copy.deepcopy(obj)
+            temp_obj = mapping_registration_report(reg,temp_obj,count,paypal_invoices)
+            reg_json = json.loads(toJSON(temp_obj))
+            rows.append(reg_json)
+            count+=1
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
+def mapping_registration_report(obj,temp_obj,count,paypal_invoices):
+    temp_obj['count']=count
+    match obj.invoice.invoice_type:
+        case 'REGISTRATION':
+            temp_obj['date']=obj.reg_date_time
+            temp_obj['name']=obj.fname + " " + obj.lname
+            temp_obj['email']=obj.invoice_email
+            temp_obj['invoice_number']=obj.invoice.invoice_number
+            temp_obj['reg_id']=obj.id
+            temp_obj['reg_type']=obj.invoice.invoice_type
+            temp_obj['invoice_total']=obj.invoice.invoice_total
+            #PayPal FEE
+            #PayPal NET
+            temp_obj['mbr']=obj.mbr
+            temp_obj['adult_minor']='Adult' if obj.age == '18+' or obj.age == "Royal" else 'Minor'
+            temp_obj['reg_base']=obj.registration_price
+            temp_obj['nmr']=obj.nmr_price
+            temp_obj['donation']=obj.paypal_donation
+            temp_obj['total_price_paid']=obj.total_due - obj.balance
+            temp_obj['paypal_body']=paypal_invoices[obj.invoice.invoice_id] if obj.invoice.invoice_id != None and obj.invoice.invoice_id in paypal_invoices else None
+            # if obj.invoice.payments != None:
+
+    return temp_obj
+
+def toJSON(obj):
+    data_dict = {}
+    for key in obj:
+        if not key.startswith("_"):
+            if isinstance(obj[key], datetime):
+                data_dict[key] = datetime.strftime(obj[key], "%Y-%m-%d")
+            else:
+                data_dict[key] = obj[key]
+    return json.dumps(data_dict, sort_keys=True, default=str)

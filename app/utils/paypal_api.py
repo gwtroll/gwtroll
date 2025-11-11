@@ -78,8 +78,8 @@ class PayPal_Invoice:
             }
         self.invoicer = {
             "business_name": "Society For Creative Anachronism-Gulf Wars, Inc",
-            'email_address':'gwincpp@gmail.com',
-            # "email_address": "sb-ymn2z15577308@business.example.com",
+            # 'email_address':'gwincpp@gmail.com',
+            "email_address": "sb-ymn2z15577308@business.example.com",
             "website": "www.gulfwars.org",
         }
         self.primary_recipients = [{"billing_info": {"email_address": invoice_email}}]
@@ -245,3 +245,44 @@ def verify_webhook_signature(auth_algo, cert_url, transmission_id, transmission_
         return True
     else:
         return False
+    
+def get_paypal_invoices():
+    url = f"{PAYPAL_API_BASE_URL}/v2/invoicing/invoices"
+
+    headers = {
+        "Authorization": get_accesstoken(),
+        "Content-Type": "application/json",
+    }
+
+    params = (
+    ('total_required', 'false'),
+    )
+
+    response = requests.get(url, headers=headers, params=params)
+
+    data_dict = response.json()
+
+    paypal_invoices = {}
+    for item in data_dict['items']:
+        paypal_invoice = {}
+        paypal_invoice['id']=item['id']
+        paypal_invoice['status']=item['status']
+        paypal_invoice['invoice_number']=item['detail']['invoice_number']
+        paypal_invoice['body']=item
+        paypal_invoices[item['id']]=paypal_invoice
+
+    return paypal_invoices
+
+def get_paypal_payment(payment_id):
+    url = f"{PAYPAL_API_BASE_URL}/v2/payments/authorizations/{payment_id}"
+
+    headers = {
+        "Authorization": get_accesstoken(),
+        "Content-Type": "application/json",
+    }
+
+    response = requests.get(url, headers=headers)
+
+    data_dict = response.json()
+
+    return data_dict
