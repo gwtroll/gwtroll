@@ -603,7 +603,7 @@ def registration_report():
         {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
         {"field": "reg_id", "title": "Registration Number", "filterControl":"input"},
         {"field": "reg_type", "title": "Registration Type", "filterControl":"select"},
-        {"field": "invoice_total", "title": "invoice_total", "filterControl":"input"},
+        {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
         {"field": "paypal_fee", "title": "PayPal Fee", "filterControl":"input"},
         {"field": "paypal_net", "title": "PayPal Net", "filterControl":"input"},
         {"field": "mbr", "title": "Member", "filterControl":"select"},
@@ -612,7 +612,6 @@ def registration_report():
         {"field": "nmr", "title": "NMR", "filterControl":"input"},
         {"field": "donation", "title": "Donation", "filterControl":"input"},
         {"field": "total_price_paid", "title": "Total Price Paid", "filterControl":"input"},
-        {"field": "paypal_body", "title": "PayPal Body"},
     ]
     rows = []
     # invoices = Invoice.query.filter().all()
@@ -639,22 +638,20 @@ def mapping_registration_report(obj,temp_obj,count,paypal_invoices):
     temp_obj['count']=count
     match obj.invoice.invoice_type:
         case 'REGISTRATION':
-            temp_obj['date']=obj.reg_date_time
+            temp_obj['date']=obj.reg_date_time.date()
+            temp_obj['time']=obj.reg_date_time.time()
             temp_obj['name']=obj.fname + " " + obj.lname
             temp_obj['email']=obj.invoice_email
             temp_obj['invoice_number']=obj.invoice.invoice_number
             temp_obj['reg_id']=obj.id
             temp_obj['reg_type']=obj.invoice.invoice_type
             temp_obj['invoice_total']=obj.invoice.invoice_total
-            #PayPal FEE
-            #PayPal NET
             temp_obj['mbr']=obj.mbr
             temp_obj['adult_minor']='Adult' if obj.age == '18+' or obj.age == "Royal" else 'Minor'
             temp_obj['reg_base']=obj.registration_price
             temp_obj['nmr']=obj.nmr_price
             temp_obj['donation']=obj.paypal_donation
             temp_obj['total_price_paid']=obj.total_due - obj.balance
-            # temp_obj['paypal_body']=paypal_invoices[obj.invoice.invoice_id] if obj.invoice.invoice_id != None and obj.invoice.invoice_id in paypal_invoices else None
             if obj.invoice.payments != None:
                 for payment in obj.invoice.payments:
                     temp_obj['paypal_fee']=0
