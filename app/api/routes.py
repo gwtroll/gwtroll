@@ -623,13 +623,28 @@ def registration_report():
     for field in columns:
         obj[field["field"]]=None
         count=1
+    temp_list=[]
     for reg in regs:
         if reg.invoice != None:
             temp_obj = copy.deepcopy(obj)
             temp_obj = mapping_registration_report(reg,temp_obj,count)
-            reg_json = json.loads(toJSON(temp_obj))
-            rows.append(reg_json)
+            temp_list.append(temp_obj)
+            # reg_json = json.loads(toJSON(temp_obj))
+            # rows.append(reg_json)
             count+=1
+    invoice_dict={}
+    for item in temp_list:
+        if item['invoice_number'] not in invoice_dict and item['total_price_paid'] != 0:
+            invoice_dict[item['invoice_number']]={'count':1,'invoice_number':item['invoice_number'], 'paypal_gross':item['paypal_gross'], 'paypal_fee':item['paypal_fee'], 'paypal_net':item['paypal_net']}
+        elif item['invoice_number'] not in invoice_dict:
+            invoice_dict[item['invoice_number']]['count']+=1
+    for item in temp_list:
+        if item['invoice_number'] in invoice_dict and item['total_price_paid'] != 0:
+            if item['paypal_gross'] != 0: item['paypal_gross']=round(item['paypal_gross']/invoice_dict[item['invoice_number']]['count'],2)
+            if item['paypal_fee'] != 0: item['paypal_fee']=round(item['paypal_fee']/invoice_dict[item['invoice_number']]['count'],2)
+            if item['paypal_net'] != 0: item['paypal_net']=round(item['paypal_net']/invoice_dict[item['invoice_number']]['count'],2)
+            reg_json = json.loads(toJSON(item))
+            rows.append(reg_json)
     data['columns'] = columns
     data['rows'] = rows
     return jsonify(data)
