@@ -683,9 +683,9 @@ def mapping_registration_report(obj,temp_obj,count):
                     if payment.paypal_id != None:
                         pay = get_paypal_payment(payment.paypal_id)
                         if 'seller_receivable_breakdown' in pay:
-                            temp_obj['paypal_gross']+=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
-                            temp_obj['paypal_fee']+=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
-                            temp_obj['paypal_net']+=float(pay['seller_receivable_breakdown']['net_amount']['value'])
+                            temp_obj['paypal_gross']=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
+                            temp_obj['paypal_fee']=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
+                            temp_obj['paypal_net']=float(pay['seller_receivable_breakdown']['net_amount']['value'])
 
     return temp_obj
 
