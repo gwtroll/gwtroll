@@ -596,20 +596,23 @@ def merchant_invoices():
 def registration_report():
     data = {}
     columns = [{"field": "count", "title": "Count"},
-        {"field": "date", "title": "Date", "filterControl":"select"},
+        {"field": "date", "title": "Date", "filterControl":"input"},
         {"field": "time", "title": "Time CT", "filterControl":"input"},
         {"field": "name", "title": "Name", "filterControl":"input"},
         {"field": "email", "title": "Email", "filterControl":"input"},
         {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
         {"field": "reg_id", "title": "Registration Number", "filterControl":"input"},
-        {"field": "reg_type", "title": "Registration Type", "filterControl":"select"},
+        {"field": "reg_type", "title": "Registration Type", "filterControl":"input"},
         {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
         {"field": "paypal_gross", "title": "PayPal Gross", "filterControl":"input"},
         {"field": "paypal_fee", "title": "PayPal Fee", "filterControl":"input"},
         {"field": "paypal_net", "title": "PayPal Net", "filterControl":"input"},
-        {"field": "mbr", "title": "Member", "filterControl":"select"},
-        {"field": "adult_minor", "title": "Adult/Minor", "filterControl":"select"},
-        {"field": "reg_base", "title": "Registration Base", "filterControl":"select"},
+        {"field": "paypal_gross_split", "title": "PayPal Gross Split", "filterControl":"input"},
+        {"field": "paypal_fee_split", "title": "PayPal Fee Split", "filterControl":"input"},
+        {"field": "paypal_net_split", "title": "PayPal Net Split", "filterControl":"input"},
+        {"field": "mbr", "title": "Member", "filterControl":"input"},
+        {"field": "adult_minor", "title": "Adult/Minor", "filterControl":"input"},
+        {"field": "reg_base", "title": "Registration Base", "filterControl":"input"},
         {"field": "nmr", "title": "NMR", "filterControl":"input"},
         {"field": "donation", "title": "Donation", "filterControl":"input"},
         {"field": "total_price_paid", "title": "Total Price Paid", "filterControl":"input"},
@@ -640,9 +643,9 @@ def registration_report():
             invoice_dict[item['invoice_number']]['count']+=1
     for item in temp_list:
         if item['invoice_number'] in invoice_dict and item['total_price_paid'] != 0:
-            if item['paypal_gross'] != 0: item['paypal_gross']=round(item['paypal_gross']/invoice_dict[item['invoice_number']]['count'],2)
-            if item['paypal_fee'] != 0: item['paypal_fee']=round(item['paypal_fee']/invoice_dict[item['invoice_number']]['count'],2)
-            if item['paypal_net'] != 0: item['paypal_net']=round(item['paypal_net']/invoice_dict[item['invoice_number']]['count'],2)
+            if item['paypal_gross_split'] != 0: item['paypal_gross']=round(item['paypal_gross']/invoice_dict[item['invoice_number']]['count'],2)
+            if item['paypal_fee_split'] != 0: item['paypal_fee']=round(item['paypal_fee']/invoice_dict[item['invoice_number']]['count'],2)
+            if item['paypal_net_split'] != 0: item['paypal_net']=round(item['paypal_net']/invoice_dict[item['invoice_number']]['count'],2)
             reg_json = json.loads(toJSON(item))
             rows.append(reg_json)
     data['columns'] = columns
@@ -671,6 +674,9 @@ def mapping_registration_report(obj,temp_obj,count):
             temp_obj['paypal_gross']=0
             temp_obj['paypal_fee']=0
             temp_obj['paypal_net']=0
+            temp_obj['paypal_gross_split']=0
+            temp_obj['paypal_fee_split']=0
+            temp_obj['paypal_net_split']=0
             if obj.invoice.payments != None:
                 for payment in obj.invoice.payments:
                     temp_obj['total_price_paid']+=payment.amount
