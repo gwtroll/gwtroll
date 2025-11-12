@@ -637,7 +637,7 @@ def registration_report():
             count+=1
     invoice_dict={}
     for item in temp_list:
-        if item['invoice_number'] not in invoice_dict and item['total_price_paid'] != 0:
+        if item['invoice_number'] not in invoice_dict and item['total_price_paid'] > 0:
             invoice_dict[item['invoice_number']]={'count':1,'invoice_number':item['invoice_number'], 'paypal_gross':item['paypal_gross'], 'paypal_fee':item['paypal_fee'], 'paypal_net':item['paypal_net']}
         elif item['invoice_number'] in invoice_dict and item['total_price_paid'] != 0:
             invoice_dict[item['invoice_number']]['count']+=1
@@ -678,8 +678,9 @@ def mapping_registration_report(obj,temp_obj,count):
             temp_obj['paypal_fee_split']=0
             temp_obj['paypal_net_split']=0
             if obj.invoice.payments != None:
+                for reg_payment in obj.payments:
+                    temp_obj['total_price_paid']+=reg_payment.amount
                 for payment in obj.invoice.payments:
-                    temp_obj['total_price_paid']+=payment.amount
                     if payment.paypal_id != None:
                         pay = get_paypal_payment(payment.paypal_id)
                         if 'seller_receivable_breakdown' in pay:
