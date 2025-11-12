@@ -636,7 +636,7 @@ def registration_report():
     for item in temp_list:
         if item['invoice_number'] not in invoice_dict and item['total_price_paid'] != 0:
             invoice_dict[item['invoice_number']]={'count':1,'invoice_number':item['invoice_number'], 'paypal_gross':item['paypal_gross'], 'paypal_fee':item['paypal_fee'], 'paypal_net':item['paypal_net']}
-        elif item['invoice_number'] not in invoice_dict:
+        elif item['invoice_number'] in invoice_dict and item['total_price_paid'] != 0:
             invoice_dict[item['invoice_number']]['count']+=1
     for item in temp_list:
         if item['invoice_number'] in invoice_dict and item['total_price_paid'] != 0:
