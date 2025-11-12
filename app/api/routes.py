@@ -604,6 +604,7 @@ def registration_report():
         {"field": "reg_id", "title": "Registration Number", "filterControl":"input"},
         {"field": "reg_type", "title": "Registration Type", "filterControl":"select"},
         {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
+        {"field": "paypal_gross", "title": "PayPal Gross", "filterControl":"input"},
         {"field": "paypal_fee", "title": "PayPal Fee", "filterControl":"input"},
         {"field": "paypal_net", "title": "PayPal Net", "filterControl":"input"},
         {"field": "mbr", "title": "Member", "filterControl":"select"},
@@ -619,14 +620,13 @@ def registration_report():
     # merchants = Merchant.query.filter().all()
     # earlyons = EarlyOnRequest.query.filter().all()
     obj = {}
-    paypal_invoices = get_paypal_invoices()
     for field in columns:
         obj[field["field"]]=None
         count=1
     for reg in regs:
         if reg.invoice != None:
             temp_obj = copy.deepcopy(obj)
-            temp_obj = mapping_registration_report(reg,temp_obj,count,paypal_invoices)
+            temp_obj = mapping_registration_report(reg,temp_obj,count)
             reg_json = json.loads(toJSON(temp_obj))
             rows.append(reg_json)
             count+=1
@@ -634,7 +634,7 @@ def registration_report():
     data['rows'] = rows
     return jsonify(data)
 
-def mapping_registration_report(obj,temp_obj,count,paypal_invoices):
+def mapping_registration_report(obj,temp_obj,count):
     temp_obj['count']=count
     match obj.invoice.invoice_type:
         case 'REGISTRATION':
@@ -652,13 +652,17 @@ def mapping_registration_report(obj,temp_obj,count,paypal_invoices):
             temp_obj['nmr']=obj.nmr_price
             temp_obj['donation']=obj.paypal_donation
             temp_obj['total_price_paid']=obj.total_due - obj.balance
+            temp_obj['total_price_paid']=0
+            temp_obj['paypal_gross']=0
+            temp_obj['paypal_fee']=0
+            temp_obj['paypal_net']=0
             if obj.invoice.payments != None:
                 for payment in obj.invoice.payments:
-                    temp_obj['paypal_fee']=0
-                    temp_obj['paypal_net']=0
+                    temp_obj['total_price_paid']+=payment.amount
                     if payment.paypal_id != None:
                         pay = get_paypal_payment(payment.paypal_id)
                         if 'seller_receivable_breakdown' in pay:
+                            temp_obj['paypal_gross']+=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
                             temp_obj['paypal_fee']+=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
                             temp_obj['paypal_net']+=float(pay['seller_receivable_breakdown']['net_amount']['value'])
 
