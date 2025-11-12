@@ -643,9 +643,9 @@ def registration_report():
             invoice_dict[item['invoice_number']]['count']+=1
     for item in temp_list:
         if item['invoice_number'] in invoice_dict and item['total_price_paid'] != 0:
-            if item['paypal_gross_split'] != 0: item['paypal_gross']=round(item['paypal_gross']/invoice_dict[item['invoice_number']]['count'],2)
-            if item['paypal_fee_split'] != 0: item['paypal_fee']=round(item['paypal_fee']/invoice_dict[item['invoice_number']]['count'],2)
-            if item['paypal_net_split'] != 0: item['paypal_net']=round(item['paypal_net']/invoice_dict[item['invoice_number']]['count'],2)
+            if item['paypal_gross'] != 0: item['paypal_gross_split']=round(item['paypal_gross']/invoice_dict[item['invoice_number']]['count'],2)
+            if item['paypal_fee'] != 0: item['paypal_fee_split']=round(item['paypal_fee']/invoice_dict[item['invoice_number']]['count'],2)
+            if item['paypal_net'] != 0: item['paypal_net_split']=round(item['paypal_net']/invoice_dict[item['invoice_number']]['count'],2)
             reg_json = json.loads(toJSON(item))
             rows.append(reg_json)
     data['columns'] = columns
