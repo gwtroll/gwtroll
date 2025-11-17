@@ -156,6 +156,7 @@ class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     role = MultiCheckboxField('Role', validators=[Optional()])
     fname = StringField('First Name', validators=[DataRequired()])
+    email = EmailField('Email', validators=[Optional()])
     lname = StringField('Last Name', validators=[DataRequired()])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
     # event = SelectField('Event', validators=[])
@@ -167,6 +168,8 @@ class EditUserForm(FlaskForm):
         # Username - Strip - Lower
         if self.username.data:
             obj.username = self.username.data.strip().lower()
+        if self.email.data:
+            obj.email = self.email.data.strip().lower()
         # Roles - Iterate
         current_role_ids = []
         user_role_permissions = [str(r[0]) for r in get_role_choices()]
@@ -197,6 +200,8 @@ class EditUserForm(FlaskForm):
         # Username
         if obj.username:
             self.username.data = obj.username
+        if obj.email:
+            self.email.data = obj.email
         # Roles - Iterate
         if obj.roles:
             role_array = []
