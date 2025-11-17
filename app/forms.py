@@ -65,6 +65,7 @@ class LoginForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     # id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
+    email = Email('Email', validators=[Optional()])
     role = MultiCheckboxField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -78,6 +79,9 @@ class CreateUserForm(FlaskForm):
         # Username - Strip - Lower
         if self.username.data:
             obj.username = self.username.data.strip().lower()
+        # Email - Strip - Lower
+        if self.email.data:
+            obj.email = self.email.data.strip().lower()
         # Roles - Iterate
         for roleid in self.role.data:
             obj.roles.append(get_role(roleid))

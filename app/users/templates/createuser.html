@@ -12,6 +12,11 @@
                 {% endwith %}
             </div>
             <div class="row form-group">
+                {% with field=form.email, required=false %}
+                {% include 'form_field.html' %}
+                {% endwith %}
+            </div>
+            <div class="row form-group">
                 {% with field=form.fname, required=true %}
                 {% include 'form_field.html' %}
                 {% endwith %}
