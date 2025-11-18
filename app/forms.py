@@ -715,6 +715,7 @@ class RiderForm(Form):
 class EarlyOnForm(FlaskForm):
     arrival_date = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
+    merchant = SelectField('Merchant Name', choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
     submit = SubmitField('Submit Early On Request')

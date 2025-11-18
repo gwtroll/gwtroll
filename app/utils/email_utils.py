@@ -216,10 +216,10 @@ def send_earlyon_approval_email(recipient, regs):
 
     send_async_mail(msg)
 
-def send_earlyon_approval_notification_email(recipient, regs):
+def send_earlyon_approval_notification_email(recipients, regs, earlyonid):
     msg = Message(
-        subject="Gulf Wars XXXIV - Early-On Approval",
-        recipients=[recipient],
+        subject="Gulf Wars XXXIV - Early-On Approval Needed",
+        recipients=[recipients],
     )
 
     regs_string = ""
@@ -228,7 +228,7 @@ def send_earlyon_approval_notification_email(recipient, regs):
 
     msg.html = (
         "<p>Greetings,</p>"
-        "<p>Your application for Early-On admittance to Gulf Wars XXXIV (2026) has been approved for the following people:</p>"
+        "<p>The following application for Early-On admittance to Gulf Wars XXXIV (2026) needs your approval:</p>"
         "<table style='border: 1px solid black; border-collapse: collapse;'>"
         "<tr>"
         "<th style='border: 1px solid black; border-collapse: collapse;'><b>Mundane Name</b></th>"
@@ -239,10 +239,14 @@ def send_earlyon_approval_notification_email(recipient, regs):
         "</tr>"
         +regs_string+
         "</table>"
-        "<p>Your registrations have automatically been updated to show your new arrival date</p>"
-        "<br><br>"
-        "<p><b>If money is owed for additional riders.</b></p>"
-        "<p>Please expect to see an invoice for your additional riders within the next 3 days (72 hours). If not paid within seven (7) days, all early-on access approval will be withdrawn.</p>"
-    )
+        "<br>"
+        "<br>"
+        "<p>To review this Early-On Application: <a href="
+        + url_for("earlyon.update",earlyon_id=earlyonid, _external=True)
+        + ">EARLY-ON APPLICATION "+str(earlyonid)+"</a></p>"
+        "<p>To view all Early-On Applications: <a href="
+        + url_for("earlyon.earlyon", _external=True)
+        + ">ALL EARLY-ON APPLICATIONS</a></p>"
+        )
 
     send_async_mail(msg)

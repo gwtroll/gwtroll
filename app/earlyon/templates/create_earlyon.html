@@ -62,7 +62,13 @@
             {% with field=form.arrival_date, required=true %}
             {% include 'form_field.html' %}
             {% endwith %}
-            {% with field=form.department, required=true %}
+            {{ form.department.label }}<span style="color: red;">*</span>
+            {{ form.department(class_='form-control m-0', onchange_="merchantCheck()") }}
+            {% if form.department.errors %}{% for error in form.department.errors %}<span
+            class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="row form-group" id="merchant_section" style="display: none;">
+            {% with field=form.merchant, required=false %}
             {% include 'form_field.html' %}
             {% endwith %}
         </div>
@@ -128,5 +134,19 @@
 {% endblock %}
 
 {% block script %}
+<script>
+    function merchantCheck() {
+        const department = document.getElementById("department").value;
+        const merchant = document.getElementById("merchant_section");
+        if (department == 'Merchant/Vendor') {
+            merchant.style.display = 'block';
+        }
+        else {
+            merchant.style.display = 'none';
+        }
+    }
+
+    merchantCheck();
+</script>
 
 {% endblock %}

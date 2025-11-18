@@ -521,6 +521,20 @@ def get_reg_arrival_dates():
         returned_dates.append(date_tup)
     return returned_dates
 
+def get_merchant_choices():
+    merchants = Merchant.query.order_by(Merchant.name).all()
+    merchant_choices = [(None, '-')]
+    for d in merchants:
+        merchant_tup = (d.id, d.name)
+        merchant_choices.append(merchant_tup)
+    return merchant_choices
+
+def get_merchant(merchantid):
+    merchant = Merchant.query.filter_by(id=merchantid).first()
+    if merchant is None:
+        abort(404)
+    return merchant
+
 def get_merch_arrival_dates():
     returned_dates = [('-','-')]
     event = EventVariables.query.first()
@@ -539,3 +553,11 @@ def get_department_choices():
         department_tup = (d.id, d.name)
         department_choices.append(department_tup)
     return department_choices
+
+def get_approval_notification_recipients(departmentid):
+    recipients = []
+    users = User.query.filter(User.department_id==departmentid).all()
+    for user in users:
+        if user.has_role('Department Head') and user.email != None:
+            recipients.append(user.email)
+    return recipients

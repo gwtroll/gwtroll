@@ -7,6 +7,7 @@ from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
 from app.utils.email_utils import *
+import math
 
 from flask_security import roles_accepted
 from markupsafe import Markup
@@ -90,6 +91,7 @@ def createearlyon(regid):
     form = EarlyOnForm()
     form.arrival_date.choices = get_earlyon_arrival_dates()
     form.department.choices = get_department_choices()
+    form.merchant.choices = get_merchant_choices()
 
     if request.method == 'POST':
         if form.department.data == 'None':
@@ -128,8 +130,13 @@ def createearlyon(regid):
             rider_cost = 0
             free_riders = 1
             adult_riders = 0
-            if form.department.data == 'Merchant':
-                free_riders = 2
+            if form.department.data == 'Merchant/Vendor':
+                free_riders = 3
+                if form.merchant.data != None and form.merchant.data != '-':
+                    merchant = get_merchant(form.merchant.data)
+                    merchant_space = (int(merchant.frontage_width) + int(merchant.ropes_left) + int(merchant.ropes_right)) * (int(merchant.frontage_depth) + int(merchant.ropes_front) + int(merchant.ropes_back)) - merchant.personal_space
+                    if merchant_space > 0:
+                        free_riders = math.ceil(merchant_space/600) * 3
 
             for idx, field in enumerate(form.riders):
 
@@ -171,6 +178,8 @@ def createearlyon(regid):
                 regs.append(r)
 
             send_earlyon_confirmation_email(reg.email,regs)
+            approval_notification_recipients = get_approval_notification_recipients(earlyon.department_id)
+            send_earlyon_approval_notification_email(approval_notification_recipients, regs, earlyon.id)
             
             return redirect(url_for('earlyon.success', earlyonid=earlyon.id))
     return render_template('create_earlyon.html', form=form, reg=reg)

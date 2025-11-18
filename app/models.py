@@ -168,6 +168,8 @@ class EarlyOnRequest(db.Model):
             microsecond=0
         ),
     )
+    merchant_id = db.Column(db.Integer(), db.ForeignKey("merchant.id"))
+    mercahnt = db.relationship("Merchant", backref="earlyonrequest")
     earlyonriders = db.relationship("EarlyOnRider", secondary="earlyonrequest_riders")
     dept_approval_status = db.Column(db.String(), default="PENDING")
     autocrat_approval_status = db.Column(db.String(), default="PENDING")
