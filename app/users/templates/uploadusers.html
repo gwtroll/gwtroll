@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form action="" method="post" enctype="multipart/form-data">
+        <h1>{% block title %} Upload Users {% endblock %}</h1>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.file.label }}
+                    {{ form.file(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit.label }}
+                    {{ form.submit(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+    </form>
+
+    
+{% endblock %}

@@ -171,6 +171,12 @@ def get_role(roleid):
         abort(404)
     return role
 
+def get_role_by_name(rolename):
+    role = Role.query.filter_by(name=rolename).first()
+    if role is None:
+        abort(404)
+    return role
+
 def get_roles():
     roles = Role.query.order_by(Role.name).all()
     if roles is None:
@@ -521,6 +527,20 @@ def get_reg_arrival_dates():
         returned_dates.append(date_tup)
     return returned_dates
 
+def get_merchant_choices():
+    merchants = Merchant.query.order_by(Merchant.business_name).all()
+    merchant_choices = [(None, '-')]
+    for d in merchants:
+        merchant_tup = (d.id, d.business_name)
+        merchant_choices.append(merchant_tup)
+    return merchant_choices
+
+def get_merchant(merchantid):
+    merchant = Merchant.query.filter_by(id=merchantid).first()
+    if merchant is None:
+        abort(404)
+    return merchant
+
 def get_merch_arrival_dates():
     returned_dates = [('-','-')]
     event = EventVariables.query.first()
@@ -539,3 +559,17 @@ def get_department_choices():
         department_tup = (d.id, d.name)
         department_choices.append(department_tup)
     return department_choices
+
+def get_department_by_name(departmentname):
+    dept = Department.query.filter_by(name=departmentname).first()
+    if dept is None:
+        abort(404)
+    return dept
+
+def get_approval_notification_recipients(departmentid):
+    recipients = []
+    users = User.query.filter(User.department_id==departmentid).all()
+    for user in users:
+        if user.has_role('Department Head') and user.email != None:
+            recipients.append(user.email)
+    return recipients

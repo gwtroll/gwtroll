@@ -715,6 +715,7 @@ class RiderForm(Form):
 class EarlyOnForm(FlaskForm):
     arrival_date = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
+    merchant = SelectField('Merchant Name', choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
     submit = SubmitField('Submit Early On Request')
@@ -722,6 +723,7 @@ class EarlyOnForm(FlaskForm):
 class EarlyOnApprovalForm(FlaskForm):
     arrival_date = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     department = SelectField('Department', validators=[NoneOf('-', message='You must select a Department')], choices=[])
+    merchant = SelectField('Merchant Name', choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
     dept_approval_status = SelectField('Department Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
