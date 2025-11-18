@@ -88,8 +88,8 @@ def send_fastpass_email(recipient, reg):
         "<p>To apply for Early On please use the following link: <a href="
         + url_for("earlyon.createearlyon", regid=reg.id, _external=True)
         + ">APPLY FOR EARLY ON</a></p>"
-        "<p>Each Staff is allowed one free Adult rider. Additional early-on riders will be charged $15 per Adult. If you apply to have additional riders, once your Department Head and the Autocrats have approved your application, you will receive a confirmation and a separate invoice. You must request early-on access for all riders coming in your vehicle, including minors. There is no additional fee for early-on minors, but they must be on the list.</p>"
-        "<p>Please note, ALL EARLY-ON registrants, whether they are staff, the free rider, or an additional rider must have pre-paid for the entire week, and be on the approved list, or they will NOT be allowed on-site until Saturday at noon, when Site opens for everyone.</p>"
+        "<p>Each Staff is allowed one free Adult rider. Additional early-on riders will be charged $15 per Adult. If you apply to have additional riders, once your Department Head and the Autocrats have approved your application, you will receive a confirmation and a separate invoice. You must request early-on access for all riders coming in your vehicle, including minors. There is no additional fee for early-on minors, but they must be on the list. Minor waiver policy is in effect for early-on, so all paperwork must be presented upon arrival.</p>"
+        "<p>Please note, ALL EARLY-ON registrants, whether they are staff, the free rider, or an additional rider must have pre-paid for the entire week, and be on the approved list, or they will NOT be allowed on-site until Saturday at 1pm, when Site opens for everyone.</p>"
         "<br/><br/>"
         "<p><b>Fast Pass</b></p>"
         "<p>Welcome to Fast Pass! Please print this and bring it with you to Gulf Wars. If everyone in your vehicle has this with them, you will be able to participate in Fast Pass Troll. Please follow the signs to Troll.  You will be asked to show this letter, photo ID, and proof of membership if you are a member. Those not on fast pass will park and walk in to troll. If EVERYONE in your vehicle has their letter printed, you will be flagged through to the fast pass lanes. The troll will scan this letter, go over the waiver with you, and give you your site token. You may then proceed to your campsite. You will not be able to leave your vehicle once in the fast pass lane.</p>"
@@ -179,7 +179,7 @@ def send_earlyon_confirmation_email(recipient, regs):
         "</table>"
         "<p>Please note, this confirmation does not guarantee acceptance. Your Department Head and the Autocrats will review all requests and will make a determination prior to the closing of early registration.</p>"
         "<p>You will receive a separate notification if your application is approved, and an invoice if you have more than the allocated allotment of free passengers. That invoice must be paid prior to arriving on-site.</p>"
-        "<p>If you do not receive confirmation that your application was approved, please do not arrive on-site until Saturday, 3/14 at noon, or you will be turned away.</p>"
+        "<p>If you do not receive confirmation that your application was approved, please do not arrive on-site until Saturday, 3/14 at 1pm, or you will be turned away.</p>"
     )
     send_async_mail(msg)
 
@@ -211,6 +211,42 @@ def send_earlyon_approval_email(recipient, regs):
         "<br><br>"
         "<p><b>If money is owed for additional riders.</b></p>"
         "<p>Please expect to see an invoice for your additional riders within the next 3 days (72 hours). If not paid within seven (7) days, all early-on access approval will be withdrawn.</p>"
+        "<p>Please be aware, if there are minors in your party, the minor waiver policy is in effect for early-on, so all paperwork must be presented upon arrival.</p>"
     )
+
+    send_async_mail(msg)
+
+def send_earlyon_approval_notification_email(recipients, regs, earlyonid):
+    msg = Message(
+        subject="Gulf Wars XXXIV - Early-On Approval Needed",
+        recipients=[recipients],
+    )
+
+    regs_string = ""
+    for reg in regs:
+        regs_string += f"<tr><td style='border: 1px solid black; border-collapse: collapse;'>{reg.fname} {reg.lname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.scaname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.mbr_num}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.expected_arrival_date}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.id}</td><tr>"
+
+    msg.html = (
+        "<p>Greetings,</p>"
+        "<p>The following application for Early-On admittance to Gulf Wars XXXIV (2026) needs your approval:</p>"
+        "<table style='border: 1px solid black; border-collapse: collapse;'>"
+        "<tr>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Mundane Name</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>SCA Name</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Member Number</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Arrival Date</b></th>"
+        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Registration ID</b></th>"
+        "</tr>"
+        +regs_string+
+        "</table>"
+        "<br>"
+        "<br>"
+        "<p>To review this Early-On Application: <a href="
+        + url_for("earlyon.update",earlyon_id=earlyonid, _external=True)
+        + ">EARLY-ON APPLICATION "+str(earlyonid)+"</a></p>"
+        "<p>To view all Early-On Applications: <a href="
+        + url_for("earlyon.earlyon", _external=True)
+        + ">ALL EARLY-ON APPLICATIONS</a></p>"
+        )
 
     send_async_mail(msg)

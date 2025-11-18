@@ -33,6 +33,7 @@
                 <th data-field="userid">User ID</th>
                 <th data-field="active" data-filter-control="select">Active</th>
                 <th data-field="user_name" data-filter-control="input">User Name</th>
+                <th data-field="email" data-filter-control="input">Email</th>
                 <th data-field="department" data-filter-control="select">Department</th>
                 <th data-field="role" data-filter-control="input">Role</th>
                 <th data-field="fname" data-filter-control="input">First Name</th>
@@ -51,6 +52,9 @@
                         </td>
                         <td> 
                             {{user.username}}
+                        </td>
+                        <td> 
+                            {{user.email}}
                         </td>
                         <td> 
                             {{user.department.name if user.department else 'N/A'}}

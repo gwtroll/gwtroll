@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from app.utils.db_utils import *
-from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField, widgets
+from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField, widgets, EmailField
 from wtforms.fields import DateField, DateTimeLocalField, DateTimeField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length, NumberRange
 
@@ -65,6 +65,7 @@ class LoginForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     # id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
+    email = EmailField('Email', validators=[Optional()])
     role = MultiCheckboxField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -78,6 +79,9 @@ class CreateUserForm(FlaskForm):
         # Username - Strip - Lower
         if self.username.data:
             obj.username = self.username.data.strip().lower()
+        # Email - Strip - Lower
+        if self.email.data:
+            obj.email = self.email.data.strip().lower()
         # Roles - Iterate
         for roleid in self.role.data:
             obj.roles.append(get_role(roleid))
@@ -152,6 +156,7 @@ class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     role = MultiCheckboxField('Role', validators=[Optional()])
     fname = StringField('First Name', validators=[DataRequired()])
+    email = EmailField('Email', validators=[Optional()])
     lname = StringField('Last Name', validators=[DataRequired()])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
     # event = SelectField('Event', validators=[])
@@ -163,6 +168,8 @@ class EditUserForm(FlaskForm):
         # Username - Strip - Lower
         if self.username.data:
             obj.username = self.username.data.strip().lower()
+        if self.email.data:
+            obj.email = self.email.data.strip().lower()
         # Roles - Iterate
         current_role_ids = []
         user_role_permissions = [str(r[0]) for r in get_role_choices()]
@@ -193,6 +200,8 @@ class EditUserForm(FlaskForm):
         # Username
         if obj.username:
             self.username.data = obj.username
+        if obj.email:
+            self.email.data = obj.email
         # Roles - Iterate
         if obj.roles:
             role_array = []
@@ -706,6 +715,7 @@ class RiderForm(Form):
 class EarlyOnForm(FlaskForm):
     arrival_date = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
+    merchant = SelectField('Merchant Name', choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
     submit = SubmitField('Submit Early On Request')

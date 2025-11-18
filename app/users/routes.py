@@ -10,6 +10,14 @@ from app.models import *
 from werkzeug.exceptions import abort
 import uuid
 from app.utils.db_utils import *
+import random
+import string
+
+def generate_temp_password(length):
+    """Generates a temporary password of a specified length."""
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.sample(characters, length))
+    return password
 
 @bp.route('/', methods=('GET', 'POST'))
 @login_required
@@ -84,3 +92,41 @@ def pwresetuser(userid):
         return redirect(url_for('users.users'))
     
     return render_template('pwresetuser.html', user=user, form=form)
+
+@bp.route('/upload', methods=('GET', 'POST'))
+@login_required
+@permission_required('admin')
+def uploadusers():
+    form = StandardUploadForm()
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            for line in file.stream:
+                line_content = line.decode('utf-8').strip()
+                new_row = line_content.split(',')
+                department_string = new_row[0].strip()
+                department = get_department_by_name(department_string)
+                email = new_row[1].strip().lower()
+                fname = new_row[2].strip()
+                lname = new_row[3].strip()
+                username = new_row[4].strip().lower()
+                role_string = new_row[5].strip()
+                role = get_role_by_name(role_string)
+                
+                new_user = User(
+                    username=username,
+                    department_id=department.id,
+                    email=email,
+                    fname=fname,
+                    lname=lname,
+                    medallion=0,
+                    active=True
+                )
+                new_user.roles.append(role)
+                new_user.fs_uniquifier = uuid.uuid4().hex
+                new_user.set_password(generate_temp_password(8))
+                db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('users.users'))
+
+    return render_template('uploadusers.html', form=form)
