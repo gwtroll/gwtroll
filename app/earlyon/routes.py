@@ -31,12 +31,15 @@ def update(earlyon_id):
     form = EarlyOnApprovalForm(
         arrival_date=earlyon.arrival_date.strftime('%Y/%m/%d'),
         department=earlyon.department_id,
+        merchant=earlyon.merchant_id if earlyon.merchant_id else None,
         notes=earlyon.notes,
         dept_approval_status=earlyon.dept_approval_status,
         autocrat_approval_status=earlyon.autocrat_approval_status,
     )
+
     form.arrival_date.choices = get_earlyon_arrival_dates()
     form.department.choices = get_department_choices()
+    form.merchant.choices = get_merchant_choices()
 
     current_dept_approval = earlyon.dept_approval_status
     current_autocrat_approval = earlyon.autocrat_approval_status
@@ -130,11 +133,13 @@ def createearlyon(regid):
             rider_cost = 0
             free_riders = 1
             adult_riders = 0
-            if form.department.data == 'Merchant/Vendor':
+            merchant_dept = get_department_by_name('Merchant/Vendor')
+            if int(form.department.data) == int(merchant_dept.id):
                 free_riders = 3
                 if form.merchant.data != None and form.merchant.data != '-':
                     merchant = get_merchant(form.merchant.data)
-                    merchant_space = (int(merchant.frontage_width) + int(merchant.ropes_left) + int(merchant.ropes_right)) * (int(merchant.frontage_depth) + int(merchant.ropes_front) + int(merchant.ropes_back)) - merchant.personal_space
+                    merchant_space = (int(merchant.frontage_width) + int(merchant.ropes_left) + int(merchant.ropes_right)) * (int(merchant.frontage_depth) + int(merchant.ropes_front) + int(merchant.ropes_back))
+                    merchant_space = merchant_space - merchant.personal_space if merchant.personal_space != None and merchant.personal_space > 0 else merchant_space
                     if merchant_space > 0:
                         free_riders = math.ceil(merchant_space/600) * 3
 
@@ -160,6 +165,7 @@ def createearlyon(regid):
                 reg_id = reg.id,
                 arrival_date=form.arrival_date.data,
                 department_id=form.department.data,
+                merchant_id = form.merchant.data,
                 notes=form.notes.data,
                 dept_approval_status='PENDING',
                 autocrat_approval_status='PENDING',
@@ -177,9 +183,9 @@ def createearlyon(regid):
                 r = get_reg(rider.regid)
                 regs.append(r)
 
-            send_earlyon_confirmation_email(reg.email,regs)
+            send_earlyon_confirmation_email(reg.email,regs, earlyon.arrival_date)
             approval_notification_recipients = get_approval_notification_recipients(earlyon.department_id)
-            send_earlyon_approval_notification_email(approval_notification_recipients, regs, earlyon.id)
+            send_earlyon_approval_notification_email(approval_notification_recipients, regs, earlyon.id, earlyon.arrival_date)
             
             return redirect(url_for('earlyon.success', earlyonid=earlyon.id))
     return render_template('create_earlyon.html', form=form, reg=reg)

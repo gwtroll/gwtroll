@@ -79,6 +79,7 @@ def send_fastpass_email(recipient, reg):
         "<p>Greetings,</p>"
         f"<p>This is confirmation that we have received payment for your Gulf Wars registration, {reg.id}. We look forward to seeing you at War!</p>"
         f"<p>Mundane Name: {reg.fname} {reg.lname}<br/>"
+        "Registration ID: " + str(reg.id) + "<br/>"
         f"SCA Name: {reg.scaname}<br/>"
         f"Member Number: {reg.mbr_num}<br/>"
         f"Arriving On: {reg.expected_arrival_date}</p>"
@@ -154,7 +155,7 @@ def send_merchant_approval_email(recipient, merchant):
 
     #EARLYON
 
-def send_earlyon_confirmation_email(recipient, regs):
+def send_earlyon_confirmation_email(recipient, regs, arrival_date):
     msg = Message(
         subject="Gulf Wars XXXIV - Early-On Confirmation",
         recipients=[recipient],
@@ -162,7 +163,7 @@ def send_earlyon_confirmation_email(recipient, regs):
 
     regs_string = ""
     for reg in regs:
-        regs_string += f"<tr><td style='border: 1px solid black; border-collapse: collapse;'>{reg.fname} {reg.lname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.scaname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.mbr_num}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.expected_arrival_date}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.id}</td><tr>"
+        regs_string += f"<tr><td style='border: 1px solid black; border-collapse: collapse;'>{reg.fname} {reg.lname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.scaname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.mbr_num}</td><td style='border: 1px solid black; border-collapse: collapse;'>{arrival_date}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.id}</td><tr>"
 
     msg.html = (
         "<p>Greetings,</p>"
@@ -216,37 +217,59 @@ def send_earlyon_approval_email(recipient, regs):
 
     send_async_mail(msg)
 
-def send_earlyon_approval_notification_email(recipients, regs, earlyonid):
+def send_earlyon_approval_notification_email(recipients, regs, earlyonid, arrival_date):
+    if len(recipients) > 0:
+        msg = Message(
+            subject="Gulf Wars XXXIV - Early-On Approval Needed",
+            recipients=recipients,
+        )
+
+        regs_string = ""
+        for reg in regs:
+            regs_string += f"<tr><td style='border: 1px solid black; border-collapse: collapse;'>{reg.fname} {reg.lname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.scaname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.mbr_num}</td><td style='border: 1px solid black; border-collapse: collapse;'>{arrival_date}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.id}</td><tr>"
+
+        msg.html = (
+            "<p>Greetings,</p>"
+            "<p>The following application for Early-On admittance to Gulf Wars XXXIV (2026) needs your approval:</p>"
+            "<table style='border: 1px solid black; border-collapse: collapse;'>"
+            "<tr>"
+            "<th style='border: 1px solid black; border-collapse: collapse;'><b>Mundane Name</b></th>"
+            "<th style='border: 1px solid black; border-collapse: collapse;'><b>SCA Name</b></th>"
+            "<th style='border: 1px solid black; border-collapse: collapse;'><b>Member Number</b></th>"
+            "<th style='border: 1px solid black; border-collapse: collapse;'><b>Arrival Date</b></th>"
+            "<th style='border: 1px solid black; border-collapse: collapse;'><b>Registration ID</b></th>"
+            "</tr>"
+            +regs_string+
+            "</table>"
+            "<br>"
+            "<br>"
+            "<p>To review this Early-On Application: <a href="
+            + url_for("earlyon.update",earlyon_id=earlyonid, _external=True)
+            + ">EARLY-ON APPLICATION "+str(earlyonid)+"</a></p>"
+            "<p>To view all Early-On Applications: <a href="
+            + url_for("earlyon.earlyon", _external=True)
+            + ">ALL EARLY-ON APPLICATIONS</a></p>"
+            )
+
+        send_async_mail(msg)
+
+def send_new_user_email(recipient, fname, lname, username, password):
     msg = Message(
-        subject="Gulf Wars XXXIV - Early-On Approval Needed",
-        recipients=[recipients],
+        subject="Gulf Wars XXXIV - New User",
+        recipients=[recipient],
     )
 
-    regs_string = ""
-    for reg in regs:
-        regs_string += f"<tr><td style='border: 1px solid black; border-collapse: collapse;'>{reg.fname} {reg.lname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.scaname}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.mbr_num}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.expected_arrival_date}</td><td style='border: 1px solid black; border-collapse: collapse;'>{reg.id}</td><tr>"
-
     msg.html = (
-        "<p>Greetings,</p>"
-        "<p>The following application for Early-On admittance to Gulf Wars XXXIV (2026) needs your approval:</p>"
-        "<table style='border: 1px solid black; border-collapse: collapse;'>"
-        "<tr>"
-        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Mundane Name</b></th>"
-        "<th style='border: 1px solid black; border-collapse: collapse;'><b>SCA Name</b></th>"
-        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Member Number</b></th>"
-        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Arrival Date</b></th>"
-        "<th style='border: 1px solid black; border-collapse: collapse;'><b>Registration ID</b></th>"
-        "</tr>"
-        +regs_string+
-        "</table>"
+        "<p>Greetings "+fname+" "+lname+",</p>"
+        "<p>A new login has been created for you for the Gulf Wars XXXIV Registion/Troll application.</p>"
+        "<p>Below is your username and temporary password.</p>"
         "<br>"
+        "<p><b>Username: </b>"+username+"</p>"
+        "<p><b>Password: </b>"+password+"</p>"
         "<br>"
-        "<p>To review this Early-On Application: <a href="
-        + url_for("earlyon.update",earlyon_id=earlyonid, _external=True)
-        + ">EARLY-ON APPLICATION "+str(earlyonid)+"</a></p>"
-        "<p>To view all Early-On Applications: <a href="
-        + url_for("earlyon.earlyon", _external=True)
-        + ">ALL EARLY-ON APPLICATIONS</a></p>"
-        )
+        "<p>Please update your password once you have logged in.</p>"
+        "<p>You can do this by going to the \"My Account\" at the top right of your screen, then selecting \"Change Password\" and entering a new password.</p>"
+        "<p>If you need further assistance, please reach out to apps.deputy@gulfwars.org</p>"
+    )
 
     send_async_mail(msg)

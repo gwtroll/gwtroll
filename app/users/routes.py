@@ -10,6 +10,7 @@ from app.models import *
 from werkzeug.exceptions import abort
 import uuid
 from app.utils.db_utils import *
+from app.utils.email_utils import send_new_user_email
 import random
 import string
 
@@ -100,8 +101,9 @@ def uploadusers():
     form = StandardUploadForm()
     if request.method == 'POST':
         file = request.files['file']
-        if file:
+        try:
             for line in file.stream:
+                print(line)
                 line_content = line.decode('utf-8').strip()
                 new_row = line_content.split(',')
                 department_string = new_row[0].strip()
@@ -124,9 +126,14 @@ def uploadusers():
                 )
                 new_user.roles.append(role)
                 new_user.fs_uniquifier = uuid.uuid4().hex
-                new_user.set_password(generate_temp_password(8))
+                password = generate_temp_password(8)
+                new_user.set_password(password)
                 db.session.add(new_user)
-        db.session.commit()
-        return redirect(url_for('users.users'))
+                if new_user.email != None:
+                    send_new_user_email(email, fname, lname, username, password)
+        finally:
+            db.session.commit()
+
+            return redirect(url_for('users.users'))
 
     return render_template('uploadusers.html', form=form)

@@ -528,10 +528,10 @@ def get_reg_arrival_dates():
     return returned_dates
 
 def get_merchant_choices():
-    merchants = Merchant.query.order_by(Merchant.name).all()
+    merchants = Merchant.query.order_by(Merchant.business_name).all()
     merchant_choices = [(None, '-')]
     for d in merchants:
-        merchant_tup = (d.id, d.name)
+        merchant_tup = (d.id, d.business_name)
         merchant_choices.append(merchant_tup)
     return merchant_choices
 

@@ -62,10 +62,14 @@
             {% with field=form.arrival_date, required=true %}
             {% include 'form_field.html' %}
             {% endwith %}
-            {{ form.department.label }}<span style="color: red;">*</span>
-            {{ form.department(class_='form-control m-0', onchange_="merchantCheck()") }}
-            {% if form.department.errors %}{% for error in form.department.errors %}<span
-            class="error">{{ error }}</span>{% endfor %}{% endif %}
+        </div>
+        <div class="row form-group">
+            <p>
+                {{ form.department.label }}<span style="color: red;">*</span>
+                {{ form.department(class_='form-control m-0', onchange_="merchantCheck()") }}
+                {% if form.department.errors %}{% for error in form.department.errors %}<span
+                class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
         </div>
         <div class="row form-group" id="merchant_section" style="display: none;">
             {% with field=form.merchant, required=false %}
@@ -78,6 +82,13 @@
             {% endwith %}
         </div>
 
+        <div class="row">
+            <div class="col">
+                <p>
+                   <b>Registration Id for riders can be found on the email 'Gulf Wars XXXIV - Payment Confirmation and Fast Pass' received after completing payment of registration.</b> 
+                </p>
+            </div>
+        </div>
         {% for rider in form.riders %}
         <div>
             <div class="row form-group">
@@ -136,9 +147,10 @@
 {% block script %}
 <script>
     function merchantCheck() {
-        const department = document.getElementById("department").value;
+        const department = document.getElementById("department");
         const merchant = document.getElementById("merchant_section");
-        if (department == 'Merchant/Vendor') {
+        console.log(department.options[department.selectedIndex].text)
+        if (department.options[department.selectedIndex].text == 'Merchant/Vendor') {
             merchant.style.display = 'block';
         }
         else {
