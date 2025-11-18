@@ -171,6 +171,12 @@ def get_role(roleid):
         abort(404)
     return role
 
+def get_role_by_name(rolename):
+    role = Role.query.filter_by(name=rolename).first()
+    if role is None:
+        abort(404)
+    return role
+
 def get_roles():
     roles = Role.query.order_by(Role.name).all()
     if roles is None:
@@ -553,6 +559,12 @@ def get_department_choices():
         department_tup = (d.id, d.name)
         department_choices.append(department_tup)
     return department_choices
+
+def get_department_by_name(departmentname):
+    dept = Department.query.filter_by(name=departmentname).first()
+    if dept is None:
+        abort(404)
+    return dept
 
 def get_approval_notification_recipients(departmentid):
     recipients = []
