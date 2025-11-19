@@ -710,3 +710,81 @@ def toJSON(obj):
             else:
                 data_dict[key] = obj[key]
     return json.dumps(data_dict, sort_keys=True, default=str)
+
+@bp.route("/paypal_recon_export", methods=("GET", ""))
+@login_required
+@permission_required('registration_reports')
+def paypal_recon_export():
+    data = {}
+    columns = [{"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
+        {"field": "date", "title": "Invoice Date", "filterControl":"input"},
+        {"field": "email", "title": "Email", "filterControl":"input"},
+        {"field": "invoice_id", "title": "PayPal ID", "filterControl":"input"},
+        {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
+        {"field": "invoice_type", "title": "Invoice Type", "filterControl":"input"},
+        {"field": "paypal_gross", "title": "PayPal Gross", "filterControl":"input"},
+        {"field": "paypal_fee", "title": "PayPal Fee", "filterControl":"input"},
+        {"field": "paypal_net", "title": "PayPal Net", "filterControl":"input"},
+        {"field": "registration_total", "title": "Registration", "filterControl":"input"},
+        {"field": "nmr_total", "title": "NMR", "filterControl":"input"},
+        {"field": "donation_total", "title": "Donation", "filterControl":"input"},
+        {"field": "space_fee", "title": "Space Fee", "filterControl":"input"},
+        {"field": "processing_fee", "title": "Processing Fee", "filterControl":"input"},
+        {"field": "rider_fee", "title": "rider_fee", "filterControl":"input"},
+        {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
+        {"field": "balance", "title": "Invoice Balance", "filterControl":"input"},
+    ]
+    rows = []
+    invoices = Invoice.query.filter().all()
+    obj = {}
+    for field in columns:
+        obj[field["field"]]=None
+    for inv in invoices:
+        temp_obj = copy.deepcopy(obj)
+        temp_obj = mapping_recon_report(inv,temp_obj)
+        reg_json = json.loads(toJSON(temp_obj))
+        rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
+def mapping_recon_report(obj,temp_obj):
+
+    temp_obj['invoice_status']=obj.invoice_status
+    temp_obj['date']=obj.invoice_date.date()
+    temp_obj['email']=obj.invoice_email
+    temp_obj['invoice_id']=obj.invoice_id
+    temp_obj['invoice_number']=obj.invoice_number
+    temp_obj['invoice_type']=obj.invoice_type
+    temp_obj['registration_total']=obj.registration_total
+    temp_obj['nmr_total']=obj.nmr_total
+    temp_obj['donation_total']=obj.donation_total
+    temp_obj['space_fee']=obj.space_fee
+    temp_obj['processing_fee']=obj.processing_fee
+    temp_obj['rider_fee']=obj.rider_fee
+    temp_obj['invoice_total']=obj.invoice_total
+    temp_obj['balance']=obj.balance
+    temp_obj['paypal_gross']=0
+    temp_obj['paypal_fee']=0
+    temp_obj['paypal_net']=0
+
+    if obj.payments != None:
+        for payment in obj.payments:
+            if payment.paypal_id != None:
+                pay = get_paypal_payment(payment.paypal_id)
+                if 'seller_receivable_breakdown' in pay:
+                    temp_obj['paypal_gross']=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
+                    temp_obj['paypal_fee']=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
+                    temp_obj['paypal_net']=float(pay['seller_receivable_breakdown']['net_amount']['value'])
+
+    return temp_obj
+
+def toJSON(obj):
+    data_dict = {}
+    for key in obj:
+        if not key.startswith("_"):
+            if isinstance(obj[key], datetime):
+                data_dict[key] = datetime.strftime(obj[key], "%Y-%m-%d")
+            else:
+                data_dict[key] = obj[key]
+    return json.dumps(data_dict, sort_keys=True, default=str)
