@@ -188,7 +188,7 @@ def send_earlyon_confirmation_email(recipient, regs, arrival_date):
 def send_earlyon_approval_email(recipient, regs):
     msg = Message(
         subject="Gulf Wars XXXIV - Early-On Approval",
-        recipients=[recipient],
+        recipients=[recipient,'early-on@gulfwars.org'],
     )
 
     regs_string = ""
