@@ -101,6 +101,10 @@ def uploadusers():
     form = StandardUploadForm()
     if request.method == 'POST':
         file = request.files['file']
+        all_users = User.query.all()
+        all_user_names = []
+        for user in all_users:
+            all_user_names.append(user.username)
         try:
             for line in file.stream:
                 print(line)
@@ -115,22 +119,26 @@ def uploadusers():
                 role_string = new_row[5].strip()
                 role = get_role_by_name(role_string)
                 
-                new_user = User(
-                    username=username,
-                    department_id=department.id,
-                    email=email,
-                    fname=fname,
-                    lname=lname,
-                    medallion=0,
-                    active=True
-                )
-                new_user.roles.append(role)
-                new_user.fs_uniquifier = uuid.uuid4().hex
-                password = generate_temp_password(8)
-                new_user.set_password(password)
-                db.session.add(new_user)
-                if new_user.email != None:
-                    send_new_user_email(email, fname, lname, username, password)
+                if username not in all_user_names:
+            
+                    new_user = User(
+                        username=username,
+                        department_id=department.id,
+                        email=email,
+                        fname=fname,
+                        lname=lname,
+                        medallion=0,
+                        active=True
+                    )
+                    new_user.roles.append(role)
+                    new_user.fs_uniquifier = uuid.uuid4().hex
+                    password = generate_temp_password(8)
+                    new_user.set_password(password)
+                    db.session.add(new_user)
+                    if new_user.email != None:
+                        send_new_user_email(email, fname, lname, username, password)
+        except Exception as e:
+            print(e)
         finally:
             db.session.commit()
 

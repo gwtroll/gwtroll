@@ -20,6 +20,17 @@ def earlyon():
         earlyons = EarlyOnRequest.query.all()
     elif current_user.has_role('Department Head'):
         earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
+        if current_user.department.name == 'Land':
+            earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
+            for x in ['Land - Ansteorra','Land - Trimaris']:
+                temp_dept = get_department_by_name(x)
+                earlyons.extend(EarlyOnRequest.query.filter_by(department_id=temp_dept.id).all())
+        if current_user.department.name == 'Merchant Coordinators':
+            earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
+            for x in ['Merchant/Vendor']:
+                temp_dept = get_department_by_name(x)
+                earlyons.extend(EarlyOnRequest.query.filter_by(department_id=temp_dept.id).all())
+
     return render_template('earlyon_list.html', earlyons=earlyons)
 
 @bp.route('/<int:earlyon_id>', methods=('GET','POST'))
