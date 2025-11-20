@@ -599,29 +599,29 @@ def registration_report():
         {"field": "date", "title": "Date", "filterControl":"input"},
         {"field": "time", "title": "Time CT", "filterControl":"input"},
         {"field": "name", "title": "Name", "filterControl":"input"},
+        {"field": "business_name", "title": "Business Name", "filterControl":"input"},
         {"field": "email", "title": "Email", "filterControl":"input"},
         {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
+        {"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
         {"field": "reg_id", "title": "Registration Number", "filterControl":"input"},
+        {"field": "reg_status", "title": "Registration Status", "filterControl":"input"},
         {"field": "reg_type", "title": "Registration Type", "filterControl":"input"},
         {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
-        {"field": "paypal_gross", "title": "PayPal Gross", "filterControl":"input"},
-        {"field": "paypal_fee", "title": "PayPal Fee", "filterControl":"input"},
-        {"field": "paypal_net", "title": "PayPal Net", "filterControl":"input"},
-        {"field": "paypal_gross_split", "title": "PayPal Gross Split", "filterControl":"input"},
-        {"field": "paypal_fee_split", "title": "PayPal Fee Split", "filterControl":"input"},
-        {"field": "paypal_net_split", "title": "PayPal Net Split", "filterControl":"input"},
         {"field": "mbr", "title": "Member", "filterControl":"input"},
         {"field": "adult_minor", "title": "Adult/Minor", "filterControl":"input"},
         {"field": "reg_base", "title": "Registration Base", "filterControl":"input"},
         {"field": "nmr", "title": "NMR", "filterControl":"input"},
         {"field": "donation", "title": "Donation", "filterControl":"input"},
+        {"field": "space_fee", "title": "Space Fee", "filterControl":"input"},
+        {"field": "processing_fee", "title": "Processing Fee", "filterControl":"input"},
+        {"field": "rider_fee", "title": "Rider Fee", "filterControl":"input"},
         {"field": "total_price_paid", "title": "Total Price Paid", "filterControl":"input"},
     ]
     rows = []
     # invoices = Invoice.query.filter().all()
     regs = Registrations.query.filter().all()
-    # merchants = Merchant.query.filter().all()
-    # earlyons = EarlyOnRequest.query.filter().all()
+    regs.extend(Merchant.query.filter().all())
+    regs.extend(EarlyOnRequest.query.filter().all())
     obj = {}
     for field in columns:
         obj[field["field"]]=None
@@ -632,33 +632,9 @@ def registration_report():
             temp_obj = copy.deepcopy(obj)
             temp_obj = mapping_registration_report(reg,temp_obj,count)
             temp_list.append(temp_obj)
-            # reg_json = json.loads(toJSON(temp_obj))
-            # rows.append(reg_json)
-            count+=1
-    invoice_dict={}
-    for item in temp_list:
-        if item['invoice_number'] not in invoice_dict and item['total_price_paid'] > 0:
-            invoice_dict[item['invoice_number']]={'count':1,'invoice_number':item['invoice_number'], 'paypal_gross':item['paypal_gross'], 'paypal_fee':item['paypal_fee'], 'paypal_net':item['paypal_net']}
-        elif item['invoice_number'] in invoice_dict and item['total_price_paid'] != 0:
-            invoice_dict[item['invoice_number']]['count']+=1
-    for item in temp_list:
-        if item['invoice_number'] in invoice_dict and item['total_price_paid'] != 0:
-            if invoice_dict[item['invoice_number']]['paypal_gross'] != 0:
-                item['paypal_gross_split']=round(item['paypal_gross']/invoice_dict[item['invoice_number']]['count'],2)
-                invoice_dict[item['invoice_number']]['paypal_gross']-=item['paypal_gross_split']
-
-
-            if invoice_dict[item['invoice_number']]['paypal_fee'] != 0: 
-                item['paypal_fee_split']=round(item['paypal_fee']/invoice_dict[item['invoice_number']]['count'],2)
-                invoice_dict[item['invoice_number']]['paypal_fee']-=item['paypal_fee_split']
-
-            if invoice_dict[item['invoice_number']]['paypal_net'] != 0: 
-                item['paypal_net_split']=round(item['paypal_net']/invoice_dict[item['invoice_number']]['count'],2)
-                invoice_dict[item['invoice_number']]['paypal_net']-=item['paypal_net_split']
-
-            invoice_dict[item['invoice_number']]['count']-1
-            reg_json = json.loads(toJSON(item))
+            reg_json = json.loads(toJSON(temp_obj))
             rows.append(reg_json)
+            count+=1
     data['columns'] = columns
     data['rows'] = rows
     return jsonify(data)
@@ -672,32 +648,55 @@ def mapping_registration_report(obj,temp_obj,count):
             temp_obj['name']=obj.fname + " " + obj.lname
             temp_obj['email']=obj.invoice_email
             temp_obj['invoice_number']=obj.invoice.invoice_number
+            temp_obj['invoice_status']=obj.invoice.invoice_status
             temp_obj['reg_id']=obj.id
+            temp_obj['reg_status']= '-' if obj.duplicate == False and obj.canceled == False else 'CANCELD/DUPLICATE'
             temp_obj['reg_type']=obj.invoice.invoice_type
             temp_obj['invoice_total']=obj.invoice.invoice_total
             temp_obj['mbr']=obj.mbr
-            temp_obj['adult_minor']='Adult' if obj.age == '18+' or obj.age == "Royal" else 'Minor'
+            temp_obj['adult_minor']= obj.age if obj.age == '18+' or obj.age == "Royals" else 'Minor'
             temp_obj['reg_base']=obj.registration_price
             temp_obj['nmr']=obj.nmr_price
             temp_obj['donation']=obj.paypal_donation
-            temp_obj['total_price_paid']=obj.total_due - obj.balance
             temp_obj['total_price_paid']=0
-            temp_obj['paypal_gross']=0
-            temp_obj['paypal_fee']=0
-            temp_obj['paypal_net']=0
-            temp_obj['paypal_gross_split']=0
-            temp_obj['paypal_fee_split']=0
-            temp_obj['paypal_net_split']=0
             if obj.invoice.payments != None:
                 for reg_payment in obj.payments:
                     temp_obj['total_price_paid']+=reg_payment.amount
-                for payment in obj.invoice.payments:
-                    if payment.paypal_id != None:
-                        pay = get_paypal_payment(payment.paypal_id)
-                        if 'seller_receivable_breakdown' in pay:
-                            temp_obj['paypal_gross']=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
-                            temp_obj['paypal_fee']=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
-                            temp_obj['paypal_net']=float(pay['seller_receivable_breakdown']['net_amount']['value'])
+        case 'MERCHANT':
+            temp_obj['date']=obj.application_date.date()
+            temp_obj['time']=obj.application_date.time()
+            temp_obj['name']=obj.fname + " " + obj.lname
+            temp_obj['business_name']=obj.business_name
+            temp_obj['email']=obj.email
+            temp_obj['invoice_number']=obj.invoice.invoice_number
+            temp_obj['invoice_status']=obj.invoice.invoice_status
+            temp_obj['reg_id']=obj.id
+            temp_obj['reg_status']= obj.status
+            temp_obj['reg_type']=obj.invoice.invoice_type
+            temp_obj['invoice_total']=obj.invoice.invoice_total
+            temp_obj['space_fee']=obj.space_fee
+            temp_obj['processing_fee']=obj.processing_fee
+            temp_obj['total_price_paid']=0
+            if obj.invoice.payments != None:
+                for reg_payment in obj.payments:
+                    temp_obj['total_price_paid']+=reg_payment.amount
+        case 'EARLYON':
+            temp_obj['date']=obj.request_date.date()
+            temp_obj['time']=obj.request_date.time()
+            temp_obj['name']=obj.registration.fname + " " + obj.registration.lname
+            temp_obj['business_name']=obj.mercahnt.business_name if obj.mercahnt != None else None
+            temp_obj['email']=obj.registration.invoice_email
+            temp_obj['invoice_number']=obj.invoice.invoice_number
+            temp_obj['invoice_status']=obj.invoice.invoice_status
+            temp_obj['reg_id']=obj.id
+            temp_obj['reg_status']= 'APPRVOED' if obj.dept_approval_status == 'APPROVED' and obj.autocrat_approval_status == 'APPROVED' else 'NOT APPROVED'
+            temp_obj['reg_type']=obj.invoice.invoice_type
+            temp_obj['invoice_total']=obj.invoice.invoice_total
+            temp_obj['rider_fee']=obj.rider_cost
+            temp_obj['total_price_paid']=0
+            if obj.invoice.payments != None:
+                for reg_payment in obj.payments:
+                    temp_obj['total_price_paid']+=reg_payment.amount
 
     return temp_obj
 
