@@ -724,13 +724,15 @@ def paypal_recon_export():
         {"field": "paypal_gross", "title": "PayPal Gross", "filterControl":"input"},
         {"field": "paypal_fee", "title": "PayPal Fee", "filterControl":"input"},
         {"field": "paypal_net", "title": "PayPal Net", "filterControl":"input"},
+        {"field": "other_payments", "title": "Non-PayPal Payments", "filterControl":"input"},
         {"field": "registration_total", "title": "Registration", "filterControl":"input"},
         {"field": "nmr_total", "title": "NMR", "filterControl":"input"},
         {"field": "donation_total", "title": "Donation", "filterControl":"input"},
         {"field": "space_fee", "title": "Space Fee", "filterControl":"input"},
         {"field": "processing_fee", "title": "Processing Fee", "filterControl":"input"},
-        {"field": "rider_fee", "title": "rider_fee", "filterControl":"input"},
+        {"field": "rider_fee", "title": "Rider Fee", "filterControl":"input"},
         {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
+        {"field": "total_price_paid", "title": "Total Price Paid", "filterControl":"input"},
         {"field": "balance", "title": "Invoice Balance", "filterControl":"input"},
     ]
     rows = []
@@ -766,9 +768,14 @@ def mapping_recon_report(obj,temp_obj):
     temp_obj['paypal_gross']=0
     temp_obj['paypal_fee']=0
     temp_obj['paypal_net']=0
+    temp_obj['other_payments']=0
+    temp_obj['total_price_paid']=0
 
     if obj.payments != None:
         for payment in obj.payments:
+            temp_obj['total_price_paid']+=payment.amount
+            if payment.type != 'PAYPAL':
+                temp_obj['other_payments']+=payment.amount
             if payment.paypal_id != None:
                 pay = get_paypal_payment(payment.paypal_id)
                 if 'seller_receivable_breakdown' in pay:
