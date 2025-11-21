@@ -176,7 +176,7 @@ def createearlyon(regid):
                 reg_id = reg.id,
                 arrival_date=form.arrival_date.data,
                 department_id=form.department.data,
-                merchant_id = form.merchant.data,
+                merchant_id = form.merchant.data if form.merchant.data != 'None' else None,
                 notes=form.notes.data,
                 dept_approval_status='PENDING',
                 autocrat_approval_status='PENDING',
