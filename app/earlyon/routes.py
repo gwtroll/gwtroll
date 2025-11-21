@@ -22,7 +22,7 @@ def earlyon():
         earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
         if current_user.department.name == 'Land':
             earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
-            for x in ['Land - Ansteorra','Land - Trimaris']:
+            for x in ['Land - Ansteorra','Land - Trimaris','Land Liaisons/Set-up Crews']:
                 temp_dept = get_department_by_name(x)
                 earlyons.extend(EarlyOnRequest.query.filter_by(department_id=temp_dept.id).all())
         if current_user.department.name == 'Merchant Coordinators':
