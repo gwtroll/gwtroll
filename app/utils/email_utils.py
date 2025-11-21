@@ -48,7 +48,7 @@ def send_confirmation_email(recipient, regs):
         "</tr>"
         +regs_string+
         "</table>"
-        "<p>You will receive your site fee invoice within 3 days of site registration opening for everyone. Expect to see it by 11/3/2025. Once received, if not paid within seven (7) days, all registrations will be cancelled and you will need to reregister for your site fees.</p>"
+        "<p>You will receive your site fee invoice within 3 days of site registration opening for everyone. Once received, if not paid within seven (7) days, all registrations will be cancelled and you will need to reregister for your site fees.</p>"
         "<p>Once paid, each registrant will receive an individual email with their confirmation, and their FastPass QR Code to use for entry. They will receive a reminder email closer to Gulf Wars to look for the previous email.</p>"
         "<p>If you need to request Early-On access to the site, you will receive instructions once your registration invoice has been paid in-full.</p>"
     )
