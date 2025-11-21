@@ -60,11 +60,79 @@ def update(earlyon_id):
             if form.department.data == None:
                 flash('Please select a department.', 'error')
                 return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
+            if request.form.get('remove'):
+                remove = request.form.get('remove')
+                form.riders.entries.pop(int(remove))
+                return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
+            if form.validate_on_submit():
+                if request.form.get('add'):
+                    form.riders.append_entry()
+                    return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
             earlyon.arrival_date = form.arrival_date.data
             earlyon.department_id = form.department.data
             earlyon.notes = form.notes.data
             earlyon.dept_approval_status = form.dept_approval_status.data
             earlyon.autocrat_approval_status = form.autocrat_approval_status.data
+            earlyon.merchant_id = form.merchant.data if form.merchant.data != 'None' else None,
+
+            rider_ids = []
+            rider_registration_ids = []
+            for idx, field in enumerate(form.riders):
+                rider_ids.append(field.regid.data)
+            rider_registrations = Registrations.query.filter(Registrations.id.in_(rider_ids)).all()
+            for rider in rider_registrations:
+                if len(rider.earlyonrequests_ref) > 0 or len(rider.earlyonriders_ref) > 0:
+                    rider_registration_ids.append(rider.id)
+
+            for id in rider_ids:
+                if id not in rider_registration_ids:
+                    flash(f"Rider with registration ID {id} does not exist.", 'error')
+                    return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
+
+            riders = []
+
+            rider_cost = 0
+            free_riders = 1
+            adult_riders = 0
+            merchant_dept = get_department_by_name('Merchant/Vendor')
+            if int(form.department.data) == int(merchant_dept.id):
+                free_riders = 3
+                if form.merchant.data != None and form.merchant.data != '-':
+                    merchant = get_merchant(form.merchant.data)
+                    merchant_space = (int(merchant.frontage_width) + int(merchant.ropes_left) + int(merchant.ropes_right)) * (int(merchant.frontage_depth) + int(merchant.ropes_front) + int(merchant.ropes_back))
+                    merchant_space = merchant_space - merchant.personal_space if merchant.personal_space != None and merchant.personal_space > 0 else merchant_space
+                    if merchant_space > 0:
+                        free_riders = math.ceil(merchant_space/600) * 3
+
+            for idx, field in enumerate(form.riders):
+
+                rider_check = EarlyOnRider.query.filter(EarlyOnRider.regid == field.regid.data).first()
+
+                if rider_check == None:
+                    if field.minor.data == False:
+                        adult_riders += 1
+                        if adult_riders > free_riders:
+                            rider_cost += 15
+                    
+                    earlyon_rider = EarlyOnRider(
+                        fname=field.fname.data,
+                        lname=field.lname.data,
+                        scaname=field.scaname.data,
+                        minor= field.minor.data,
+                        regid=field.regid.data,
+                    )
+                else:
+                    earlyon_rider = rider_check
+                    earlyon_rider.fname = field.fname.data
+                    earlyon_rider.lname = field.lname.data
+                    earlyon_rider.scaname = field.scaname.data
+                    earlyon_rider.minor = field.minor.data
+
+                riders.append(earlyon_rider)            
+                db.session.add_all(riders)
+
+
+            earlyon.earlyonriders = riders
 
             if earlyon.dept_approval_status == 'APPROVED' and earlyon.autocrat_approval_status == 'APPROVED' and earlyon.rider_balance <= 0:
                 earlyon.registration.early_on_approved = True

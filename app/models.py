@@ -817,11 +817,11 @@ class Merchant(db.Model):
         processing_fee_balance = self.processing_fee
         electricity_balance = float(self.electricity_fee)
         for payment in self.payments:
-            balance -= payment.space_fee_amount
+            balance -= float(payment.space_fee_amount)
             balance -= payment.processing_fee_amount
-            space_fee_balance -= payment.space_fee_amount
+            space_fee_balance -= float(payment.space_fee_amount)
             processing_fee_balance -= payment.processing_fee_amount
-            electricity_balance -= payment.electricity_fee_amount
+            electricity_balance -= float(payment.electricity_fee_amount)
         if balance < 0:
             self.balance = 0
         self.balance = balance

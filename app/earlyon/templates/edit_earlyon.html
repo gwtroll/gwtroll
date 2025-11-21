@@ -79,6 +79,7 @@
                 {% with field=rider.regid, required=true %}
                 {% include 'form_field.html' %}
                 {% endwith %}
+                {% if rider.regid.data %}
                 <div class="col form-group">
                     <p>
                         Registration
@@ -86,13 +87,26 @@
                         <a href="{{url_for('registration.viewreg', regid=rider.regid.data)}}">{{rider.fname.data}} {{rider.lname.data}} - {{rider.regid.data}}</a>
                     </p>
                 </div>
+                {% endif %}
                 {% with field=rider.minor, checkbox=true %}
                 {% include 'form_field.html' %}
                 {% endwith %}
+                <div class="col form-group">
+                    <br />
+                    <button value="{{ loop.index -1 }}" name="remove"
+                        class="btn form-control btn-danger btn-lg">Delete</button>
+                </div>
             </div>
         </div>
         {% endfor %}
         {% endif %}
+        <div class="row">
+            <div class="col">
+                <button name="add" value="addRider" class="btn save form-control btn-warning btn-lg">Add
+                    Rider</button>
+            </div>
+        </div>
+        <br />
 
         {% if current_user.has_role('Admin') or current_user.has_role('Department Head') %}
         <div class="row form-group">

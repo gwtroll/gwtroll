@@ -937,6 +937,7 @@ class EditMerchantForm(FlaskForm):
     trailer_state = StringField('Trailer State', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
     application_date = DateTimeField('Application Date', validators=[DataRequired()])
+    invoice_number = IntegerField('Invoice Number', validators=[Optional()])
     signature = StringField('Signature', validators=[DataRequired()])
     
     submit = SubmitField(

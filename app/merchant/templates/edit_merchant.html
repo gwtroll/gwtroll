@@ -326,6 +326,17 @@
         </div>
     </div>
 
+    {% if current_user.has_permission('admin') %}
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.invoice_number.label }}
+                {{ form.invoice_number(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="row form-group">
         <div class="col form-group">
             <p>

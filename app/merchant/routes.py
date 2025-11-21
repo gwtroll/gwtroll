@@ -146,6 +146,7 @@ def update(merch_id):
     merchant = Merchant.query.get_or_404(merch_id)
     event = EventVariables.query.first()
     form = EditMerchantForm(
+        invoice_number = merchant.invoice.invoice_number if merchant.invoice != None else None,
         business_name = merchant.business_name,
         sca_name = merchant.sca_name,
         fname = merchant.fname,
@@ -192,6 +193,7 @@ def update(merch_id):
     if request.method == 'POST':
         old_status = merchant.status
         if form.validate_on_submit():
+            merchant.invoice_number = form.invoice_number.data if form.invoice_number.data != 'None' and form.invoice_number.data != None else None
             merchant.status = form.status.data
             merchant.application_date = form.application_date.data.replace(microsecond=0)
             merchant.business_name = form.business_name.data
