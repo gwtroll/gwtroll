@@ -9,6 +9,7 @@ from flask_security.models import fsqla_v3 as fsqla
 from flask_mail import Mail
 from flask_qrcode import QRcode
 from werkzeug.exceptions import InternalServerError
+import traceback
 
 app = Flask(__name__,static_url_path="", static_folder="static")
 
@@ -70,7 +71,8 @@ from app.utils.email_utils import send_admin_error_email
 
 @app.errorhandler(InternalServerError)
 def handle_500_error(e):
-    send_admin_error_email(e)
+    stack_trace = traceback.format_exc()
+    send_admin_error_email(e, stack_trace)
     return "An internal server error occurred. The administrator has been notified.", 500
 
 
