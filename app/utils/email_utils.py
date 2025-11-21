@@ -3,6 +3,7 @@ from flask_mail import Message
 from flask import url_for, copy_current_request_context
 import base64, binascii
 import threading
+from datetime import datetime
 
 def send_async_mail(message):
 
@@ -270,6 +271,21 @@ def send_new_user_email(recipient, fname, lname, username, password):
         "<p>Please update your password once you have logged in.</p>"
         "<p>You can do this by going to the \"My Account\" at the top right of your screen, then selecting \"Change Password\" and entering a new password.</p>"
         "<p>If you need further assistance, please reach out to apps.deputy@gulfwars.org</p>"
+    )
+
+    send_async_mail(msg)
+
+def send_admin_error_email(error):
+    now = datetime.strftime(datetime.now(),"%m/%d/%Y %H:%M:%S")
+    msg = Message(
+    subject=f"Gulf Wars XXXIV - 500 Error - {now}",
+    recipients=['apps.deputy@gulfwars.org'],
+    )
+
+    msg.html = (
+        f"<p>Code: {error.code}</p>"
+        f"<p>Name: {error.name}</p>"
+        f"<p>Message: {error.description}</p>"
     )
 
     send_async_mail(msg)

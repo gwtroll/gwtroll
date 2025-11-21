@@ -8,6 +8,7 @@ from flask_security import Security, SQLAlchemyUserDatastore, auth_required, has
 from flask_security.models import fsqla_v3 as fsqla
 from flask_mail import Mail
 from flask_qrcode import QRcode
+from werkzeug.exceptions import InternalServerError
 
 app = Flask(__name__,static_url_path="", static_folder="static")
 
@@ -64,3 +65,13 @@ app.register_blueprint(payment_bp)
 app.register_blueprint(scheduledevents_bp)
 app.register_blueprint(report_bp)
 app.register_blueprint(api_bp)
+
+from app.utils.email_utils import send_admin_error_email
+
+@app.errorhandler(InternalServerError)
+def handle_500_error(e):
+    send_admin_error_email(e)
+    return "An internal server error occurred. The administrator has been notified.", 500
+
+
+app.register_error_handler(500, handle_500_error)
