@@ -287,6 +287,8 @@ def send_admin_error_email(error, stack_trace):
         f"<p>Name: {error.name}</p>"
         f"<p>Message: {error.description}</p>"
         f"<p>Stack Trace: {stack_trace}</p>"
+        f"<p>Full Error Object:<br><br>"
+        f"{error}</p>"
     )
 
     send_async_mail(msg)
