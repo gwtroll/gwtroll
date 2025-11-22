@@ -275,7 +275,7 @@ def send_new_user_email(recipient, fname, lname, username, password):
 
     send_async_mail(msg)
 
-def send_admin_error_email(error, stack_trace, obj='None'):
+def send_admin_error_email(error, stack_trace):
     now = datetime.strftime(datetime.now(),"%m/%d/%Y %H:%M:%S")
     msg = Message(
     subject=f"Gulf Wars XXXIV - 500 Error - {now}",
@@ -287,8 +287,6 @@ def send_admin_error_email(error, stack_trace, obj='None'):
         f"<p>Name: {error.name}</p>"
         f"<p>Message: {error.description}</p>"
         f"<p>Stack Trace: {stack_trace}</p>"
-        f"<p>Full Error Object:<br><br>"
-        f"{obj}</p>"
     )
 
     send_async_mail(msg)

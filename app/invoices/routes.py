@@ -8,6 +8,7 @@ from app.utils.security_utils import *
 from app.utils.paypal_api import *
 from flask_security import roles_accepted
 from markupsafe import Markup
+import traceback
 
 from sqlalchemy import and_, or_
 
@@ -273,6 +274,8 @@ def createinvoice():
             try:
                 paypal_invoice = create_invoice(regs, invoice_email, type)
             except Exception as e:
+                stack_trace = traceback.format_exc()
+                send_admin_error_email(e,stack_trace)
                 return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
             inv = Invoice(
