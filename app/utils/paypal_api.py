@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 import json
 import pytz
 from app.models import EventVariables
+import traceback
+from utils.email_utils import send_admin_error_email
+from flask import jsonify
 
 PAYPAL_API_BASE_URL = os.environ.get('PAYPAL_API_BASE_URL')
 PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID")
@@ -141,6 +144,10 @@ def create_invoice(registrations, invoice_email, type):
         data_dict = response.json()
         return data_dict
     elif response.status_code != 200:
+        stack_trace = traceback.format_exc()
+        e = {'code':999,'name':'999','description':'999'}
+        obj = jsonify({"error": f"An unexpected error occurred: {response.json()}"})
+        send_admin_error_email(e,stack_trace,obj)
         raise Exception(response.json())
 
 
