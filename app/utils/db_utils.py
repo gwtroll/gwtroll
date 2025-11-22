@@ -429,7 +429,7 @@ def prereg_total():
 
 def unsent_count():
     unsent=0
-    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
+    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate != True, Registrations.canceled != True, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
     unsent += len(unsent_reg)
     unsent_merch = Merchant.query.with_entities(Merchant.id).filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     unsent += len(unsent_merch)
@@ -438,7 +438,7 @@ def unsent_count():
     return unsent
 
 def unsent_reg_count():
-    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).all()
+    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate != True, Registrations.canceled != True, Registrations.balance > 0)).all()
     return len(unsent_reg)
 
 def inv_prereg_open_counts():
