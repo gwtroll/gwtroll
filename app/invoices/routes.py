@@ -212,7 +212,7 @@ def createinvoice():
             for reg in regs:
                 if reg.duplicate == False and reg.canceled == False:      
                     reg.invoice_number = zero_invoice.invoice_number
-                    reg.notes = inv.notes
+                    reg.notes = zero_invoice.notes
             
             db.session.commit()
             return redirect(url_for('invoices.unsent'))
