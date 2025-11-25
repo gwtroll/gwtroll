@@ -300,3 +300,20 @@ def editreg(regid):
 
     form.populate_form(reg)
     return render_template('editreg.html', regid=reg.id, reg=reg, form=form)
+
+@bp.route('/<int:regid>/edit/invoice', methods=['GET', 'POST'])
+@login_required
+@permission_required('admin')
+def regupdateinvoice(regid):
+    reg = get_reg(regid)
+
+    form = UpdateInvoiceNumber()
+
+    if request.method == 'POST' and form.validate_on_submit():
+
+        reg.invoice_number=form.invoice_number.data
+        db.session.commit()
+        return redirect(url_for('troll.reg',regid=regid))
+
+    form.invoice_number.data = reg.invoice_number
+    return render_template('updateinvoice.html', regid=reg.id, reg=reg, form=form)

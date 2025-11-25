@@ -1104,3 +1104,7 @@ class PayPalForm(FlaskForm):
     client_secret = StringField('Client Secret', validators=[DataRequired()])
     webhook_id = StringField('Webhook ID', validators=[DataRequired()])
     submit = SubmitField('Update PayPal Info')
+
+class UpdateInvoiceNumber(FlaskForm):
+    invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
+    submit = SubmitField('Update PayPal Info')
