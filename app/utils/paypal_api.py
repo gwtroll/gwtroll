@@ -162,10 +162,10 @@ def cancel_invoice_non_payment(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "note":"This is to inform you that we have cancelled your invoice and associaited registrations due to non-payment. \nIf you still plan to attend Gulf Wars XXXIV (2026), please reregister at https://gulfwars.org/registration.",' \
-    ' "send_to_invoicer": true,' \
+    data = '{ "send_to_invoicer": true,' \
     ' "send_to_recipient": true,' \
-    ' "additional_recipients": [ "reservations@gulfwars.org" ] }'
+    ' "additional_recipients": [ "reservations@gulfwars.org" ],' \
+    ' "note": "This is to inform you that we have cancelled your invoice and associaited registrations due to non-payment. \nIf you still plan to attend Gulf Wars XXXIV (2026), please reregister at https://gulfwars.org/registration." }'
 
     response = requests.post(url, headers=headers, data=data)
 
@@ -177,10 +177,10 @@ def cancel_invoice_duplicate(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "note":"It has come to our attention that a duplicate invoice was issued to you. \nThis is to inform you that we have cancelled this invoice to avoid confusion. \nIf you have questions or concerns, please contact the Gulf Wars Reservationist at reservations@gulfwars.org.",' \
-    '"send_to_invoicer": true, ' \
-    '"send_to_recipient": true, ' \
-    '"additional_recipients": [ "reservations@gulfwars.org" ] }'
+    data = '{ "send_to_invoicer": true,' \
+    ' "send_to_recipient": true,' \
+    ' "additional_recipients": [ "reservations@gulfwars.org" ],' \
+    ' "note": "It has come to our attention that a duplicate invoice was issued to you. \nThis is to inform you that we have cancelled this invoice to avoid confusion. \nIf you have questions or concerns, please contact the Gulf Wars Reservationist at reservations@gulfwars.org." }'
 
     response = requests.post(url, headers=headers, data=data)
 
