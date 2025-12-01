@@ -119,6 +119,8 @@ def update():
 
             for reg in regs:      
                 reg.invoice_number = invoice_number
+            
+            inv.recalculate_balance()
 
         db.session.commit()
         flash('Invoice Information Successfully Updated')
@@ -133,6 +135,8 @@ def update():
     form.invoice_email.data = inv.invoice_email
     form.notes.data = inv.notes
     form.paypal_id.data = inv.invoice_id
+
+    
     
     return render_template('update_invoice.html', form=form, regs=regs, inv=inv)
 

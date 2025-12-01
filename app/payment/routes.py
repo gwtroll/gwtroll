@@ -200,7 +200,7 @@ def paypalpayment():
                                     reg.recalculate_balance()
                                     db.session.commit()
 
-                            inv.balance = float(inv.balance) - float(payment_amount)
+                            inv.recalculate_balance()
                             if inv.balance <= 0:
                                 inv.invoice_status = 'PAID'
                                 #TODO: CREATE EARLY ON EMAIL
