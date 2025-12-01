@@ -480,6 +480,7 @@ class EditForm(FlaskForm):
     early_on = BooleanField('Early On')
     notes = TextAreaField('Notes')
     duplicate = BooleanField('Duplicate Registration')
+    canceled = BooleanField('Canceled Registration')
 
     paypal_donation = IntegerField('PayPal Donation', validators=[NumberRange(min=0,max=999)], default=0)
     
@@ -558,6 +559,8 @@ class EditForm(FlaskForm):
         self.early_on.data = obj.early_on_approved
         # Duplicate
         self.duplicate.data = obj.duplicate
+        # Canceled
+        self.canceled.data = obj.canceled
         # Notes
         if obj.notes:
             self.notes.data = obj.notes         
@@ -634,6 +637,8 @@ class EditForm(FlaskForm):
         obj.early_on_approved = self.early_on.data
         # Duplicate
         obj.duplicate = self.duplicate.data
+        # Canceled
+        obj.canceled = self.canceled.data
         # Notes
         if self.notes.data:
             obj.notes = self.notes.data

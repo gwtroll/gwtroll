@@ -8,7 +8,7 @@ from datetime import datetime
 from flask import jsonify, request
 import json
 import copy
-from app.utils.paypal_api import get_paypal_invoices, get_paypal_payment
+from app.utils.paypal_api import get_paypal_invoices, get_paypal_payment, get_paypal_transactions
 
 def init_data_obj(labels=[]):
     data = {}
@@ -139,20 +139,20 @@ def search_registration(key, value):
         pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
     data['prereg_price'] = pricesheet.prereg_price
     if key == 'name':
-        regs = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + value + '%'))),Registrations.duplicate==False, or_(Registrations.canceled == False, Registrations.canceled == None)).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.filter(and_(or_(sa.cast(Registrations.fname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.lname,sa.Text).ilike('%' + value + '%'),sa.cast(Registrations.scaname,sa.Text).ilike('%' + value + '%'))),Registrations.duplicate!=True, Registrations.canceled != True).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE (fname ILIKE %s OR lname ILIKE %s OR scaname ILIKE %s) AND duplicate = false order by checkin DESC, lname, fname",
         #     #(value, value, value))
         #     ('%' + value + '%', '%' + value + '%', '%' + value + '%'))
 
     elif key == 'inv':
-        regs = Registrations.query.filter(and_(sa.cast(Registrations.invoice_number,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.filter(and_(sa.cast(Registrations.invoice_number,sa.Text).ilike('%' + value + '%'),Registrations.duplicate!=True, Registrations.canceled != True)).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE CAST(invoice_number AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
         #     ('%' + value + '%',))
 
     elif key == 'mbr':
-        regs = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + value + '%'),Registrations.duplicate==False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
+        regs = Registrations.query.filter(and_(sa.cast(Registrations.mbr_num,sa.Text).ilike('%' + value + '%'),Registrations.duplicate!=True, Registrations.canceled != True)).order_by(Registrations.checkin.desc(),Registrations.lname,Registrations.fname).all()
         # reg = query_db(
         #     "SELECT * FROM registrations WHERE CAST(mbr_num AS TEXT) ILIKE %s AND duplicate = false order by checkin DESC, lname, fname",
         #     ('%' + value + '%',))
@@ -226,6 +226,7 @@ def fullexport():
         {"field": "early_on_approved", "title": "EarlyOn Approved", "filterControl":"select"},
         {"field": "notes", "title": "Notes"},
         {"field": "duplicate", "title": "Duplicate", "filterControl":"select"},
+        {"field": "canceled", "title": "Canceled", "filterControl":"select"},
         {"field": "registration_price", "title": "Registration Price", "filterControl":"select"},
         {"field": "registration_balance", "title": "Registration Balance", "filterControl":"input"},
         {"field": "nmr_price", "title": "NMR Price", "filterControl":"select"},
@@ -794,3 +795,9 @@ def toJSON(obj):
             else:
                 data_dict[key] = obj[key]
     return json.dumps(data_dict, sort_keys=True, default=str)
+
+@bp.route("/paypal_transactions", methods=("GET", ""))
+@login_required
+@permission_required('admin')
+def paypal_transaction_search():
+    return str(get_paypal_transactions())

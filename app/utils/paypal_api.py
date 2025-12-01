@@ -285,3 +285,26 @@ def get_paypal_payment(payment_id):
     data_dict = response.json()
 
     return data_dict
+
+def get_paypal_transactions():
+    url = f"{PAYPAL_API_BASE_URL}/v1/reporting/transactions"
+
+    headers = {
+        "Authorization": get_accesstoken(),
+        "Content-Type": "application/json",
+    }
+
+    today = datetime.now()
+    first_day = today + timedelta(days=-30)
+    today_string = today.strftime("%Y-%m-%dT%H:%M:%S-0000")
+    first_day_string = first_day.strftime("%Y-%m-%dT%H:%M:%S-0000")
+
+    params = (
+        ('start_date', first_day_string),
+        ('end_date', today_string),
+        ('fields', 'all'),
+    )
+
+    response = requests.get(url, headers=headers, params=params)
+    data_dict = response.json()
+    return data_dict
