@@ -317,12 +317,21 @@ def get_paypal_transactions():
         if 'transaction_details' in data_dict:
             for item in data_dict['transaction_details']:
                 transaction_id = item['transaction_info']['transaction_id']
-                gross = item['transaction_info']['transaction_amount']['value']
-                fee = item['transaction_info']['fee_amount']['value']
+                if 'transaction_amount' in item['transaction_info']:
+                    gross = item['transaction_info']['transaction_amount']['value']
+                else:
+                    gross = 0.00
+                if 'fee_amount' in item['transaction_info']:
+                    fee = item['transaction_info']['fee_amount']['value']
+                else:
+                    fee = 0.00
                 net = float(gross)+float(fee)
                 status = item['transaction_info']['transaction_status']
                 invoice_number = item['transaction_info']['invoice_id']
-                type = item['transaction_info']['custom_field']
+                if 'custom_field' in item['transaction_info']:
+                    type = item['transaction_info']['custom_field']
+                else:
+                    type = 'None'
                 paypal_invoice_id = item['cart_info']['paypal_invoice_id']
                 
                 return_dict[transaction_id] = {
