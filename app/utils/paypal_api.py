@@ -360,5 +360,5 @@ def get_paypal_transactions():
                     'fee': fee,
                     'net': net
                 }
-        start_date = (start_date + timedelta(days=31))
+        start_date = (start_date + timedelta(days=30))
     return json.loads(json.dumps(return_dict))
