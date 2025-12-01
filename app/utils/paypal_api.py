@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import json
 import pytz
 from app.models import EventVariables
+from decimal import Decimal
 
 PAYPAL_API_BASE_URL = os.environ.get('PAYPAL_API_BASE_URL')
 PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID")
@@ -325,7 +326,9 @@ def get_paypal_transactions():
                     fee = item['transaction_info']['fee_amount']['value']
                 else:
                     fee = 0.00
-                net = float(gross)+float(fee)
+                net = Decimal(gross)-Decimal(fee)
+                net = str(net)
+                fee = str(Decimal(fee)*-1)
                 if 'transaction_status' in item['transaction_info']:
                     status = item['transaction_info']['transaction_status']
                 else:
