@@ -326,13 +326,25 @@ def get_paypal_transactions():
                 else:
                     fee = 0.00
                 net = float(gross)+float(fee)
-                status = item['transaction_info']['transaction_status']
-                invoice_number = item['transaction_info']['invoice_id']
+                if 'transaction_status' in item['transaction_info']:
+                    status = item['transaction_info']['transaction_status']
+                else:
+                    status = 'None'
+                if 'invoice_id' in item['transaction_info']:
+                    invoice_number = item['transaction_info']['invoice_id']
+                else:
+                    invoice_number = 'None'
                 if 'custom_field' in item['transaction_info']:
                     type = item['transaction_info']['custom_field']
                 else:
                     type = 'None'
-                paypal_invoice_id = item['cart_info']['paypal_invoice_id']
+                if 'cart_info' in item:
+                    if 'paypal_invoice_id' in item['cart_info']:
+                        paypal_invoice_id = item['cart_info']['paypal_invoice_id']
+                    else:
+                        paypal_invoice_id = 'None'
+                else:
+                    paypal_invoice_id = 'None'
                 
                 return_dict[transaction_id] = {
                     'payment_id': transaction_id,
