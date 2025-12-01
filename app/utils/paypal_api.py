@@ -326,7 +326,7 @@ def get_paypal_transactions():
                     fee = item['transaction_info']['fee_amount']['value']
                 else:
                     fee = 0.00
-                net = Decimal(gross)-Decimal(fee)
+                net = Decimal(gross)+Decimal(fee)
                 net = str(net)
                 fee = str(Decimal(fee)*-1)
                 if 'transaction_status' in item['transaction_info']:
