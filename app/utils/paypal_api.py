@@ -340,4 +340,4 @@ def get_paypal_transactions():
         if end_date > today:
             end_date = today
         print(return_dict)
-    return return_dict
+    return json.loads(json.dumps(return_dict))
