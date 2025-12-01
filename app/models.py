@@ -472,7 +472,7 @@ class Invoice(db.Model):
         self.donation_total = 0
 
         for reg in self.regs:
-            if reg.duplicate == False and reg.canceled == False:
+            if reg.duplicate != True and reg.canceled != True:
                 self.registration_total += reg.registration_balance
                 self.nmr_total += reg.nmr_balance
                 self.donation_total += reg.paypal_donation_balance

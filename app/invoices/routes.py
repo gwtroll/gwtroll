@@ -20,7 +20,7 @@ from flask_login import login_required
 @login_required
 @permission_required('invoice_view')
 def unsent():
-    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate != True, Registrations.canceled != True)).order_by(Registrations.invoice_email).all()
     all_merchants = Merchant.query.filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     all_earlyons = EarlyOnRequest.query.filter(and_(EarlyOnRequest.invoice_number == None, EarlyOnRequest.rider_balance > 0, EarlyOnRequest.dept_approval_status == 'APPROVED', EarlyOnRequest.autocrat_approval_status == 'APPROVED')).all()
 
@@ -97,7 +97,7 @@ def update():
     if inv.invoice_type == 'REGISTRATION':
         regs = []
         for r in inv.regs:
-            if r.duplicate == False and r.canceled == False:
+            if r.duplicate != True and r.canceled != True:
                 regs.append(r)
     elif inv.invoice_type == 'MERCHANT':
         regs = inv.merchants
@@ -150,7 +150,7 @@ def createinvoice():
         nmr_price = 0
         total_due = 0
         for reg in regs:
-            if reg.duplicate == False:
+            if reg.duplicate != True and reg.canceled != True:
                 paypal_donation += reg.paypal_donation_balance
                 registration_price += reg.registration_balance
                 nmr_price += reg.nmr_balance
@@ -210,7 +210,7 @@ def createinvoice():
                 )
                 db.session.add(zero_invoice)
             for reg in regs:
-                if reg.duplicate == False and reg.canceled == False:      
+                if reg.duplicate != True and reg.canceled != True:      
                     reg.invoice_number = zero_invoice.invoice_number
                     reg.notes = zero_invoice.notes
             
@@ -244,7 +244,7 @@ def createinvoice():
                     inv.donation_total = paypal_donation
                     inv.balance = total_due
                     for reg in regs:
-                        if reg.duplicate == False and reg.canceled == False:      
+                        if reg.duplicate != True and reg.canceled != True:      
                             reg.invoice_number = inv.invoice_number
                             reg.notes = inv.notes
                 case 'MERCHANT':
@@ -313,7 +313,7 @@ def createinvoice():
             match type:
                 case 'REGISTRATION':
                     for reg in regs:
-                        if reg.duplicate == False:      
+                        if reg.duplicate != True and reg.canceled != True:      
                             reg.invoice_number = inv.invoice_number
                             reg.notes = inv.notes
                 case 'MERCHANT':
@@ -341,7 +341,7 @@ def createpayment():
     if inv.invoice_type == 'REGISTRATION':
         regs = []
         for r in inv.regs:
-            if r.duplicate == False and r.canceled == False:
+            if r.duplicate != True and r.canceled != True:
                 regs.append(r)
     elif inv.invoice_type == 'MERCHANT':
         regs = inv.merchants
@@ -397,7 +397,7 @@ def createpayment():
             if inv.balance <= 0:
                 inv.invoice_status = 'PAID'
                 for r in inv.regs:
-                    if r.duplicate == True:
+                    if r.duplicate == True or r.canceled == True:
                         r.invoice_number = None
                     else:
                         send_fastpass_email(r.email, r)

@@ -79,7 +79,7 @@ def checkins():
 def registrations_bykingdom():
     data = init_data_obj(["Registrations by Kingdom"])
 
-    results = Registrations.query.filter(Registrations.duplicate == False).all()
+    results = Registrations.query.filter(Registrations.duplicate != True, Registrations.canceled != True).all()
     results_counts = {}
     for r in results:
         if r.kingdom.name not in results_counts:
@@ -102,7 +102,7 @@ def invoice_status():
 # invoice_status
 # invoice_total
     results = Invoice.query.filter(Invoice.invoice_status != 'DUPLICATE').all()
-    unsent = Registrations.query.filter(Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoice_number == None)
+    unsent = Registrations.query.filter(Registrations.prereg == True, Registrations.duplicate != True, Registrations.canceled != True, Registrations.invoice_number == None)
     results_counts = {'UNSENT':0,'OPEN':0,'PAID':0,'NO PAYMENT':0}
     for r in results:
         if r.invoice_status is not None and r.invoice_total is not None:
@@ -651,7 +651,7 @@ def mapping_registration_report(obj,temp_obj,count):
             temp_obj['invoice_number']=obj.invoice.invoice_number
             temp_obj['invoice_status']=obj.invoice.invoice_status
             temp_obj['reg_id']=obj.id
-            temp_obj['reg_status']= '-' if obj.duplicate == False and obj.canceled == False else 'CANCELD/DUPLICATE'
+            temp_obj['reg_status']= '-' if obj.duplicate != True and obj.canceled != True else 'CANCELD/DUPLICATE'
             temp_obj['reg_type']=obj.invoice.invoice_type
             temp_obj['invoice_total']=obj.invoice.invoice_total
             temp_obj['mbr']=obj.mbr

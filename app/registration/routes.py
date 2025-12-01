@@ -186,7 +186,7 @@ def duplicate():
     reg.duplicate = True
     reg.invoice_number = None
     db.session.commit()
-    all_regs = Registrations.query.filter(and_(Registrations.invoice_email==reg.invoice_email, Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate == False, or_(Registrations.canceled == False, Registrations.canceled == None))).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_email==reg.invoice_email, Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate != True, Registrations.canceled != True)).order_by(Registrations.invoice_email).all()
 
     for r in all_regs:
         regids.append(r.id)

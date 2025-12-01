@@ -122,7 +122,7 @@ def paypalpayment():
                         if inv.invoice_type == 'REGISTRATION':
                             regs = []
                             for r in inv.regs:
-                                if r.duplicate == False and r.canceled == False:
+                                if r.duplicate != True and r.canceled != True:
                                     regs.append(r)
                         elif inv.invoice_type == 'MERCHANT':
                             regs = inv.merchants
@@ -150,7 +150,7 @@ def paypalpayment():
                             if inv.balance <= 0:
                                 inv.invoice_status = 'PAID'
                                 for r in inv.regs:
-                                    if r.duplicate == True:
+                                    if r.duplicate == True or r.canceled == True:
                                         r.invoice_number = None
                                     else:
                                         send_fastpass_email(r.email, r)
