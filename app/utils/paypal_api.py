@@ -287,6 +287,9 @@ def get_paypal_payment(payment_id):
     return data_dict
 
 def get_paypal_transactions():
+
+    return_dict = {}
+
     url = f"{PAYPAL_API_BASE_URL}/v1/reporting/transactions"
 
     headers = {
@@ -294,17 +297,47 @@ def get_paypal_transactions():
         "Content-Type": "application/json",
     }
 
+
     today = datetime.now()
-    first_day = today + timedelta(days=-30)
-    today_string = today.strftime("%Y-%m-%dT%H:%M:%S-0000")
-    first_day_string = first_day.strftime("%Y-%m-%dT%H:%M:%S-0000")
+    start_date = datetime(today.year, 8, 1, 0, 0, 0, 0)
+    end_date = start_date + timedelta(days=30)
 
-    params = (
-        ('start_date', first_day_string),
-        ('end_date', today_string),
-        ('fields', 'all'),
-    )
+    while start_date <= today:
+        start_date_string = start_date.strftime("%Y-%m-%dT%H:%M:%S-0000")
+        end_date_string = end_date.strftime("%Y-%m-%dT%H:%M:%S-0000")
 
-    response = requests.get(url, headers=headers, params=params)
-    data_dict = response.json()
-    return data_dict
+        params = (
+            ('start_date', start_date_string),
+            ('end_date', end_date_string),
+            ('fields', 'all'),
+        )
+
+        response = requests.get(url, headers=headers, params=params)
+        data_dict = response.json()
+        if 'transaction_details' in data_dict:
+            for item in data_dict['transaction_details']:
+                transaction_id = item['transaction_info']['transaction_id']
+                gross = item['transaction_info']['transaction_amount']['value']
+                fee = item['transaction_info']['fee_amount']['value']
+                net = float(gross)+float(fee)
+                status = item['transaction_info']['transaction_status']
+                invoice_number = item['transaction_info']['invoice_id']
+                type = item['transaction_info']['custom_field']
+                paypal_invoice_id = item['cart_info']['paypal_invoice_id']
+                
+                return_dict[transaction_id] = {
+                    'payment_id': transaction_id,
+                    'paypal_invoice_id': paypal_invoice_id,
+                    'invoice_number': invoice_number,
+                    'type': type,
+                    'status': status,
+                    'gross': gross,
+                    'fee': fee,
+                    'net': net
+                }
+        start_date = end_date + timedelta(days=1)
+        end_date = start_date + timedelta(days=30)
+        if end_date > today:
+            end_date = today
+        print(return_dict)
+    return return_dict

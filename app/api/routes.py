@@ -715,6 +715,7 @@ def toJSON(obj):
 @login_required
 @permission_required('registration_reports')
 def paypal_recon_export():
+    paypal_transactions = get_paypal_transactions()
     data = {}
     columns = [{"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
         {"field": "date", "title": "Invoice Date", "filterControl":"input"},
@@ -743,15 +744,14 @@ def paypal_recon_export():
         obj[field["field"]]=None
     for inv in invoices:
         temp_obj = copy.deepcopy(obj)
-        temp_obj = mapping_recon_report(inv,temp_obj)
+        temp_obj = mapping_recon_report(inv,temp_obj,paypal_transactions)
         reg_json = json.loads(toJSON(temp_obj))
         rows.append(reg_json)
     data['columns'] = columns
     data['rows'] = rows
     return jsonify(data)
 
-def mapping_recon_report(obj,temp_obj):
-
+def mapping_recon_report(obj,temp_obj,paypal_transactions):
     temp_obj['invoice_status']=obj.invoice_status
     temp_obj['date']=obj.invoice_date.date()
     temp_obj['email']=obj.invoice_email
@@ -778,11 +778,11 @@ def mapping_recon_report(obj,temp_obj):
             if payment.type != 'PAYPAL':
                 temp_obj['other_payments']+=payment.amount
             if payment.paypal_id != None:
-                pay = get_paypal_payment(payment.paypal_id)
-                if 'seller_receivable_breakdown' in pay:
-                    temp_obj['paypal_gross']=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
-                    temp_obj['paypal_fee']=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
-                    temp_obj['paypal_net']=float(pay['seller_receivable_breakdown']['net_amount']['value'])
+                if payment.paypal_id in paypal_transactions:
+                    pay = paypal_transactions[payment.paypal_id]
+                    temp_obj['paypal_gross']=float(pay['gross'])
+                    temp_obj['paypal_fee']=float(pay['fee'])
+                    temp_obj['paypal_net']=float(pay['net'])
 
     return temp_obj
 
