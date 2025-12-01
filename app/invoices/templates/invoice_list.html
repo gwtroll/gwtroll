@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-        <h1>{% block title %} Invoices {% endblock %}</h1>
+<h1>{% block title %} Invoices {% endblock %}</h1>
 <div class="row">
   <div class="col text-center">
     <b>Total PreRegs: {{counts['Prereg']}}</b>
@@ -26,12 +26,14 @@
       <thead>
         <tr>
           <th data-field="invoice_type" data-filter-control="select">Invoice Type</th>
+          <th data-field="registrations">Registrations</th>
           <th data-field="invoice_number" data-filter-control="input">Invoice Number</th>
           <th data-field="invoice_date" data-filter-control="select">Invoice Date</th>
           <th data-field="email" data-filter-control="input">Email</th>
           {% if back == 'all' %}
           <th data-field="status" data-filter-control="select">Status</th>
           <th data-field="invoice_amount" data-filter-control="input">Invoice Amount</th>
+          <th data-field="balance" data-filter-control="input">Balance</th>
           {% endif %}
           <th data-field="update">Update</th>
         </tr>
@@ -43,6 +45,27 @@
           <td>
             {{invoice['invoice_type']}}
           </td>
+          {% if invoice.regs %}
+          <td>
+            {% for reg in invoice.regs %}
+            <a href="{{url_for('registration.viewreg', regid=reg.id)}}" target="_blank">{{reg.id}}</a>, 
+            {% endfor %}
+          </td>
+          {% elif invoice.merchants %}
+          <td>
+            {% for reg in invoice.merchants %}
+            {{reg.id}}
+            {% endfor %}
+          </td>
+          {% elif invoice.earlyonrequests %}
+          <td>
+            {% for reg in invoice.earlyonrequests %}
+            {{reg.id}}
+            {% endfor %}
+          </td>
+          {% else %}
+          <td>None</td>
+          {% endif %}
           <td>
             {{invoice['invoice_number']}}
           </td>
@@ -64,6 +87,9 @@
           </td>
           <td>
             {{invoice['invoice_total']}}
+          </td>
+          <td>
+            {{invoice['balance']}}
           </td>
           {% endif %}
           <td>
