@@ -301,11 +301,12 @@ def get_paypal_transactions():
 
     today = datetime.now()
     start_date = datetime(today.year, 8, 1, 0, 0, 0, 0)
-    end_date = start_date + timedelta(days=30)
 
     while start_date <= today:
         start_date_string = start_date.strftime("%Y-%m-%dT%H:%M:%S-0000")
-        end_date_string = end_date.strftime("%Y-%m-%dT%H:%M:%S-0000")
+        end_date_string = (start_date + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S-0000")
+        print(start_date_string)
+        print(end_date_string)
 
         params = (
             ('start_date', start_date_string),
@@ -359,9 +360,5 @@ def get_paypal_transactions():
                     'fee': fee,
                     'net': net
                 }
-        start_date = end_date + timedelta(days=1)
-        end_date = start_date + timedelta(days=30)
-        if end_date > today:
-            end_date = today
-        print(return_dict)
+        start_date = (start_date + timedelta(days=31))
     return json.loads(json.dumps(return_dict))
