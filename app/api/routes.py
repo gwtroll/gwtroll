@@ -812,6 +812,8 @@ def land_pre_reg():
         {"field": "early_on_approved", "title": "EarlyOn Approved", "filterControl":"select"},
         {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
         {"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
+        {"field": "kingdom", "title": "Kingdom", "filterControl":"input"},
+        {"field": "lodging", "title": "Lodging", "filterControl":"input"},
     ]
     rows = []
     regs = Registrations.query.filter(Registrations.prereg==True,Registrations.canceled!=True,Registrations.duplicate!=True).order_by(Registrations.id).all()
