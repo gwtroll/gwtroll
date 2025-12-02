@@ -796,6 +796,39 @@ def toJSON(obj):
                 data_dict[key] = obj[key]
     return json.dumps(data_dict, sort_keys=True, default=str)
 
+@bp.route("/land_pre-reg", methods=("GET", ""))
+@login_required
+@permission_required('registration_reports')
+def land_pre_reg():
+    data = {}
+    columns = [{"field": "id", "title": "ID", "filterControl": 'input'},
+        {"field": "fname", "title": "First Name", "filterControl":"input"},
+        {"field": "lname", "title": "Last Name", "filterControl":"input"},
+        {"field": "scaname", "title": "SCA Name", "filterControl":"input"},
+        {"field": "age", "title": "Age", "filterControl":"select"},
+        {"field": "reg_date_time", "title": "Registration Date/Time", "filterControl":"input"},
+        {"field": "prereg", "title": "Pre-Registered", "filterControl":"select"},
+        {"field": "expected_arrival_date", "title": "Expected Arrival Date", "filterControl":"select"},
+        {"field": "early_on_approved", "title": "EarlyOn Approved", "filterControl":"select"},
+        {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
+        {"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
+    ]
+    rows = []
+    regs = Registrations.query.filter(Registrations.prereg==True,Registrations.canceled!=True,Registrations.duplicate!=True).order_by(Registrations.id).all()
+    for reg in regs:
+        if reg.invoice:
+            if reg.invoice.invoice_status == 'PAID':
+                kingdom = reg.kingdom.name
+                lodging = reg.lodging.name
+                reg_json = json.loads(reg.toJSON())
+                reg_json['kingdom'] = kingdom
+                reg_json['lodging'] = lodging
+                reg_json['invoice_status'] = reg.invoice.invoice_status
+                rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
 @bp.route("/paypal_transactions", methods=("GET", ""))
 @login_required
 @permission_required('admin')

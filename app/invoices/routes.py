@@ -136,8 +136,6 @@ def update():
     form.notes.data = inv.notes
     form.paypal_id.data = inv.invoice_id
 
-    
-    
     return render_template('update_invoice.html', form=form, regs=regs, inv=inv)
 
 @bp.route('/create', methods=('GET', 'POST'))
