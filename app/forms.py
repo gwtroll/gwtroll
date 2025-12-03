@@ -751,6 +751,22 @@ class UpdateInvoiceForm(FlaskForm):
     notes = TextAreaField('Notes')
     submit = SubmitField('Update Invoice')
 
+class UpdateInvoiceAdminForm(FlaskForm):
+    invoice_amount = FloatField('Invoice Amount')
+    registration_amount = IntegerField('Registration Amount')
+    invoice_email = StringField('Invoice Email')
+    invoice_number = IntegerField('Invoice Number', validators=[])
+    paypal_id = StringField('PayPal ID', validators=[])
+    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    processing_fee = IntegerField('Processing Fee')
+    space_fee = FloatField('Space Fee')
+    merchant_fee = FloatField('Merchant Fee')
+    rider_fee = IntegerField('Rider Fee')
+    paypal_donation = IntegerField('PayPal Donation')
+    invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Update Invoice')
+
 class SendInvoiceForm(FlaskForm):
     invoice_amount = FloatField('Invoice Amount')
     space_fee = FloatField('Space Fee')

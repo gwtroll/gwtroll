@@ -138,6 +138,60 @@ def update():
 
     return render_template('update_invoice.html', form=form, regs=regs, inv=inv)
 
+@bp.route('<invnumber>/update/admin', methods=('GET', 'POST'))
+@login_required
+@permission_required('admin')
+def update_admin(invnumber):
+    inv = get_inv(invnumber)
+    if inv.invoice_type == 'REGISTRATION':
+        regs = []
+        for r in inv.regs:
+            if r.duplicate != True and r.canceled != True:
+                regs.append(r)
+    elif inv.invoice_type == 'MERCHANT':
+        regs = inv.merchants
+    elif inv.invoice_type == 'EARLYON':
+        regs = inv.earlyonrequests
+    pays = inv.payments
+
+    form = UpdateInvoiceAdminForm()
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        invoice_number = request.form.get('invoice_number')
+        invoice_date = request.form.get('invoice_date')
+        notes = request.form.get('notes')
+
+        if invoice_number is not None and invoice_number != '':
+            inv.invoice_number = invoice_number
+            inv.invoice_date = invoice_date
+            inv.notes = notes
+            inv.registration_total = form.registration_amount.data
+            inv.donation_total = form.paypal_donation.data
+            inv.invoice_id = form.paypal_id.data
+            inv.invoice_status = form.invoice_status.data
+
+            for reg in regs:
+                reg.invoice_number = invoice_number
+            
+            inv.recalculate_balance()
+
+            db.session.commit()
+            flash('Invoice Information Successfully Updated')
+        # log_reg_action(reg, 'INVOICE UPDATED')
+
+    form.invoice_amount.data = inv.invoice_total
+    form.registration_amount.data = inv.registration_total
+    form.invoice_number.data  = inv.invoice_number
+    form.paypal_donation.data  = inv.donation_total
+    form.invoice_date.data  = inv.invoice_date
+    form.notes.data  = inv.notes
+    form.invoice_email.data = inv.invoice_email
+    form.notes.data = inv.notes
+    form.paypal_id.data = inv.invoice_id
+    form.invoice_status.data = inv.invoice_status
+
+    return render_template('update_invoice_admin.html', form=form, regs=regs, inv=inv)
+
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
 @permission_required('invoice_edit')

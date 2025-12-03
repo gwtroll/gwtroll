@@ -284,6 +284,8 @@
                 <p>
                     {{ form.scaname.label }}
                     {{ form.scaname(class_='form-control m-0') }}
+                    {% if form.scaname.errors %}{% for error in form.scaname.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
                 </p>
             </div>
         </div>

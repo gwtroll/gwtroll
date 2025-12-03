@@ -720,7 +720,6 @@ def paypal_recon_export():
     columns = [{"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
         {"field": "date", "title": "Invoice Date", "filterControl":"input"},
         {"field": "email", "title": "Email", "filterControl":"input"},
-        {"field": "invoice_id", "title": "PayPal ID", "filterControl":"input"},
         {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
         {"field": "invoice_type", "title": "Invoice Type", "filterControl":"input"},
         {"field": "paypal_gross", "title": "PayPal Gross", "filterControl":"input"},
@@ -736,6 +735,7 @@ def paypal_recon_export():
         {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
         {"field": "total_price_paid", "title": "Total Price Paid", "filterControl":"input"},
         {"field": "balance", "title": "Invoice Balance", "filterControl":"input"},
+        {"field": "invoice_id", "title": "PayPal ID", "filterControl":"input"},
     ]
     rows = []
     invoices = Invoice.query.filter().all()

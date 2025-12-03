@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Update Invoice {% endblock %}</h1>
+{% if inv.invoice_type == 'REGISTRATION' %}
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>RegID</th>
+                    <th>Name</th>
+                    <th>SCA Name</th>
+                    <th>Age</th>
+                    <th>Communication Email</th>
+                    <th>Registration</th>
+                    <th>NMR</th>
+                    <th>PayPal Donation</th>
+                    <th>Balance</th>
+                </thead>
+                <tbody>
+                    {% if regs %}
+                    {% for reg in regs %}
+                    <tr>
+                        <td>{{ reg.id }}</td>
+                        <td>{{ reg.fname }} {{ reg.lname }}</td>
+                        <td>{{ reg.scaname }}</td>
+                        <td>{{ reg.age }}</td>
+                        <td>{{ reg.email }}</td>
+                        <td>{{ reg.registration_price }}</td>
+                        <td>{{ reg.nmr_price }}</td>
+                        <td>{{ reg.paypal_donation }}</td>
+                        <td>{{ reg.balance }}</td>
+                        {% if inv.invoice_status != 'PAID' %}
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Related Actions">
+                                <a href="{{url_for('registration.cancel', regid=reg.id)}}"><button
+                                        class="btn btn-danger" type="button">Cancel Registration</button></a>
+                            </div>
+                        </td>
+                        {%endif%}
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        {% with field=form.notes %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <h4>Invoice Information</h4>
+    <div class="row">
+        {% with field=form.invoice_email, disabled=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.invoice_date, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.invoice_number, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.paypal_id, required=false %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.registration_amount, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.paypal_donation, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.invoice_amount, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.invoice_status, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <h4>Payment Information</h4>
+    <h5>Applied Payments</h5>
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>PayID</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Registration</th>
+                </thead>
+                <tbody>
+                    {% if inv %}
+                    {% for pay in inv.payments %}
+                    <tr>
+                        <td>{{ pay.id }}</td>
+                        <td>{{ pay.type }}</td>
+                        <td>{{ pay.payment_date }}</td>
+                        <td>{{ pay.amount }}</td>
+                        <td>{{ pay.reg.fname }} {{ pay.reg.lname }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+        {% if inv.invoice_status == 'OPEN' %}
+        <p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal"
+                data-bs-target="#confirmNonPaymentModal">Mark Non-Payment</button></p>
+        <p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal"
+                data-bs-target="#confirmDuplicateModal">Mark Duplicate</button></p>
+        <p><a href="{{url_for('invoices.remind', invnumber=inv.invoice_number)}}"><button
+                    class="form-control btn btn-primary btn-lg" type="button">Send Reminder</button></a></p>
+        {% endif %}
+    </div>
+</form>
+{% elif inv.invoice_type=='MERCHANT' %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>MerchantID</th>
+                    <th>Name</th>
+                    <th>SCA Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Space Fee</th>
+                    <th>Processing Fee</th>
+                </thead>
+                <tbody>
+                    {% if regs %}
+                    {% for reg in regs %}
+                    <tr>
+                        <td>{{ reg.id }}</td>
+                        <td>{{ reg.fname }} {{ reg.lname }}</td>
+                        <td>{{ reg.sca_name }}</td>
+                        <td>{{ reg.phone }}</td>
+                        <td>{{ reg.email }}</td>
+                        <td>{{ reg.space_fee }}</td>
+                        <td>{{ reg.processing_fee }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        {% with field=form.notes %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <h4>Invoice Information</h4>
+    <div class="row">
+        {% with field=form.invoice_email, disabled=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.invoice_date, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.invoice_number, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.paypal_id, required=false %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.invoice_amount, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <h4>Payment Information</h4>
+    <h5>Applied Payments</h5>
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>PayID</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Registration</th>
+                </thead>
+                <tbody>
+                    {% if inv %}
+                    {% for pay in inv.payments %}
+                    <tr>
+                        <td>{{ pay.id }}</td>
+                        <td>{{ pay.type }}</td>
+                        <td>{{ pay.payment_date }}</td>
+                        <td>{{ pay.amount }}</td>
+                        <td>{{ pay.merchant.business_name }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+        {% if inv.invoice_status == 'OPEN' %}
+        <p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal"
+                data-bs-target="#confirmNonPaymentModal">Mark Non-Payment</button></p>
+        <p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal"
+                data-bs-target="#confirmDuplicateModal">Mark Duplicate</button></p>
+        <p><a href="{{url_for('invoices.remind', invnumber=inv.invoice_number)}}"><button
+                    class="form-control btn btn-primary btn-lg" type="button">Send Reminder</button></a></p>
+        {% endif %}
+    </div>
+</form>
+{% elif inv.invoice_type=='EARLYON' %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>EarlyOnID</th>
+                    <th>Name</th>
+                    <th>SCA Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Rider Fee</th>
+                </thead>
+                <tbody>
+                    {% if regs %}
+                    {% for reg in regs %}
+                    <tr>
+                        <td>{{ reg.id }}</td>
+                        <td>{{ reg.registration.fname }} {{ reg.registration.lname }}</td>
+                        <td>{{ reg.registration.scaname }}</td>
+                        <td>{{ reg.registration.phone }}</td>
+                        <td>{{ reg.registration.invoice_email }}</td>
+                        <td>{{ reg.registration.rider_cost }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        {% with field=form.notes %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <h4>Invoice Information</h4>
+    <div class="row">
+        {% with field=form.invoice_email, disabled=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.invoice_date, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.invoice_number, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.paypal_id, required=false %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
+        {% with field=form.invoice_amount, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <h4>Payment Information</h4>
+    <h5>Applied Payments</h5>
+    <div class="row">
+        <div class="col">
+            <table class="table table-responsive">
+                <thead>
+                    <th>PayID</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Registration</th>
+                </thead>
+                <tbody>
+                    {% if inv %}
+                    {% for pay in inv.payments %}
+                    <tr>
+                        <td>{{ pay.id }}</td>
+                        <td>{{ pay.type }}</td>
+                        <td>{{ pay.payment_date }}</td>
+                        <td>{{ pay.amount }}</td>
+                        <td>{{ pay.earlyonrequest.registration.fname }} {{ pay.earlyonrequest.registration.lname }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+        {% if inv.invoice_status == 'OPEN' %}
+        <p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal"
+                data-bs-target="#confirmNonPaymentModal">Mark Non-Payment</button></p>
+        <p><button type="button" class="btn btn-danger btn-lg form-control" data-bs-toggle="modal"
+                data-bs-target="#confirmDuplicateModal">Mark Duplicate</button></p>
+        <p><a href="{{url_for('invoices.remind', invnumber=inv.invoice_number)}}"><button
+                    class="form-control btn btn-primary btn-lg" type="button">Send Reminder</button></a></p>
+        {% endif %}
+    </div>
+</form>
+{% endif %}
+
+<!-- Confirm Non-Payment Modal -->
+<div class="modal fade" id="confirmNonPaymentModal" tabindex="-1" role="dialog"
+    aria-labelledby="confirmNonPaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmNonPaymentModalLabel">Confirm Non-Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Please Confirm the Cancellation of Invoice {{inv.invoice_number}} for Non-Payment</h5>
+            </div>
+            <div class="modal-footer">
+                <p><a href="{{url_for('invoices.nonpayment', invnumber=inv.invoice_number)}}"><button
+                            class="btn btn-success" type="button">Confirm Non-Payment</button></a></p>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Duplicate Modal -->
+<div class="modal fade" id="confirmDuplicateModal" tabindex="-1" role="dialog"
+    aria-labelledby="confirmDuplicateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDuplicateModalLabel">Confirm Duplicate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Please Confirm the Cancellation of Invoice {{inv.invoice_number}} for Duplicate</h5>
+            </div>
+            <div class="modal-footer">
+                <p><a href="{{url_for('invoices.markduplicate', invnumber=inv.invoice_number)}}"><button
+                            class="btn btn-success" type="button">Confirm Duplicate</button></a></p>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}
