@@ -870,7 +870,7 @@ def paypal_transaction_search():
 
 @bp.route("/resend_fastpass", methods=("GET", ""))
 @login_required
-@permission_required('admin')
+@permission_required('registration_edit')
 def resend_fastpass():
     regid = request.args.get('regid')
     reg = get_reg(regid)
