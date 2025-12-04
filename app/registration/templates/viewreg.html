@@ -288,9 +288,36 @@
         </div>
     </div>
 
+    <div class="row">
+    <div class="col">
+        <button id="runreport" class="form-control btn btn-primary" onclick="resend_fastpass()">Resend Fast Pass Email</button>
+    </div>
+</div>
+
    
 {% endblock %}
 
 {% block script %}
+
+<script>
+
+    async function resend_fastpass() {
+        const path = window.location.pathname;
+        const pathSegments = path.split('/');
+
+        // Access specific segments by index
+        const regid = pathSegments[2];
+        const baseURL = window.location.origin+"/api/resend_fastpass";
+        const url = new URL(baseURL);
+        console.log(url)
+        const params = {
+            regid:regid,
+        };
+        url.search = new URLSearchParams(params).toString();
+        await fetch(url)
+            .then(response => response.json())
+            .then((data) => {});
+    }
+    </script>
 
 {% endblock %}

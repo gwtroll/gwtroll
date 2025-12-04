@@ -9,6 +9,7 @@ from flask import jsonify, request
 import json
 import copy
 from app.utils.paypal_api import get_paypal_invoices, get_paypal_payment, get_paypal_transactions
+from app.utils.email_utils import send_fastpass_email
 
 def init_data_obj(labels=[]):
     data = {}
@@ -866,3 +867,12 @@ def paypal_canceled_export():
 @permission_required('admin')
 def paypal_transaction_search():
     return str(get_paypal_transactions())
+
+@bp.route("/resend_fastpass", methods=("GET", ""))
+@login_required
+@permission_required('admin')
+def resend_fastpass():
+    regid = request.args.get('regid')
+    reg = get_reg(regid)
+    send_fastpass_email(reg.email, reg)
+    return 'SUCCESS'
