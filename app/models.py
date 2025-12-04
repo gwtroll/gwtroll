@@ -35,7 +35,10 @@ class EventVariables(db.Model):
     merchant_late_processing_fee = db.Column(db.Integer(), default=45, nullable=False)
     merchant_squarefoot_fee = db.Column(db.Numeric(10, 2), default=0.10, nullable=False)
     merchant_bounced_check_fee = db.Column(db.Integer(), default=35, nullable=False)
-
+    # bas = db.Column(db.String(), nullable=True)
+    # cli = db.Column(db.String(), nullable=True)
+    # sec = db.Column(db.String(), nullable=True)
+    # web = db.Column(db.String(), nullable=True)
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -172,6 +175,8 @@ class EarlyOnRequest(db.Model):
             microsecond=0
         ),
     )
+    merchant_id = db.Column(db.Integer(), db.ForeignKey("merchant.id"))
+    mercahnt = db.relationship("Merchant", backref="earlyonrequest")
     earlyonriders = db.relationship("EarlyOnRider", secondary="earlyonrequest_riders")
     dept_approval_status = db.Column(db.String(), default="PENDING")
     autocrat_approval_status = db.Column(db.String(), default="PENDING")
@@ -194,6 +199,21 @@ class EarlyOnRequest(db.Model):
         if rider_balance < 0:
             rider_balance = 0
         self.rider_balance = rider_balance
+    
+    def get_invoice_items(self):
+        items = []
+        if self.rider_balance > 0:
+            items.append({
+                'name':'Extra Riders Fee',
+                'description':'Gulf Wars Early On Extra Riders Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.rider_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 
 class EarlyOnRider(db.Model):
@@ -262,6 +282,7 @@ class Registrations(db.Model):
     early_on_approved = db.Column(db.Boolean(), default=False)
     notes = db.Column(db.Text)
     duplicate = db.Column(db.Boolean, default=False)
+    canceled = db.Column(db.Boolean, default=False) 
 
     # Pricing
     registration_price = db.Column(db.Integer(), default=0)
@@ -284,7 +305,8 @@ class Registrations(db.Model):
     actual_arrival_date = db.Column(db.Date())
 
     # Relationships
-    invoices = db.relationship("Invoice", secondary="registration_invoices")
+    invoice_number = db.Column(db.Integer(), db.ForeignKey("invoice.invoice_number"))
+    invoice = db.relationship("Invoice", backref="inv_regs")
     payments = db.relationship("Payment", back_populates="reg")
     bows = db.relationship("Bows", secondary="reg_bows")
     crossbows = db.relationship("Crossbows", secondary="reg_crossbows")
@@ -341,11 +363,59 @@ class Registrations(db.Model):
         if paypal_donation_balance < 0:
             paypal_donation_balance = 0
         self.paypal_donation_balance = paypal_donation_balance
+    
+    def get_invoice_items(self):
+        reg_arrival_dict = {
+            "03/14/2026":"Adult Pre-Registration Sat-Sun",
+            "03/15/2026":"Adult Pre-Registration Sat-Sun",
+            "03/16/2026":"Adult Pre-Registration Mon-Tues",
+            "03/17/2026":"Adult Pre-Registration Mon-Tues",
+            "03/18/2026":"Adult Pre-Registration Wed-Thurs",
+            "03/19/2026":"Adult Pre-Registration Wed-Thurs",
+            "03/20/2026":"Adult Pre-Registration Fri-Sat",
+            "03/21/2026":"Adult Pre-Registration Fri-Sat",
+        }
+        items = []
+        if self.age == '18+' and self.registration_balance > 0:
+            items.append({
+                'name':reg_arrival_dict[self.expected_arrival_date.strftime('%m/%d/%Y')],
+                'description':'Gulf Wars Registration - ' + self.fname + ' ' + self.lname + ' - ' + self.expected_arrival_date.strftime('%m/%d/%Y'),
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.registration_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.nmr_balance > 0:
+            items.append({
+                'name':'NMR',
+                'description':'Non-Member Fee - ' + self.fname + ' ' + self.lname,
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.nmr_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.paypal_donation_balance > 0:
+            items.append({
+                'name':'PayPal Donation',
+                'description':'PayPal Donation - ' + self.fname + ' ' + self.lname,
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.paypal_donation_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 
 class Invoice(db.Model):
     __tablename__ = "invoice"
     invoice_number = db.Column(db.Integer(), primary_key=True)
+    invoice_id = db.Column(db.String())
     invoice_type = db.Column(db.String(), nullable=False)
     invoice_email = db.Column(db.String(), nullable=False)
     invoice_date = db.Column(db.DateTime(), nullable=False)
@@ -369,12 +439,22 @@ class Invoice(db.Model):
     )
     balance = db.Column(db.Numeric(10, 2))
     notes = db.Column(db.Text())
-    regs = db.relationship("Registrations", secondary="registration_invoices", viewonly=True)
+    regs = db.relationship("Registrations", back_populates="invoice")
     merchants = db.relationship("Merchant", back_populates="invoice")
     earlyonrequests = db.relationship("EarlyOnRequest", back_populates="invoice")
     payments = db.relationship("Payment", back_populates="invoice")
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='invoice')
+
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
     def recalculate_balance(self):
         balance = (
@@ -393,21 +473,37 @@ class Invoice(db.Model):
         if self.balance > 0:
             self.invoice_status = "OPEN"
 
+    def recalculate_balance_from_registrations(self):
+        self.registration_total = 0
+        self.nmr_total = 0
+        self.donation_total = 0
 
-class Registration_Invoices(db.Model):
-    __tablename__ = "registration_invoices"
-    id = db.Column(db.Integer(), primary_key=True)
-    reg_id = db.Column(
-        db.Integer(), db.ForeignKey("registrations.id", ondelete="CASCADE")
-    )
-    invoice_id = db.Column(
-        db.Integer(), db.ForeignKey("invoice.invoice_number", ondelete="CASCADE")
-    )
+        for reg in self.regs:
+            if reg.duplicate != True and reg.canceled != True:
+                self.registration_total += reg.registration_balance
+                self.nmr_total += reg.nmr_balance
+                self.donation_total += reg.paypal_donation_balance
 
+        balance = (
+            self.registration_total
+            + self.nmr_total
+            + self.donation_total
+            + self.space_fee
+            + self.processing_fee
+            + self.rider_fee
+        )
+        for payment in self.payments:
+            balance -= payment.amount
+        if balance < 0:
+            balance = 0
+        self.balance = balance
+        if self.balance > 0:
+            self.invoice_status = "OPEN"
 
 class Payment(db.Model):
     __tablename__ = "payment"
     id = db.Column(db.Integer(), primary_key=True)
+    paypal_id = db.Column(db.String(), nullable=True)
     type = db.Column(db.String(), nullable=False)
     check_num = db.Column(db.Integer())
     payment_date = db.Column(db.DateTime(), nullable=False)
@@ -479,9 +575,9 @@ class Payment(db.Model):
             # Check if Payment is enough to cover all costs
             if (
                 payment_amount
-                >= self.merchant.space_fee_balance
+                >= float(self.merchant.space_fee_balance)
                 + self.merchant.processing_fee_balance
-                + self.merchant.electricity_balance
+                + float(self.merchant.electricity_balance)
             ):
                 self.space_fee_amount = self.merchant.space_fee_balance
                 self.processing_fee_amount = self.merchant.processing_fee_balance
@@ -489,7 +585,7 @@ class Payment(db.Model):
             # Space Fee Payment
             if payment_amount >= self.merchant.space_fee_balance:
                 payment_amount -= float(self.merchant.space_fee_balance)
-                self.space_fee_amount = self.merchant.space_fee_balance
+                self.space_fee_amount = float(self.merchant.space_fee_balance)
             else:
                 self.space_fee_amount = payment_amount
                 payment_amount = 0
@@ -503,15 +599,15 @@ class Payment(db.Model):
             # Electricity Fee Payment
             if payment_amount >= self.merchant.electricity_balance:
                 payment_amount -= float(self.merchant.electricity_balance)
-                self.electricity_fee_amount = self.merchant.electricity_balance
+                self.electricity_fee_amount = float(self.merchant.electricity_balance)
             else:
-                self.electricity_fee_amount = payment_amount
+                self.electricity_fee_amount = float(payment_amount)
                 payment_amount = 0
 
             self.amount = (
-                self.space_fee_amount
+                float(self.space_fee_amount)
                 + self.processing_fee_amount
-                + self.electricity_fee_amount
+                + float(self.electricity_fee_amount)
             )
 
         # EarlyOn
@@ -666,6 +762,8 @@ class Merchant(db.Model):
     ropes_back = db.Column(db.Integer(), nullable=False, default=0)
     ropes_left = db.Column(db.Integer(), nullable=False, default=0)
     ropes_right = db.Column(db.Integer(), nullable=False, default=0)
+    personal_space = db.Column(db.Numeric(10, 2), nullable=True, default=0.0)
+    extra_space = db.Column(db.Numeric(10, 2), nullable=True, default=0.0)
     space_fee = db.Column(db.Numeric(10, 2), nullable=False, default=0.0)
     space_fee_balance = db.Column(db.Numeric(10, 2), nullable=False, default=0.0)
     additional_space_information = db.Column(db.Text())
@@ -709,18 +807,28 @@ class Merchant(db.Model):
 
     def __repr__(self):
         return "<Merchant {}>".format(self.business_name)
+    
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
     def recalculate_balance(self):
-        balance = self.space_fee + self.processing_fee
-        space_fee_balance = self.space_fee
+        balance = float(self.space_fee) + self.processing_fee + float(self.electricity_fee)
+        space_fee_balance = float(self.space_fee)
         processing_fee_balance = self.processing_fee
-        electricity_balance = self.electricity_fee
+        electricity_balance = float(self.electricity_fee)
         for payment in self.payments:
-            balance -= payment.space_fee_amount
+            balance -= float(payment.space_fee_amount)
             balance -= payment.processing_fee_amount
-            space_fee_balance -= payment.space_fee_amount
+            space_fee_balance -= float(payment.space_fee_amount)
             processing_fee_balance -= payment.processing_fee_amount
-            electricity_balance -= payment.electricity_fee_amount
+            electricity_balance -= float(payment.electricity_fee_amount)
         if balance < 0:
             self.balance = 0
         self.balance = balance
@@ -734,6 +842,42 @@ class Merchant(db.Model):
             self.electricity_balance = 0
         self.electricity_balance = electricity_balance
 
+    def get_invoice_items(self):
+        items = []
+        if self.space_fee_balance > 0:
+            items.append({
+                'name':'Space Fee',
+                'description':'Gulf Wars Merchant Space Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.space_fee_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.processing_fee_balance > 0:
+            items.append({
+                'name':'Processing Fee',
+                'description':'Gulf Wars Merchant Processing Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.processing_fee_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        if self.electricity_balance > 0:
+            items.append({
+                'name':'Electricity Fee',
+                'description':'Gulf Wars Merchant Electricity Fee',
+                'quantity':'1',
+                'unit_amount':{
+                    'currency_code':'USD',
+                    'value':str(self.electricity_balance)
+                },
+                'unit_of_measure': 'QUANTITY'
+            })
+        return items
 
 class ScheduledEvent(db.Model):
     __tablename__ = "scheduledevent"

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from app.utils.db_utils import *
-from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField, widgets
+from wtforms import Form, StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, HiddenField, SelectMultipleField, TextAreaField, DecimalField, FieldList, FormField, DateTimeField, FileField, FloatField, widgets, EmailField
 from wtforms.fields import DateField, DateTimeLocalField, DateTimeField
 from wtforms.validators import DataRequired, Email, InputRequired, Optional, ValidationError, NoneOf, EqualTo, Length, NumberRange
 
@@ -12,7 +12,7 @@ agedata = [('-','-'),('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', '
 
 mbrdata = [('-','-'),('Member', 'Member'), ('Non-Member', 'Non-Member')]
 
-reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg', 'land_pre-reg'), ('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report'), ('earlyon','early_on_report'), ('paypal_paid_export','paypal_paid_export'),('paypal_canceled_export','paypal_canceled_export'),('paypal_recon_export','paypal_recon_export'),('atd_export','atd_export'),('log_export','log_export'),('minor_waivers','minor_waivers')]
+reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg', 'land_pre-reg'), ('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report'), ('early_on_report','early_on_report'), ('paypal_paid_export','paypal_paid_export'),('paypal_canceled_export','paypal_canceled_export'),('paypal_recon_export','paypal_recon_export'),('atd_export','atd_export'),('log_export','log_export'),('minor_waivers','minor_waivers')]
 
 paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle'),('travlers_check','Travlers Check')]
 
@@ -65,6 +65,7 @@ class LoginForm(FlaskForm):
 class CreateUserForm(FlaskForm):
     # id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
+    email = EmailField('Email', validators=[Optional()])
     role = MultiCheckboxField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -78,6 +79,9 @@ class CreateUserForm(FlaskForm):
         # Username - Strip - Lower
         if self.username.data:
             obj.username = self.username.data.strip().lower()
+        # Email - Strip - Lower
+        if self.email.data:
+            obj.email = self.email.data.strip().lower()
         # Roles - Iterate
         for roleid in self.role.data:
             obj.roles.append(get_role(roleid))
@@ -152,6 +156,7 @@ class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     role = MultiCheckboxField('Role', validators=[Optional()])
     fname = StringField('First Name', validators=[DataRequired()])
+    email = EmailField('Email', validators=[Optional()])
     lname = StringField('Last Name', validators=[DataRequired()])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
     # event = SelectField('Event', validators=[])
@@ -163,6 +168,8 @@ class EditUserForm(FlaskForm):
         # Username - Strip - Lower
         if self.username.data:
             obj.username = self.username.data.strip().lower()
+        if self.email.data:
+            obj.email = self.email.data.strip().lower()
         # Roles - Iterate
         current_role_ids = []
         user_role_permissions = [str(r[0]) for r in get_role_choices()]
@@ -193,6 +200,8 @@ class EditUserForm(FlaskForm):
         # Username
         if obj.username:
             self.username.data = obj.username
+        if obj.email:
+            self.email.data = obj.email
         # Roles - Iterate
         if obj.roles:
             role_array = []
@@ -462,18 +471,17 @@ class EditForm(FlaskForm):
     emergency_contact_name = StringField('Name', validators=[DataRequired()])
     emergency_contact_phone = StringField('Phone', validators=[DataRequired()])
     mbr = SelectField('Membership Status', validators=[DataRequired()], choices=mbrdata)
-    mbr_num = IntegerField('Member Number', validators=[Optional()])
-    mbr_num_exp = DateField('Member Exp Date', validators=[Optional()])
+    mbr_num = IntegerField('Member Number', validators=[RequiredIfMembership('mbr')])
+    mbr_num_exp = DateField('Member Exp Date', validators=[RequiredIfMembership('mbr')])
     
     reg_date_time = DateTimeField('Registration Date/Time')
     prereg = BooleanField('Pre-Registered')
-    expected_arrival_date = DateField("Expected Arrival Date", validators=[DataRequired()])
+    expected_arrival_date = SelectField('Arrival Date', validators=[NoneOf('-', message='You must select an Arrival Date')])
     early_on = BooleanField('Early On')
     notes = TextAreaField('Notes')
     duplicate = BooleanField('Duplicate Registration')
+    canceled = BooleanField('Canceled Registration')
 
-    registration_price = IntegerField('Registration Price', validators=[NumberRange(min=0,max=999)], default=0)
-    nmr_price = IntegerField('NMR Price', validators=[NumberRange(min=0,max=999)], default=0)
     paypal_donation = IntegerField('PayPal Donation', validators=[NumberRange(min=0,max=999)], default=0)
     
     checkin = DateTimeField('Checkin Date/Time', validators=[Optional()])
@@ -538,7 +546,7 @@ class EditForm(FlaskForm):
             self.mbr_num_exp.data = obj.mbr_num_exp
         # Expected Arrival
         if obj.expected_arrival_date:
-            self.expected_arrival_date.data = obj.expected_arrival_date        
+            self.expected_arrival_date.data = obj.expected_arrival_date.strftime('%Y/%m/%d')       
         # Emergency Contact Name
         if obj.emergency_contact_name:
             self.emergency_contact_name.data = obj.emergency_contact_name 
@@ -551,6 +559,8 @@ class EditForm(FlaskForm):
         self.early_on.data = obj.early_on_approved
         # Duplicate
         self.duplicate.data = obj.duplicate
+        # Canceled
+        self.canceled.data = obj.canceled
         # Notes
         if obj.notes:
             self.notes.data = obj.notes         
@@ -558,12 +568,6 @@ class EditForm(FlaskForm):
         if obj.medallion:
             self.medallion.data = obj.medallion
         # Prices
-        # Registration Price
-        if obj.registration_price:
-            self.registration_price.data = obj.registration_price
-        # NMR Price
-        if obj.nmr_price:
-            self.nmr_price.data = obj.nmr_price
         # PayPal Donation
         if obj.paypal_donation:
             self.paypal_donation.data = obj.paypal_donation         
@@ -633,6 +637,8 @@ class EditForm(FlaskForm):
         obj.early_on_approved = self.early_on.data
         # Duplicate
         obj.duplicate = self.duplicate.data
+        # Canceled
+        obj.canceled = self.canceled.data
         # Notes
         if self.notes.data:
             obj.notes = self.notes.data
@@ -640,15 +646,23 @@ class EditForm(FlaskForm):
         if self.medallion.data:
             obj.medallion = self.medallion.data
         # Prices
-        # Registration Price
-        if self.registration_price.data:
-            obj.registration_price = self.registration_price.data
-        # NMR Price
-        if self.nmr_price.data:
-            obj.nmr_price = self.nmr_price.data
-        # PayPal Donation
-        if self.paypal_donation.data:
-            obj.paypal_donation = self.paypal_donation.data
+        if obj.age == '18+':
+            if obj.prereg == True:
+                registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date if obj.actual_arrival_date else obj.expected_arrival_date)
+            else:
+                registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
+            obj.registration_price = registration_price
+            if obj.mbr != True:
+                obj.nmr_price = 10
+            else:
+                obj.nmr_price = 0
+        else:
+            obj.registration_price = 0
+            obj.nmr_price = 0
+            
+        obj.paypal_donation = self.paypal_donation.data
+        
+        obj.balance = obj.registration_price + obj.nmr_price + obj.paypal_donation
         obj.recalculate_balance()
 
 class EditLimitedForm(FlaskForm):
@@ -706,6 +720,7 @@ class RiderForm(Form):
 class EarlyOnForm(FlaskForm):
     arrival_date = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
+    merchant = SelectField('Merchant Name', choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
     submit = SubmitField('Submit Early On Request')
@@ -713,6 +728,7 @@ class EarlyOnForm(FlaskForm):
 class EarlyOnApprovalForm(FlaskForm):
     arrival_date = SelectField('Estimated Date of Arrival', validators=[NoneOf('-', message='You must select an Arrival Date')])
     department = SelectField('Department', validators=[NoneOf('-', message='You must select a Department')], choices=[])
+    merchant = SelectField('Merchant Name', choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
     dept_approval_status = SelectField('Department Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
@@ -720,38 +736,51 @@ class EarlyOnApprovalForm(FlaskForm):
     submit = SubmitField('Submit Early On Request')
 
 class UpdateInvoiceForm(FlaskForm):
-    invoice_amount = IntegerField('Invoice Amount')
+    invoice_amount = FloatField('Invoice Amount')
     registration_amount = IntegerField('Registration Amount')
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])
-    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMNET','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    paypal_id = StringField('PayPal ID', validators=[])
+    # invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
     processing_fee = IntegerField('Processing Fee')
     space_fee = FloatField('Space Fee')
     merchant_fee = FloatField('Merchant Fee')
     rider_fee = IntegerField('Rider Fee')
     paypal_donation = IntegerField('PayPal Donation')
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
-    payment_date = DateField('Payment Date')
-    payment_amount = IntegerField('Payment Amount')
-    payment_type = SelectField('Payment Type',choices=[('PAYPAL','PAYPAL'),('CHECK','CHECK')])
-    check_num = IntegerField('Check Number')
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Update Invoice')
+
+class UpdateInvoiceAdminForm(FlaskForm):
+    invoice_amount = FloatField('Invoice Amount')
+    registration_amount = IntegerField('Registration Amount')
+    invoice_email = StringField('Invoice Email')
+    invoice_number = IntegerField('Invoice Number', validators=[])
+    paypal_id = StringField('PayPal ID', validators=[])
+    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    processing_fee = IntegerField('Processing Fee')
+    space_fee = FloatField('Space Fee')
+    merchant_fee = FloatField('Merchant Fee')
+    rider_fee = IntegerField('Rider Fee')
+    paypal_donation = IntegerField('PayPal Donation')
+    invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
     notes = TextAreaField('Notes')
     submit = SubmitField('Update Invoice')
 
 class SendInvoiceForm(FlaskForm):
-    invoice_amount = IntegerField('Invoice Amount')
+    invoice_amount = FloatField('Invoice Amount')
     space_fee = FloatField('Space Fee')
     processing_fee = IntegerField('Processing Fee')
     merchant_fee = FloatField('Total Invoice Amount')
     rider_fee = IntegerField('Rider Fee')
     registration_amount = IntegerField('Registration Amount')
-    invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
+    invoice_number = IntegerField('Invoice Number', validators=[Optional()])
     invoice_email = StringField('Invoice Email')
     paypal_donation = IntegerField('PayPal Donation')
     nmr_amount = IntegerField('NMR Amount')
     invoice_date = DateField('Invoice Date', validators=[DataRequired()])
     notes = TextAreaField('Notes')
-    submit = SubmitField('Create Invoice')
+    submit = SubmitField('Send Invoice with PayPal')
 
 class PayInvoiceForm(FlaskForm):
     invoice_amount = FloatField('Invoice Amount', validators=[DataRequired()])
@@ -762,7 +791,7 @@ class PayInvoiceForm(FlaskForm):
     space_fee = FloatField('Space Fee', validators=[Optional()])
     invoice_email = StringField('Invoice Email', validators=[DataRequired()])
     invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
-    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMNET','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
     paypal_donation = IntegerField('PayPal Donation', validators=[Optional()])
     invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
     payment_date = DateField('Payment Date', validators=[DataRequired()])
@@ -770,7 +799,7 @@ class PayInvoiceForm(FlaskForm):
     payment_type = SelectField('Payment Type',choices=[('PAYPAL','PAYPAL'),('CHECK','CHECK')])
     check_num = IntegerField('Check Number', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
-    submit = SubmitField('Update Invoice')
+    submit = SubmitField('Create Manual Payment')
 
 class PayRegistrationForm(FlaskForm):
     total_due = IntegerField('Total Due')
@@ -814,7 +843,7 @@ class PaymentForm(FlaskForm):
     submit = SubmitField('Update Payment')
 
 class ReportForm(FlaskForm):
-    report_type = SelectField('Report Type', validators=[DataRequired()], choices=reporttypedata)
+    report_type = SelectField('Report Type', validators=[DataRequired()], choices=None)
     dt_start = DateField('Start Date', format='%Y-%m-%d')
     dt_end = DateField('End Date', format='%Y-%m-%d')
     submit = SubmitField('Submit')
@@ -892,7 +921,7 @@ class MerchantForm(FlaskForm):
 class EditMerchantForm(FlaskForm):
     business_name = StringField('Business Name', validators=[DataRequired()])
     status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('WAITLIST','WAITLIST'),('DUPLICATE','DUPLICATE')], validators=[DataRequired()])
-    sca_name = StringField('SCA Name', validators=[DataRequired()])
+    sca_name = StringField('SCA Name', validators=[])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -908,9 +937,13 @@ class EditMerchantForm(FlaskForm):
     ropes_back = IntegerField('Ropes Back (in feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0)
     ropes_left = IntegerField('Ropes Left (in feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0)
     ropes_right = IntegerField('Ropes Right (in feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0)
+    personal_space = FloatField('Personal Space (Square Feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0.00)
+    extra_space = FloatField('Extra Space (Square Feet)', validators=[NumberRange(0,None, message='Value must be 0 or greater')], default=0.00)
     space_fee = FloatField('Space Fee', default=0)
+    space_fee_balance = FloatField('Space Fee Balance', default=0)
     additional_space_information = TextAreaField('Additional Space Information', validators=[Optional()])
     processing_fee = IntegerField('Processing Fee',validators=[DataRequired()], default=0)
+    processing_fee_balance = IntegerField('Processing Fee Balance', default=0)
     merchant_fee = FloatField('Merchant Fee',validators=[DataRequired()], default=0)
     electricity_request = TextAreaField('Electricity Request', validators=[Optional()])
     food_merchant_agreement = BooleanField('FOOD MERCHANTS: Agreement to send menu and pricing', validators=[Optional()]) 
@@ -925,6 +958,7 @@ class EditMerchantForm(FlaskForm):
     trailer_state = StringField('Trailer State', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
     application_date = DateTimeField('Application Date', validators=[DataRequired()])
+    invoice_number = IntegerField('Invoice Number', validators=[Optional()])
     signature = StringField('Signature', validators=[DataRequired()])
     
     submit = SubmitField(
@@ -1157,3 +1191,13 @@ class VolunteerPositionForm(FlaskForm):
         if obj.department_id:
             self.department.data = str(obj.department_id)
 
+class PayPalForm(FlaskForm):
+    base_url = StringField('Base URL', validators=[DataRequired()])
+    client_id = StringField('Client ID', validators=[DataRequired()])
+    client_secret = StringField('Client Secret', validators=[DataRequired()])
+    webhook_id = StringField('Webhook ID', validators=[DataRequired()])
+    submit = SubmitField('Update PayPal Info')
+
+class UpdateInvoiceNumber(FlaskForm):
+    invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
+    submit = SubmitField('Update PayPal Info')

@@ -49,7 +49,7 @@
         {% endif %}
         {% if current_user.has_permission('registration_reports') %}
         <li class="nav-item">
-          <a class="nav-link" href="/reports">Reports</a>
+          <a class="nav-link" href="/report">Registration Reports</a>
         </li>
         {% endif %}
         {% if current_user.has_permission('marshal_reports') %}
@@ -90,6 +90,8 @@
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="{{ url_for('merchant.merchants') }}">Manage Applications</a></li>
             <li><a class="dropdown-item" href="{{ url_for('merchant.merchant_search') }}">Merchant Checkin</a></li>
+            {% if current_user.has_permission('merchant_reports') %}
+            <li><a class="dropdown-item" href="/report/merchant">Merchant Reports</a></li>{% endif %}
           </ul>
         </li>
         {% endif %}

@@ -30,6 +30,7 @@
               <th data-field="email" data-filter-control="input">Email</th>
               <th data-field="status" data-filter-control="select">Status</th>
               <th data-field="merchant_fee" data-filter-control="input">Merchant Fee</th>
+              <th data-field="invoice_status" data-filter-control="select">Invoice Status</th>
               <th data-field="update">Update</th>
           </tr>
       </thead>
@@ -48,6 +49,11 @@
                   </td>
                   <td> 
                       {{merchant['merchant_fee']}}
+                  </td>
+                  <td>
+                    {% if merchant['invoice'] %}
+                      {{ merchant['invoice']['invoice_status']}}
+                    {% endif %}
                   </td>
                   <td>
                     <a class="btn btn-primary" href="{{url_for('merchant.update', merch_id=merchant.id)}}" role="button">Update</a>

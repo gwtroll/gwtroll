@@ -10,6 +10,7 @@ from app.utils.email_utils import *
 from app.utils.security_utils import *
 from flask_security import roles_accepted
 from markupsafe import Markup
+import decimal
 
 @bp.route('/', methods=('GET',))
 @login_required
@@ -145,6 +146,7 @@ def update(merch_id):
     merchant = Merchant.query.get_or_404(merch_id)
     event = EventVariables.query.first()
     form = EditMerchantForm(
+        invoice_number = merchant.invoice.invoice_number if merchant.invoice != None else None,
         business_name = merchant.business_name,
         sca_name = merchant.sca_name,
         fname = merchant.fname,
@@ -162,9 +164,13 @@ def update(merch_id):
         ropes_back = merchant.ropes_back,
         ropes_left = merchant.ropes_left,
         ropes_right = merchant.ropes_right,
+        personal_space = merchant.personal_space if merchant.personal_space != None else 0,
+        extra_space = merchant.extra_space if merchant.extra_space != None else 0,
         space_fee = merchant.space_fee,
+        space_fee_balance = merchant.space_fee_balance,
         additional_space_information = merchant.additional_space_information,
         processing_fee = merchant.processing_fee,
+        processing_fee_balance = merchant.processing_fee_balance,
         merchant_fee = merchant.merchant_fee,
         electricity_request = merchant.electricity_request,
         food_merchant_agreement = merchant.food_merchant_agreement,
@@ -187,6 +193,7 @@ def update(merch_id):
     if request.method == 'POST':
         old_status = merchant.status
         if form.validate_on_submit():
+            merchant.invoice_number = form.invoice_number.data if form.invoice_number.data != 'None' and form.invoice_number.data != None else None
             merchant.status = form.status.data
             merchant.application_date = form.application_date.data.replace(microsecond=0)
             merchant.business_name = form.business_name.data
@@ -206,6 +213,8 @@ def update(merch_id):
             merchant.ropes_back = int(form.ropes_back.data) if form.ropes_back.data else 0
             merchant.ropes_left = int(form.ropes_left.data) if form.ropes_left.data else 0
             merchant.ropes_right = int(form.ropes_right.data) if form.ropes_right.data else 0
+            merchant.personal_space = decimal.Decimal(float(form.personal_space.data)) if form.personal_space.data else 0
+            merchant.extra_space = decimal.Decimal(float(form.extra_space.data)) if form.extra_space.data else 0
             merchant.additional_space_information = form.additional_space_information.data
             merchant.electricity_request = form.electricity_request.data
             merchant.food_merchant_agreement = form.food_merchant_agreement.data
@@ -219,9 +228,10 @@ def update(merch_id):
             merchant.trailer_license_plate = form.trailer_license_plate.data
             merchant.trailer_state = form.trailer_state.data
             merchant.notes = form.notes.data
-            merchant.space_fee = (int(form.frontage_width.data) + int(form.ropes_left.data) + int(form.ropes_right.data)) * (int(form.frontage_depth.data) + int(form.ropes_front.data) + int(form.ropes_back.data)) * event.merchant_squarefoot_fee if form.frontage_width.data and form.frontage_depth.data else 0
+            merchant.space_fee = ((int(form.frontage_width.data) + int(form.ropes_left.data) + int(form.ropes_right.data)) * (int(form.frontage_depth.data) + int(form.ropes_front.data) + int(form.ropes_back.data)) - decimal.Decimal(float(form.personal_space.data)) + decimal.Decimal(float(form.extra_space.data))) * event.merchant_squarefoot_fee if form.frontage_width.data and form.frontage_depth.data else 0
             merchant.processing_fee = int(form.processing_fee.data)
             merchant.merchant_fee = merchant.processing_fee + merchant.space_fee
+            merchant.recalculate_balance()
             db.session.commit()
             if old_status != merchant.status:
                 if merchant.status == 'APPROVED':

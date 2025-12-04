@@ -75,8 +75,8 @@ def createprereg():
     event = EventVariables.query.first()
     event_dates = pd.date_range(start=event.start_date, end=event.end_date).tolist()
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date.in_(event_dates)).order_by(PriceSheet.arrival_date).all()
-    # Close Pre-Reg at Midnight 02/22/2025
-    if datetime.now(pytz.timezone('America/Chicago')).date() <= event.preregistration_open_date:
+    # Open and Close Pre-Reg
+    if datetime.now(pytz.timezone('America/Chicago')).date() < event.preregistration_open_date:
         return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
     if datetime.now(pytz.timezone('America/Chicago')).date() >= event.preregistration_close_date:
         return render_template("prereg_closed.html", event=event,pricesheet=pricesheet)
@@ -160,14 +160,11 @@ def createprereg():
                 del session['additional_registrations']
 
             flash_string = ''
+            all_regs = [reg]
             for add_reg in additional_registrations:
-                send_confirmation_email(add_reg.email,add_reg)
-                if add_reg.balance<=0:
-                    send_fastpass_email(add_reg.email,add_reg)
+                all_regs.append(add_reg)
                 flash_string += ('\nRegistration {} created for {} {}.'.format(add_reg.id, add_reg.fname, add_reg.lname))
-            send_confirmation_email(reg.email,reg)
-            if reg.balance<=0:
-                    send_fastpass_email(reg.email,reg)
+            send_confirmation_email(reg.invoice_email,all_regs)
             flash_string += 'Registration {} created for {} {}.'.format(reg.id, reg.fname, reg.lname)
             flash(flash_string)
             return redirect(url_for('registration.success'))
@@ -187,9 +184,9 @@ def duplicate():
 
     reg = get_reg(regid)
     reg.duplicate = True
+    reg.invoice_number = None
     db.session.commit()
-
-    all_regs = Registrations.query.filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.invoice_email==reg.invoice_email, Registrations.balance > 0)).order_by(Registrations.invoice_email).all()
+    all_regs = Registrations.query.filter(and_(Registrations.invoice_email==reg.invoice_email, Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate != True, Registrations.canceled != True)).order_by(Registrations.invoice_email).all()
 
     for r in all_regs:
         regids.append(r.id)
@@ -198,6 +195,21 @@ def duplicate():
         return redirect(url_for('invoices.unsent'))
 
     return redirect(url_for('invoices.createinvoice', regids=[regids], type="REGISTRATION"))
+
+@bp.route('/markcancel', methods=('GET', 'POST'))
+@login_required
+@permission_required('registration_edit')
+def cancel():
+    regid = request.args.get('regid')
+
+    reg = get_reg(regid)
+    reg.canceled = True
+    inv = get_inv(reg.invoice_number)
+    inv.recalculate_balance_from_registrations()
+    reg.invoice_number = None
+    db.session.commit()
+
+    return redirect(url_for('invoices.update', invnumber=inv.invoice_number, type="REGISTRATION"))
 
 @bp.route('/atd', methods=('GET', 'POST'))
 @login_required
@@ -269,6 +281,7 @@ def editreg(regid):
     form = EditForm()
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
+    form.expected_arrival_date.choices = get_reg_arrival_dates()
 
     if request.method == 'POST' and form.validate_on_submit():
         medallion_check = None
@@ -287,3 +300,20 @@ def editreg(regid):
 
     form.populate_form(reg)
     return render_template('editreg.html', regid=reg.id, reg=reg, form=form)
+
+@bp.route('/<int:regid>/edit/invoice', methods=['GET', 'POST'])
+@login_required
+@permission_required('admin')
+def regupdateinvoice(regid):
+    reg = get_reg(regid)
+
+    form = UpdateInvoiceNumber()
+
+    if request.method == 'POST' and form.validate_on_submit():
+
+        reg.invoice_number=form.invoice_number.data
+        db.session.commit()
+        return redirect(url_for('troll.reg',regid=regid))
+
+    form.invoice_number.data = reg.invoice_number
+    return render_template('updateinvoice.html', regid=reg.id, reg=reg, form=form)

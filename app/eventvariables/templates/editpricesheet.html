@@ -2,29 +2,22 @@
 
 {% block content %}
 
-    <form action="" method="post">
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
                 <h1>{% block title %} Edit Pricesheet {% endblock %}</h1>
         <div class="row form-group">
-            <div class="col form-group">
-                <p>
-                    {{ form.arrival_date.label }}
-                    {{ form.arrival_date(class_='form-control m-0', disabled=true) }}
-                </p>
-            </div>
+            {% with field=form.arrival_date, disabled=True %}
+                {% include 'form_field.html' %}
+            {% endwith %}
+
         </div>
         <div class="row form-group">
-            <div class="col form-group">
-                <p>
-                    {{ form.prereg_price.label }}
-                    {{ form.prereg_price(class_='form-control m-0') }}
-                </p>
-            </div>
-            <div class="col form-group">
-                <p>
-                    {{ form.atd_price.label }}
-                    {{ form.atd_price(class_='form-control m-0') }}
-                </p>
-            </div>
+            {% with field=form.prereg_price, required=True %}
+                {% include 'form_field.html' %}
+            {% endwith %}
+            {% with field=form.atd_price, required=True %}
+                {% include 'form_field.html' %}
+            {% endwith %}
         </div>
         <div class="row form-group">
             <div class="col form-group">

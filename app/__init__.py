@@ -8,6 +8,8 @@ from flask_security import Security, SQLAlchemyUserDatastore, auth_required, has
 from flask_security.models import fsqla_v3 as fsqla
 from flask_mail import Mail
 from flask_qrcode import QRcode
+from werkzeug.exceptions import InternalServerError
+import traceback
 
 app = Flask(__name__,static_url_path="", static_folder="static")
 
@@ -44,6 +46,7 @@ from app.merchant import bp as merchant_bp
 from app.payment import bp as payment_bp
 from app.scheduledevents import bp as scheduledevents_bp
 from app.recruitment import bp as recruitment_bp
+from app.report import bp as report_bp
 from app.api import bp as api_bp
 
 app.register_blueprint(user_bp)
@@ -63,4 +66,16 @@ app.register_blueprint(merchant_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(scheduledevents_bp)
 app.register_blueprint(recruitment_bp)
+app.register_blueprint(report_bp)
 app.register_blueprint(api_bp)
+
+from app.utils.email_utils import send_admin_error_email
+
+@app.errorhandler(InternalServerError)
+def handle_500_error(e):
+    stack_trace = traceback.format_exc()
+    send_admin_error_email(e, stack_trace)
+    return "An internal server error occurred. The administrator has been notified.", 500
+
+
+app.register_error_handler(500, handle_500_error)

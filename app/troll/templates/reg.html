@@ -139,7 +139,7 @@
         <br>
         {% if atd_payments %}
         {% for pay in atd_payments %}
-        {% if reg.invoices|length <= 0 %} <h1 class="text-center" style="background-color: red; color: white;">
+        {% if reg.invoice_number %} <h1 class="text-center" style="background-color: red; color: white;">
             {{pay.type}} - ${{pay.amount}}</h1>
             {% if reg['age'] == '18+' %}
             <h1 class="text-center m-0" style="background-color: red; color: white;">ADULT</h1>
@@ -223,6 +223,7 @@
             {% endif %}
         </div>
     </div>
+</div>
     {% endif %}
     <!-- <br>
         <form method="post">

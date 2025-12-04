@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Edit Registration {% endblock %}</h1>
+
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    <h2>Personal Information</h2>
+    <div class="row form-group">
+        {% with field=form.invoice_number, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.submit(class_='form-control m-0 btn btn-lg btn-primary') }}
+            </p>
+        </div>
+    </div>
+</form>
+
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

@@ -95,7 +95,6 @@ def eventvariables():
             eventvariables.merchant_bounced_check_fee = form.merchant_bounced_check_fee.data
         
         db.session.commit()
-        db.session.close()
         flash('Event Variables saved successfully!', 'success')
         return redirect(url_for('eventvariables.eventvariables', form=form))
 
@@ -106,7 +105,6 @@ def eventvariables():
 @permission_required('admin')
 def pricesheet():
     pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).all()
-    db.session.close()
     return render_template('viewpricesheet.html', pricesheet=pricesheet)
 
 
@@ -116,12 +114,30 @@ def pricesheet():
 def editpricesheet(date):
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date == date).first()
     form = PriceSheetForm(
-        arrival_date = pricesheet.arrival_date,
+        arrival_date = pricesheet.arrival_date.strftime('%Y/%m/%d'),
         prereg_price = pricesheet.prereg_price,
         atd_price = pricesheet.atd_price
     )
     form.arrival_date.choices = get_reg_arrival_dates()
-    db.session.close()
+    if request.method == 'POST' and form.validate_on_submit():
+        pricesheet.prereg_price = form.prereg_price.data
+        pricesheet.atd_price = form.atd_price.data
+        db.session.commit()
+        return redirect(url_for('eventvariables.pricesheet'))
+    print(form.errors)
     return render_template('editpricesheet.html', form=form, pricesheet=pricesheet)
 
-
+@bp.route('/paypal_info', methods=('GET', 'POST'))
+@login_required
+@permission_required('admin')
+def paypal_info():
+    form=PayPalForm()
+    if request.method=='POST':
+        env_vars=EventVariables.query.filter(EventVariables.id==1).first()
+        env_vars.bas=form.base_url.data
+        env_vars.cli=form.client_id.data
+        env_vars.sec=form.client_secret.data
+        env_vars.web=form.webhook_id.data
+        db.session.commit()
+        return redirect(url_for('eventvariables.eventvariables'))
+    return render_template('paypal_info.html', form=form)

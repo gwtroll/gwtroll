@@ -214,6 +214,24 @@
             </p>
         </div>
     </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.personal_space.label }}
+                {{ form.personal_space(class_='form-control m-0') }}
+                {% if form.personal_space.errors %}{% for error in form.personal_space.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p class="text-center">
+                {{ form.extra_space.label }}
+                {{ form.extra_space(class_='form-control m-0') }}
+                {% if form.extra_space.errors %}{% for error in form.extra_space.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
 
     <div class="row form-group">
         <div class="col form-group">
@@ -244,11 +262,29 @@
         </div>
         <div class="col form-group">
             <p>
+                {{ form.space_fee_balance.label }}
+                {{ form.space_fee_balance(class_='form-control m-0') }}
+                {% if form.space_fee_balance.errors %}{% for error in form.space_fee_balance.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>  
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
                 {{ form.processing_fee.label }}
                 {{ form.processing_fee(class_='form-control m-0') }}
                 {% if form.processing_fee.errors %}{% for error in form.processing_fee.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
             </p>
         </div>
+        <div class="col form-group">
+            <p>
+                {{ form.processing_fee_balance.label }}
+                {{ form.processing_fee_balance(class_='form-control m-0') }}
+                {% if form.processing_fee_balance.errors %}{% for error in form.processing_fee_balance.errors %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
         <div class="col form-group">
             <p>
                 {{ form.merchant_fee.label(class_='form-check-label') }}
@@ -290,6 +326,17 @@
         </div>
     </div>
 
+    {% if current_user.has_permission('admin') %}
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.invoice_number.label }}
+                {{ form.invoice_number(class_='form-control m-0') }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="row form-group">
         <div class="col form-group">
             <p>
@@ -315,8 +362,10 @@
         ropes_right = document.getElementById('ropes_right')
         ropes_front = document.getElementById('ropes_front')
         ropes_back = document.getElementById('ropes_back')
+        personal_space = document.getElementById('personal_space')
+        extra_space = document.getElementById('extra_space')
 
-        space_fee.value = (((parseInt(frontage_width.value) + parseInt(ropes_left.value) + parseInt(ropes_right.value)) * (parseInt(frontage_depth.value) + parseInt(ropes_front.value) + parseInt(ropes_back.value))) * new Number("{{event.merchant_squarefoot_fee}}")).toFixed(2);
+        space_fee.value = (((parseInt(frontage_width.value) + parseInt(ropes_left.value) + parseInt(ropes_right.value)) * (parseInt(frontage_depth.value) + parseInt(ropes_front.value) + parseInt(ropes_back.value)) - parseFloat(personal_space.value) + parseFloat(extra_space.value)) * new Number("{{event.merchant_squarefoot_fee}}")).toFixed(2);
 
         merchant_fee.value = (parseFloat(space_fee.value) + parseFloat(processing_fee.value)).toFixed(2)
     }

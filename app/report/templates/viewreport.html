@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Report {% endblock %}</h1>
+
+<div class="row">
+    <div class="col">
+        {{form.report_type(class_="form-control")}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{form.dt_start.label}}
+        {{form.dt_start(class_="form-control")}}
+    </div>
+    <div class="col">
+        {{form.dt_end.label}}
+        {{form.dt_end(class_="form-control")}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <button id="runreport" class="form-control btn btn-primary" onclick="populate_table()">Run Report</button>
+    </div>
+</div>
+
+<table id="myTable" data-show-columns="true"
+    data-show-columns-toggle-all="true" data-filter-control="true" data-sortable="true" data-pagination="true"
+    data-show-fullscreen="true" data-show-export="true" data-export-types="['csv', 'excel', 'pdf']"
+    data-minimum-count-columns="2" data-show-pagination-switch="true" data-page-list="[10, 25, 50, 100, all]"
+    data-detail-view="true" data-detail-view-icon="false" data-mobile-responsive="true" data-check-on-init="true"
+    data-classes="table table-striped table-responsive">
+</table>
+
+<script>
+
+    async function populate_table() {
+        const select = document.getElementById('report_type');
+        const dt_start = document.getElementById('dt_start');
+        const dt_end = document.getElementById('dt_end');
+        console.log(dt_start.value);
+        console.log(dt_end.value);
+        console.log(select.value);
+        const baseURL = window.location.origin+"/api/"+select.value;
+        const url = new URL(baseURL);
+        console.log(url)
+        const params = {
+            dt_start:dt_start.value,
+            dt_end:dt_end.value
+        };
+        url.search = new URLSearchParams(params).toString();
+        await fetch(url)
+            .then(response => response.json())
+            .then((data) => {
+                console.log(url)
+                console.log('checkin')
+                $('#myTable').bootstrapTable('destroy');
+                $('#myTable').bootstrapTable({
+                    columns: data.columns,
+                    data: data.rows
+                })
+            });
+    }
+</script>
+{% endblock %}

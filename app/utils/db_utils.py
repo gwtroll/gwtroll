@@ -80,7 +80,7 @@ def reg_count():
     if checkin_count != None and checkin_count_cache_time > datetime.now() + timedelta(minutes=-10):
         return checkin_count
     else:
-        count = len(Registrations.query.with_entities(Registrations.id).filter(Registrations.checkin is not None).all())
+        count = len(Registrations.query.with_entities(Registrations.id).filter(Registrations.checkin != None).all())
         checkin_count = count
         checkin_count_cache_time = datetime.now()
         return checkin_count
@@ -171,6 +171,12 @@ def get_role(roleid):
         abort(404)
     return role
 
+def get_role_by_name(rolename):
+    role = Role.query.filter_by(name=rolename).first()
+    if role is None:
+        abort(404)
+    return role
+
 def get_roles():
     roles = Role.query.order_by(Role.name).all()
     if roles is None:
@@ -197,6 +203,12 @@ def get_role_choices():
     
     if current_user.has_role('Head Troll'):
         role_choices.append([role_dict['Troll Shift Lead'].id,'Troll Shift Lead'])
+
+    if current_user.has_role('Exchequer'):
+        for r in roles:
+            if r.name != 'Admin':
+                role_choices.append([r.id, r.name])
+        return role_choices
 
     return role_choices
 
@@ -417,7 +429,7 @@ def prereg_total():
 
 def unsent_count():
     unsent=0
-    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
+    unsent_reg = Registrations.query.with_entities(Registrations.invoice_email).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate != True, Registrations.canceled != True, Registrations.balance > 0)).distinct(Registrations.invoice_email).all()
     unsent += len(unsent_reg)
     unsent_merch = Merchant.query.with_entities(Merchant.id).filter(and_(Merchant.invoice_number == None, Merchant.status == "APPROVED")).all()
     unsent += len(unsent_merch)
@@ -426,7 +438,7 @@ def unsent_count():
     return unsent
 
 def unsent_reg_count():
-    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoices == None, Registrations.prereg == True, Registrations.duplicate == False, Registrations.balance > 0)).all()
+    unsent_reg = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.invoice_number == None, Registrations.prereg == True, Registrations.duplicate != True, Registrations.canceled != True, Registrations.balance > 0)).all()
     return len(unsent_reg)
 
 def inv_prereg_open_counts():
@@ -441,7 +453,7 @@ def open_reg_count():
     open_reg = Invoice.query.filter(and_(Invoice.invoice_status=='OPEN')).all()
     for inv in open_reg:
         for reg in inv.regs:
-            if reg.duplicate == False: 
+            if reg.duplicate != True and reg.canceled != True: 
                 count+=1
     return count
 
@@ -457,7 +469,7 @@ def paid_reg_count():
     paid_reg = Invoice.query.filter(and_(Invoice.invoice_status=='PAID')).all()
     for inv in paid_reg:
         for reg in inv.regs:
-            if reg.duplicate == False: 
+            if reg.duplicate != True and reg.canceled != True: 
                 count+=1
     return count
 
@@ -465,15 +477,15 @@ def inv_prereg_canceled_counts():
     return {'Prereg':prereg_total(),'Regs':canceled_reg_count(),'Inv':canceled_count()}
 
 def canceled_count():
-    canceled_inv = Invoice.query.with_entities(Invoice.invoice_number).filter(or_(Invoice.invoice_status=='NO PAYMNET', Invoice.invoice_status=='DUPLICATE')).all()
+    canceled_inv = Invoice.query.with_entities(Invoice.invoice_number).filter(or_(Invoice.invoice_status=='NO PAYMENT', Invoice.invoice_status=='DUPLICATE')).all()
     return len(canceled_inv)
 
 def canceled_reg_count():
     count = 0
-    canceled_reg = Invoice.query.filter(or_(Invoice.invoice_status=='NO PAYMNET', Invoice.invoice_status=='DUPLICATE')).all()
+    canceled_reg = Invoice.query.filter(or_(Invoice.invoice_status=='NO PAYMENT', Invoice.invoice_status=='DUPLICATE')).all()
     for inv in canceled_reg:
         for reg in inv.regs:
-            if reg.duplicate == False: 
+            if reg.duplicate != True or reg.canceled != True: 
                 count+=1
     return count
 
@@ -481,15 +493,15 @@ def inv_prereg_all_counts():
     return {'Prereg':prereg_total(),'Regs':all_reg_count(),'Inv':all_count()}
 
 def all_count():
-    invs = Invoice.query.with_entities(Invoice.invoice_number).filter(and_(Invoice.invoice_status!='NO PAYMNET', Invoice.invoice_status!='DUPLICATE')).all()
+    invs = Invoice.query.with_entities(Invoice.invoice_number).filter(and_(Invoice.invoice_status!='NO PAYMENT', Invoice.invoice_status!='DUPLICATE')).all()
     return len(invs)
 
 def all_reg_count():
     count = 0
-    regs = Invoice.query.filter(and_(Invoice.invoice_status!='NO PAYMNET', Invoice.invoice_status!='DUPLICATE')).all()
+    regs = Invoice.query.filter(and_(Invoice.invoice_status!='NO PAYMENT', Invoice.invoice_status!='DUPLICATE')).all()
     for inv in regs:
         for reg in inv.regs:
-            if reg.duplicate == False: 
+            if reg.duplicate != True and reg.canceled != True: 
                 count+=1
     return count
 
@@ -514,6 +526,20 @@ def get_reg_arrival_dates():
         date_tup = (date.strftime('%Y/%m/%d'), date.strftime('%A - %B %d, %Y'))
         returned_dates.append(date_tup)
     return returned_dates
+
+def get_merchant_choices():
+    merchants = Merchant.query.filter(Merchant.status=='APPROVED').order_by(Merchant.business_name).all()
+    merchant_choices = [(None, '-')]
+    for d in merchants:
+        merchant_tup = (d.id, d.business_name)
+        merchant_choices.append(merchant_tup)
+    return merchant_choices
+
+def get_merchant(merchantid):
+    merchant = Merchant.query.filter_by(id=merchantid).first()
+    if merchant is None:
+        abort(404)
+    return merchant
 
 def get_merch_arrival_dates():
     returned_dates = [('-','-')]
@@ -549,3 +575,17 @@ def get_volunteerposition_choices():
         position_tup = (d.id, d.name)
         position_choices.append(position_tup)
     return position_choices
+
+def get_department_by_name(departmentname):
+    dept = Department.query.filter_by(name=departmentname).first()
+    if dept is None:
+        abort(404)
+    return dept
+
+def get_approval_notification_recipients(departmentid):
+    recipients = []
+    users = User.query.filter(User.department_id==departmentid).all()
+    for user in users:
+        if user.has_role('Department Head') and user.email != None:
+            recipients.append(user.email)
+    return recipients

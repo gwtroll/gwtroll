@@ -29,6 +29,7 @@
             <th data-field="id">ID</th>
             <th data-field="type" data-filter-control="select">Type</th>
             <th data-field="relationship" data-filter-control="select">Relationship</th>
+            <th data-field="paypal_id" data-filter-control="input">PayPal ID</th>
             <th data-field="object" data-filter-control="input">Object</th>
             <th data-field="edit">Edit</th>
         </thead>
@@ -51,6 +52,9 @@
                     {% if payment.merchant %}
                     Merchant
                     {% endif %}
+                </td>
+                <td>
+                    {{payment.paypal_id}}
                 </td>
                 <td>
                     {% if payment.reg %}

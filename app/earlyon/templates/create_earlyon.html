@@ -5,22 +5,27 @@
 <h1>{% block title %} Request Early On {% endblock %}</h1>
 <div class="row">
     <div class="col">
-        <p>Use this form to request an Early On at Gulf Wars. Please fill out all required fields.</p>
+        <p>Use this form to request an Early-On at Gulf Wars. Please fill out all required fields below.</p>
 
         <div class="row"
             style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
             <div class="col">
                 <p>You will receive an email confirmation of your application. This is not an acceptance email.</p>
 
-                <p>If you don't get the auto response email, your application did not go through. (Don't forget to check
-                    your spam folder)</p>
+                <p>If you don't get an auto-response email, your application did not go through. (Don't forget to check your spam folder before reapplying.)</p>
             </div>
         </div>
         <div class="row"
             style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
             <div class="col">
-                <p>Staff receive 1 adult rider for FREE. To add an additional rider will be $15 per adult.</p>
-                <p>Merchants receive 2 adult rider for FREE. To add an additional rider will be $15 per adult.</p>
+                <p>Staff is allowed 1 adult rider for FREE. Each additional Adult rider will require $15 to be pre-paid. There is no additional charge for minors, but they must be on the approved list so must be included in this application.</p>
+                <p>Merchants receive 3 adult riders for FREE per 600 sq ft of reserved merchant space, up to a maximum of 12 staff members, including the merchant. Each additional Adult rider will require $15 to be pre-paid.</p>
+            </div>
+        </div>
+        <div class="row"
+            style="border: .1em; border-style: solid; border-color: black; padding: 1em; margin-bottom: 1em; border-radius: 1em;">
+            <div class="col">
+                <p>Please note, ALL EARLY-ON registrants, whether they are staff, a free rider, or an additional rider must have pre-paid for the entire week, and be on the approved list, or they will NOT be allowed on-site until Saturday at 1pm, when Site opens for everyone.</p>
             </div>
         </div>
     </div>
@@ -57,7 +62,17 @@
             {% with field=form.arrival_date, required=true %}
             {% include 'form_field.html' %}
             {% endwith %}
-            {% with field=form.department, required=true %}
+        </div>
+        <div class="row form-group">
+            <p>
+                {{ form.department.label }}<span style="color: red;">*</span>
+                {{ form.department(class_='form-control m-0', onchange_="merchantCheck()") }}
+                {% if form.department.errors %}{% for error in form.department.errors %}<span
+                class="error">{{ error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+        <div class="row form-group" id="merchant_section" style="display: none;">
+            {% with field=form.merchant, required=false %}
             {% include 'form_field.html' %}
             {% endwith %}
         </div>
@@ -67,6 +82,13 @@
             {% endwith %}
         </div>
 
+        <div class="row">
+            <div class="col">
+                <p>
+                   <b>Registration Id for riders can be found on the email 'Gulf Wars XXXIV - Payment Confirmation and Fast Pass' received after completing payment of registration.</b> 
+                </p>
+            </div>
+        </div>
         {% for rider in form.riders %}
         <div>
             <div class="row form-group">
@@ -123,5 +145,20 @@
 {% endblock %}
 
 {% block script %}
+<script>
+    function merchantCheck() {
+        const department = document.getElementById("department");
+        const merchant = document.getElementById("merchant_section");
+        console.log(department.options[department.selectedIndex].text)
+        if (department.options[department.selectedIndex].text == 'Merchant/Vendor') {
+            merchant.style.display = 'block';
+        }
+        else {
+            merchant.style.display = 'none';
+        }
+    }
+
+    merchantCheck();
+</script>
 
 {% endblock %}

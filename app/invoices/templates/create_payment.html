@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{% block title %} Create Invoice Payment {% endblock %}</h1>
+<h1>{% block title %} Create Payment {% endblock %}</h1>
 {% if inv.invoice_type == 'REGISTRATION' %}
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
@@ -55,12 +55,17 @@
         {% endwith %}
     </div>
     <div class="row">
+        {% with field=form.invoice_status, disabled=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
         {% with field=form.invoice_date, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
         {% with field=form.invoice_number, required=true %}
         {% include 'form_field.html' %}
-        {% endwith %}        
+        {% endwith %}
     </div>
     <div class="row">
         {% with field=form.paypal_donation, required=true %}
@@ -68,7 +73,7 @@
         {% endwith %}
         {% with field=form.registration_amount, required=true %}
         {% include 'form_field.html' %}
-        {% endwith %}        
+        {% endwith %}
     </div>
     <div class="row">
         {% with field=form.invoice_amount, required=true %}
@@ -91,7 +96,7 @@
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
-    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+    <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
     </div>
 </form>
 {% elif inv.invoice_type=='MERCHANT' %}
@@ -141,20 +146,25 @@
         {% endwith %}
     </div>
     <div class="row">
+        {% with field=form.invoice_status, disabled=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
         {% with field=form.invoice_date, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
         {% with field=form.invoice_number, required=true %}
         {% include 'form_field.html' %}
-        {% endwith %}        
+        {% endwith %}
     </div>
     <div class="row">
         {% with field=form.space_fee, required=true %}
         {% include 'form_field.html' %}
-        {% endwith %}  
+        {% endwith %}
         {% with field=form.processing_fee, required=true %}
         {% include 'form_field.html' %}
-        {% endwith %}                  
+        {% endwith %}
     </div>
     <div class="row">
         {% with field=form.invoice_amount, required=true %}
@@ -177,7 +187,7 @@
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
-    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+    <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
     </div>
 </form>
 {% elif inv.invoice_type=='EARLYON' %}
@@ -224,28 +234,25 @@
         {% endwith %}
     </div>
     <div class="row">
+        {% with field=form.invoice_status, disabled=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
         {% with field=form.invoice_date, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
         {% with field=form.invoice_number, required=true %}
         {% include 'form_field.html' %}
-        {% endwith %}        
+        {% endwith %}
     </div>
     <div class="row">
         {% with field=form.rider_fee, required=true %}
         {% include 'form_field.html' %}
-        {% endwith %}          
+        {% endwith %}
     </div>
     <div class="row">
-        <div class="col">
-            <p>
-                {{ form.invoice_amount.label }}<br>
-                {{ form.invoice_amount(class_='form-control', readonly=true) }}
-            </p>
-        </div>
-    </div>
-    <div class="row">
-        {% with field=form.invoice_amount, required=true %}
+        {% with field=form.invoice_amount, disabled=true %}
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
@@ -265,11 +272,10 @@
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
-    <p>{{ form.submit(class_='form-control btn btn-primary btn-lg') }}</p>
+    <p>{{ form.submit(class_='form-control btn btn-warning btn-lg') }}</p>
     </div>
 </form>
 {% endif %}
-
 
 {% endblock %}
 

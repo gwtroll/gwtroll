@@ -31,6 +31,17 @@
             <div class="row form-group">
                 <div class="col form-group">
                     <p>
+                        Email
+                        {{ form.email.label }}
+                        {{ form.email(class_='form-control m-0') }}
+                        {% if form.email.errors %}{% for error in form.email.errors %}<span class="error">{{ error
+                            }}</span>{% endfor %}{% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col form-group">
+                    <p>
                         {{ form.fname.label }}
                         {{ form.fname(class_='form-control m-0') }}
                         {% if form.fname.errors %}{% for error in form.fname.errors %}<span class="error">{{ error

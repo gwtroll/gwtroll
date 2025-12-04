@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+        <h1>{% block title %} PayPal Variables {% endblock %}</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field, errors in form.errors.items() %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <h2>PayPal Variables</h2>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.base_url.label }}
+                    {{ form.base_url(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.client_id.label }}
+                    {{ form.client_id(class_='form-control m-0') }}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.client_secret.label }}
+                    {{ form.client_secret(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.webhook_id.label }}
+                    {{ form.webhook_id(class_='form-control m-0') }}
+                </p>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit(class_='form-control m-0 btn btn-lg btn-success') }}
+                </p>
+            </div>
+        </div>
+    </form>
+
+    
+{% endblock %}
