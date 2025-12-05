@@ -324,9 +324,9 @@ def createinvoice():
 
             return redirect(url_for('invoices.unsent'))
         else:
-            # if form.invoice_amount.data <= 0:
-            #     flash('$0 Invoices should be acknowledged using the \'Acknowledge Zero Dollar Invoice\' action.','error')
-            #     render_template('create_invoice.html', form=form, regs=regs, type=type)
+            if total_due <= 0 and type == 'REGISTRATION':
+                flash('$0 Invoices should be acknowledged using the \'Acknowledge Zero Dollar Invoice\' action.','error')
+                return render_template('create_invoice.html', form=form, regs=regs, type=type)
             try:
                 paypal_invoice = create_invoice(regs, invoice_email, type)
             except Exception as e:
