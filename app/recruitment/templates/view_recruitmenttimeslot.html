@@ -2,55 +2,100 @@
 
 {% block content %}
 <h1>Volunteer Timeslot</h1>
-        <div class="row">
-            <div class="col">
-                <p>
-                    Position
-                    <input class="form-control" disabled value="{{timeslot.volunteerposition.name}}">
-                </p>
+<div class="row">
+    <div class="col">
+        <p>
+            Position
+            <input class="form-control" disabled value="{{timeslot.volunteerposition.name}}">
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <p>
+            Description
+            <textarea class="form-control" disabled>{{timeslot.volunteerposition.description}}</textarea>
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <p>
+            Start Date/Time
+            <input class="form-control" disabled value="{{timeslot.start_datetime.strftime('%m/%d/%Y %I:%M %p')}}">
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <p>
+            End Date/Time
+            <input class="form-control" disabled value="{{timeslot.end_datetime.strftime('%m/%d/%Y %I:%M %p')}}">
+        </p>
+    </div>
+</div>
+<button type="button" class="btn btn-success btn-lg form-control" data-bs-toggle="modal"
+    data-bs-target="#signupModal">Sign Me Up!</button>
+
+<!-- Sign Up Modal -->
+<div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="signupModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Sign Up for {{timeslot.volunteerposition.name}}</h5>
+                <form action="{{ url_for('recruitment.addrecruitmentschedule',recruitmentscheduleid=timeslot.id)}}" method="POST">
+                    <div class="row">
+                        <div class="col">
+                            <p>
+                                {{signup_form.fname.label}}</b>
+                                {{signup_form.fname(class_='form-control')}}
+                            </p>
+                        </div>
+                        <div class="col">
+                            <p>
+                                {{signup_form.lname.label}}</b>
+                                {{signup_form.lname(class_='form-control')}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <p>
+                                {{signup_form.scaname.label}}</b>
+                                {{signup_form.scaname(class_='form-control')}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <p>
+                                {{signup_form.lodging.label}}</b>
+                                {{signup_form.lodging(class_='form-control')}}
+                            </p>
+                        </div>
+                        <div class="col">
+                            <p>
+                                {{signup_form.kingdom.label}}</b>
+                                {{signup_form.kingdom(class_='form-control')}}
+                            </p>
+                        </div>
+                    </div>
+                    <b>
+                        {{signup_form.submit(class_='form-control btn btn-primary')}}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
-    <div class="row">
-        <div class="col">
-            <p>
-                Description
-                <textarea class="form-control" disabled>{{timeslot.volunteerposition.description}}</textarea>
-            </p>
-        </div>
     </div>
-
-    <div class="row">
-        <div class="col">
-            <p>
-                Start Date/Time
-                <input class="form-control" disabled value="{{timeslot.start_datetime.strftime('%m/%d/%Y %I:%M %p')}}">
-            </p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <p>
-                End Date/Time
-                <input class="form-control" disabled value="{{timeslot.end_datetime.strftime('%m/%d/%Y %I:%M %p')}}">
-            </p>
-        </div>
-    </div>
-    {% if timeslot.volunteer and current_user.has_permission('view_recruitment')%}
-        <div class="row">
-            <div class="col">
-                <p>
-                    Volunteer
-                    <input class="form-control" disabled value="{{timeslot.volunteer.lname}}, {{timeslot.volunteer.fname}}">
-                </p>
-            </div>
-        </div>
-    {% endif %}
-
-            {% if timeslot.id in current_user.get_recruitmentschedule_ids() %}
-            <button class="form-control btn btn-lg btn-danger" onclick="remove_recruitmentschedule(this,'{{timeslot.id}}')">Remove</button>
-            {% else %}
-            <button class="form-control btn btn-lg btn-primary" onclick="add_recruitmentschedule(this,'{{timeslot.id}}')">Sign Up</button>
-            {% endif %}
+</div>
 
 {% endblock %}
 

@@ -1,6 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+{% if current_user.has_permission('admin') or current_user.has_permission('recruitment_edit') %}
+<div class="row">
+  <div class="col">
+    <a href="{{url_for('recruitment.createrecruitmentschedule')}}"><button
+        class="btn btn-primary btn-lg" type="button">Create Timeslot</button></a>
+  </div>
+    <div class="col">
+    <a href="{{url_for('recruitment.positions')}}"><button
+        class="btn btn-primary btn-lg" type="button">Positions</button></a>
+  </div>
+</div>
+{% endif %}
+
 <div class="row">
   <div class="col">
     <table id="recruitmentscheduleTable" data-toggle="table" data-filter-control="true" data-sortable="true"
@@ -12,12 +26,16 @@
       data-classes="table table-striped table-responsive">
       <thead>
         <tr>
+          <th data-field="department" data-filter-control="select">Department</th>
           <th data-field="position" data-filter-control="select">Position</th>
           <th data-field="date" data-filter-control="select">Date</th>
           <th data-field="day" data-filter-control="select">Day</th>
           <th data-field="start_time" data-filter-control="select">Start Time</th>
           <th data-field="end_time" data-filter-control="select">End Time</th>
+          {% if current_user.has_permission('admin') or current_user.has_permission('recruitment_edit') %}
+          <th data-field="volunteer" data-filter-control="select">Volunteer</th>
           <th data-field="add">Add</th>
+          {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -25,7 +43,11 @@
         {%for ts in timeslots %}
         <tr>
           <td>
-            <a href="{{url_for('recruitment.recruitmentschedule_item', recruitmentscheduleid=ts.id)}}">{{ts.volunteerposition.name}}</a>
+            {{ts.department.name}}
+          </td>
+          <td>
+            <a
+              href="{{url_for('recruitment.recruitmentschedule_item', recruitmentscheduleid=ts.id)}}">{{ts.volunteerposition.name}}</a>
           </td>
           <td>
             {{ts.start_datetime.date()}}
@@ -39,11 +61,19 @@
           <td>
             {{ts.end_datetime.strftime("%I:%M %p")}}
           </td>
+          {% if (current_user.has_permission('admin') or current_user.has_permission('recruitment_edit'))%}
           <td>
-            {% if ts.id in current_user.get_recruitmentschedule_ids() %}
-            <button class="btn btn-danger" onclick="remove_recruitmentschedule(this,'{{ts.id}}')">Remove</button>
-            {% else %}
-            <button class="btn btn-primary" onclick="add_recruitmentschedule(this,'{{ts.id}}')">Sign Up</button>
+            {% if ts.volunteer  %}
+            <a href="{{url_for('recruitment.viewvolunteer', volid=ts.volunteer.id)}}">{{ts.volunteer.fname}} {{ts.volunteer.lname}}</a>
+            {% endif %}
+          </td>
+          {% endif %}
+          <td>
+            <a href="{{url_for('recruitment.recruitmentschedule_item', recruitmentscheduleid=ts.id)}}"><button
+                class="btn btn-primary btn-lg" type="button">View</button></a>
+            {% if current_user.has_permission('admin') or current_user.has_permission('recruitment_edit') %}
+            <a href="{{url_for('recruitment.updaterecruitmentschedule', recruitmentscheduleid=ts.id)}}"><button
+                class="btn btn-warning btn-lg" type="button">Edit</button></a>
             {% endif %}
           </td>
         </tr>
@@ -71,7 +101,7 @@
     remove_btn.classList.add('btn')
     remove_btn.classList.add('btn-danger')
     remove_btn.innerText = 'Remove'
-    remove_btn.onclick = function(){ remove_recruitmentschedule(this,recruitmentscheduleid) }
+    remove_btn.onclick = function () { remove_recruitmentschedule(this, recruitmentscheduleid) }
     btn.replaceWith(remove_btn)
   }
   async function remove_recruitmentschedule(btn, recruitmentscheduleid) {
@@ -90,7 +120,7 @@
     add_btn.classList.add('btn')
     add_btn.classList.add('btn-primary')
     add_btn.innerText = 'Add'
-    add_btn.onclick = function(){ add_recruitmentschedule(this,recruitmentscheduleid) }
+    add_btn.onclick = function () { add_recruitmentschedule(this, recruitmentscheduleid) }
     btn.replaceWith(add_btn)
   }
 </script>

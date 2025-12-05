@@ -2,26 +2,31 @@
 
 
 {% block content %}
-<h1>Create Scheduled Event</h1>
+<h1>View/Update Volunteer</h1>
 
 <form id='scheduledeventform' action="" method="POST" novalidate>
     {{ form.hidden_tag() }}
 
     <div class="row form-group">
-        {% with field=form.start_datetime, required=true %}
+        {% with field=form.fname, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
-        {% with field=form.end_datetime, required=true %}
-        {% include 'form_field.html' %}
-        {% endwith %}
-    </div>
-    <div class="row form-group">
-        {% with field=form.volunteerposition, required=true %}
+        {% with field=form.lname, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
+
     <div class="row form-group">
-        {% with field=form.department, required=true %}
+        {% with field=form.scaname, required=false %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+
+    <div class="row form-group">
+        {% with field=form.lodging, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+        {% with field=form.kingdom, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
     </div>

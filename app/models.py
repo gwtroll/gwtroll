@@ -939,8 +939,8 @@ class RecruitmentSchedule(db.Model):
     start_datetime = db.Column(db.DateTime(), nullable=False)
     end_datetime = db.Column(db.DateTime(), nullable=False)
     status = db.Column(db.String(), nullable=False, default='OPEN')
-    volunteer_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
-    volunteer = db.relationship("User", backref="volunteer", viewonly=True)
+    volunteer_id = db.Column(db.Integer(), db.ForeignKey("volunteer.id"))
+    volunteer = db.relationship("Volunteer", backref="volunteer", viewonly=True)
     volunteerposition_id = db.Column(db.Integer(), db.ForeignKey("volunteerposition.id"))
     volunteerposition = db.relationship("VolunteerPosition", backref="volunteerposition", viewonly=True)
     department_id = db.Column(db.Integer(), db.ForeignKey("departments.id"))
@@ -953,3 +953,14 @@ class User_RecruitmentSchedule(db.Model):
     recruitmentschedule_id = db.Column(
         db.Integer(), db.ForeignKey("recruitmentschedule.id", ondelete="CASCADE")
     )
+
+class Volunteer(db.Model):
+    __tablename__ = "volunteer"
+    id = db.Column(db.Integer(), primary_key=True)
+    fname = db.Column(db.String(), nullable=False)
+    lname = db.Column(db.String(), nullable=False)
+    scaname = db.Column(db.String(), nullable=True)
+    kingdom_id = db.Column(db.Integer(), db.ForeignKey("kingdom.id"))
+    kingdom = db.relationship("Kingdom", backref="kingdom")
+    lodging_id = db.Column(db.Integer(), db.ForeignKey("lodging.id"))
+    lodging = db.relationship("Lodging", backref="lodging")

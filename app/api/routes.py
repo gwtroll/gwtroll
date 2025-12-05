@@ -197,26 +197,25 @@ def removescheduledevent(scheduledeventid):
         db.session.commit()
     return jsonify({"message": "Request successful!"}), 200
 
-@bp.route('/recruitmentschedule/<int:recruitmentscheduleid>/add', methods=('','POST'))
-@login_required
-def addrecruitmentschedule(recruitmentscheduleid):
-    timeslot = RecruitmentSchedule.query.get_or_404(int(recruitmentscheduleid))
-    if timeslot not in current_user.recruitmentschedules:
-        timeslot.volunteer_id = current_user.id
-        current_user.recruitmentschedules.append(timeslot)
-        db.session.commit()
-    return jsonify({"message": "Request successful!"}), 200
+# @bp.route('/recruitmentschedule/<int:recruitmentscheduleid>/add', methods=('','POST'))
+# @login_required
+# def addrecruitmentschedule(recruitmentscheduleid):
+#     timeslot = RecruitmentSchedule.query.get_or_404(int(recruitmentscheduleid))
+#     if timeslot not in current_user.recruitmentschedules:
+#         timeslot.volunteer_id = current_user.id
+#         current_user.recruitmentschedules.append(timeslot)
+#         db.session.commit()
+#     return jsonify({"message": "Request successful!"}), 200
 
-
-@bp.route('/recruitmentschedule/<int:recruitmentscheduleid>/remove', methods=('','POST'))
-@login_required
-def removerecruitmentschedule(recruitmentscheduleid):
-    timeslot = RecruitmentSchedule.query.get_or_404(recruitmentscheduleid)
-    if timeslot in current_user.recruitmentschedules:
-        timeslot.volunteer_id = None
-        current_user.recruitmentschedules.remove(timeslot)
-        db.session.commit()
-    return jsonify({"message": "Request successful!"}), 200
+# @bp.route('/recruitmentschedule/<int:recruitmentscheduleid>/remove', methods=('','POST'))
+# @login_required
+# def removerecruitmentschedule(recruitmentscheduleid):
+#     timeslot = RecruitmentSchedule.query.get_or_404(recruitmentscheduleid)
+#     if timeslot in current_user.recruitmentschedules:
+#         timeslot.volunteer_id = None
+#         current_user.recruitmentschedules.remove(timeslot)
+#         db.session.commit()
+#     return jsonify({"message": "Request successful!"}), 200
 
 @bp.route("/full_export", methods=("GET", ""))
 @login_required

@@ -1122,9 +1122,8 @@ class ScheduledEventForm(FlaskForm):
 class RecruitmentScheduleForm(FlaskForm):
     start_datetime = DateTimeLocalField('Event Date/Time', validators=[DataRequired()])
     end_datetime = DateTimeLocalField('Event Date/Time', validators=[DataRequired()])
-    volunteer = SelectField('Volunteer', validators=[])
-    volunteerposition = SelectField('Position', validators=[])
-    department = SelectField('Department', validators=[])
+    volunteerposition = SelectField('Position', validators=[NoneOf(['-','None'], message='You must select an Position')])
+    department = SelectField('Department', validators=[NoneOf(['-','None'], message='You must select an Department')])
 
     submit = SubmitField('Create Volunteer Timeslot')
 
@@ -1134,10 +1133,7 @@ class RecruitmentScheduleForm(FlaskForm):
             obj.start_datetime = self.start_datetime.data
         # End Date/Time
         if self.end_datetime.data:
-            obj.end_datetime = self.end_datetime.data
-        # Volunteer
-        if self.volunteer.data != 'None' and self.volunteer.data != '-':
-            obj.volunteer_id = self.volunteer.data    
+            obj.end_datetime = self.end_datetime.data 
         # Position
         if self.volunteerposition.data != 'None' and self.volunteerposition.data != '-':
             obj.volunteerposition_id = self.volunteerposition.data    
@@ -1152,9 +1148,6 @@ class RecruitmentScheduleForm(FlaskForm):
         # End Date/Time
         if obj.end_datetime:
             self.end_datetime.data = obj.end_datetime
-        # Volunteer
-        if obj.volunteer_id:
-            self.volunteer.data = str(obj.volunteer_id)
         # Position
         if obj.volunteerposition_id:
             self.volunteerposition.data = str(obj.volunteerposition_id)
@@ -1165,7 +1158,7 @@ class RecruitmentScheduleForm(FlaskForm):
 class VolunteerPositionForm(FlaskForm):
     name = StringField('Position Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
-    department = SelectField('Department', validators=[])
+    department = SelectField('Department', validators=[NoneOf('-', message='You must select an Derpartment')])
 
     submit = SubmitField('Create Position')
 
@@ -1201,3 +1194,45 @@ class PayPalForm(FlaskForm):
 class UpdateInvoiceNumber(FlaskForm):
     invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
     submit = SubmitField('Update PayPal Info')
+
+class VolunteerSignupForm(FlaskForm):
+    fname = StringField('First Name', validators=[DataRequired()])
+    lname = StringField('Last Name', validators=[DataRequired()])
+    scaname = StringField('SCA Name', validators=[Optional()])
+    kingdom = SelectField('Kingdom', validators=[NoneOf('-', message='You must select a Kingdom')])
+    lodging = SelectField('Camping Group', validators=[NoneOf('-', message='You must select a Lodging')])
+    submit = SubmitField('Confirm Sign Up')
+
+    def populate_object(self, obj):
+        # First Name
+        if self.fname.data:
+            obj.fname = self.fname.data.strip()
+        # Last Name
+        if self.lname.data:
+            obj.lname = self.lname.data.strip()
+        # SCA Name
+        if self.scaname.data:
+            obj.scaname = self.scaname.data.strip()
+        # Lodging
+        if self.lodging.data != 'None' and self.lodging.data != '-':
+            obj.lodging_id = self.lodging.data    
+        # Kingdom
+        if self.kingdom.data != 'None' and self.kingdom.data != '-':
+            obj.kingdom_id = self.kingdom.data    
+
+    def populate_form(self, obj):
+        # First Name
+        if obj.fname:
+            self.fname.data = obj.fname
+        # Last Name
+        if obj.lname:
+            self.lname.data = obj.lname
+        # SCA Name
+        if obj.scaname:
+            self.scaname.data = obj.scaname
+        # Lodging
+        if obj.lodging_id:
+            self.lodging.data = str(obj.lodging_id)
+        # Kingdom
+        if obj.kingdom_id:
+            self.kingdom.data = str(obj.kingdom_id)

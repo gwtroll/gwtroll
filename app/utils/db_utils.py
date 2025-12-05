@@ -569,12 +569,39 @@ def get_volunteer_choices():
     return volunteer_choices
 
 def get_volunteerposition_choices():
-    positions = VolunteerPosition.query.order_by(VolunteerPosition.name).all()
     position_choices = [(None, '-')]
+    if current_user.department.name == 'Recruitment' or current_user.has_permission('admin'):
+        positions = VolunteerPosition.query.order_by(VolunteerPosition.name).all()
+    elif current_user.department_id != None:
+        positions = VolunteerPosition.query.filter(VolunteerPosition.department_id==current_user.department_id).order_by(VolunteerPosition.name).all()
+    else:
+        position_choices = [(None, '-')]
+        return position_choices
     for d in positions:
         position_tup = (d.id, d.name)
         position_choices.append(position_tup)
     return position_choices
+
+def get_volunteerdepartment_choices():
+    if current_user.department.name == 'Recruitment' or current_user.has_permission('admin'):
+        department_choices = [(None, '-')]
+        departments = Department.query.order_by(Department.name).all()
+    elif current_user.department_id != None:
+        department_choices = []
+        departments = Department.query.filter(Department.id==current_user.department_id).order_by(Department.name).all()
+    else:
+        department_choices = [(None, '-')]
+        return department_choices
+    for d in departments:
+        department_tup = (d.id, d.name)
+        department_choices.append(department_tup)
+    return department_choices
+
+def get_position(positionid):
+    position = VolunteerPosition.query.filter_by(id=positionid).first()
+    if position is None:
+        abort(404)
+    return position
 
 def get_department_by_name(departmentname):
     dept = Department.query.filter_by(name=departmentname).first()

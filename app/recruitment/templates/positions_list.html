@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% if current_user.has_permission('admin') or current_user.has_permission('recruitment_edit') %}
+<div class="row">
+  <div class="col">
+    <a href="{{url_for('recruitment.createposition')}}"><button
+        class="btn btn-primary btn-lg" type="button">Create Position</button></a>
+  </div>
+</div>
+{% endif %}
 <div class="row">
   <div class="col">
     <table id="positionsTable" data-toggle="table" data-filter-control="true" data-sortable="true"
