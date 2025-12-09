@@ -216,3 +216,39 @@ def paypalpayment():
     except Exception as e:
         send_webhook_error_email(str(e))
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+    
+@bp.route('/create/admin', methods=('GET', 'POST'))
+@login_required
+@permission_required('admin')
+def createpayment_admin():
+    form = AdminCreatePayment()
+    if request.method == 'POST' and form.validate_on_submit():
+        payment = Payment()
+        payment.paypal_id = form.paypal_id.data
+        payment.type = form.type.data
+        payment.check_num = form.check_num.data
+        payment.payment_date = form.payment_date.data
+        payment.registration_amount = form.registration_amount.data
+        payment.nmr_amount = form.nmr_amount.data
+        payment.paypal_donation_amount = form.paypal_donation_amount.data
+        payment.space_fee_amount = form.space_fee_amount.data
+        payment.processing_fee_amount = form.processing_fee_amount.data
+        payment.rider_fee_amount = form.rider_fee_amount.data
+        payment.electricity_fee_amount = form.electricity_fee_amount.data
+        payment.invoice_number = form.invoice_number.data
+        payment.reg_id = form.reg_id.data if form.reg_id.data != '' else None
+
+        payment.amount = payment.registration_amount + payment.nmr_amount + payment.paypal_donation_amount + payment.space_fee_amount + payment.processing_fee_amount + payment.electricity_fee_amount + payment.rider_fee_amount
+
+        db.session.add(payment)
+
+        db.session.commit()
+
+        invoice = payment.invoice if payment.invoice is not None else None
+        if invoice is not None:
+            invoice.recalculate_balance()
+
+        db.session.commit()
+        return redirect(url_for('payment.payment'))
+
+    return render_template('createpayment.html', form=form)
