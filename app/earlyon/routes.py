@@ -148,7 +148,7 @@ def update(earlyon_id):
                 send_earlyon_approval_email(earlyon.registration.email,regs)
                 
             db.session.commit()
-            return render_template('earlyon_list.html', earlyons=EarlyOnRequest.query.all())
+            return redirect(url_for('earlyon.earlyon'))
         flash('There was an error with your submission. Please check the form and try again.', 'error')
         return render_template('edit_earlyon.html', form=form, earlyon=earlyon)
         
