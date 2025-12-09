@@ -781,15 +781,15 @@ def mapping_recon_report(obj,temp_obj,paypal_transactions):
             if payment.paypal_id != None:
                 if payment.paypal_id in paypal_transactions:
                     pay = paypal_transactions[payment.paypal_id]
-                    temp_obj['paypal_gross']=float(pay['gross'])
-                    temp_obj['paypal_fee']=float(pay['fee'])
-                    temp_obj['paypal_net']=float(pay['net'])
+                    temp_obj['paypal_gross']+=float(pay['gross'])
+                    temp_obj['paypal_fee']+=float(pay['fee'])
+                    temp_obj['paypal_net']+=float(pay['net'])
                 else:
                     pay = get_paypal_payment(payment.paypal_id)
                     if 'seller_receivable_breakdown' in pay:
-                        temp_obj['paypal_gross']=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
-                        temp_obj['paypal_fee']=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
-                        temp_obj['paypal_net']=float(pay['seller_receivable_breakdown']['net_amount']['value'])
+                        temp_obj['paypal_gross']+=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
+                        temp_obj['paypal_fee']+=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
+                        temp_obj['paypal_net']+=float(pay['seller_receivable_breakdown']['net_amount']['value'])
 
     return temp_obj
 
