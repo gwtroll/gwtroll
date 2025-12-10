@@ -169,7 +169,7 @@
     </div>
     <h4>Invoice Information</h4>
     <div class="row">
-        {% with field=form.invoice_email, disabled=true %}
+        {% with field=form.invoice_email, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
