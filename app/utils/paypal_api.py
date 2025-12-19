@@ -5,6 +5,7 @@ import json
 import pytz
 from app.models import EventVariables
 from decimal import Decimal
+from app.utils.email_utils import send_admin_paypal_error_email
 
 PAYPAL_API_BASE_URL = os.environ.get('PAYPAL_API_BASE_URL')
 PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID")
@@ -163,12 +164,14 @@ def cancel_invoice_non_payment(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "send_to_invoicer": true,' \
-    ' "send_to_recipient": true,' \
-    ' "additional_recipients": [ "reservations@gulfwars.org" ],' \
-    ' "note": "This is to inform you that we have cancelled your invoice and associaited registrations due to non-payment. \nIf you still plan to attend Gulf Wars XXXIV (2026), please reregister at https://gulfwars.org/registration." }'
+    data = '{ "send_to_invoicer": true,"send_to_recipient": true,"additional_recipients": [ "reservations@gulfwars.org" ],"note": "This is to inform you that we have cancelled your invoice and associaited registrations due to non-payment. If you still plan to attend Gulf Wars XXXIV (2026), please reregister at https://gulfwars.org/registration." }'
 
     response = requests.post(url, headers=headers, data=data)
+
+    if response.status_code != 204:
+        send_admin_paypal_error_email(response.json())
+        raise Exception(response.json())
+        
 
 def cancel_invoice_duplicate(invoice_id):
     url = f"{PAYPAL_API_BASE_URL}/v2/invoicing/invoices/{invoice_id}/cancel"
@@ -178,12 +181,13 @@ def cancel_invoice_duplicate(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "send_to_invoicer": true,' \
-    ' "send_to_recipient": true,' \
-    ' "additional_recipients": [ "reservations@gulfwars.org" ],' \
-    ' "note": "It has come to our attention that a duplicate invoice was issued to you. \nThis is to inform you that we have cancelled this invoice to avoid confusion. \nIf you have questions or concerns, please contact the Gulf Wars Reservationist at reservations@gulfwars.org." }'
+    data = '{ "send_to_invoicer": true,"send_to_recipient": true,"additional_recipients": [ "reservations@gulfwars.org" ],"note": "It has come to our attention that a duplicate invoice was issued to you. \nThis is to inform you that we have cancelled this invoice to avoid confusion. If you have questions or concerns, please contact the Gulf Wars Reservationist at reservations@gulfwars.org." }'
 
     response = requests.post(url, headers=headers, data=data)
+
+    if response.status_code != 204:
+        send_admin_paypal_error_email(response.json())
+        raise Exception(response.json())
 
 def send_reminder(invoice_id):
     url = f"{PAYPAL_API_BASE_URL}/v2/invoicing/invoices/{invoice_id}/remind"

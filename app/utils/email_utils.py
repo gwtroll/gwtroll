@@ -290,3 +290,16 @@ def send_admin_error_email(error, stack_trace):
     )
 
     send_async_mail(msg)
+
+def send_admin_paypal_error_email(response):
+    now = datetime.strftime(datetime.now(),"%m/%d/%Y %H:%M:%S")
+    msg = Message(
+    subject=f"Gulf Wars XXXIV - 400 Error - {now}",
+    recipients=['apps.deputy@gulfwars.org'],
+    )
+
+    msg.html = (
+        f"<p>Error Response: {response}</p>"
+    )
+
+    send_async_mail(msg)

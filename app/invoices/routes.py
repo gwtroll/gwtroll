@@ -655,7 +655,12 @@ def nonpayment():
             reg.canceled == True
 
     if inv.invoice_id is not None:
-        cancel_invoice_non_payment(inv.invoice_id)
+        try:
+            cancel_invoice_non_payment(inv.invoice_id)
+        except Exception as e:
+            send_admin_paypal_error_email(e)
+            flash("There was an PayPal Error Canceling " + str(inv.invoice_number) + "Please Check PayPal to manually cancel Invoice", "error")
+            return redirect(url_for("invoices.open"))
 
     inv.invoice_status = "NO PAYMENT"
     db.session.commit()
@@ -676,7 +681,12 @@ def markduplicate():
             reg.duplicate == True
 
     if inv.invoice_id is not None:
-        cancel_invoice_duplicate(inv.invoice_id)
+        try:
+            cancel_invoice_duplicate(inv.invoice_id)
+        except Exception as e:
+            send_admin_paypal_error_email(e)
+            flash("There was an PayPal Error Canceling " + str(inv.invoice_number) + "Please Check PayPal to manually cancel Invoice", "error")
+            return redirect(url_for("invoices.open"))
 
     inv.invoice_status = "DUPLICATE"
     db.session.commit()
