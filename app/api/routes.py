@@ -52,7 +52,7 @@ def preregistrations():
 def checkins():
     data = init_data_obj(["Checkins"])
 
-    results = Registrations.query.all()
+    results = Registrations.query.filter(Registrations.duplicate != True, Registrations.canceled != True).all()
     results_counts = {
         "PreReg Not Checked In": 0,
         "PreReg Checked In": 0,
