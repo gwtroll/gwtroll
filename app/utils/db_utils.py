@@ -424,7 +424,7 @@ def inv_prereg_unsent_counts():
     return {'Prereg':prereg_total(),'Regs':unsent_reg_count(),'Inv':unsent_count()}
 
 def prereg_total():
-    regs = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.duplicate==False, Registrations.prereg==True)).all()
+    regs = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.duplicate!=True, Registrations.canceled!=True, Registrations.prereg==True)).all()
     return len(regs)
 
 def unsent_count():
