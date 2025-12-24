@@ -503,6 +503,9 @@ def all_reg_count():
         for reg in inv.regs:
             if reg.duplicate != True and reg.canceled != True: 
                 count+=1
+        for merch in inv.merchants:
+            if merch.status == 'APPROVED':
+                count+=1
     return count
 
 def get_earlyon_arrival_dates():

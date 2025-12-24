@@ -720,6 +720,7 @@ def paypal_recon_export():
     data = {}
     columns = [{"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
         {"field": "date", "title": "Invoice Date", "filterControl":"input"},
+        {"field": "paymentdate", "title": "Payment Date", "filterControl":"input"},
         {"field": "email", "title": "Email", "filterControl":"input"},
         {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
         {"field": "invoice_type", "title": "Invoice Type", "filterControl":"input"},
@@ -776,6 +777,7 @@ def mapping_recon_report(obj,temp_obj,paypal_transactions):
     if obj.payments != None:
         unique_payments = []
         for payment in obj.payments:
+            temp_obj['paymentdate'] = payment.payment_date.date()
             temp_obj['total_price_paid']+=payment.amount
             if payment.type != 'PAYPAL':
                 temp_obj['other_payments']+=payment.amount
