@@ -25,19 +25,19 @@ class PayPal_Invoice:
                 "invoice_number": str(get_invoice_number()),
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
-                "\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
-                "\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
+                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
                     },
                 "memo": "Pre-Registration",
                 "terms_and_conditions": "Terms and Conditions (Registrations)"
-                "\n1. Please pay invoice by the due date or your reservation may be cancelled."
-                "\n2. If you have questions or need to change anything once you have paid your reservation please contact the Gulf Wars Reservationist at reservations@gulffwars.org. "
-                "\n3. The GW Exchequer must RECEIVE requests for refunds in writing, postmarked or e-mailed no later than your registered date of arrival. Refund requests should be submitted using a Site Fee Refund Request found on the Gulf Wars Registration website and emailed to exchequer@gulfwars.org. "
-                "\nAll refund requests for any reason will be processed until February 27, 2026. Requests received by after pre-registration closes will be processed at the discretion of the GW Exchequer and the GW Autocrats. Refund requests made after Gulf Wars starts are not guaranteed to be honored. "
-                "\n1. ALL Refunds will be paid via check after the War has ended. A processing fee of $10 per person will be charged to all refunds of PayPal reservations."
+                "\\n1. Please pay invoice by the due date or your reservation may be cancelled."
+                "\\n2. If you have questions or need to change anything once you have paid your reservation please contact the Gulf Wars Reservationist at reservations@gulffwars.org. "
+                "\\n3. The GW Exchequer must RECEIVE requests for refunds in writing, postmarked or e-mailed no later than your registered date of arrival. Refund requests should be submitted using a Site Fee Refund Request found on the Gulf Wars Registration website and emailed to exchequer@gulfwars.org. "
+                "\\nAll refund requests for any reason will be processed until February 27, 2026. Requests received by after pre-registration closes will be processed at the discretion of the GW Exchequer and the GW Autocrats. Refund requests made after Gulf Wars starts are not guaranteed to be honored. "
+                "\\n1. ALL Refunds will be paid via check after the War has ended. A processing fee of $10 per person will be charged to all refunds of PayPal reservations."
             }
         elif type == 'MERCHANT':
             self.detail = {
@@ -46,18 +46,18 @@ class PayPal_Invoice:
                 "invoice_number": str(get_invoice_number()),
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
-                "\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
-                "\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
+                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
                     },
                 "memo": "Merchant",
                 "terms_and_conditions": "Terms & Conditions (Merchants) "
-                "\n1. Please pay invoice by November 19th or your reservation may be cancelled and your merchant space given away. "
-                "\n2. If you have questions or need to change anything once you have paid your merchant fees please contact the Gulf Wars Merchantcrat at merchantcrat@gulfwars.org. "
-                "\n3. The GW Exchequer must RECEIVE requests for refunds in writing, postmarked or e-mailed no later than February 27, 2026. Refund requests for merchant fees must be accompanied by a Merchant Fee Refund Request available on the Gulf Wars Registration site. After that date, refunds will be issued at the discretion of the Gulf War Exchequer, the Autocrats, and the Merchantcrats. No refunds will be processed after March 13, 2026. "
-                "\n4. ALL Refunds will be paid via check to be issued after the War has ended. Merchants will forfeit their Merchant Processing Fee for all refunds."
+                "\\n1. Please pay invoice by November 19th or your reservation may be cancelled and your merchant space given away. "
+                "\\n2. If you have questions or need to change anything once you have paid your merchant fees please contact the Gulf Wars Merchantcrat at merchantcrat@gulfwars.org. "
+                "\\n3. The GW Exchequer must RECEIVE requests for refunds in writing, postmarked or e-mailed no later than February 27, 2026. Refund requests for merchant fees must be accompanied by a Merchant Fee Refund Request available on the Gulf Wars Registration site. After that date, refunds will be issued at the discretion of the Gulf War Exchequer, the Autocrats, and the Merchantcrats. No refunds will be processed after March 13, 2026. "
+                "\\n4. ALL Refunds will be paid via check to be issued after the War has ended. Merchants will forfeit their Merchant Processing Fee for all refunds."
             }
         elif type == 'EARLYON':
             self.detail = {
@@ -66,17 +66,17 @@ class PayPal_Invoice:
                 "invoice_number": str(get_invoice_number()),
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
-                "\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED.  "
-                "\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED.  "
+                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
                     },
                 "memo": "Early-On",
                 "terms_and_conditions": "Terms and Conditions (Early-on) "
-                "\n1. Your invoice must be paid in full for the full week in order to be eligible for Early-on."
-                "\n2. You must have approval from your Department Head and the Autocrat to be allowed on-site before Saturday at noon."
-                "\n3. If you have questions or need to change anything once you have paid your reservation please contact the Gulf Wars Reservationist at reservations@gulffwars.org."
+                "\\n1. Your invoice must be paid in full for the full week in order to be eligible for Early-on."
+                "\\n2. You must have approval from your Department Head and the Autocrat to be allowed on-site before Saturday at noon."
+                "\\n3. If you have questions or need to change anything once you have paid your reservation please contact the Gulf Wars Reservationist at reservations@gulffwars.org."
             }
         self.invoicer = {
             "business_name": "Society For Creative Anachronism-Gulf Wars, Inc",
@@ -181,7 +181,7 @@ def cancel_invoice_duplicate(invoice_id):
         "Content-Type": "application/json",
     }
 
-    data = '{ "send_to_invoicer": true,"send_to_recipient": true,"additional_recipients": [ "reservations@gulfwars.org" ],"note": "It has come to our attention that a duplicate invoice was issued to you. \nThis is to inform you that we have cancelled this invoice to avoid confusion. If you have questions or concerns, please contact the Gulf Wars Reservationist at reservations@gulfwars.org." }'
+    data = '{ "send_to_invoicer": true,"send_to_recipient": true,"additional_recipients": [ "reservations@gulfwars.org" ],"note": "It has come to our attention that a duplicate invoice was issued to you. This is to inform you that we have cancelled this invoice to avoid confusion. If you have questions or concerns, please contact the Gulf Wars Reservationist at reservations@gulfwars.org." }'
 
     response = requests.post(url, headers=headers, data=data)
 
