@@ -101,7 +101,7 @@ def open():
     all_inv = Invoice.query.filter(and_(Invoice.invoice_status == "OPEN")).all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     return render_template(
-        "open_list.html", invoices=all_inv, counts=inv_prereg_open_counts()
+        "open_list.html", invoices=all_inv, counts=inv_prereg_open_counts(), timedelta=timedelta
     )
 
 

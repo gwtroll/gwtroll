@@ -31,6 +31,7 @@
           <th data-field="invoice_date" data-filter-control="select">Invoice Date</th>
           <th data-field="invoice_total" data-filter-control="input">Invoice Total</th>
           <th data-field="email" data-filter-control="input">Email</th>
+          <th data-field="due_date" data-filter-control="input">Due Date</th>
           <th data-field="update">Update</th>
           <th data-field="create_payment">Create Payment</th>
         </tr>
@@ -80,6 +81,9 @@
           </td>
           <td>
             {{invoice['invoice_email']}}
+          </td>
+          <td>
+            {{(invoice['invoice_date'] + timedelta(days=7)).strftime('%m-%d-%Y')}}
           </td>
           <td>
             <a class="btn btn-primary" href="{{url_for('invoices.update', invnumber=invoice['invoice_number'])}}"
