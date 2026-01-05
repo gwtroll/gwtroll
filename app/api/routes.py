@@ -9,6 +9,7 @@ from flask import jsonify, request
 import json
 import copy
 from app.utils.paypal_api import get_paypal_invoices, get_paypal_payment, get_paypal_transactions
+from app.utils.email_utils import send_fastpass_email
 
 def init_data_obj(labels=[]):
     data = {}
@@ -51,7 +52,7 @@ def preregistrations():
 def checkins():
     data = init_data_obj(["Checkins"])
 
-    results = Registrations.query.all()
+    results = Registrations.query.filter(Registrations.duplicate != True, Registrations.canceled != True).all()
     results_counts = {
         "PreReg Not Checked In": 0,
         "PreReg Checked In": 0,
@@ -719,8 +720,8 @@ def paypal_recon_export():
     data = {}
     columns = [{"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
         {"field": "date", "title": "Invoice Date", "filterControl":"input"},
+        {"field": "paymentdate", "title": "Payment Date", "filterControl":"input"},
         {"field": "email", "title": "Email", "filterControl":"input"},
-        {"field": "invoice_id", "title": "PayPal ID", "filterControl":"input"},
         {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
         {"field": "invoice_type", "title": "Invoice Type", "filterControl":"input"},
         {"field": "paypal_gross", "title": "PayPal Gross", "filterControl":"input"},
@@ -736,6 +737,7 @@ def paypal_recon_export():
         {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
         {"field": "total_price_paid", "title": "Total Price Paid", "filterControl":"input"},
         {"field": "balance", "title": "Invoice Balance", "filterControl":"input"},
+        {"field": "invoice_id", "title": "PayPal ID", "filterControl":"input"},
     ]
     rows = []
     invoices = Invoice.query.filter().all()
@@ -773,16 +775,29 @@ def mapping_recon_report(obj,temp_obj,paypal_transactions):
     temp_obj['total_price_paid']=0
 
     if obj.payments != None:
+        unique_payments = []
         for payment in obj.payments:
+            temp_obj['paymentdate'] = payment.payment_date.date()
             temp_obj['total_price_paid']+=payment.amount
             if payment.type != 'PAYPAL':
                 temp_obj['other_payments']+=payment.amount
             if payment.paypal_id != None:
-                if payment.paypal_id in paypal_transactions:
-                    pay = paypal_transactions[payment.paypal_id]
-                    temp_obj['paypal_gross']=float(pay['gross'])
-                    temp_obj['paypal_fee']=float(pay['fee'])
-                    temp_obj['paypal_net']=float(pay['net'])
+                if payment.paypal_id not in unique_payments:
+                    unique_payments.append(payment.paypal_id)
+
+        for payment in unique_payments:
+            if payment in paypal_transactions:
+                pay = paypal_transactions[payment]
+                temp_obj['paypal_gross']+=float(pay['gross'])
+                temp_obj['paypal_fee']+=float(pay['fee'])
+                temp_obj['paypal_net']+=float(pay['net'])
+            else:
+                pay = get_paypal_payment(payment)
+                if 'seller_receivable_breakdown' in pay:
+                    temp_obj['paypal_gross']+=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
+                    temp_obj['paypal_fee']+=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])
+                    temp_obj['paypal_net']+=float(pay['seller_receivable_breakdown']['net_amount']['value'])
+
 
     return temp_obj
 
@@ -796,8 +811,82 @@ def toJSON(obj):
                 data_dict[key] = obj[key]
     return json.dumps(data_dict, sort_keys=True, default=str)
 
+@bp.route("/land_pre-reg", methods=("GET", ""))
+@login_required
+@permission_required('registration_reports')
+def land_pre_reg():
+    data = {}
+    columns = [{"field": "id", "title": "ID", "filterControl": 'input'},
+        {"field": "fname", "title": "First Name", "filterControl":"input"},
+        {"field": "lname", "title": "Last Name", "filterControl":"input"},
+        {"field": "scaname", "title": "SCA Name", "filterControl":"input"},
+        {"field": "age", "title": "Age", "filterControl":"select"},
+        {"field": "reg_date_time", "title": "Registration Date/Time", "filterControl":"input"},
+        {"field": "prereg", "title": "Pre-Registered", "filterControl":"select"},
+        {"field": "expected_arrival_date", "title": "Expected Arrival Date", "filterControl":"select"},
+        {"field": "early_on_approved", "title": "EarlyOn Approved", "filterControl":"select"},
+        {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
+        {"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
+        {"field": "kingdom", "title": "Kingdom", "filterControl":"input"},
+        {"field": "lodging", "title": "Lodging", "filterControl":"input"},
+    ]
+    rows = []
+    regs = Registrations.query.filter(Registrations.prereg==True,Registrations.canceled!=True,Registrations.duplicate!=True).order_by(Registrations.id).all()
+    for reg in regs:
+        if reg.invoice:
+            if reg.invoice.invoice_status == 'PAID':
+                kingdom = reg.kingdom.name
+                lodging = reg.lodging.name
+                reg_json = json.loads(reg.toJSON())
+                reg_json['kingdom'] = kingdom
+                reg_json['lodging'] = lodging
+                reg_json['invoice_status'] = reg.invoice.invoice_status
+                rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
+@bp.route("/paypal_canceled_export", methods=("GET", ""))
+@login_required
+@permission_required('registration_reports')
+def paypal_canceled_export():
+    data = {}
+
+    columns = [{"field": "invoice_number", "title": "Invoice Number", "filterControl": 'input'},
+    {"field": "invoice_type", "title": "Invoice Type", "filterControl": 'select'},
+    {"field": "invoice_email", "title": "Invoice Email", "filterControl": 'input'},
+    {"field": "invoice_date", "title": "Invoice Date", "filterControl":"select"},
+    {"field": "invoice_status", "title": "Invoice Status", "filterControl":"select"},
+    {"field": "registration_total", "title": "Registration", "filterControl":"input"},
+    {"field": "nmr_total", "title": "NMR", "filterControl":"input"},
+    {"field": "donation_total", "title": "Donation", "filterControl":"input"},
+    {"field": "space_fee", "title": "Space Fee", "filterControl":"input"},
+    {"field": "processing_fee", "title": "Processing Fee", "filterControl":"input"},
+    {"field": "rider_fee", "title": "Rider Fee", "filterControl":"input"},
+    {"field": "invoice_total", "title": "Invoice Total", "filterControl":"input"},
+    {"field": "balance", "title": "Balance", "filterControl":"input"},
+    {"field": "notes", "title": "Notes", "filterControl":"input"},
+    ]
+    rows = []
+    full = Invoice.query.filter(Invoice.invoice_status!='PAID',Invoice.invoice_status!='OPEN',).order_by(Invoice.invoice_number).all()
+    for inv in full:
+        reg_json = json.loads(inv.toJSON())
+        rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
 @bp.route("/paypal_transactions", methods=("GET", ""))
 @login_required
 @permission_required('admin')
 def paypal_transaction_search():
     return str(get_paypal_transactions())
+
+@bp.route("/resend_fastpass", methods=("GET", ""))
+@login_required
+@permission_required('registration_edit')
+def resend_fastpass():
+    regid = request.args.get('regid')
+    reg = get_reg(regid)
+    send_fastpass_email(reg.email, reg)
+    return 'SUCCESS'

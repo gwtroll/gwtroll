@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Create Payment {% endblock %}</h1>
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <h2>Create Payment</h2>
+    <h3>Payment</h3>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.type.label }}
+                {{ form.type(class_='form-control m-0') }}
+                {% if form.type.errors %}{% for error in form.type.errors %}<span class="error">{{ error }}</span>{%
+                endfor %}{% endif %}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.payment_date.label }}
+                {{ form.payment_date(class_='form-control m-0') }}
+                {% if form.payment_date.errors %}{% for error in form.payment_date.errors %}<span class="error">{{ error
+                    }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.check_num.label }}
+                {{ form.check_num(class_='form-control m-0') }}
+                {% if form.check_num.errors %}{% for error in form.check_num.errors %}<span class="error">{{ error
+                    }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+        <div class="col form-group">
+            <p>
+                {{ form.invoice_number.label }}
+                {{ form.invoice_number(class_='form-control m-0') }}
+                {% if form.invoice_number.errors %}{% for error in form.invoice_number.errors %}<span class="error">{{
+                    error }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.paypal_id.label }}
+                {{ form.paypal_id(class_='form-control m-0') }}
+                {% if form.paypal_id.errors %}{% for error in form.paypal_id.errors %}<span class="error">{{ error
+                    }}</span>{% endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.amount.label }}
+                {{ form.amount(class_='form-control m-0', readonly=true, disabled=true) }}
+                {% if form.amount.errors %}{% for error in form.amount.errors %}<span class="error">{{ error }}</span>{%
+                endfor %}{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <h3>Registration Amount</h3>
+    <div class="row form-group">
+        <div class="col form-group">
+            <p>
+                {{ form.reg_id.label }}
+                {{ form.reg_id(class_='form-control m-0') }}
+                {% if form.reg_id.errors %}{% for error in form.reg_id.errors %}<span class="error">{{ error }}</span>{%
+                endfor %}{% endif %}
+            </p>
+        </div>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.registration_amount.label }}
+                    {{ form.registration_amount(class_='form-control m-0') }}
+                    {% if form.registration_amount.errors %}{% for error in form.registration_amount.errors %}<span
+                        class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.nmr_amount.label }}
+                    {{ form.nmr_amount(class_='form-control m-0') }}
+                    {% if form.nmr_amount.errors %}{% for error in form.nmr_amount.errors %}<span class="error">{{ error
+                        }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.paypal_donation_amount.label }}
+                    {{ form.paypal_donation_amount(class_='form-control m-0') }}
+                    {% if form.paypal_donation_amount.errors %}{% for error in form.paypal_donation_amount.errors
+                    %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+        </div>
+
+
+        <h3>Merchant Amount</h3>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.space_fee_amount.label }}
+                    {{ form.space_fee_amount(class_='form-control m-0') }}
+                    {% if form.space_fee_amount.errors %}{% for error in form.space_fee_amount.errors %}<span
+                        class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.processing_fee_amount.label }}
+                    {{ form.processing_fee_amount(class_='form-control m-0') }}
+                    {% if form.processing_fee_amount.errors %}{% for error in form.processing_fee_amount.errors %}<span
+                        class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+            <div class="col form-group">
+                <p>
+                    {{ form.electricity_fee_amount.label }}
+                    {{ form.electricity_fee_amount(class_='form-control m-0') }}
+                    {% if form.electricity_fee_amount.errors %}{% for error in form.electricity_fee_amount.errors
+                    %}<span class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <h3>EarlyOn Amount</h3>
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.rider_fee_amount.label }}
+                    {{ form.rider_fee_amount(class_='form-control m-0') }}
+                    {% if form.rider_fee_amount.errors %}{% for error in form.rider_fee_amount.errors %}<span
+                        class="error">{{ error }}</span>{% endfor %}{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col form-group">
+                <p>
+                    {{ form.submit(class_='form-control m-0 btn btn-success btn-lg') }}
+                </p>
+            </div>
+        </div>
+</form>
+{% endblock %}

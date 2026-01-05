@@ -424,7 +424,7 @@ def inv_prereg_unsent_counts():
     return {'Prereg':prereg_total(),'Regs':unsent_reg_count(),'Inv':unsent_count()}
 
 def prereg_total():
-    regs = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.duplicate==False, Registrations.prereg==True)).all()
+    regs = Registrations.query.with_entities(Registrations.id).filter(and_(Registrations.duplicate!=True, Registrations.canceled!=True, Registrations.prereg==True)).all()
     return len(regs)
 
 def unsent_count():
@@ -502,6 +502,9 @@ def all_reg_count():
     for inv in regs:
         for reg in inv.regs:
             if reg.duplicate != True and reg.canceled != True: 
+                count+=1
+        for merch in inv.merchants:
+            if merch.status == 'APPROVED':
                 count+=1
     return count
 

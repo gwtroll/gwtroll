@@ -141,17 +141,6 @@ class CreateRoleForm(FlaskForm):
     permissions = MultiCheckboxField('Permissions')
     submit = SubmitField('Submit')
 
-
-
-# class CreateEventForm(FlaskForm):
-#     event_name = StringField('Event Name', validators=[DataRequired()])
-#     event_year = IntegerField('Event Year', validators=[DataRequired()])
-#     event_description = TextAreaField('Event Description', validators=[DataRequired()])
-#     event_start = DateField('Event Start', format='%Y-%m-%d', validators=[DataRequired()])
-#     event_end = DateField('Event End', format='%Y-%m-%d', validators=[DataRequired()])
-#     event_location = StringField('Event Location', validators=[DataRequired()])
-#     submit = SubmitField('Submit')
-
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     role = MultiCheckboxField('Role', validators=[Optional()])
@@ -437,9 +426,6 @@ class CreatePreRegForm(FlaskForm):
             obj.paypal_donation_balance = 0
         # Balance
         obj.balance = obj.registration_balance + obj.nmr_balance + obj.paypal_donation_balance
-
-        
-
 class CheckinForm(FlaskForm):
     regid = IntegerField()
     fname = StringField('First Name')
@@ -455,7 +441,6 @@ class CheckinForm(FlaskForm):
     minor_waiver = SelectField('Minor Waiver', validators=[Optional(), NoneOf('-', message='You must select a Minor Form Validation')], choices=[('-','-'),('Signed by Parent/Guardian','Signed by Parent/Guardian'),('Medical Authorization Form Submitted','Medical Authorization Form Submitted')])
     notes = TextAreaField('Notes')
     submit = SubmitField('Submit')
-
 class EditForm(FlaskForm):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -751,6 +736,22 @@ class UpdateInvoiceForm(FlaskForm):
     notes = TextAreaField('Notes')
     submit = SubmitField('Update Invoice')
 
+class UpdateInvoiceAdminForm(FlaskForm):
+    invoice_amount = FloatField('Invoice Amount')
+    registration_amount = IntegerField('Registration Amount')
+    invoice_email = StringField('Invoice Email')
+    invoice_number = IntegerField('Invoice Number', validators=[])
+    paypal_id = StringField('PayPal ID', validators=[])
+    invoice_status = SelectField('Invoice Status', choices=[('UNSENT','UNSENT'),('OPEN','OPEN'),('PAID','PAID'),('NO PAYMENT','NO PAYMENT'),('DUPLICATE','DUPLICATE')])
+    processing_fee = IntegerField('Processing Fee')
+    space_fee = FloatField('Space Fee')
+    merchant_fee = FloatField('Merchant Fee')
+    rider_fee = IntegerField('Rider Fee')
+    paypal_donation = IntegerField('PayPal Donation')
+    invoice_date = DateField('Invoice Date', validators=[RequiredIf('invoice_number')])
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Update Invoice')
+
 class SendInvoiceForm(FlaskForm):
     invoice_amount = FloatField('Invoice Amount')
     space_fee = FloatField('Space Fee')
@@ -767,7 +768,7 @@ class SendInvoiceForm(FlaskForm):
     submit = SubmitField('Send Invoice with PayPal')
 
 class PayInvoiceForm(FlaskForm):
-    invoice_amount = FloatField('Invoice Amount', validators=[DataRequired()])
+    invoice_amount = FloatField('Invoice Amount', validators=[])
     registration_amount = IntegerField('Registration Amount', validators=[Optional()])
     processing_fee = IntegerField('Processing Fee', validators=[Optional()])
     merchant_fee = FloatField('Merchant Fee', validators=[Optional()])
@@ -1113,3 +1114,39 @@ class PayPalForm(FlaskForm):
 class UpdateInvoiceNumber(FlaskForm):
     invoice_number = IntegerField('Invoice Number', validators=[DataRequired()])
     submit = SubmitField('Update PayPal Info')
+
+class AdminCreateInvoice(FlaskForm):
+    invoice_number = IntegerField('Invoice Number')
+    invoice_id = StringField('PayPal ID')
+    invoice_type = SelectField('Invoice Type')
+    invoice_email = StringField('Invoice Email')
+    invoice_date = DateField('Invoice Date')
+    invoice_status = SelectField('Status')
+    registration_total = IntegerField('Registration', default=0)
+    nmr_total = IntegerField('NMR', default=0)
+    donation_total = IntegerField('Donation', default=0)
+    space_fee = FloatField('Space Fee', default=0.0)
+    processing_fee = IntegerField('Processing Fee', default=0)
+    rider_fee = IntegerField('Rider Fee', default=0)
+    balance = FloatField('Balance', default=0.0)
+    notes = TextAreaField('Notes')
+
+    submit = SubmitField('Submit')
+
+class AdminCreatePayment(FlaskForm):
+    paypal_id = StringField('PayPal ID')
+    type = SelectField('Payment Type', choices=[('ZETTLE','ZETTLE'),('CASH','CASH'),('TRAVELLER CHEQUE','TRAVELLER CHEQUE'),('PAYPAL','PAYPAL'),('CHECK','CHECK')])
+    check_num = IntegerField('Check Number', validators=[Optional()])
+    payment_date = DateField('Payment Date')
+    registration_amount = IntegerField('Registration', default=0)
+    nmr_amount = IntegerField('NMR', default=0)
+    paypal_donation_amount = IntegerField('Donation', default=0)
+    space_fee_amount = FloatField('Space Fee', default=0.0)
+    processing_fee_amount = IntegerField('Processing Fee', default=0)
+    rider_fee_amount = IntegerField('Rider Fee', default=0)
+    electricity_fee_amount = FloatField('Elictricity Fee', default=0.0)
+    amount = FloatField('Amount', default=0.0)
+    invoice_number = IntegerField('Invoice Number')
+    reg_id = IntegerField('Registration Number')
+
+    submit = SubmitField('Submit')

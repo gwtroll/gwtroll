@@ -24,7 +24,7 @@
                     {% for reg in regs %}
                     <tr>
                         <td>{{ reg.id }}</td>
-                        <td>{{ reg.fname }} {{ reg.lname }}</td>
+                        <td><a href="{{url_for('registration.viewreg', regid=reg.id)}}" target="_blank">{{ reg.fname }} {{ reg.lname }}</a></td>
                         <td>{{ reg.scaname }}</td>
                         <td>{{ reg.age }}</td>
                         <td>{{ reg.email }}</td>
