@@ -81,8 +81,7 @@ def update(earlyon_id):
                 rider_ids.append(field.regid.data)
             rider_registrations = Registrations.query.filter(Registrations.id.in_(rider_ids)).all()
             for rider in rider_registrations:
-                if len(rider.earlyonrequests_ref) > 0 or len(rider.earlyonriders_ref) > 0:
-                    rider_registration_ids.append(rider.id)
+                rider_registration_ids.append(rider.id)
 
             for id in rider_ids:
                 if id not in rider_registration_ids:
