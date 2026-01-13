@@ -634,11 +634,28 @@ class MarshalInspection(db.Model):
     __tablename__ = "marshal_inspection"
     id = db.Column(db.Integer(), primary_key=True)
     regid = db.Column(db.Integer, db.ForeignKey("registrations.id"))
+    reg = db.relationship("Registrations", backref="marshal_inspections_reg", viewonly=True)
     inspection_type = db.Column(db.String())
     inspection_date = db.Column(db.DateTime())
     inspecting_marshal_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
     inspecting_marshal = db.relationship("User", foreign_keys=[inspecting_marshal_id])
     inspected = db.Column(db.Boolean())
+
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        data_dict['fname'] = self.reg.fname if self.reg else ''
+        data_dict['lname'] = self.reg.lname if self.reg else ''
+        data_dict['scaname'] = self.reg.scaname if self.reg else ''
+        data_dict['medallion'] = self.reg.medallion if self.reg else ''
+        data_dict['marshal_name'] = self.inspecting_marshal.fname + ' ' + self.inspecting_marshal.lname if self.inspecting_marshal else ''
+        data_dict['marshal_medallion'] = self.inspecting_marshal.medallion if self.inspecting_marshal else ''
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
 
 class Bows(db.Model):
@@ -660,8 +677,28 @@ class RegBows(db.Model):
     regid = db.Column(
         db.Integer(), db.ForeignKey("registrations.id", ondelete="CASCADE")
     )
+    reg = db.relationship("Registrations", foreign_keys=[regid])
     bowid = db.Column(db.Integer(), db.ForeignKey("bows.id", ondelete="CASCADE"))
+    bow = db.relationship("Bows", foreign_keys=[bowid])
 
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        data_dict['fname'] = self.reg.fname if self.reg else ''
+        data_dict['lname'] = self.reg.lname if self.reg else ''
+        data_dict['scaname'] = self.reg.scaname if self.reg else ''
+        data_dict['medallion'] = self.reg.medallion if self.reg else ''
+        data_dict['type'] = 'Bow'
+        data_dict['poundage'] = self.bow.poundage if self.bow else ''
+        data_dict['inspection_date'] = self.bow.bow_inspection_date.strftime("%Y-%m-%d") if self.bow and self.bow.bow_inspection_date else ''
+        data_dict['marshal_name'] = self.bow.bow_inspection_marshal.fname + ' ' + self.bow.bow_inspection_marshal.lname if self.bow.bow_inspection_marshal else ''
+        data_dict['marshal_medallion'] = self.bow.bow_inspection_marshal.medallion if self.bow.bow_inspection_marshal else ''
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
 class Crossbows(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -675,22 +712,42 @@ class Crossbows(db.Model):
     def __repr__(self):
         return "<CrossBow {}>".format(self.id)
 
-
 class RegCrossBows(db.Model):
     __tablename__ = "reg_crossbows"
     id = db.Column(db.Integer(), primary_key=True)
     regid = db.Column(
         db.Integer(), db.ForeignKey("registrations.id", ondelete="CASCADE")
     )
+    reg = db.relationship("Registrations", foreign_keys=[regid])
     crossbowid = db.Column(
         db.Integer(), db.ForeignKey("crossbows.id", ondelete="CASCADE")
     )
+    crossbow = db.relationship("Crossbows", foreign_keys=[crossbowid])
 
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        data_dict['fname'] = self.reg.fname if self.reg else ''
+        data_dict['lname'] = self.reg.lname if self.reg else ''
+        data_dict['scaname'] = self.reg.scaname if self.reg else ''
+        data_dict['medallion'] = self.reg.medallion if self.reg else ''
+        data_dict['type'] = 'Crossbow'
+        data_dict['inchpounds'] = self.crossbow.inchpounds if self.crossbow else ''
+        data_dict['inspection_date'] = self.crossbow.crossbow_inspection_date.strftime("%Y-%m-%d") if self.crossbow and self.crossbow.crossbow_inspection_date else ''
+        data_dict['marshal_name'] = self.crossbow.crossbow_inspection_marshal.fname + ' ' + self.crossbow.crossbow_inspection_marshal.lname if self.crossbow.crossbow_inspection_marshal else ''
+        data_dict['marshal_medallion'] = self.crossbow.crossbow_inspection_marshal.medallion if self.crossbow.crossbow_inspection_marshal else ''
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
 class IncidentReport(db.Model):
     __tablename__ = "incidentreport"
     id = db.Column(db.Integer(), primary_key=True)
     regid = db.Column(db.Integer, db.ForeignKey("registrations.id"))
+    reg = db.relationship("Registrations", foreign_keys=[regid])
     report_date = db.Column(db.DateTime())
     incident_date = db.Column(db.DateTime())
     reporting_user_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
@@ -699,6 +756,21 @@ class IncidentReport(db.Model):
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='incidentreport')
 
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        data_dict['fname'] = self.reg.fname if self.reg else ''
+        data_dict['lname'] = self.reg.lname if self.reg else ''
+        data_dict['scaname'] = self.reg.scaname if self.reg else ''
+        data_dict['medallion'] = self.reg.medallion if self.reg else ''
+        data_dict['marshal_name'] = self.reporting_user.fname + ' ' + self.reporting_user.lname if self.reporting_user else ''
+        data_dict['marshal_medallion'] = self.reporting_user.medallion if self.reporting_user else ''
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
 class PriceSheet(db.Model):
     __tablename__ = "pricesheet"

@@ -26,3 +26,11 @@ def merchant_reports():
     form = ReportForm()
     form.report_type.choices = [('merchant_full_export','Full Export'),('merchant_invoices','Merchant Invoices')]
     return render_template("viewreport.html", form=form)
+
+@bp.route("/marshal", methods=("GET", "POST"))
+@login_required
+@permission_required('marshal_reports')
+def marshal_reports():
+    form = ReportForm()
+    form.report_type.choices = [('full_inspection_report','Inspections'),('full_bows_crossbows','Bows/Crossbows'),('full_incident_report','Incidents')]
+    return render_template("viewreport.html", form=form)

@@ -23,13 +23,17 @@
         <button id="runreport" class="form-control btn btn-primary" onclick="populate_table()">Run Report</button>
     </div>
 </div>
+<div id="loader" class="row" style="display: none;">
+    <div class="col d-flex justify-content-center m-5">
+        <div class="loader"></div>
+    </div>
+</div>
 
-<table id="myTable" data-show-columns="true"
-    data-show-columns-toggle-all="true" data-filter-control="true" data-sortable="true" data-pagination="true"
-    data-show-fullscreen="true" data-show-export="true" data-export-types="['csv', 'excel', 'pdf']"
-    data-minimum-count-columns="2" data-show-pagination-switch="true" data-page-list="[10, 25, 50, 100, all]"
-    data-detail-view="true" data-detail-view-icon="false" data-mobile-responsive="true" data-check-on-init="true"
-    data-classes="table table-striped table-responsive">
+<table id="myTable" data-show-columns="true" data-show-columns-toggle-all="true" data-filter-control="true"
+    data-sortable="true" data-pagination="true" data-show-fullscreen="true" data-show-export="true"
+    data-export-types="['csv', 'excel', 'pdf']" data-minimum-count-columns="2" data-show-pagination-switch="true"
+    data-page-list="[10, 25, 50, 100, all]" data-detail-view="true" data-detail-view-icon="false"
+    data-mobile-responsive="true" data-check-on-init="true" data-classes="table table-striped table-responsive">
 </table>
 
 <script>
@@ -41,17 +45,19 @@
         console.log(dt_start.value);
         console.log(dt_end.value);
         console.log(select.value);
-        const baseURL = window.location.origin+"/api/"+select.value;
+        const baseURL = window.location.origin + "/api/" + select.value;
         const url = new URL(baseURL);
         console.log(url)
         const params = {
-            dt_start:dt_start.value,
-            dt_end:dt_end.value
+            dt_start: dt_start.value,
+            dt_end: dt_end.value
         };
         url.search = new URLSearchParams(params).toString();
+        showLoader();
         await fetch(url)
             .then(response => response.json())
             .then((data) => {
+                hideLoader();
                 console.log(url)
                 console.log('checkin')
                 $('#myTable').bootstrapTable('destroy');
@@ -60,6 +66,16 @@
                     data: data.rows
                 })
             });
+    }
+
+    // Function to show the loader
+    function showLoader() {
+        document.getElementById('loader').style.display = 'block';
+    }
+
+    // Function to hide the loader
+    function hideLoader() {
+        document.getElementById('loader').style.display = 'none';
     }
 </script>
 {% endblock %}

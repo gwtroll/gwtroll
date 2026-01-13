@@ -890,3 +890,79 @@ def resend_fastpass():
     reg = get_reg(regid)
     send_fastpass_email(reg.email, reg)
     return 'SUCCESS'
+
+@bp.route("/full_inspection_report", methods=("GET", ""))
+@login_required
+@permission_required('registration_reports')
+def full_inspection_report():
+    data = {}
+
+    columns = [{"field": "fname", "title": "First Name", "filterControl": 'input'},
+    {"field": "lname", "title": "Last Name", "filterControl": 'input'},
+    {"field": "medallion", "title": "Medallion", "filterControl":"input"},
+    {"field": "inspection_type", "title": "Inspection Type", "filterControl": 'input'},
+    {"field": "inspection_date", "title": "Inspection Date", "filterControl":"select"},
+    {"field": "marshal_name", "title": "Marshal", "filterControl":"select"},
+    {"field": "marshal_medallion", "title": "Marshal Medallion", "filterControl":"select"},
+    ]
+    rows = []
+    full = MarshalInspection.query.order_by(MarshalInspection.id).all()
+    for insp in full:
+        reg_json = json.loads(insp.toJSON())
+        rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
+@bp.route("/full_incident_report", methods=("GET", ""))
+@login_required
+@permission_required('registration_reports')
+def full_incident_report():
+    data = {}
+
+    columns = [{"field": "fname", "title": "First Name", "filterControl": 'input'},
+    {"field": "lname", "title": "Last Name", "filterControl": 'input'},
+    {"field": "medallion", "title": "Medallion", "filterControl":"input"},
+    {"field": "incident_date", "title": "Incident Date", "filterControl": 'input'},
+    {"field": "report_date", "title": "Report Date", "filterControl":"select"},
+    {"field": "notes", "title": "Notes", "filterControl":"select"},
+    {"field": "marshal_name", "title": "Marshal", "filterControl":"select"},
+    {"field": "marshal_medallion", "title": "Marshal Medallion", "filterControl":"select"},
+    ]
+    rows = []
+    full = IncidentReport.query.order_by(IncidentReport.id).all()
+    for inc in full:
+        reg_json = json.loads(inc.toJSON())
+        rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
+@bp.route("/full_bows_crossbows", methods=("GET", ""))
+@login_required
+@permission_required('registration_reports')
+def full_bows_crossbows():
+    data = {}
+
+    columns = [{"field": "fname", "title": "First Name", "filterControl": 'input'},
+    {"field": "lname", "title": "Last Name", "filterControl": 'input'},
+    {"field": "medallion", "title": "Medallion", "filterControl":"input"},
+    {"field": "type", "title": "Type", "filterControl":"select"},
+    {"field": "poundage", "title": "Poundage", "filterControl":"input"},
+    {"field": "inchpounds", "title": "Inch-Pounds", "filterControl":"input"},
+    {"field": "inspection_date", "title": "Inspection Date", "filterControl":"select"},
+    {"field": "marshal_name", "title": "Marshal", "filterControl":"select"},
+    {"field": "marshal_medallion", "title": "Marshal Medallion", "filterControl":"select"},
+    ]
+    rows = []
+    crossbows = RegCrossBows.query.order_by(RegCrossBows.id).all()
+    bows = RegBows.query.order_by(RegBows.id).all()
+    for cbow in crossbows:
+        reg_json = json.loads(cbow.toJSON())
+        rows.append(reg_json)
+    for bow in bows:
+        reg_json = json.loads(bow.toJSON())
+        rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)

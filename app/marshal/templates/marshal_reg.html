@@ -43,10 +43,14 @@
                 </tr>
                 <tr>
                     <th style="background-color: #D6EEEE">Check-In Date: </th>
+                    {% if reg['checkin'] %}
                     <td>{{ reg['checkin'].strftime('%m-%d-%Y %I:%M %p') }}</td>
+                    {% else %}
+                    <td style="color: red;">NOT CHECKED IN</td>
+                    {% endif %}
                 </tr>
                 <tr>
-                    <th style="background-color: #D6EEEE">Offsite Emergency Contact: </th>
+                    <th style="background-color: #D6EEEE">Emergency Contact: </th>
                     <td>{{ reg.emergency_contact_name }} <br>
                         Phone: {{ reg.emergency_contact_phone }} </td>
                 </tr>
