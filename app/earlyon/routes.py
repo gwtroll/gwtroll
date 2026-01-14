@@ -16,7 +16,7 @@ from markupsafe import Markup
 @login_required
 @permission_required('earlyon_view')
 def earlyon():
-    if current_user.has_role('Autocrat') or current_user.has_role('Admin'):
+    if current_user.has_role('Autocrat') or current_user.has_role('Admin') or current_user.has_role('Earlyon Coordinator'):
         earlyons = EarlyOnRequest.query.all()
     elif current_user.has_role('Department Head'):
         earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
