@@ -1,3 +1,4 @@
+from app import logger
 import requests
 import os
 from datetime import datetime, timedelta
@@ -304,13 +305,13 @@ def get_paypal_transactions():
 
 
     today = datetime.now()
-    start_date = datetime(today.year, 8, 1, 0, 0, 0, 0)
+    start_date = datetime(2025, 8, 1, 0, 0, 0, 0)
+    logger.debug(f"Start Date: {start_date.strftime('%Y-%m-%dT%H:%M:%S-0000')} / Today: {today.strftime('%Y-%m-%dT%H:%M:%S-0000')}")
 
     while start_date <= today:
         start_date_string = start_date.strftime("%Y-%m-%dT%H:%M:%S-0000")
         end_date_string = (start_date + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S-0000")
-        print(start_date_string)
-        print(end_date_string)
+        logger.debug(f"Fetching transactions from {start_date_string} to {end_date_string}")
 
         params = (
             ('start_date', start_date_string),
@@ -320,9 +321,12 @@ def get_paypal_transactions():
 
         response = requests.get(url, headers=headers, params=params)
         data_dict = response.json()
+        logger.debug(f"Received {len(data_dict.get('transaction_details', []))} transactions")
         if 'transaction_details' in data_dict:
+            logger.debug(f"Processing transactions for period {start_date_string} to {end_date_string}")
             for item in data_dict['transaction_details']:
                 transaction_id = item['transaction_info']['transaction_id']
+                logger.debug(f"Processing Transaction ID: {transaction_id}")
                 if 'transaction_amount' in item['transaction_info']:
                     gross = item['transaction_info']['transaction_amount']['value']
                 else:
@@ -364,5 +368,7 @@ def get_paypal_transactions():
                     'fee': fee,
                     'net': net
                 }
+                logger.debug(f"Added Transaction ID: {transaction_id} to return dictionary")
+                logger.debug(f"Transaction Details: {return_dict[transaction_id]}")
         start_date = (start_date + timedelta(days=30))
     return json.loads(json.dumps(return_dict))
