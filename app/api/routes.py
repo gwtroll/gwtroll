@@ -1,3 +1,4 @@
+import traceback
 from app.api import bp
 from app.utils.security_utils import *
 from flask_login import login_required
@@ -9,7 +10,8 @@ from flask import jsonify, request
 import json
 import copy
 from app.utils.paypal_api import get_paypal_invoices, get_paypal_payment, get_paypal_transactions
-from app.utils.email_utils import send_fastpass_email
+from app.utils.email_utils import send_admin_error_email, send_fastpass_email
+from app import logger
 
 def init_data_obj(labels=[]):
     data = {}
@@ -716,7 +718,18 @@ def toJSON(obj):
 @login_required
 @permission_required('registration_reports')
 def paypal_recon_export():
-    paypal_transactions = get_paypal_transactions()
+    try:
+        paypal_transactions = get_paypal_transactions()
+        logger.debug("PayPal Transactions fetched successfully.")
+    except Exception as e:
+        logger.error("PayPal Transactions fetching error: %s", str(e))
+        stack_trace = traceback.format_exc()
+        send_admin_error_email(e, stack_trace)
+        return (
+            jsonify({"error": f"An unexpected error occurred: {str(e)}"}),
+            500,
+        )
+    
     data = {}
     columns = [{"field": "invoice_status", "title": "Invoice Status", "filterControl":"input"},
         {"field": "date", "title": "Invoice Date", "filterControl":"input"},
@@ -746,7 +759,19 @@ def paypal_recon_export():
         obj[field["field"]]=None
     for inv in invoices:
         temp_obj = copy.deepcopy(obj)
-        temp_obj = mapping_recon_report(inv,temp_obj,paypal_transactions)
+        try:
+            logger.debug(f"Processing Invoice ID: {inv.invoice_id}")
+            temp_obj = mapping_recon_report(inv,temp_obj,paypal_transactions)
+            logger.debug(f"Mapped Invoice ID: {inv.invoice_id} successfully.")
+        except Exception as e:
+            logger.error(f"Error processing Invoice ID: {inv.invoice_id} - {str(e)}")
+            stack_trace = traceback.format_exc()
+            send_admin_error_email(e, stack_trace)
+            return (
+                jsonify({"error": f"An unexpected error occurred: {str(e)}"}),
+                500,
+            )
+        
         reg_json = json.loads(toJSON(temp_obj))
         rows.append(reg_json)
     data['columns'] = columns
@@ -792,7 +817,18 @@ def mapping_recon_report(obj,temp_obj,paypal_transactions):
                 temp_obj['paypal_fee']+=float(pay['fee'])
                 temp_obj['paypal_net']+=float(pay['net'])
             else:
-                pay = get_paypal_payment(payment)
+                try:
+                    logger.debug(f"Fetching PayPal payment details for Payment ID: {payment}")
+                    pay = get_paypal_payment(payment)
+                    logger.debug(f"Fetched PayPal payment details for Payment ID: {payment} successfully.")
+                except Exception as e:
+                    logger.error(f"Error fetching PayPal payment details for Payment ID: {payment} - {str(e)}")
+                    stack_trace = traceback.format_exc()
+                    send_admin_error_email(e, stack_trace)
+                    return (
+                        jsonify({"error": f"An unexpected error occurred: {str(e)}"}),
+                        500,
+                    )
                 if 'seller_receivable_breakdown' in pay:
                     temp_obj['paypal_gross']+=float(pay['seller_receivable_breakdown']['gross_amount']['value'])
                     temp_obj['paypal_fee']+=float(pay['seller_receivable_breakdown']['paypal_fee']['value'])

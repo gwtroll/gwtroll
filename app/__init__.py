@@ -10,6 +10,7 @@ from flask_mail import Mail
 from flask_qrcode import QRcode
 from werkzeug.exceptions import InternalServerError
 import traceback
+import logging
 
 app = Flask(__name__,static_url_path="", static_folder="static")
 
@@ -21,6 +22,33 @@ login.login_view = 'login'
 qrcode = QRcode(app)
 
 mail = Mail(app)
+
+# Create a custom logger
+logger = logging.getLogger('gwlogger')
+
+# Set the log level for the custom logger
+logger.setLevel(logging.DEBUG)
+
+# Create a file handler to write logs to a file
+file_handler = logging.FileHandler('gwlogger.log')
+
+# Create a console handler to output logs to the console
+console_handler = logging.StreamHandler()
+
+# Set log levels for the handlers
+file_handler.setLevel(logging.DEBUG)
+console_handler.setLevel(logging.DEBUG)
+
+# Create a formatter for log messages
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Add the formatter to the handlers
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+# Add the handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 from app import routes, models
 from app.models import Role, User
