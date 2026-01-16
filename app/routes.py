@@ -121,6 +121,19 @@ def show_logs():
     # Render an HTML template with the log content
     return render_template('logs.html', log_content=log_content)
 
+@app.route('/logs/clear', methods=['GET', 'POST'])
+@login_required
+@permission_required('admin')
+def clear_logs():
+
+    log_file_path = 'gwlogger.log'
+    with open(log_file_path, 'r+') as file:
+        file.truncate(0)
+        
+    # Render an HTML template with the log content
+    return redirect(url_for('show_logs'))
+
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_reports')

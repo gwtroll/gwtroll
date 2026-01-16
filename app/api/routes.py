@@ -720,6 +720,8 @@ def toJSON(obj):
 def paypal_recon_export():
     try:
         paypal_transactions = get_paypal_transactions()
+        for key in paypal_transactions:
+            logger.debug(f"PayPal Transaction ID: {key}, Details: {paypal_transactions[key]}")
         logger.debug("PayPal Transactions fetched successfully.")
     except Exception as e:
         logger.error("PayPal Transactions fetching error: %s", str(e))
@@ -779,25 +781,29 @@ def paypal_recon_export():
     return jsonify(data)
 
 def mapping_recon_report(obj,temp_obj,paypal_transactions):
-    temp_obj['invoice_status']=obj.invoice_status
-    temp_obj['date']=obj.invoice_date.date()
-    temp_obj['email']=obj.invoice_email
-    temp_obj['invoice_id']=obj.invoice_id
-    temp_obj['invoice_number']=obj.invoice_number
-    temp_obj['invoice_type']=obj.invoice_type
-    temp_obj['registration_total']=obj.registration_total
-    temp_obj['nmr_total']=obj.nmr_total
-    temp_obj['donation_total']=obj.donation_total
-    temp_obj['space_fee']=obj.space_fee
-    temp_obj['processing_fee']=obj.processing_fee
-    temp_obj['rider_fee']=obj.rider_fee
-    temp_obj['invoice_total']=obj.invoice_total
-    temp_obj['balance']=obj.balance
-    temp_obj['paypal_gross']=0
-    temp_obj['paypal_fee']=0
-    temp_obj['paypal_net']=0
-    temp_obj['other_payments']=0
-    temp_obj['total_price_paid']=0
+    try:
+        temp_obj['invoice_status']=obj.invoice_status
+        temp_obj['date']=obj.invoice_date.date()
+        temp_obj['email']=obj.invoice_email
+        temp_obj['invoice_id']=obj.invoice_id
+        temp_obj['invoice_number']=obj.invoice_number
+        temp_obj['invoice_type']=obj.invoice_type
+        temp_obj['registration_total']=obj.registration_total
+        temp_obj['nmr_total']=obj.nmr_total
+        temp_obj['donation_total']=obj.donation_total
+        temp_obj['space_fee']=obj.space_fee
+        temp_obj['processing_fee']=obj.processing_fee
+        temp_obj['rider_fee']=obj.rider_fee
+        temp_obj['invoice_total']=obj.invoice_total
+        temp_obj['balance']=obj.balance
+        temp_obj['paypal_gross']=0
+        temp_obj['paypal_fee']=0
+        temp_obj['paypal_net']=0
+        temp_obj['other_payments']=0
+        temp_obj['total_price_paid']=0
+    except Exception as e:
+        logger.error(f"Error mapping basic invoice details for Invoice ID: {obj.invoice_id} - {str(e)}")
+        raise e
 
     if obj.payments != None:
         unique_payments = []
@@ -811,7 +817,7 @@ def mapping_recon_report(obj,temp_obj,paypal_transactions):
                     unique_payments.append(payment.paypal_id)
 
         for payment in unique_payments:
-            if payment in paypal_transactions:
+            if payment in paypal_transactions.keys():
                 pay = paypal_transactions[payment]
                 temp_obj['paypal_gross']+=float(pay['gross'])
                 temp_obj['paypal_fee']+=float(pay['fee'])
