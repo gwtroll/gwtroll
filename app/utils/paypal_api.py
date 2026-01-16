@@ -308,15 +308,20 @@ def get_paypal_transactions():
     start_date = datetime(2025, 8, 1, 0, 0, 0, 0)
     logger.debug(f"Start Date: {start_date.strftime('%Y-%m-%dT%H:%M:%S-0000')} / Today: {today.strftime('%Y-%m-%dT%H:%M:%S-0000')}")
 
+    page = 1
+
     while start_date <= today:
         start_date_string = start_date.strftime("%Y-%m-%dT%H:%M:%S-0000")
         end_date_string = (start_date + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S-0000")
-        logger.debug(f"Fetching transactions from {start_date_string} to {end_date_string}")
+        
+        logger.debug(f"Fetching transactions from {start_date_string} to {end_date_string} page {page}")
 
         params = (
             ('start_date', start_date_string),
             ('end_date', end_date_string),
             ('fields', 'all'),
+            ('page', page),
+            ('page_size', '100'),
         )
 
         response = requests.get(url, headers=headers, params=params)
@@ -370,5 +375,10 @@ def get_paypal_transactions():
                 }
                 logger.debug(f"Added Transaction ID: {transaction_id} to return dictionary")
                 logger.debug(f"Transaction Details: {return_dict[transaction_id]}")
-        start_date = (start_date + timedelta(days=30))
+        if len(data_dict.get('transaction_details', [])) >= 100:
+            page += 1
+        else:
+            page = 1
+            start_date = (start_date + timedelta(days=30))
+        
     return json.loads(json.dumps(return_dict))
