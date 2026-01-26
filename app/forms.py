@@ -905,7 +905,7 @@ class MerchantForm(FlaskForm):
 
 class EditMerchantForm(FlaskForm):
     business_name = StringField('Business Name', validators=[DataRequired()])
-    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('WAITLIST','WAITLIST'),('DUPLICATE','DUPLICATE')], validators=[DataRequired()])
+    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('WAITLIST','WAITLIST'),('CANCELED','CANCELED'),('DUPLICATE','DUPLICATE')], validators=[DataRequired()])
     sca_name = StringField('SCA Name', validators=[])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
