@@ -402,6 +402,70 @@ def earlyon():
     data['rows'] = rows
     return jsonify(data)
 
+@bp.route("/merchant_early_on_report", methods=("GET", ""))
+@login_required
+@permission_required('merchant_reports')
+def merchant_earlyon():
+    data = {}
+    columns = [{"field": "id", "title": "ID", "filterControl": 'input'},
+        {"field": "fname", "title": "First Name", "filterControl":"input"},
+        {"field": "lname", "title": "Last Name", "filterControl":"input"},
+        {"field": "scaname", "title": "SCA Name", "filterControl":"input"},
+        {"field": "earlyon_merchant", "title": "Merchant", "filterControl":"select"},
+        {"field": "driver_rider", "title": "Driver/Rider", "filterControl":"select"},
+        {"field": "arrival_date", "title": "Arrival Date", "filterControl":"select"},
+        {"field": "dept_approval", "title": "Dept Approval", "filterControl":"select"},
+        {"field": "autocrat_approval", "title": "Autocrat Approval", "filterControl":"select"},
+        {"field": "notes", "title": "Notes", "filterControl":"input"},
+        {"field": "phone", "title": "Phone", "filterControl":"input"},
+        {"field": "email", "title": "Email", "filterControl":"input"},
+        {"field": "kingdom", "title": "Kingdom", "filterControl":"select"},
+        {"field": "lodging", "title": "Lodging", "filterControl":"select"},
+    ]
+    rows = []
+    earlyon_list = EarlyOnRequest.query.all()
+    for request in earlyon_list:
+        if request.mercahnt is None:
+            continue
+        kingdom = request.registration.kingdom.name
+        lodging = request.registration.lodging.name
+        driver_rider = 'Driver'
+        earlyon_merchant = request.mercahnt.business_name if request.mercahnt else ''
+        arrival_date = request.arrival_date
+        dept_approval = request.dept_approval_status
+        autocrat_approval = request.autocrat_approval_status
+        notes = request.notes
+
+        reg_json = json.loads(request.registration.toJSON())
+        reg_json['kingdom'] = kingdom
+        reg_json['lodging'] = lodging
+        reg_json['earlyon_merchant'] = earlyon_merchant
+        reg_json['driver_rider'] = driver_rider
+        reg_json['arrival_date'] = arrival_date.strftime('%Y-%m-%d') if arrival_date else ''
+        reg_json['dept_approval'] = dept_approval
+        reg_json['autocrat_approval'] = autocrat_approval
+        reg_json['notes'] = notes
+
+        rows.append(reg_json)
+        for rider in request.earlyonriders:
+            kingdom = rider.reg.kingdom.name
+            lodging = rider.reg.lodging.name
+            driver_rider = 'Rider'
+            earlyon_merchant = request.mercahnt.business_name if request.mercahnt else ''
+            reg_json = json.loads(rider.reg.toJSON())
+            reg_json['kingdom'] = kingdom
+            reg_json['lodging'] = lodging
+            reg_json['earlyon_merchant'] = earlyon_merchant
+            reg_json['driver_rider'] = driver_rider
+            reg_json['arrival_date'] = arrival_date.strftime('%Y-%m-%d') if arrival_date else ''
+            reg_json['dept_approval'] = dept_approval
+            reg_json['autocrat_approval'] = autocrat_approval
+            reg_json['notes'] = notes
+            rows.append(reg_json)
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
+
 
 @bp.route("/ghost_report", methods=("GET", ""))
 @login_required

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-        <h1>{% block title %} Early On Applications {% endblock %}</h1>
+<h1>{% block title %} Early On Applications {% endblock %}</h1>
 <div class="row">
   <div class="col">
     <table id="earlyonTable"data-toggle="table"
@@ -29,6 +29,7 @@
               <th data-field="registrations" data-filter-control="input">Primary Registration</th>
               <th data-field="riders" data-filter-control="input">Riders #</th>
               <th data-field="department" data-filter-control="select">Department</th>
+              <th data-field="merchant" data-filter-control="select">Merchant</th>
               <th data-field="lname" data-filter-control="select">Department Approval</th>
               <th data-field="status" data-filter-control="select">Autocrat Approval</th>
               <th data-field="update">Update</th>
@@ -48,6 +49,13 @@
                 </td>
                   <td> 
                       {{earlyon['department']['name']}}
+                  </td>
+                  <td> 
+                  {% if earlyon.mercahnt %}                  
+                      {{earlyon['mercahnt']['business_name']}}
+                  {% else %}
+                  -
+                  {% endif %}
                   </td>
                   <td> 
                       {{earlyon['dept_approval_status']}}

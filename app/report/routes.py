@@ -24,7 +24,7 @@ def reports():
 @permission_required('merchant_reports')
 def merchant_reports():
     form = ReportForm()
-    form.report_type.choices = [('merchant_full_export','Full Export'),('merchant_invoices','Merchant Invoices')]
+    form.report_type.choices = [('merchant_full_export','Full Export'),('merchant_invoices','Merchant Invoices'), ('merchant_early_on_report','Merchant Early On Report')]
     return render_template("viewreport.html", form=form)
 
 @bp.route("/marshal", methods=("GET", "POST"))
