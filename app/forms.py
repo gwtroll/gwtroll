@@ -334,28 +334,34 @@ class CreatePreRegForm(FlaskForm):
     royal_title = StringField('Royal Title', validators=[Optional()])
     submit = SubmitField('Register')
 
+    def replace_characters(self, field_value):
+        field_value = field_value.strip()
+        for char in [',','"','<','>','/','\\']:
+            field_value = field_value.replace(char, '')
+        return field_value
+
     def populate_object(self, obj):
         # First Name - Strip
         if self.fname.data:
-            obj.fname = self.fname.data.strip()
+            obj.fname = self.replace_characters(self.fname.data)
         # Last Name - Strip
         if self.lname.data:
-            obj.lname = self.lname.data.strip()
+            obj.lname = self.replace_characters(self.lname.data)
         # SCA Name - Strip
         if self.scaname.data:
-            obj.scaname = self.scaname.data.strip()
+            obj.scaname = self.replace_characters(self.scaname.data)
         # Zip
         if self.zip.data:
             obj.zip = self.zip.data
         # City - Strip
         if self.city.data:
-            obj.city = self.city.data.strip()
+            obj.city = self.replace_characters(self.city.data)
         # State/Province - Strip
         if self.state_province.data:
-            obj.state_province = self.state_province.data.strip()
+            obj.state_province = self.replace_characters(self.state_province.data)
         # Country - Strip
         if self.country.data:
-            obj.country = self.country.data.strip()
+            obj.country = self.replace_characters(self.country.data)
         # Phone
         if self.phone.data:
             obj.phone = self.phone.data
@@ -394,7 +400,7 @@ class CreatePreRegForm(FlaskForm):
             obj.royal_title = self.royal_title.data
         # Emergency Contact Name
         if self.emergency_contact_name.data:
-            obj.emergency_contact_name = self.emergency_contact_name.data
+            obj.emergency_contact_name = self.replace_characters(self.emergency_contact_name.data)
         # Emergency Contact Phone
         if self.emergency_contact_phone.data:
             obj.emergency_contact_phone = self.emergency_contact_phone.data
