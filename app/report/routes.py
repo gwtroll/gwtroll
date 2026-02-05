@@ -15,7 +15,7 @@ from flask_security import roles_accepted
 @permission_required("registration_reports")
 def reports():
     form = ReportForm()
-    form.report_type.choices = [('registration_report','registration_report'),('royal_registrations', 'royal_registrations'), ('land_pre-reg', 'land_pre-reg'), ('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report'), ('early_on_report','early_on_report'), ('paypal_paid_export','paypal_paid_export'),('paypal_canceled_export','paypal_canceled_export'),('paypal_recon_export','paypal_recon_export'),('atd_export','atd_export'),('log_export','log_export'),('minor_waivers','minor_waivers')]
+    form.report_type.choices = [('registration_report','Registration Report'),('royal_registrations', 'Royal Registrations'), ('land_pre-reg', 'Land Pre-Reg'), ('full_export', 'Full Export'), ('full_signatue_export', 'Full Signature Export'), ('full_checkin_report', 'Full Checkin Report'), ('at_door_count', 'At Door Count'), ('kingdom_count', 'Kingdom Count'), ('ghost_report', 'Ghost Report'), ('early_on_report','Early On Report'), ('paypal_paid_export','PayPal Paid Export'),('paypal_canceled_export','PayPal Canceled Export'),('paypal_recon_export','PayPal Recon Export'),('atd_export','ATD Export'),('log_export','Log Export'),('minor_waivers','Minor Waivers'),('paypal_transactions','PayPal Transactions')]
     return render_template("viewreport.html", form=form)
 
 

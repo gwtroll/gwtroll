@@ -986,7 +986,23 @@ def paypal_canceled_export():
 @login_required
 @permission_required('admin')
 def paypal_transaction_search():
-    return str(get_paypal_transactions())
+    paypal_transactions = get_paypal_transactions()
+    data = {}
+    columns = [{"field": "payment_id", "title": "Payment ID", "filterControl":"input"},
+        {"field": "paypal_invoice_id", "title": "PayPal Invoice ID", "filterControl":"input"},
+        {"field": "invoice_number", "title": "Invoice Number", "filterControl":"input"},
+        {"field": "type", "title": "Type", "filterControl":"input"},
+        {"field": "status", "title": "Status", "filterControl":"input"},
+        {"field": "gross", "title": "Gross", "filterControl":"input"},
+        {"field": "fee", "title": "Fee", "filterControl":"input"},
+        {"field": "net", "title": "Net", "filterControl":"input"},
+    ]
+    rows = []
+    for key in paypal_transactions:
+        rows.append(paypal_transactions[key])
+    data['columns'] = columns
+    data['rows'] = rows
+    return jsonify(data)
 
 @bp.route("/resend_fastpass", methods=("GET", ""))
 @login_required
