@@ -128,8 +128,10 @@ def reg(regid):
                 form.rapier_inspection.data = inspection.inspected
             case 'Rapier Spear':
                 form.rapier_spear_inspection.data = inspection.inspected
-            case 'Combat Archery':
-                form.combat_archery_inspection.data = inspection.inspected
+            case 'Heavy Combat Archery':
+                form.heavy_combat_archery_inspection.data = inspection.inspected
+            case 'Rapier Combat Archery':
+                form.rapier_combat_archery_inspection.data = inspection.inspected
 
     if reg.bows:
         for bow in reg.bows:
@@ -143,7 +145,8 @@ def reg(regid):
         chivalric_spear_inspection = request.form.get('chivalric_spear_inspection')
         rapier_inspection = request.form.get('rapier_inspection')
         rapier_spear_inspection = request.form.get('rapier_spear_inspection')
-        combat_archery_inspection = request.form.get('combat_archery_inspection')
+        heavy_combat_archery_inspection = request.form.get('heavy_combat_archery_inspection')
+        rapier_combat_archery_inspection = request.form.get('rapier_combat_archery_inspection')
 
         if 'Heavy' not in inspection_dict and chivalric_inspection:
             new_inspection = MarshalInspection(
@@ -181,10 +184,19 @@ def reg(regid):
                 inspected = True
             )
             db.session.add(new_inspection)
-        if 'Combat Archery' not in inspection_dict and combat_archery_inspection:
+        if 'Heavy Combat Archery' not in inspection_dict and heavy_combat_archery_inspection:
             new_inspection = MarshalInspection(
                 regid = regid,
-                inspection_type = 'Combat Archery',
+                inspection_type = 'Heavy Combat Archery',
+                inspection_date = datetime.now(pytz.timezone('America/Chicago')),
+                inspecting_marshal_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Rapier Combat Archery' not in inspection_dict and rapier_combat_archery_inspection:
+            new_inspection = MarshalInspection(
+                regid = regid,
+                inspection_type = 'Rapier Combat Archery',
                 inspection_date = datetime.now(pytz.timezone('America/Chicago')),
                 inspecting_marshal_id = current_user.id,
                 inspected = True

@@ -80,7 +80,7 @@
                         <tr>
                             <td colspan="3">
                                 <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal"
-                                data-bs-target="#incidentModal">
+                                    data-bs-target="#incidentModal">
                                     + New Incident
                                 </button>
                             </td>
@@ -165,7 +165,7 @@
                                 </td>
                                 <td>
                                     {% if inspection_dict['Heavy Spear'] %}
-                                    {{inspection_dict['Heavy Spear'].inspecting_marshal.fname}} 
+                                    {{inspection_dict['Heavy Spear'].inspecting_marshal.fname}}
                                     {{inspection_dict['Heavy Spear'].inspecting_marshal.lname}}
                                     {% endif %}
                                 </td>
@@ -215,20 +215,39 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <b>Combat Archery</b>
+                                    <b>Heavy Combat Archery</b>
                                 </td>
                                 <td>
-                                    {{form.combat_archery_inspection(class_='form-check-input big-checkbox')}}
+                                    {{form.heavy_combat_archery_inspection(class_='form-check-input big-checkbox')}}
                                 </td>
                                 <td>
-                                    {% if inspection_dict['Combat Archery'] %}
-                                    {{inspection_dict['Combat Archery'].inspecting_marshal.fname}}
-                                    {{inspection_dict['Combat Archery'].inspecting_marshal.lname}}
+                                    {% if inspection_dict['Heavy Combat Archery'] %}
+                                    {{inspection_dict['Heavy Combat Archery'].inspecting_marshal.fname}}
+                                    {{inspection_dict['Heavy Combat Archery'].inspecting_marshal.lname}}
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if inspection_dict['Combat Archery'] %}
-                                    {{inspection_dict['Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {% if inspection_dict['Heavy Combat Archery'] %}
+                                    {{inspection_dict['Heavy Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Rapier Combat Archery</b>
+                                </td>
+                                <td>
+                                    {{form.rapier_combat_archery_inspection(class_='form-check-input big-checkbox')}}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Rapier Combat Archery'] %}
+                                    {{inspection_dict['Rapier Combat Archery'].inspecting_marshal.fname}}
+                                    {{inspection_dict['Rapier Combat Archery'].inspecting_marshal.lname}}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inspection_dict['Rapier Combat Archery'] %}
+                                    {{inspection_dict['Rapier Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
                                     {% endif %}
                                 </td>
                             </tr>
