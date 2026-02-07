@@ -116,7 +116,8 @@ def get_inspection_stats():
 
     chivalric_inspections = 0
     rapier_inspections = 0
-    combat_archery = 0
+    heavy_combat_archery = 0
+    rapier_combat_archery = 0
     bow_inspections = 0
     crossbow_inspections = 0
     for i in inspections:
@@ -130,8 +131,10 @@ def get_inspection_stats():
                 rapier_inspections += 1
             case 'Rapier Spear':
                 rapier_inspections += 1
-            case 'Combat Archery':
-                combat_archery += 1
+            case 'Heavy Combat Archery':
+                heavy_combat_archery += 1
+            case 'Rapier Combat Archery':
+                rapier_combat_archery += 1
 
     for i in ranged_inspections:
         if i.bows:
@@ -142,7 +145,8 @@ def get_inspection_stats():
     inspection_stats = {
     'chivalric_inspections':chivalric_inspections, 
     'rapier_inspections':rapier_inspections, 
-    'combat_archery_inspections':combat_archery,
+    'heavy_combat_archery_inspections':heavy_combat_archery,
+    'rapier_combat_archery_inspections':rapier_combat_archery,
     'bow_inspections':bow_inspections, 
     'crossbow_inspections':crossbow_inspections}
     return inspection_stats
