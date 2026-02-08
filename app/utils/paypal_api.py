@@ -27,7 +27,7 @@ class PayPal_Invoice:
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
-                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nRegistrations will be closed February 27, 2026 with payment due by March 6, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
@@ -48,7 +48,7 @@ class PayPal_Invoice:
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
-                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nRegistrations will be closed February 27, 2026 with payment due by March 6, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
@@ -68,7 +68,7 @@ class PayPal_Invoice:
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED.  "
-                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nRegistrations will be closed February 27, 2026 with payment due by March 6, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
