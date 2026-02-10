@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+        <div class="row">
+            <div class="col">
+                Edit Crossbow
+                <form action="/marshal/{{reg.id}}/editcrossbow/{{crossbow.id}}" method="POST">
+                    {{form.inchpounds.label}}
+                    {{form.inchpounds(class_='form-control')}}
+                    {{form.combat_archery_type.label}}
+                    {{form.combat_archery_type(class_='form-control')}}
+                    {{form.submit(class_='form-control btn btn-primary')}}
+                </form>
+            </div>
+        </div>
+        
+{% endblock %}

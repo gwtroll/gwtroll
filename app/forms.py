@@ -840,9 +840,36 @@ class ReportForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class BowForm(FlaskForm):
-    id = IntegerField("Bow Id")
     poundage = DecimalField('Poundage')
+    combat_archery_type = SelectField('Combat Archery Type', choices=[('Heavy Combat Archery','Heavy Combat Archery'),('Rapier Combat Archery','Rapier Combat Archery')])
     submit = SubmitField('Submit')
+
+    def populate_object(self, obj):
+        if self.poundage.data:
+            obj.poundage = self.poundage.data
+        if self.combat_archery_type.data:
+            obj.combat_archery_type = self.combat_archery_type.data
+    def populate_form(self, obj):
+        if obj.poundage:
+            self.poundage.data = obj.poundage
+        if obj.combat_archery_type:
+            self.combat_archery_type.data = obj.combat_archery_type
+
+class CrossbowForm(FlaskForm):
+    inchpounds = DecimalField('Inch-Pounds')
+    combat_archery_type = SelectField('Combat Archery Type', choices=[('Heavy Combat Archery','Heavy Combat Archery'),('Rapier Combat Archery','Rapier Combat Archery')])
+    submit = SubmitField('Submit')
+
+    def populate_object(self, obj):
+        if self.inchpounds.data:
+            obj.inchpounds = self.inchpounds.data
+        if self.combat_archery_type.data:
+            obj.combat_archery_type = self.combat_archery_type.data
+    def populate_form(self, obj):
+        if obj.inchpounds:
+            self.inchpounds.data = obj.inchpounds
+        if obj.combat_archery_type:
+            self.combat_archery_type.data = obj.combat_archery_type
 
 class MarshalForm(FlaskForm):
     regid = IntegerField()

@@ -1070,6 +1070,7 @@ def full_bows_crossbows():
     {"field": "lname", "title": "Last Name", "filterControl": 'input'},
     {"field": "medallion", "title": "Medallion", "filterControl":"input"},
     {"field": "type", "title": "Type", "filterControl":"select"},
+    {"field": "combat_archery_type", "title": "Combat Archery Type", "filterControl":"select"},
     {"field": "poundage", "title": "Poundage", "filterControl":"input"},
     {"field": "inchpounds", "title": "Inch-Pounds", "filterControl":"input"},
     {"field": "inspection_date", "title": "Inspection Date", "filterControl":"select"},

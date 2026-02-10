@@ -657,11 +657,11 @@ class MarshalInspection(db.Model):
         data_dict['marshal_medallion'] = self.inspecting_marshal.medallion if self.inspecting_marshal else ''
         return json.dumps(data_dict, sort_keys=True, default=str)
 
-
 class Bows(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     poundage = db.Column(db.Double())
     bow_inspection_date: so.Mapped[Optional[datetime]]
+    combat_archery_type = db.Column(db.String())
     bow_inspection_marshal_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
     bow_inspection_marshal = db.relationship(
         "User", foreign_keys=[bow_inspection_marshal_id]
@@ -696,6 +696,7 @@ class RegBows(db.Model):
         data_dict['type'] = 'Bow'
         data_dict['poundage'] = self.bow.poundage if self.bow else ''
         data_dict['inspection_date'] = self.bow.bow_inspection_date.strftime("%Y-%m-%d") if self.bow and self.bow.bow_inspection_date else ''
+        data_dict['combat_archery_type'] = self.bow.combat_archery_type if self.bow else ''
         data_dict['marshal_name'] = self.bow.bow_inspection_marshal.fname + ' ' + self.bow.bow_inspection_marshal.lname if self.bow.bow_inspection_marshal else ''
         data_dict['marshal_medallion'] = self.bow.bow_inspection_marshal.medallion if self.bow.bow_inspection_marshal else ''
         return json.dumps(data_dict, sort_keys=True, default=str)
@@ -704,6 +705,7 @@ class Crossbows(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     inchpounds = db.Column(db.Double())
     crossbow_inspection_date: so.Mapped[Optional[datetime]]
+    combat_archery_type = db.Column(db.String())
     crossbow_inspection_marshal_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
     crossbow_inspection_marshal = db.relationship(
         "User", foreign_keys=[crossbow_inspection_marshal_id]
@@ -739,6 +741,7 @@ class RegCrossBows(db.Model):
         data_dict['type'] = 'Crossbow'
         data_dict['inchpounds'] = self.crossbow.inchpounds if self.crossbow else ''
         data_dict['inspection_date'] = self.crossbow.crossbow_inspection_date.strftime("%Y-%m-%d") if self.crossbow and self.crossbow.crossbow_inspection_date else ''
+        data_dict['combat_archery_type'] = self.crossbow.combat_archery_type if self.crossbow else ''
         data_dict['marshal_name'] = self.crossbow.crossbow_inspection_marshal.fname + ' ' + self.crossbow.crossbow_inspection_marshal.lname if self.crossbow.crossbow_inspection_marshal else ''
         data_dict['marshal_medallion'] = self.crossbow.crossbow_inspection_marshal.medallion if self.crossbow.crossbow_inspection_marshal else ''
         return json.dumps(data_dict, sort_keys=True, default=str)

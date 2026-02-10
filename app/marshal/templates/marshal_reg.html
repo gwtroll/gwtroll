@@ -79,7 +79,7 @@
                         {% endfor %}
                         <tr>
                             <td colspan="3">
-                                <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal"
+                                <button type="button" class="btn btn-primary form-control btn-lg" data-bs-toggle="modal"
                                     data-bs-target="#incidentModal">
                                     + New Incident
                                 </button>
@@ -267,24 +267,28 @@
             </div>
         </div>
         <div class="row m-0">
-            <div class="col justify-content-center m-0">
-                <table class="table">
+            <div class="col justify-content-center m-0 table-responsive">
+                <table class="table table-reg">
                     <thead>
                         <th>Poundage</th>
+                        <th>Combat Archery Type</th>
                         <th>Marshal</th>
                         <th>Date/Time</th>
+                        <th>Edit</th>
                     </thead>
                     <tbody>
                         {% for bow in reg.bows %}
                         <tr>
                             <td>{{ bow.poundage }}</td>
+                            <td>{{ bow.combat_archery_type}}</td>
                             <td>{{ bow.bow_inspection_marshal.fname}} {{bow.bow_inspection_marshal.lname}}</td>
                             <td>{{ bow.bow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
+                            <td><a href="{{url_for('marshal.edit_bow', regid=reg.id, bow_id=bow.id)}}"><button type="button" class="btn btn-warning">Edit</button></a></td>
                         </tr>
                         {% endfor %}
                         <tr>
-                            <td colspan="3">
-                                <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal"
+                            <td colspan="5">
+                                <button type="button" class="btn btn-primary form-control btn-lg" data-bs-toggle="modal"
                                     data-bs-target="#bowModal">
                                     + Add Bow
                                 </button>
@@ -301,25 +305,29 @@
             </div>
         </div>
         <div class="row m-0">
-            <div class="col justify-content-center m-0">
-                <table class="table">
+            <div class="col justify-content-center m-0 table-responsive">
+                <table class="table table-reg">
                     <thead>
                         <th>Inch/Pounds</th>
+                        <th>Combat Archery Type</th>
                         <th>Marshal</th>
                         <th>Date/Time</th>
+                        <th>Edit</th>
                     </thead>
                     <tbody>
                         {% for crossbow in reg.crossbows %}
                         <tr>
                             <td>{{ crossbow.inchpounds }}</td>
+                            <td>{{ crossbow.combat_archery_type}}</td>
                             <td>{{ crossbow.crossbow_inspection_marshal.fname}}
                                 {{crossbow.crossbow_inspection_marshal.lname}}</td>
                             <td>{{ crossbow.crossbow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
+                            <td><a href="{{url_for('marshal.edit_crossbow', regid=reg.id, crossbow_id=crossbow.id)}}"><button type="button" class="btn btn-warning">Edit</button></a></td>
                         </tr>
                         {% endfor %}
                         <tr>
-                            <td colspan="3">
-                                <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal"
+                            <td colspan="5">
+                                <button type="button" class="btn btn-primary form-control btn-lg" data-bs-toggle="modal"
                                     data-bs-target="#crossbowModal">
                                     + Add Crossbow
                                 </button>
@@ -342,6 +350,8 @@
             </div>
             <div class="modal-body">
                 <form action="/marshal/{{reg.id}}/addbow" method="POST">
+                    <b>{{bow_form.combat_archery_type.label}}</b>
+                    {{bow_form.combat_archery_type(class_='form-control')}}
                     <b>{{bow_form.poundage.label}}</b>
                     {{bow_form.poundage(class_='form-control')}}
                     {{bow_form.submit(class_='form-control btn btn-primary')}}
@@ -365,6 +375,8 @@
             </div>
             <div class="modal-body">
                 <form action="/marshal/{{reg.id}}/addcrossbow" method="POST">
+                    <b>{{bow_form.combat_archery_type.label}}</b>
+                    {{bow_form.combat_archery_type(class_='form-control')}}
                     <b>{{bow_form.poundage.label}}</b>
                     {{bow_form.poundage(class_='form-control')}}
                     {{bow_form.submit(class_='form-control btn btn-primary')}}
