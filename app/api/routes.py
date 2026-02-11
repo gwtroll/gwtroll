@@ -211,7 +211,10 @@ def search_registration(key, value):
     elif key == "med":
         regs = (
             Registrations.query.filter(
-                sa.cast(Registrations.medallion, sa.Text) == value
+                sa.cast(Registrations.medallion, sa.Text) == value, 
+                Registrations.duplicate != True, 
+                Registrations.canceled != True
+                
             )
             .order_by(
                 Registrations.checkin.desc(), Registrations.lname, Registrations.fname
@@ -222,7 +225,9 @@ def search_registration(key, value):
     elif key == "id":
         regs = (
             Registrations.query.filter(
-                sa.cast(Registrations.id, sa.Text) == value
+                sa.cast(Registrations.id, sa.Text) == value, 
+                Registrations.duplicate != True, 
+                Registrations.canceled != True
             )
             .order_by(
                 Registrations.checkin.desc(), Registrations.lname, Registrations.fname
@@ -573,17 +578,18 @@ def earlyon():
         {"field": "email", "title": "Email", "filterControl": "input"},
         {"field": "kingdom", "title": "Kingdom", "filterControl": "select"},
         {"field": "lodging", "title": "Lodging", "filterControl": "select"},
+        {"field": "balance", "title": "Balance", "filterControl": "input"},
     ]
     rows = []
     earlyon_list = Registrations.query.filter(
-        Registrations.early_on_approved == True, Registrations.balance <= 0
-    ).all()
+        Registrations.early_on_approved == True, Registrations.canceled != True, Registrations.duplicate != True).all()
     for reg in earlyon_list:
         kingdom = reg.kingdom.name
         lodging = reg.lodging.name
         reg_json = json.loads(reg.toJSON())
         reg_json["kingdom"] = kingdom
         reg_json["lodging"] = lodging
+        reg_json["balance"] = reg.get_balance()
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows

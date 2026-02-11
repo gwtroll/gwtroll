@@ -356,6 +356,19 @@ class Registrations(db.Model):
         if paypal_donation_balance < 0:
             paypal_donation_balance = 0
         self.paypal_donation_balance = paypal_donation_balance
+
+    def get_balance(self):
+        balance = (
+            self.registration_price
+            + self.nmr_price
+            + self.paypal_donation
+            + self.nmr_donation
+        )
+        for payment in self.payments:
+            balance -= payment.amount
+        if balance < 0:
+            balance = 0
+        return balance
     
     def get_invoice_items(self):
         reg_arrival_dict = {
