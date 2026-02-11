@@ -22,13 +22,13 @@
       data-show-fullscreen="true" data-show-export="true" data-export-types="['csv', 'excel', 'pdf']"
       data-minimum-count-columns="2" data-show-pagination-switch="true" data-page-list="[10, 25, 50, 100, all]"
       data-response-handler="responseHandler" data-detail-view="true" data-detail-view-icon="false"
-      data-mobile-responsive="true" data-check-on-init="true" data-classes="table table-striped table-responsive">
+      data-mobile-responsive="true" data-check-on-init="true" data-sort-select-options="true" data-classes="table table-striped table-responsive">
       <thead>
         <tr>
           <th data-field="invoice_type" data-filter-control="select">Invoice Type</th>
           <th data-field="registrations">Registrations</th>
           <th data-field="invoice_number" data-filter-control="input">Invoice Number</th>
-          <th data-field="invoice_date" data-filter-control="select">Invoice Date</th>
+          <th data-field="invoice_date" data-filter-control="datepicker">Invoice Date</th>
           <th data-field="email" data-filter-control="input">Email</th>
           {% if back == 'all' %}
           <th data-field="status" data-filter-control="select">Status</th>
