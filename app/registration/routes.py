@@ -282,6 +282,7 @@ def editreg(regid):
     form.lodging.choices = get_lodging_choices()
     form.kingdom.choices = get_kingdom_choices()
     form.expected_arrival_date.choices = get_reg_arrival_dates()
+    form.expected_arrival_date.choices.extend(get_earlyon_arrival_dates())
 
     if request.method == 'POST' and form.validate_on_submit():
         medallion_check = None
