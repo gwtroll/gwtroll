@@ -98,7 +98,7 @@ def unsent():
 @login_required
 @permission_required("invoice_view")
 def open():
-    all_inv = Invoice.query.filter(and_(Invoice.invoice_status == "OPEN")).all()
+    all_inv = Invoice.query.filter(and_(Invoice.invoice_status == "OPEN")).order_by(Invoice.invoice_date).all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     return render_template(
         "open_list.html", invoices=all_inv, counts=inv_prereg_open_counts(), timedelta=timedelta
@@ -109,7 +109,7 @@ def open():
 @login_required
 @permission_required("invoice_view")
 def paid():
-    all_inv = Invoice.query.filter(Invoice.invoice_status == "PAID").all()
+    all_inv = Invoice.query.filter(Invoice.invoice_status == "PAID").order_by(Invoice.invoice_date).all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     return render_template(
         "paid_list.html", invoices=all_inv, counts=inv_prereg_paid_counts()
@@ -141,7 +141,7 @@ def canceled():
 @permission_required("invoice_view")
 def all():
 
-    all_inv = Invoice.query.all()
+    all_inv = Invoice.query.order_by(Invoice.invoice_date).all()
 
     # invoices = {}
     # for reg in all_inv:
