@@ -228,7 +228,8 @@
                                 </td>
                                 <td>
                                     {% if inspection_dict['Heavy Combat Archery'] %}
-                                    {{inspection_dict['Heavy Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {{inspection_dict['Heavy Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M
+                                    %p')}}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -247,7 +248,8 @@
                                 </td>
                                 <td>
                                     {% if inspection_dict['Rapier Combat Archery'] %}
-                                    {{inspection_dict['Rapier Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M %p')}}
+                                    {{inspection_dict['Rapier Combat Archery'].inspection_date.strftime('%m-%d-%Y %I:%M
+                                    %p')}}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -283,7 +285,8 @@
                             <td>{{ bow.combat_archery_type}}</td>
                             <td>{{ bow.bow_inspection_marshal.fname}} {{bow.bow_inspection_marshal.lname}}</td>
                             <td>{{ bow.bow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
-                            <td><a href="{{url_for('marshal.edit_bow', regid=reg.id, bow_id=bow.id)}}"><button type="button" class="btn btn-warning">Edit</button></a></td>
+                            <td><a href="{{url_for('marshal.edit_bow', regid=reg.id, bow_id=bow.id)}}"><button
+                                        type="button" class="btn btn-warning">Edit</button></a></td>
                         </tr>
                         {% endfor %}
                         <tr>
@@ -309,6 +312,7 @@
                 <table class="table table-reg">
                     <thead>
                         <th>Inch/Pounds</th>
+                        <th>Poundage</th>
                         <th>Combat Archery Type</th>
                         <th>Marshal</th>
                         <th>Date/Time</th>
@@ -318,11 +322,13 @@
                         {% for crossbow in reg.crossbows %}
                         <tr>
                             <td>{{ crossbow.inchpounds }}</td>
+                            <td>{{ crossbow.poundage }}</td>
                             <td>{{ crossbow.combat_archery_type}}</td>
                             <td>{{ crossbow.crossbow_inspection_marshal.fname}}
                                 {{crossbow.crossbow_inspection_marshal.lname}}</td>
                             <td>{{ crossbow.crossbow_inspection_date.strftime('%m-%d-%Y %I:%M %p')}}</td>
-                            <td><a href="{{url_for('marshal.edit_crossbow', regid=reg.id, crossbow_id=crossbow.id)}}"><button type="button" class="btn btn-warning">Edit</button></a></td>
+                            <td><a href="{{url_for('marshal.edit_crossbow', regid=reg.id, crossbow_id=crossbow.id)}}"><button
+                                        type="button" class="btn btn-warning">Edit</button></a></td>
                         </tr>
                         {% endfor %}
                         <tr>
@@ -375,11 +381,13 @@
             </div>
             <div class="modal-body">
                 <form action="/marshal/{{reg.id}}/addcrossbow" method="POST">
-                    <b>{{bow_form.combat_archery_type.label}}</b>
-                    {{bow_form.combat_archery_type(class_='form-control')}}
-                    <b>{{bow_form.poundage.label}}</b>
-                    {{bow_form.poundage(class_='form-control')}}
-                    {{bow_form.submit(class_='form-control btn btn-primary')}}
+                    <b>{{crossbow_form.combat_archery_type.label}}</b>
+                    {{crossbow_form.combat_archery_type(class_='form-control')}}
+                    <b>{{crossbow_form.inchpounds.label}}</b>
+                    {{crossbow_form.inchpounds(class_='form-control')}}
+                    <b>{{crossbow_form.poundage.label}}</b>
+                    {{crossbow_form.poundage(class_='form-control')}}
+                    {{crossbow_form.submit(class_='form-control btn btn-primary')}}
                 </form>
             </div>
             <div class="modal-footer">

@@ -683,7 +683,6 @@ class Bows(db.Model):
     def __repr__(self):
         return "<Bow {}>".format(self.id)
 
-
 class RegBows(db.Model):
     __tablename__ = "reg_bows"
     id = db.Column(db.Integer(), primary_key=True)
@@ -717,6 +716,7 @@ class RegBows(db.Model):
 class Crossbows(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     inchpounds = db.Column(db.Double())
+    poundage = db.Column(db.Double())
     crossbow_inspection_date: so.Mapped[Optional[datetime]]
     combat_archery_type = db.Column(db.String())
     crossbow_inspection_marshal_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
@@ -753,6 +753,7 @@ class RegCrossBows(db.Model):
         data_dict['medallion'] = self.reg.medallion if self.reg else ''
         data_dict['type'] = 'Crossbow'
         data_dict['inchpounds'] = self.crossbow.inchpounds if self.crossbow else ''
+        data_dict['poundage'] = self.crossbow.poundage if self.crossbow else ''
         data_dict['inspection_date'] = self.crossbow.crossbow_inspection_date.strftime("%Y-%m-%d") if self.crossbow and self.crossbow.crossbow_inspection_date else ''
         data_dict['combat_archery_type'] = self.crossbow.combat_archery_type if self.crossbow else ''
         data_dict['marshal_name'] = self.crossbow.crossbow_inspection_marshal.fname + ' ' + self.crossbow.crossbow_inspection_marshal.lname if self.crossbow.crossbow_inspection_marshal else ''

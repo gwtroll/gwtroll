@@ -840,7 +840,7 @@ class ReportForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class BowForm(FlaskForm):
-    poundage = DecimalField('Poundage')
+    poundage = DecimalField('Poundage', default=0.0)
     combat_archery_type = SelectField('Combat Archery Type', choices=[('Heavy Combat Archery','Heavy Combat Archery'),('Rapier Combat Archery','Rapier Combat Archery')])
     submit = SubmitField('Submit')
 
@@ -856,7 +856,8 @@ class BowForm(FlaskForm):
             self.combat_archery_type.data = obj.combat_archery_type
 
 class CrossbowForm(FlaskForm):
-    inchpounds = DecimalField('Inch-Pounds')
+    inchpounds = DecimalField('Inch-Pounds', default=0.0)
+    poundage = DecimalField('Poundage', default=0.0)
     combat_archery_type = SelectField('Combat Archery Type', choices=[('Heavy Combat Archery','Heavy Combat Archery'),('Rapier Combat Archery','Rapier Combat Archery')])
     submit = SubmitField('Submit')
 

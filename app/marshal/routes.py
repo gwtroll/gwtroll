@@ -58,21 +58,21 @@ def add_bow(regid):
 def add_crossbow(regid):
     reg = get_reg(regid)
     if request.method == 'POST':
-        if request.form.get("poundage"):
-            update_reg = Registrations.query.filter_by(id=reg.id).first()
-            crossbow = Crossbows()
-            crossbow.inchpounds = request.form.get("poundage")
-            crossbow.combat_archery_type = request.form.get("combat_archery_type")
-            crossbow.crossbow_inspection_marshal_id = current_user.id
-            crossbow.crossbow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
-            if update_reg.crossbows:
-                update_reg.crossbows.append(crossbow)
-            else:
-                crossbows = []
-                crossbows.append(crossbow)
-                update_reg.crossbows = crossbows
-            db.session.commit()
-        return redirect(url_for('marshal.reg', regid=regid))
+        update_reg = Registrations.query.filter_by(id=reg.id).first()
+        crossbow = Crossbows()
+        crossbow.inchpounds = request.form.get("inchpounds")
+        crossbow.poundage = request.form.get("poundage")
+        crossbow.combat_archery_type = request.form.get("combat_archery_type")
+        crossbow.crossbow_inspection_marshal_id = current_user.id
+        crossbow.crossbow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
+        if update_reg.crossbows:
+            update_reg.crossbows.append(crossbow)
+        else:
+            crossbows = []
+            crossbows.append(crossbow)
+            update_reg.crossbows = crossbows
+        db.session.commit()
+    return redirect(url_for('marshal.reg', regid=regid))
 
 @bp.route('/<int:regid>/editbow/<int:bow_id>', methods=('GET', 'POST'))
 @permission_required('marshal_edit')
@@ -135,6 +135,7 @@ def reg(regid):
     reg = get_reg(regid)
     form = MarshalForm()
     bow_form = BowForm()
+    crossbow_form = CrossbowForm()
     incident_form = IncidentForm()
     url = f"https://amp.ansteorra.org/activities/authorizations/getMemberAuthorizations/{reg.email}"
     headers = {
@@ -235,7 +236,7 @@ def reg(regid):
 
         db.session.commit()
         return redirect(url_for('marshal.reg',regid=regid))
-    return render_template('marshal_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form, fighter_auth=fighter_auth)
+    return render_template('marshal_reg.html', reg=reg, form=form, bow_form=bow_form, crossbow_form=crossbow_form, inspection_dict=inspection_dict, incident_form=incident_form, fighter_auth=fighter_auth)
 
 @bp.route('/reports', methods=('GET', 'POST'))
 @login_required
