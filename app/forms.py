@@ -864,11 +864,15 @@ class CrossbowForm(FlaskForm):
     def populate_object(self, obj):
         if self.inchpounds.data:
             obj.inchpounds = self.inchpounds.data
+        if self.poundage.data:
+            obj.poundage = self.poundage.data
         if self.combat_archery_type.data:
             obj.combat_archery_type = self.combat_archery_type.data
     def populate_form(self, obj):
         if obj.inchpounds:
             self.inchpounds.data = obj.inchpounds
+        if obj.poundage:
+            self.poundage.data = obj.poundage
         if obj.combat_archery_type:
             self.combat_archery_type.data = obj.combat_archery_type
 
