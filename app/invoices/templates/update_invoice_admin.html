@@ -291,6 +291,11 @@
         {% include 'form_field.html' %}
         {% endwith %}
     </div>
+        <div class="row">
+        {% with field=form.invoice_status, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
     <h4>Payment Information</h4>
     <h5>Applied Payments</h5>
     <div class="row">

@@ -464,12 +464,12 @@ class Invoice(db.Model):
 
     def recalculate_balance(self):
         balance = (
-            self.registration_total
-            + self.nmr_total
-            + self.donation_total
-            + self.space_fee
-            + self.processing_fee
-            + self.rider_fee
+            self.registration_total if self.registration_total else 0
+            + self.nmr_total if self.nmr_total else 0
+            + self.donation_total if self.donation_total else 0
+            + self.space_fee if self.space_fee else 0
+            + self.processing_fee if self.processing_fee else 0
+            + self.rider_fee if self.rider_fee else 0
         )
         for payment in self.payments:
             balance -= payment.amount
