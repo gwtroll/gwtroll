@@ -31,6 +31,8 @@
             <th data-field="type" data-filter-control="select">Type</th>
             <th data-field="relationship" data-filter-control="select">Relationship</th>
             <th data-field="paypal_id" data-filter-control="input">PayPal ID</th>
+            <th data-field="invoice_number" data-filter-control="input">Invoice Number</th>
+            <th data-field="reg_id" data-filter-control="input">Reg ID</th>
             <th data-field="object" data-filter-control="input">Object</th>
             <th data-field="edit">Edit</th>
         </thead>
@@ -57,6 +59,9 @@
                 <td>
                     {{payment.paypal_id}}
                 </td>
+                <td>{{payment.invoice_number}}
+                </td>
+                <td>{{payment.reg_id}}</td>
                 <td>
                     {% if payment.reg %}
                     <a href="{{url_for('registration.editreg',regid=payment.reg_id)}}" target="_blank">{{payment.reg.fname}} {{payment.reg.lname}}</a>
