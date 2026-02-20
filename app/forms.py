@@ -722,8 +722,8 @@ class EarlyOnApprovalForm(FlaskForm):
     merchant = SelectField('Merchant Name', choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
-    dept_approval_status = SelectField('Department Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
-    autocrat_approval_status = SelectField('Autocrat Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
+    dept_approval_status = SelectField('Department Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('DUPLICATE','DUPLICATE')])
+    autocrat_approval_status = SelectField('Autocrat Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('DUPLICATE','DUPLICATE')])
     submit = SubmitField('Submit Early On Request')
 
 class UpdateInvoiceForm(FlaskForm):
