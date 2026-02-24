@@ -476,7 +476,7 @@ class Invoice(db.Model):
         if balance < 0:
             balance = 0
         self.balance = balance
-        if self.balance > 0 and self.invoice_status != "CANCELED" and self.invoice_status != "DUPLICATE":
+        if self.balance > 0 and self.invoice_status != "NO PAYMENT" and self.invoice_status != "DUPLICATE":
             self.invoice_status = "OPEN"
 
     def recalculate_balance_from_registrations(self):
