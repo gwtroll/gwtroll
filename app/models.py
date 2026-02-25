@@ -207,6 +207,16 @@ class EarlyOnRequest(db.Model):
                 'unit_of_measure': 'QUANTITY'
             })
         return items
+    
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
 
 class EarlyOnRider(db.Model):
@@ -220,6 +230,16 @@ class EarlyOnRider(db.Model):
         db.Integer(), db.ForeignKey("registrations.id", ondelete="CASCADE")
     )
     reg = db.relationship("Registrations", backref="earlyonriders")
+
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
 
 class EarlyOnRequestRiders(db.Model):
@@ -237,7 +257,6 @@ class EarlyOnRequestRiders(db.Model):
     earlyonrider = db.relationship(
         "EarlyOnRider", backref="earlyonrequest_riders", viewonly=True
     )
-
 
 class Registrations(db.Model):
     id = db.Column(db.Integer(), primary_key=True, unique=True)

@@ -19,6 +19,8 @@ def reports():
         form.report_type.choices = [('registration_report','Registration Report'), ('royal_registrations', 'Royal Registrations'), ('land_pre-reg', 'Land Pre-Reg'), ('kingdom_count', 'Kingdom Count'), ('early_on_report','Early On Report')]
     else:
         form.report_type.choices = [('registration_report','Registration Report'),('royal_registrations', 'Royal Registrations'), ('land_pre-reg', 'Land Pre-Reg'), ('full_export', 'Full Export'), ('full_signatue_export', 'Full Signature Export'), ('full_checkin_report', 'Full Checkin Report'), ('at_door_count', 'At Door Count'), ('kingdom_count', 'Kingdom Count'), ('ghost_report', 'Ghost Report'), ('early_on_report','Early On Report'), ('paypal_paid_export','PayPal Paid Export'),('paypal_canceled_export','PayPal Canceled Export'),('paypal_recon_export','PayPal Recon Export'),('atd_export','ATD Export'),('log_export','Log Export'),('minor_waivers','Minor Waivers'),('paypal_transactions','PayPal Transactions')]
+    if current_user.has_role('Admin'):
+        form.report_type.choices.append(('early_on_audit','Early On Report Audit'))
     return render_template("viewreport.html", form=form)
 
 

@@ -595,6 +595,52 @@ def earlyon():
     data["rows"] = rows
     return jsonify(data)
 
+@bp.route("/early_on_audit", methods=("GET", ""))
+@login_required
+@permission_required("admin")
+def earlyon_audit():
+    data = {}
+    columns = [
+        {"field": "request_id", "title": "Request ID", "filterControl": "input"},
+        {"field": "dept_approval_status", "title": "Department Approval Status", "filterControl": "select"},
+        {"field": "autocrat_approval_status", "title": "Autocrat Approval Status", "filterControl": "select"},
+        {"field": "reg_id", "title": "Registration ID", "filterControl": "input"},
+        {"field": "fname", "title": "First Name", "filterControl": "input"},
+        {"field": "lname", "title": "Last Name", "filterControl": "input"},
+        {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+        {"field": "enteredFName", "title": "Entered First Name", "filterControl": "input"},
+        {"field": "enteredLName", "title": "Entered Last Name", "filterControl": "input"},
+        {"field": "age", "title": "Age", "filterControl": "input"},
+        {"field": "driver_rider", "title": "Driver/Rider", "filterControl": "select"},
+    ]
+    rows = []
+    earlyon_applications = EarlyOnRequest.query.all()
+    for application in earlyon_applications:
+        reg_json = json.loads(application.toJSON())
+        reg_json['request_id'] = application.id
+        reg_json['reg_id'] = application.registration.id
+        reg_json['enteredFName'] = application.registration.fname
+        reg_json['enteredLName'] = application.registration.lname
+        reg_json['age'] = application.registration.age
+        reg_json['driver_rider'] = "Driver"
+        rows.append(reg_json)
+        for rider in application.earlyonriders:
+            reg_json_rider = json.loads(rider.toJSON())
+            reg_json_rider['request_id'] = application.id
+            reg_json_rider['reg_id'] = rider.regid
+            reg_json_rider['enteredFName'] = rider.fname
+            reg_json_rider['enteredLName'] = rider.lname
+            reg_json_rider['dept_approval_status'] = application.dept_approval_status
+            reg_json_rider['autocrat_approval_status'] = application.autocrat_approval_status
+            reg_json_rider['fname'] = rider.reg.fname
+            reg_json_rider['lname'] = rider.reg.lname
+            reg_json_rider['age'] = rider.reg.age
+            reg_json_rider['driver_rider'] = "Rider"
+            rows.append(reg_json_rider)
+
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/merchant_early_on_report", methods=("GET", ""))
 @login_required

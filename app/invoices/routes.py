@@ -345,6 +345,7 @@ def createinvoice():
                 if reg.duplicate != True and reg.canceled != True:
                     reg.invoice_number = zero_invoice.invoice_number
                     reg.notes = zero_invoice.notes
+                    send_fastpass_email(reg.email, reg)
 
             db.session.commit()
             return redirect(url_for("invoices.unsent"))
