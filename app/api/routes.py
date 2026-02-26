@@ -1426,6 +1426,7 @@ def toJSON(obj):
 def land_pre_reg():
     data = {}
     columns = [
+        {"field": "lodging", "title": "Lodging", "filterControl": "input"},
         {"field": "id", "title": "ID", "filterControl": "input"},
         {"field": "fname", "title": "First Name", "filterControl": "input"},
         {"field": "lname", "title": "Last Name", "filterControl": "input"},
@@ -1458,7 +1459,6 @@ def land_pre_reg():
             "filterControl": "input",
         },
         {"field": "kingdom", "title": "Kingdom", "filterControl": "input"},
-        {"field": "lodging", "title": "Lodging", "filterControl": "input"},
     ]
     rows = []
     regs = (
