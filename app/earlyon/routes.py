@@ -16,7 +16,7 @@ from markupsafe import Markup
 @login_required
 @permission_required('earlyon_view')
 def earlyon():
-    if current_user.has_role('Autocrat') or current_user.has_role('Admin'):
+    if current_user.has_role('Autocrat') or current_user.has_role('Admin') or current_user.has_role('Earlyon Coordinator') or current_user.has_role('Exchequer') or current_user.has_role('Invoices'):
         earlyons = EarlyOnRequest.query.all()
     elif current_user.has_role('Department Head'):
         earlyons = EarlyOnRequest.query.filter_by(department_id=current_user.department_id).all()
@@ -81,8 +81,7 @@ def update(earlyon_id):
                 rider_ids.append(field.regid.data)
             rider_registrations = Registrations.query.filter(Registrations.id.in_(rider_ids)).all()
             for rider in rider_registrations:
-                if len(rider.earlyonrequests_ref) > 0 or len(rider.earlyonriders_ref) > 0:
-                    rider_registration_ids.append(rider.id)
+                rider_registration_ids.append(rider.id)
 
             for id in rider_ids:
                 if id not in rider_registration_ids:

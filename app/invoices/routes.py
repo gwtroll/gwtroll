@@ -98,7 +98,7 @@ def unsent():
 @login_required
 @permission_required("invoice_view")
 def open():
-    all_inv = Invoice.query.filter(and_(Invoice.invoice_status == "OPEN")).all()
+    all_inv = Invoice.query.filter(and_(Invoice.invoice_status == "OPEN")).order_by(Invoice.invoice_date).all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     return render_template(
         "open_list.html", invoices=all_inv, counts=inv_prereg_open_counts(), timedelta=timedelta
@@ -109,7 +109,7 @@ def open():
 @login_required
 @permission_required("invoice_view")
 def paid():
-    all_inv = Invoice.query.filter(Invoice.invoice_status == "PAID").all()
+    all_inv = Invoice.query.filter(Invoice.invoice_status == "PAID").order_by(Invoice.invoice_date).all()
     # all_regs = Registrations.query.filter(and_(Registrations.invoice_number != None, Registrations.prereg == True, Registrations.invoice_status == 'OPEN')).order_by(Registrations.invoice_email).all()
     return render_template(
         "paid_list.html", invoices=all_inv, counts=inv_prereg_paid_counts()
@@ -141,7 +141,7 @@ def canceled():
 @permission_required("invoice_view")
 def all():
 
-    all_inv = Invoice.query.all()
+    all_inv = Invoice.query.order_by(Invoice.invoice_date).all()
 
     # invoices = {}
     # for reg in all_inv:
@@ -239,6 +239,7 @@ def update_admin(invnumber):
             inv.invoice_date = invoice_date
             inv.notes = notes
             inv.registration_total = form.registration_amount.data
+            inv.nmr_total = form.nmr_amount.data
             inv.donation_total = form.paypal_donation.data
             inv.invoice_id = form.paypal_id.data
             inv.invoice_status = form.invoice_status.data
@@ -254,6 +255,7 @@ def update_admin(invnumber):
 
     form.invoice_amount.data = inv.invoice_total
     form.registration_amount.data = inv.registration_total
+    form.nmr_amount.data = inv.nmr_total
     form.invoice_number.data = inv.invoice_number
     form.paypal_donation.data = inv.donation_total
     form.invoice_date.data = inv.invoice_date
@@ -345,6 +347,7 @@ def createinvoice():
                 if reg.duplicate != True and reg.canceled != True:
                     reg.invoice_number = zero_invoice.invoice_number
                     reg.notes = zero_invoice.notes
+                    send_fastpass_email(reg.email, reg)
 
             db.session.commit()
             return redirect(url_for("invoices.unsent"))

@@ -105,6 +105,35 @@ def orm_to_df(orm_obj, columns=[]):
     df = pd.DataFrame(return_data)
     return df
 
+@app.route('/logs', methods=['GET', 'POST'])
+@login_required
+@permission_required('admin')
+def show_logs():
+    try:
+        # Read the log file content
+        with open('gwlogger.log', 'r') as f:
+            log_content = f.read()
+    except FileNotFoundError:
+        log_content = "Log file not found."
+    except IOError as e:
+        log_content = f"Error reading log file: {e}"
+        
+    # Render an HTML template with the log content
+    return render_template('logs.html', log_content=log_content)
+
+@app.route('/logs/clear', methods=['GET', 'POST'])
+@login_required
+@permission_required('admin')
+def clear_logs():
+
+    log_file_path = 'gwlogger.log'
+    with open(log_file_path, 'r+') as file:
+        file.truncate(0)
+        
+    # Render an HTML template with the log content
+    return redirect(url_for('show_logs'))
+
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 @permission_required('registration_reports')

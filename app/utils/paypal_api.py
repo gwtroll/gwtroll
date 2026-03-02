@@ -1,3 +1,4 @@
+from app import logger
 import requests
 import os
 from datetime import datetime, timedelta
@@ -26,7 +27,7 @@ class PayPal_Invoice:
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
-                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nRegistrations will be closed February 27, 2026 with payment due by March 6, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
@@ -47,7 +48,7 @@ class PayPal_Invoice:
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED."
-                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nRegistrations will be closed February 27, 2026 with payment due by March 6, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
@@ -67,7 +68,7 @@ class PayPal_Invoice:
                 "invoice_date": datetime.now(pytz.timezone('America/Chicago')).strftime("%Y-%m-%d"),
                 "note": "Gulf Wars XXXIV- A war with no enemies! "
                 "\\nALL INVOICES MUST BE PAID WITHIN 7 DAYS OR THE RESERVATION MAY BE CANCELLED.  "
-                "\\nRegistrations will be closed February 21, 2026 with payment due by February 28, 2026.",
+                "\\nRegistrations will be closed February 27, 2026 with payment due by March 6, 2026.",
                 "payment_term": {
                     "term_type": "DUE_ON_DATE_SPECIFIED",
                     "due_date": (datetime.now(pytz.timezone('America/Chicago')) + timedelta(days=7)).strftime("%Y-%m-%d")
@@ -304,25 +305,33 @@ def get_paypal_transactions():
 
 
     today = datetime.now()
-    start_date = datetime(today.year, 8, 1, 0, 0, 0, 0)
+    start_date = datetime(2025, 8, 1, 0, 0, 0, 0)
+    logger.debug(f"Start Date: {start_date.strftime('%Y-%m-%dT%H:%M:%S-0000')} / Today: {today.strftime('%Y-%m-%dT%H:%M:%S-0000')}")
+
+    page = 1
 
     while start_date <= today:
         start_date_string = start_date.strftime("%Y-%m-%dT%H:%M:%S-0000")
         end_date_string = (start_date + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S-0000")
-        print(start_date_string)
-        print(end_date_string)
+        
+        logger.debug(f"Fetching transactions from {start_date_string} to {end_date_string} page {page}")
 
         params = (
             ('start_date', start_date_string),
             ('end_date', end_date_string),
             ('fields', 'all'),
+            ('page', page),
+            ('page_size', '100'),
         )
 
         response = requests.get(url, headers=headers, params=params)
         data_dict = response.json()
+        logger.debug(f"Received {len(data_dict.get('transaction_details', []))} transactions")
         if 'transaction_details' in data_dict:
+            logger.debug(f"Processing transactions for period {start_date_string} to {end_date_string}")
             for item in data_dict['transaction_details']:
                 transaction_id = item['transaction_info']['transaction_id']
+                logger.debug(f"Processing Transaction ID: {transaction_id}")
                 if 'transaction_amount' in item['transaction_info']:
                     gross = item['transaction_info']['transaction_amount']['value']
                 else:
@@ -364,5 +373,12 @@ def get_paypal_transactions():
                     'fee': fee,
                     'net': net
                 }
-        start_date = (start_date + timedelta(days=30))
+                logger.debug(f"Added Transaction ID: {transaction_id} to return dictionary")
+                logger.debug(f"Transaction Details: {return_dict[transaction_id]}")
+        if len(data_dict.get('transaction_details', [])) >= 100:
+            page += 1
+        else:
+            page = 1
+            start_date = (start_date + timedelta(days=30))
+        
     return json.loads(json.dumps(return_dict))

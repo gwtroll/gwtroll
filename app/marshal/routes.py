@@ -32,11 +32,10 @@ def index():
     else:
         return render_template('marshal_home.html', inspection_stats=inspection_stats)
     
-@bp.route('/<int:regid>/addbow', methods=('GET', 'POST'))
+@bp.route('/<int:regid>/addbow', methods=['POST'])
 @permission_required('marshal_edit')
 def add_bow(regid):
     reg = get_reg(regid)
-    form = BowForm()
     if request.method == 'POST':
         if request.form.get("poundage"):
             update_reg = Registrations.query.filter_by(id=reg.id).first()
@@ -44,6 +43,7 @@ def add_bow(regid):
             bow.poundage = request.form.get("poundage")
             bow.bow_inspection_marshal_id = current_user.id
             bow.bow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
+            bow.combat_archery_type = request.form.get("combat_archery_type")
             if update_reg.bows:
                 update_reg.bows.append(bow)
             else:
@@ -52,29 +52,59 @@ def add_bow(regid):
                 update_reg.bows = bows
             db.session.commit()
         return redirect(url_for('marshal.reg', regid=regid))
-    return render_template('add_bow.html', reg=reg, form=form)
 
-@bp.route('/<int:regid>/addcrossbow', methods=('GET', 'POST'))
+@bp.route('/<int:regid>/addcrossbow', methods=['POST'])
 @permission_required('marshal_edit')
 def add_crossbow(regid):
     reg = get_reg(regid)
-    form = BowForm()
     if request.method == 'POST':
-        if request.form.get("poundage"):
-            update_reg = Registrations.query.filter_by(id=reg.id).first()
-            crossbow = Crossbows()
-            crossbow.inchpounds = request.form.get("poundage")
-            crossbow.crossbow_inspection_marshal_id = current_user.id
-            crossbow.crossbow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
-            if update_reg.crossbows:
-                update_reg.crossbows.append(crossbow)
-            else:
-                crossbows = []
-                crossbows.append(crossbow)
-                update_reg.crossbows = crossbows
-            db.session.commit()
+        update_reg = Registrations.query.filter_by(id=reg.id).first()
+        crossbow = Crossbows()
+        crossbow.inchpounds = request.form.get("inchpounds")
+        crossbow.poundage = request.form.get("poundage")
+        crossbow.combat_archery_type = request.form.get("combat_archery_type")
+        crossbow.crossbow_inspection_marshal_id = current_user.id
+        crossbow.crossbow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
+        if update_reg.crossbows:
+            update_reg.crossbows.append(crossbow)
+        else:
+            crossbows = []
+            crossbows.append(crossbow)
+            update_reg.crossbows = crossbows
+        db.session.commit()
+    return redirect(url_for('marshal.reg', regid=regid))
+
+@bp.route('/<int:regid>/editbow/<int:bow_id>', methods=('GET', 'POST'))
+@permission_required('marshal_edit')
+def edit_bow(regid, bow_id):
+    reg = get_reg(regid)
+    form = BowForm()
+    
+    bow = Bows.query.filter_by(id=bow_id).first()
+    if request.method == 'POST':
+        form.populate_object(bow)
+        bow.bow_inspection_marshal_id = current_user.id
+        bow.bow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
+        db.session.commit()
         return redirect(url_for('marshal.reg', regid=regid))
-    return render_template('add_crossbow.html', reg=reg, form=form)
+    form.populate_form(Bows.query.filter_by(id=bow_id).first())
+    return render_template('edit_bow.html', reg=reg, bow=bow, form=form)
+
+@bp.route('/<int:regid>/editcrossbow/<int:crossbow_id>', methods=('GET', 'POST'))
+@permission_required('marshal_edit')
+def edit_crossbow(regid, crossbow_id):
+    reg = get_reg(regid)
+    form = CrossbowForm()
+    
+    crossbow = Crossbows.query.filter_by(id=crossbow_id).first()
+    if request.method == 'POST':
+        form.populate_object(crossbow)
+        crossbow.crossbow_inspection_marshal_id = current_user.id
+        crossbow.crossbow_inspection_date = datetime.now(pytz.timezone('America/Chicago'))
+        db.session.commit()
+        return redirect(url_for('marshal.reg', regid=regid))
+    form.populate_form(Crossbows.query.filter_by(id=crossbow_id).first())
+    return render_template('edit_crossbow.html', crossbow=crossbow, reg=reg, form=form)
 
 @bp.route('/<int:regid>/addincident', methods=('GET', 'POST'))
 @permission_required('marshal_edit')
@@ -105,6 +135,7 @@ def reg(regid):
     reg = get_reg(regid)
     form = MarshalForm()
     bow_form = BowForm()
+    crossbow_form = CrossbowForm()
     incident_form = IncidentForm()
     url = f"https://amp.ansteorra.org/activities/authorizations/getMemberAuthorizations/{reg.email}"
     headers = {
@@ -128,8 +159,10 @@ def reg(regid):
                 form.rapier_inspection.data = inspection.inspected
             case 'Rapier Spear':
                 form.rapier_spear_inspection.data = inspection.inspected
-            case 'Combat Archery':
-                form.combat_archery_inspection.data = inspection.inspected
+            case 'Heavy Combat Archery':
+                form.heavy_combat_archery_inspection.data = inspection.inspected
+            case 'Rapier Combat Archery':
+                form.rapier_combat_archery_inspection.data = inspection.inspected
 
     if reg.bows:
         for bow in reg.bows:
@@ -143,7 +176,8 @@ def reg(regid):
         chivalric_spear_inspection = request.form.get('chivalric_spear_inspection')
         rapier_inspection = request.form.get('rapier_inspection')
         rapier_spear_inspection = request.form.get('rapier_spear_inspection')
-        combat_archery_inspection = request.form.get('combat_archery_inspection')
+        heavy_combat_archery_inspection = request.form.get('heavy_combat_archery_inspection')
+        rapier_combat_archery_inspection = request.form.get('rapier_combat_archery_inspection')
 
         if 'Heavy' not in inspection_dict and chivalric_inspection:
             new_inspection = MarshalInspection(
@@ -181,10 +215,19 @@ def reg(regid):
                 inspected = True
             )
             db.session.add(new_inspection)
-        if 'Combat Archery' not in inspection_dict and combat_archery_inspection:
+        if 'Heavy Combat Archery' not in inspection_dict and heavy_combat_archery_inspection:
             new_inspection = MarshalInspection(
                 regid = regid,
-                inspection_type = 'Combat Archery',
+                inspection_type = 'Heavy Combat Archery',
+                inspection_date = datetime.now(pytz.timezone('America/Chicago')),
+                inspecting_marshal_id = current_user.id,
+                inspected = True
+            )
+            db.session.add(new_inspection)
+        if 'Rapier Combat Archery' not in inspection_dict and rapier_combat_archery_inspection:
+            new_inspection = MarshalInspection(
+                regid = regid,
+                inspection_type = 'Rapier Combat Archery',
                 inspection_date = datetime.now(pytz.timezone('America/Chicago')),
                 inspecting_marshal_id = current_user.id,
                 inspected = True
@@ -193,7 +236,7 @@ def reg(regid):
 
         db.session.commit()
         return redirect(url_for('marshal.reg',regid=regid))
-    return render_template('marshal_reg.html', reg=reg, form=form, bow_form=bow_form, inspection_dict=inspection_dict, incident_form=incident_form, fighter_auth=fighter_auth)
+    return render_template('marshal_reg.html', reg=reg, form=form, bow_form=bow_form, crossbow_form=crossbow_form, inspection_dict=inspection_dict, incident_form=incident_form, fighter_auth=fighter_auth)
 
 @bp.route('/reports', methods=('GET', 'POST'))
 @login_required

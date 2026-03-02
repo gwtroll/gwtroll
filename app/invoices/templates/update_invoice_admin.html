@@ -75,6 +75,9 @@
         {% with field=form.registration_amount, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
+        {% with field=form.nmr_amount, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
         {% with field=form.paypal_donation, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
@@ -288,6 +291,11 @@
     </div>
     <div class="row">
         {% with field=form.invoice_amount, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+        <div class="row">
+        {% with field=form.invoice_status, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
     </div>

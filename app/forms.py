@@ -334,28 +334,34 @@ class CreatePreRegForm(FlaskForm):
     royal_title = StringField('Royal Title', validators=[Optional()])
     submit = SubmitField('Register')
 
+    def replace_characters(self, field_value):
+        field_value = field_value.strip()
+        for char in [',','"','<','>','/','\\']:
+            field_value = field_value.replace(char, '')
+        return field_value
+
     def populate_object(self, obj):
         # First Name - Strip
         if self.fname.data:
-            obj.fname = self.fname.data.strip()
+            obj.fname = self.replace_characters(self.fname.data)
         # Last Name - Strip
         if self.lname.data:
-            obj.lname = self.lname.data.strip()
+            obj.lname = self.replace_characters(self.lname.data)
         # SCA Name - Strip
         if self.scaname.data:
-            obj.scaname = self.scaname.data.strip()
+            obj.scaname = self.replace_characters(self.scaname.data)
         # Zip
         if self.zip.data:
             obj.zip = self.zip.data
         # City - Strip
         if self.city.data:
-            obj.city = self.city.data.strip()
+            obj.city = self.replace_characters(self.city.data)
         # State/Province - Strip
         if self.state_province.data:
-            obj.state_province = self.state_province.data.strip()
+            obj.state_province = self.replace_characters(self.state_province.data)
         # Country - Strip
         if self.country.data:
-            obj.country = self.country.data.strip()
+            obj.country = self.replace_characters(self.country.data)
         # Phone
         if self.phone.data:
             obj.phone = self.phone.data
@@ -394,7 +400,7 @@ class CreatePreRegForm(FlaskForm):
             obj.royal_title = self.royal_title.data
         # Emergency Contact Name
         if self.emergency_contact_name.data:
-            obj.emergency_contact_name = self.emergency_contact_name.data
+            obj.emergency_contact_name = self.replace_characters(self.emergency_contact_name.data)
         # Emergency Contact Phone
         if self.emergency_contact_phone.data:
             obj.emergency_contact_phone = self.emergency_contact_phone.data
@@ -716,8 +722,8 @@ class EarlyOnApprovalForm(FlaskForm):
     merchant = SelectField('Merchant Name', choices=[])
     notes = TextAreaField('Notes')
     riders = FieldList(FormField(RiderForm), min_entries=0, max_entries=10)
-    dept_approval_status = SelectField('Department Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
-    autocrat_approval_status = SelectField('Autocrat Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED')])
+    dept_approval_status = SelectField('Department Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('DUPLICATE','DUPLICATE')])
+    autocrat_approval_status = SelectField('Autocrat Approval', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('DUPLICATE','DUPLICATE')])
     submit = SubmitField('Submit Early On Request')
 
 class UpdateInvoiceForm(FlaskForm):
@@ -739,6 +745,7 @@ class UpdateInvoiceForm(FlaskForm):
 class UpdateInvoiceAdminForm(FlaskForm):
     invoice_amount = FloatField('Invoice Amount')
     registration_amount = IntegerField('Registration Amount')
+    nmr_amount = IntegerField('NMR Amount')
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])
     paypal_id = StringField('PayPal ID', validators=[])
@@ -834,9 +841,41 @@ class ReportForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class BowForm(FlaskForm):
-    id = IntegerField("Bow Id")
-    poundage = DecimalField('Poundage')
+    poundage = DecimalField('Poundage', default=0.0)
+    combat_archery_type = SelectField('Combat Archery Type', choices=[('Heavy Combat Archery','Heavy Combat Archery'),('Rapier Combat Archery','Rapier Combat Archery')])
     submit = SubmitField('Submit')
+
+    def populate_object(self, obj):
+        if self.poundage.data:
+            obj.poundage = self.poundage.data
+        if self.combat_archery_type.data:
+            obj.combat_archery_type = self.combat_archery_type.data
+    def populate_form(self, obj):
+        if obj.poundage:
+            self.poundage.data = obj.poundage
+        if obj.combat_archery_type:
+            self.combat_archery_type.data = obj.combat_archery_type
+
+class CrossbowForm(FlaskForm):
+    inchpounds = DecimalField('Inch-Pounds', default=0.0)
+    poundage = DecimalField('Poundage', default=0.0)
+    combat_archery_type = SelectField('Combat Archery Type', choices=[('Heavy Combat Archery','Heavy Combat Archery'),('Rapier Combat Archery','Rapier Combat Archery')])
+    submit = SubmitField('Submit')
+
+    def populate_object(self, obj):
+        if self.inchpounds.data:
+            obj.inchpounds = self.inchpounds.data
+        if self.poundage.data:
+            obj.poundage = self.poundage.data
+        if self.combat_archery_type.data:
+            obj.combat_archery_type = self.combat_archery_type.data
+    def populate_form(self, obj):
+        if obj.inchpounds:
+            self.inchpounds.data = obj.inchpounds
+        if obj.poundage:
+            self.poundage.data = obj.poundage
+        if obj.combat_archery_type:
+            self.combat_archery_type.data = obj.combat_archery_type
 
 class MarshalForm(FlaskForm):
     regid = IntegerField()
@@ -844,7 +883,8 @@ class MarshalForm(FlaskForm):
     rapier_inspection = BooleanField('Rapier Inspection')
     chivalric_spear_inspection = BooleanField('Heavy Spear Inspection')
     rapier_spear_inspection = BooleanField('Rapier Inspection')
-    combat_archery_inspection = BooleanField('Combat Archery Inspection')
+    heavy_combat_archery_inspection = BooleanField('Heavy Combat Archery Inspection')
+    rapier_combat_archery_inspection = BooleanField('Rapier Combat Archery Inspection')
     bows = FieldList(FormField(BowForm))
     crossbows = FieldList(FormField(BowForm))
     submit = SubmitField('Submit')
@@ -905,7 +945,7 @@ class MerchantForm(FlaskForm):
 
 class EditMerchantForm(FlaskForm):
     business_name = StringField('Business Name', validators=[DataRequired()])
-    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('WAITLIST','WAITLIST'),('DUPLICATE','DUPLICATE')], validators=[DataRequired()])
+    status = SelectField('Merchant Status', choices=[('PENDING','PENDING'),('APPROVED','APPROVED'),('DENIED','DENIED'),('WAITLIST','WAITLIST'),('CANCELED','CANCELED'),('DUPLICATE','DUPLICATE')], validators=[DataRequired()])
     sca_name = StringField('SCA Name', validators=[])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
