@@ -239,6 +239,7 @@ def update_admin(invnumber):
             inv.invoice_date = invoice_date
             inv.notes = notes
             inv.registration_total = form.registration_amount.data
+            inv.nmr_total = form.nmr_amount.data
             inv.donation_total = form.paypal_donation.data
             inv.invoice_id = form.paypal_id.data
             inv.invoice_status = form.invoice_status.data
@@ -254,6 +255,7 @@ def update_admin(invnumber):
 
     form.invoice_amount.data = inv.invoice_total
     form.registration_amount.data = inv.registration_total
+    form.nmr_amount.data = inv.nmr_total
     form.invoice_number.data = inv.invoice_number
     form.paypal_donation.data = inv.donation_total
     form.invoice_date.data = inv.invoice_date

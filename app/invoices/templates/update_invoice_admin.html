@@ -75,6 +75,9 @@
         {% with field=form.registration_amount, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}
+        {% with field=form.nmr_amount, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
         {% with field=form.paypal_donation, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}

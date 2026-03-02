@@ -745,6 +745,7 @@ class UpdateInvoiceForm(FlaskForm):
 class UpdateInvoiceAdminForm(FlaskForm):
     invoice_amount = FloatField('Invoice Amount')
     registration_amount = IntegerField('Registration Amount')
+    nmr_amount = IntegerField('NMR Amount')
     invoice_email = StringField('Invoice Email')
     invoice_number = IntegerField('Invoice Number', validators=[])
     paypal_id = StringField('PayPal ID', validators=[])
