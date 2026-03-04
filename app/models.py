@@ -1,13 +1,29 @@
-from datetime import datetime
+from datetime import datetime, date
 import pytz
 from typing import Optional
 from flask_security import UserMixin, RoleMixin, UserMixin
 import sqlalchemy as sa
-from sqlalchemy import Computed
+from sqlalchemy import Computed, inspect
 import sqlalchemy.orm as so
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+
+def get_attribute_type(obj, attribute_name):
+    mapper = inspect(obj)
+    # Get the column property for the attribute name
+    col_prop = mapper.all_orm_descriptors[attribute_name]
+
+    # Access the column and its type information
+    if hasattr(col_prop, 'expression'):
+        column = col_prop.expression
+        
+        # Get the SQLAlchemy database type (e.g., String, Integer)
+        db_type = column.type
+
+        # Get the underlying Python type (e.g., str, int)
+        python_type = db_type.python_type
+        return python_type
 
 
 class EventVariables(db.Model):
@@ -35,10 +51,6 @@ class EventVariables(db.Model):
     merchant_late_processing_fee = db.Column(db.Integer(), default=45, nullable=False)
     merchant_squarefoot_fee = db.Column(db.Numeric(10, 2), default=0.10, nullable=False)
     merchant_bounced_check_fee = db.Column(db.Integer(), default=35, nullable=False)
-    # bas = db.Column(db.String(), nullable=True)
-    # cli = db.Column(db.String(), nullable=True)
-    # sec = db.Column(db.String(), nullable=True)
-    # web = db.Column(db.String(), nullable=True)
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -266,7 +278,7 @@ class Registrations(db.Model):
     scaname = db.Column(db.String())
     city = db.Column(db.String())
     state_province = db.Column(db.String())
-    zip = db.Column(db.Integer())
+    zip = db.Column(db.String())
     country = db.Column(db.String())
     phone = db.Column(db.String())
     email = db.Column(db.String())
@@ -298,16 +310,13 @@ class Registrations(db.Model):
 
     # Pricing
     registration_price = db.Column(db.Integer(), default=0)
-    registration_balance = db.Column(db.Integer(), default=0)
     nmr_price = db.Column(db.Integer(), default=0)
-    nmr_balance = db.Column(db.Integer(), default=0)
     paypal_donation = db.Column(db.Integer(), default=0)
-    paypal_donation_balance = db.Column(db.Integer(), default=0)
     nmr_donation = db.Column(db.Integer(), default=0)
-    total_due = db.Column(
-        db.Integer(), Computed(registration_price + nmr_price + paypal_donation)
-    )
-    balance = db.Column(db.Integer(), default=0)
+    # total_due = db.Column(
+    #     db.Integer(), Computed(registration_price + nmr_price + paypal_donation)
+    # )
+    # balance = db.Column(db.Integer(), default=0)
 
     # Troll
     minor_waiver = db.Column(db.String())
@@ -317,8 +326,7 @@ class Registrations(db.Model):
     actual_arrival_date = db.Column(db.Date())
 
     # Relationships
-    invoice_number = db.Column(db.Integer(), db.ForeignKey("invoice.invoice_number"))
-    invoice = db.relationship("Invoice", backref="inv_regs")
+    invoices = db.relationship("Invoice", secondary="registration_invoices")
     payments = db.relationship("Payment", back_populates="reg")
     bows = db.relationship("Bows", secondary="reg_bows")
     crossbows = db.relationship("Crossbows", secondary="reg_crossbows")
@@ -335,59 +343,120 @@ class Registrations(db.Model):
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='registrations')
 
+    @property
+    def total_due(self):
+        total = self.registration_price + self.nmr_price + self.paypal_donation + self.nmr_donation
+        return total
+
+    @property
+    def balance(self):
+        balance = self.total_due
+        for payment in self.payments:
+            balance -= payment.amount
+        return balance
+    
+    @property
+    def registration_balance(self):
+        registration_balance = self.registration_price
+        for payment in self.payments:
+            registration_balance -= payment.registration_amount
+        return registration_balance
+    
+    @property
+    def nmr_balance(self):
+        nmr_balance = self.nmr_price
+        for payment in self.payments:
+            nmr_balance -= payment.nmr_amount
+        return nmr_balance
+
+    @property
+    def paypal_donation_balance(self):
+        paypal_donation = self.paypal_donation
+        for payment in self.payments:
+            paypal_donation -= payment.paypal_donation_amount
+        return paypal_donation
+    
+    @property
+    def nmr_donation_balance(self):
+        nmr_donation = self.nmr_donation
+        for payment in self.payments:
+            nmr_donation -= payment.nmr_donation_amount
+        return nmr_donation
+
     def __repr__(self):
         return "<Registrations {}>".format(self.id)
 
-    def toJSON(self):
-        data_dict = {}
-        for key in self.__dict__:
-            if not key.startswith("_"):
-                if isinstance(self.__dict__[key], datetime):
-                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
-                else:
-                    data_dict[key] = self.__dict__[key]
-        return json.dumps(data_dict, sort_keys=True, default=str)
+    def populate_object(self, data):
+        # SET Default Values
+        self.mbr = False if self.mbr == None else self.mbr
+        self.prereg = False if self.prereg == None else self.prereg
+        self.duplicate = False if self.duplicate == None else self.duplicate
+        self.canceled = False if self.canceled == None else self.canceled
+        self.age = 'ADULT' if self.age == None else self.age
+        self.comp = False if self.comp == None else self.comp
+        self.early_on_approved = False if self.early_on_approved == None else self.early_on_approved
 
-    def recalculate_balance(self):
-        balance = (
-            self.registration_price
-            + self.nmr_price
-            + self.paypal_donation
-            + self.nmr_donation
-        )
-        registration_balance = self.registration_price
-        nmr_balance = self.nmr_price
-        paypal_donation_balance = self.paypal_donation
-        for payment in self.payments:
-            balance -= payment.amount
-            registration_balance -= payment.registration_amount
-            nmr_balance -= payment.nmr_amount
-            paypal_donation_balance -= payment.paypal_donation_amount
-        if balance < 0:
-            balance = 0
-        self.balance = balance
-        if registration_balance < 0:
-            registration_balance = 0
-        self.registration_balance = registration_balance
-        if nmr_balance < 0:
-            nmr_balance = 0
-        self.nmr_balance = nmr_balance
-        if paypal_donation_balance < 0:
-            paypal_donation_balance = 0
-        self.paypal_donation_balance = paypal_donation_balance
+        for i in data:
+            if i in self.__dir__():
+                match i:
+                    case "id"|"mbr_num"|"mbr_num_exp":
+                        pass
+                    case "mbr":
+                        self.mbr = True if data[i] == "Member" or data[i] == True else False
+                    case "age":
+                        self.age = data[i].upper() if data[i].upper() in ["ADULT","MINOR"] else "ADULT"
+                    case "kingdom":
+                        self.kingdom_id = data[i] if data[i] != "-" or data[i] != None else None
+                    case "lodging":
+                        self.lodging_id = data[i] if data[i] != "-" or data[i] != None else None
+                    case _:
+                        if get_attribute_type(Registrations,i) == str:
+                            self.__setattr__(i, data[i].strip())
+                        elif get_attribute_type(Registrations,i) == bool:
+                            if data[i] == "y" or data[i] == True:
+                                self.__setattr__(i, True)
+                            else:
+                                self.__setattr__(i, False)
+                        else:
+                            self.__setattr__(i, data[i])
 
-    def get_balance(self):
-        balance = (
-            self.registration_price
-            + self.nmr_price
-            + self.paypal_donation
-            + self.nmr_donation
-        )
+        if self.mbr:
+            self.mbr_num = data['mbr_num'] if 'mbr_num' in data and data['mbr_num'] != "" else None
+            self.mbr_num_exp = data['mbr_num_exp'] if 'mbr_num_exp' in data and data['mbr_num_exp'] != "" else None
+
+    def to_dict(self):
+        dict = {}
+        all_fields = {k: getattr(self, k) for k in dir(self)}
+        for field in all_fields:
+            if not field.startswith('_'):
+                match field:
+                    case 'mbr_num_exp' | 'royal_departure_date' | 'expected_arrival_date' | 'actual_arrival_date':
+                         if self.__getattribute__(field) != None:
+                            dict[field] = datetime.strftime(self.__getattribute__(field), "%Y-%m-%d")
+                    case 'reg_date_time' | 'checkin':
+                        if self.__getattribute__(field) != None:
+                            dict[field] = datetime.strftime(self.__getattribute__(field), "%Y-%m-%d %H:%M:%S") if self.__getattribute__(field) != None else None
+                    case _:
+                        if type(self.__getattribute__(field)) in [int,str,bool]:
+                            dict[field]=self.__getattribute__(field)
+
+        dict['balance'] = self.balance
+        dict['total_due'] = self.total_due
+        dict['registration_balance'] = self.registration_balance
+        dict['nmr_balance'] = self.nmr_balance
+        dict['paypal_donation_balance'] = self.paypal_donation_balance
+        dict['nmr_donation_balance'] = self.nmr_donation_balance
+        dict['kingdom'] = self.kingdom.name if self.kingdom else None
+        dict['lodging'] = self.lodging.name if self.lodging else None
+
+        dict['payments'] = []
         for payment in self.payments:
-            balance -= payment.amount
-        if balance < 0:
-            balance = 0
-        return balance
+            dict['payments'].append(payment.id)
+
+        return dict
+    
+    def to_json(self):
+        return json.loads(json.dumps(self.to_dict()))
     
     def get_invoice_items(self):
         reg_arrival_dict = {
@@ -451,18 +520,18 @@ class Invoice(db.Model):
     space_fee = db.Column(db.Numeric(10, 2), default=0)
     processing_fee = db.Column(db.Integer(), default=0)
     rider_fee = db.Column(db.Integer(), default=0)
-    invoice_total = db.Column(
-        db.Numeric(10, 2),
-        Computed(
-            registration_total
-            + nmr_total
-            + donation_total
-            + space_fee
-            + processing_fee
-            + rider_fee
-        ),
-    )
-    balance = db.Column(db.Numeric(10, 2))
+    # invoice_total = db.Column(
+    #     db.Numeric(10, 2),
+    #     Computed(
+    #         registration_total
+    #         + nmr_total
+    #         + donation_total
+    #         + space_fee
+    #         + processing_fee
+    #         + rider_fee
+    #     ),
+    # )
+    # balance = db.Column(db.Numeric(10, 2))
     notes = db.Column(db.Text())
     regs = db.relationship("Registrations", back_populates="invoice")
     merchants = db.relationship("Merchant", back_populates="invoice")
@@ -471,59 +540,79 @@ class Invoice(db.Model):
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='invoice')
 
-    def toJSON(self):
-        data_dict = {}
-        for key in self.__dict__:
-            if not key.startswith("_"):
-                if isinstance(self.__dict__[key], datetime):
-                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
-                else:
-                    data_dict[key] = self.__dict__[key]
-        return json.dumps(data_dict, sort_keys=True, default=str)
+    @property
+    def invoice_total(self):
+        total = self.registration_total + self.nmr_total + self.donation_total + self.space_fee + self.processing_fee + self.rider_fee
+        return total
 
-    def recalculate_balance(self):
-        balance = (
-            self.registration_total if self.registration_total else 0
-            + self.nmr_total if self.nmr_total else 0
-            + self.donation_total if self.donation_total else 0
-            + self.space_fee if self.space_fee else 0
-            + self.processing_fee if self.processing_fee else 0
-            + self.rider_fee if self.rider_fee else 0
-        )
+    @property
+    def balance(self):
+        balance = self.invoice_total
         for payment in self.payments:
             balance -= payment.amount
-        if balance < 0:
-            balance = 0
-        self.balance = balance
-        if self.balance > 0 and self.invoice_status != "NO PAYMENT" and self.invoice_status != "DUPLICATE":
+        return balance
+    
+    def populate_object(self, data):
+        # SET Default Values
+        self.registration_total = 0 if self.registration_total == None else self.registration_total
+        self.nmr_total = 0 if self.nmr_total == None else self.nmr_total
+        self.donation_total = 0 if self.donation_total == None else self.donation_total
+        self.space_fee = 0 if self.space_fee == None else self.space_fee
+        self.processing_fee = 0 if self.processing_fee == None else self.processing_fee
+        self.rider_fee = 0 if self.rider_fee == None else self.rider_fee
+
+        for i in data:
+            if i in self.__dir__():
+                match i:
+                    case "id":
+                        pass
+                    case _:
+                        if get_attribute_type(Invoice,i) == str:
+                            self.__setattr__(i, data[i].strip())
+                        elif get_attribute_type(Invoice,i) == bool:
+                            if data[i] == "y" or data[i] == True:
+                                self.__setattr__(i, True)
+                            else:
+                                self.__setattr__(i, False)
+                        else:
+                            self.__setattr__(i, data[i])
+        if self.balance <= 0 and self.invoice_status != "NO PAYMENT" and self.invoice_status != "DUPLICATE":
+            self.invoice_status = "PAID"
+        elif self.balance > 0 and self.invoice_status != "NO PAYMENT" and self.invoice_status != "DUPLICATE":
             self.invoice_status = "OPEN"
+    
+    def to_dict(self):
+        dict = {}
+        all_fields = {k: getattr(self, k) for k in dir(self)}
+        for field in all_fields:
+            if not field.startswith('_'):
+                match field:
+                    case 'invoice_date':
+                         if self.__getattribute__(field) != None:
+                            dict[field] = datetime.strftime(self.__getattribute__(field), "%Y-%m-%d")
+                    case _:
+                        if type(self.__getattribute__(field)) in [int,str,bool]:
+                            dict[field]=self.__getattribute__(field)
 
-    def recalculate_balance_from_registrations(self):
-        self.registration_total = 0
-        self.nmr_total = 0
-        self.donation_total = 0
+        dict['balance'] = self.balance
+        dict['total_due'] = self.total_due
 
-        for reg in self.regs:
-            if reg.duplicate != True and reg.canceled != True:
-                self.registration_total += reg.registration_balance
-                self.nmr_total += reg.nmr_balance
-                self.donation_total += reg.paypal_donation_balance
-
-        balance = (
-            self.registration_total
-            + self.nmr_total
-            + self.donation_total
-            + self.space_fee
-            + self.processing_fee
-            + self.rider_fee
-        )
+        dict['payments'] = []
         for payment in self.payments:
-            balance -= payment.amount
-        if balance < 0:
-            balance = 0
-        self.balance = balance
-        if self.balance > 0:
-            self.invoice_status = "OPEN"
+            dict['payments'].append(payment.id)
+
+        return dict
+    
+    def to_json(self):
+        return json.loads(json.dumps(self.to_dict()))
+
+class RegistrationInvoices(db.Model):
+    __tablename__ = "registration_invoices"
+    id = db.Column(db.Integer(), primary_key=True)
+    reg_id = db.Column(db.Integer(), db.ForeignKey("registrations.id", ondelete="CASCADE"))
+    invoice_number = db.Column(db.Integer(), db.ForeignKey("invoice.invoice_number", ondelete="CASCADE"))
+    registration = db.relationship("Registrations", backref="registration_invoices", viewonly=True)
+    invoice = db.relationship("Invoice", backref="registration_invoices", viewonly=True)
 
 class Payment(db.Model):
     __tablename__ = "payment"
@@ -649,6 +738,62 @@ class Payment(db.Model):
                 payment_amount = 0
 
             self.amount = self.rider_fee_amount
+        
+    def populate_object(self, data):
+        # SET Default Values
+        self.amount = 0 if self.amount == None else self.amount
+        self.registration_amount = 0 if self.registration_amount == None else self.registration_amount
+        self.nmr_amount = 0 if self.nmr_amount == None else self.nmr_amount
+        self.paypal_donation_amount = 0 if self.paypal_donation_amount == None else self.paypal_donation_amount
+        self.space_fee_amount = 0 if self.space_fee_amount == None else self.space_fee_amount
+        self.processing_fee_amount = 0 if self.processing_fee_amount == None else self.processing_fee_amount
+        self.rider_fee_amount = 0 if self.rider_fee_amount == None else self.rider_fee_amount
+        self.electricity_fee_amount = 0 if self.electricity_fee_amount == None else self.electricity_fee_amount
+
+        for i in data:
+            if i in self.__dir__():
+                match i:
+                    case "id":
+                        pass
+                    case _:
+                        if get_attribute_type(Invoice,i) == str:
+                            self.__setattr__(i, data[i].strip())
+                        elif get_attribute_type(Invoice,i) == bool:
+                            if data[i] == "y" or data[i] == True:
+                                self.__setattr__(i, True)
+                            else:
+                                self.__setattr__(i, False)
+                        else:
+                            self.__setattr__(i, data[i])
+        if self.balance <= 0 and self.invoice_status != "NO PAYMENT" and self.invoice_status != "DUPLICATE":
+            self.invoice_status = "PAID"
+        elif self.balance > 0 and self.invoice_status != "NO PAYMENT" and self.invoice_status != "DUPLICATE":
+            self.invoice_status = "OPEN"
+    
+    def to_dict(self):
+        dict = {}
+        all_fields = {k: getattr(self, k) for k in dir(self)}
+        for field in all_fields:
+            if not field.startswith('_'):
+                match field:
+                    case 'invoice_date':
+                         if self.__getattribute__(field) != None:
+                            dict[field] = datetime.strftime(self.__getattribute__(field), "%Y-%m-%d")
+                    case _:
+                        if type(self.__getattribute__(field)) in [int,str,bool]:
+                            dict[field]=self.__getattribute__(field)
+
+        dict['balance'] = self.balance
+        dict['total_due'] = self.total_due
+
+        dict['payments'] = []
+        for payment in self.payments:
+            dict['payments'].append(payment.id)
+
+        return dict
+    
+    def to_json(self):
+        return json.loads(json.dumps(self.to_dict()))
 
 
 class RegLogs(db.Model):
