@@ -353,6 +353,7 @@ def fullexport():
         {"field": "nmr_donation", "title": "NMR Donation", "filterControl": "select"},
         {"field": "total_due", "title": "Total Price", "filterControl": "input"},
         {"field": "balance", "title": "Balance", "filterControl": "input"},
+        {"field": "invoice_status", "title": "Invoice Status", "filterControl": "select"},
         {"field": "minor_waiver", "title": "Minor Waiver", "filterControl": "input"},
         {"field": "checkin", "title": "Checkin Date/Time", "filterControl": "input"},
         {"field": "medallion", "title": "Medallion", "filterControl": "input"},
@@ -366,6 +367,7 @@ def fullexport():
     full = Registrations.query.filter().all()
     for reg in full:
         reg_json = json.loads(reg.toJSON())
+        reg_json["invoice_status"] = reg.invoice.invoice_status if reg.invoice else "-"
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
