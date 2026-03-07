@@ -274,6 +274,8 @@ def fullexport():
         {"field": "fname", "title": "First Name", "filterControl": "input"},
         {"field": "lname", "title": "Last Name", "filterControl": "input"},
         {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+        {"field": "kingdom", "title": "Kingdom", "filterControl": "input"},
+        {"field": "lodging", "title": "Lodging", "filterControl": "input"},
         {"field": "city", "title": "City", "filterControl": "input"},
         {
             "field": "state_province",
@@ -368,6 +370,8 @@ def fullexport():
     for reg in full:
         reg_json = json.loads(reg.toJSON())
         reg_json["invoice_status"] = reg.invoice.invoice_status if reg.invoice else "-"
+        reg_json["kingdom"] = reg.kingdom.name
+        reg_json["lodging"] = reg.lodging.name  
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
@@ -1130,6 +1134,8 @@ def registration_report():
             "title": "Total Price Paid",
             "filterControl": "input",
         },
+        {"field": "kingdom", "title": "Kingdom", "filterControl": "input"},
+        {"field": "lodging", "title": "Lodging", "filterControl": "input"}
     ]
     rows = []
     # invoices = Invoice.query.filter().all()
@@ -1158,6 +1164,8 @@ def mapping_registration_report(obj, temp_obj, count):
     temp_obj["count"] = count
     match obj.invoice.invoice_type:
         case "REGISTRATION":
+            temp_obj["kingdom"] = obj.kingdom.name
+            temp_obj["lodging"] = obj.lodging.name
             temp_obj["date"] = obj.reg_date_time.date()
             temp_obj["time"] = obj.reg_date_time.time()
             temp_obj["name"] = obj.fname + " " + obj.lname
