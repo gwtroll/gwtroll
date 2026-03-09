@@ -130,6 +130,8 @@ def checkin(regid):
             # reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
             reg.recalculate_balance()
 
+            reg.checkedin_by_id = current_user.id
+
             db.session.commit()
 
             # log_reg_action(reg, 'CHECKIN')

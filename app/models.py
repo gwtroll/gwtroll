@@ -330,6 +330,8 @@ class Registrations(db.Model):
     lodging = db.relationship("Lodging", backref="regs")
     earlyonrequests_ref = db.relationship("EarlyOnRequest", back_populates="registration", viewonly=True)
     earlyonriders_ref = db.relationship("EarlyOnRider", back_populates="reg", viewonly=True)
+    checkedin_by_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
+    checkedin_by = db.relationship("User", backref="checkedin_regs", foreign_keys=[checkedin_by_id])
 
     # Event
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))

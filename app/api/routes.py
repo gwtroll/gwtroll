@@ -6,7 +6,7 @@ from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
 from datetime import datetime
-from flask import jsonify, request
+from flask import jsonify, request, url_for
 import json
 import copy
 from app.utils.paypal_api import (
@@ -364,6 +364,7 @@ def fullexport():
             "title": "Actual Arrival Date",
             "filterControl": "input",
         },
+        {"field": "checked_in_by", "title": "Checked In By", "filterControl": "input"},
     ]
     rows = []
     full = Registrations.query.filter().all()
@@ -372,6 +373,7 @@ def fullexport():
         reg_json["invoice_status"] = reg.invoice.invoice_status if reg.invoice else "-"
         reg_json["kingdom"] = reg.kingdom.name
         reg_json["lodging"] = reg.lodging.name  
+        reg_json["checked_in_by"] = reg.checkedin_by.fname + " " + reg.checkedin_by.lname if reg.checkedin_by else "-"
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
@@ -569,6 +571,28 @@ def kingdom_count():
     reg_json = json.loads(json.dumps(data))
     return reg_json
 
+@bp.route("/troll_checkin_count", methods=("GET", ""))
+@login_required
+@permission_required("registration_reports")
+def troll_checkin_count():
+    data = {}
+    columns = [
+        {"field": "id", "title": "ID", "filterControl": "input"},
+        {"field": "medallion", "title": "Medallion", "filterControl": "input"},
+        {"field": "checkin", "title": "Check-in Date/Time", "filterControl": "input"},
+        {"field": "checked_in_by", "title": "Checked In By", "filterControl": "select"},
+    ]
+    rows = []
+    checked_in_list = Registrations.query.filter(
+        Registrations.checkin != None).all()
+    for reg in checked_in_list:
+        reg_json = json.loads(reg.toJSON())
+        reg_json["id"] = "<a href='" + url_for('troll.reg', regid=str(reg.id)) + "' target='_blank' rel='noopener noreferrer'>" + str(reg.id) + "</a>"
+        reg_json["checked_in_by"] = reg.checkedin_by.fname + " " + reg.checkedin_by.lname + " (" + reg.checkedin_by.username + ")" if reg.checkedin_by else "-"
+        rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/early_on_report", methods=("GET", ""))
 @login_required
@@ -580,11 +604,13 @@ def earlyon():
         {"field": "fname", "title": "First Name", "filterControl": "input"},
         {"field": "lname", "title": "Last Name", "filterControl": "input"},
         {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+        {"field": "age", "title": "Age", "filterControl": "input"},
         {"field": "phone", "title": "Phone", "filterControl": "input"},
         {"field": "email", "title": "Email", "filterControl": "input"},
         {"field": "kingdom", "title": "Kingdom", "filterControl": "select"},
         {"field": "lodging", "title": "Lodging", "filterControl": "select"},
         {"field": "balance", "title": "Balance", "filterControl": "input"},
+        {"field": "expected_arrival_date", "title": "ExpectedArrival Date", "filterControl": "input"},
     ]
     rows = []
     earlyon_list = Registrations.query.filter(
