@@ -238,11 +238,14 @@ def update_admin(invnumber):
             inv.invoice_number = invoice_number
             inv.invoice_date = invoice_date
             inv.notes = notes
-            inv.registration_total = form.registration_amount.data
-            inv.nmr_total = form.nmr_amount.data
-            inv.donation_total = form.paypal_donation.data
+            inv.registration_total = form.registration_amount.data if form.registration_amount.data is not None else 0
+            inv.nmr_total = form.nmr_amount.data if form.nmr_amount.data is not None else 0
+            inv.donation_total = form.paypal_donation.data if form.paypal_donation.data is not None else 0
+            inv.space_fee = form.space_fee.data if form.space_fee.data is not None else 0
+            inv.processing_fee = form.processing_fee.data if form.processing_fee.data is not None else 0
             inv.invoice_id = form.paypal_id.data
             inv.invoice_status = form.invoice_status.data
+            inv.rider_fee = form.rider_fee.data if form.rider_fee.data is not None else 0
 
             for reg in regs:
                 reg.invoice_number = invoice_number
@@ -256,6 +259,7 @@ def update_admin(invnumber):
     form.invoice_amount.data = inv.invoice_total
     form.registration_amount.data = inv.registration_total
     form.nmr_amount.data = inv.nmr_total
+    form.rider_fee.data = inv.rider_fee
     form.invoice_number.data = inv.invoice_number
     form.paypal_donation.data = inv.donation_total
     form.invoice_date.data = inv.invoice_date

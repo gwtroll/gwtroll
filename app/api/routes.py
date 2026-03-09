@@ -584,11 +584,33 @@ def troll_checkin_count():
     ]
     rows = []
     checked_in_list = Registrations.query.filter(
-        Registrations.checkin != None).all()
+        Registrations.checkin != None).order_by(Registrations.checkin).all()
     for reg in checked_in_list:
         reg_json = json.loads(reg.toJSON())
         reg_json["id"] = "<a href='" + url_for('troll.reg', regid=str(reg.id)) + "' target='_blank' rel='noopener noreferrer'>" + str(reg.id) + "</a>"
         reg_json["checked_in_by"] = reg.checkedin_by.fname + " " + reg.checkedin_by.lname + " (" + reg.checkedin_by.username + ")" if reg.checkedin_by else "-"
+        rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
+
+@bp.route("/log_export", methods=("GET", ""))
+@login_required
+@permission_required("registration_reports")
+def log_export():
+    data = {}
+    columns = [
+        {"field": "reg", "title": "Registration", "filterControl": "input"},
+        {"field": "user", "title": "User", "filterControl": "input"},
+        {"field": "timestamp", "title": "Timestamp", "filterControl": "input"},
+        {"field": "action", "title": "Action", "filterControl": "select"},
+    ]
+    rows = []
+    reglogs = RegLogs.query.order_by(RegLogs.timestamp).all()
+    for reg in reglogs:
+        reg_json = json.loads(reg.toJSON())
+        reg_json["reg"] = "<a href='" + url_for('troll.reg', regid=str(reg.regid)) + "' target='_blank' rel='noopener noreferrer'>" + str(reg.registration.fname) + " " + str(reg.registration.lname) + "</a>"
+        reg_json["user"] = str(reg.user.fname) + " " + str(reg.user.lname)
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows

@@ -344,7 +344,9 @@ class Registrations(db.Model):
         data_dict = {}
         for key in self.__dict__:
             if not key.startswith("_"):
-                if isinstance(self.__dict__[key], datetime):
+                if key == "checkin" and self.__dict__[key] is not None:
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d %H:%M:%S")
+                elif isinstance(self.__dict__[key], datetime):
                     data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d")
                 else:
                     data_dict[key] = self.__dict__[key]
@@ -657,11 +659,23 @@ class RegLogs(db.Model):
     __tablename__ = "reglogs"
     id = db.Column(db.Integer(), primary_key=True)
     regid = db.Column(db.Integer(), db.ForeignKey("registrations.id"))
+    registration = db.relationship("Registrations", backref="reglogs")
     userid = db.Column(db.Integer(), db.ForeignKey("users.id"))
+    user = db.relationship("User", backref="reglogs")
     timestamp = db.Column(db.DateTime())
     action = db.Column(db.String())
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='reglogs')
+
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d %H:%M:%S")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
 
 class MarshalInspection(db.Model):

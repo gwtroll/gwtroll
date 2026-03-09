@@ -134,7 +134,7 @@ def checkin(regid):
 
             db.session.commit()
 
-            # log_reg_action(reg, 'CHECKIN')
+            log_reg_action(reg, 'CHECKIN')
 
             if reg.balance > 0:
                 return redirect(url_for('troll.payment', regid=regid))
@@ -164,7 +164,7 @@ def waiver(regid):
         
         db.session.commit()
 
-        # log_reg_action(reg, 'WAIVER')
+        log_reg_action(reg, 'WAIVER')
 
         return redirect(url_for('troll.checkin', regid=regid))
 
@@ -229,7 +229,7 @@ def payment(regid):
             reg.recalculate_balance()
             db.session.commit()
 
-        # log_reg_action(reg, 'PAYMENT')
+        log_reg_action(reg, 'PAYMENT')
 
         return redirect(url_for('troll.reg', regid=regid))
 
