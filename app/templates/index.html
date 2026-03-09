@@ -13,35 +13,35 @@
             <!-- Search -->
             <div class="col">
                 <input id='name_search' class="form-control py-2 custom-input-space" placeholder="Search by Name"
-                    name="search_name" value="" />
+                    name="search_name" value="" enterkeyhint="done" />
             </div>
         </div>
         <div class="row">
             <!-- Search -->
             <div class="col">
                 <input id='inv_search' class="form-control py-2 custom-input-space"
-                    placeholder="Search by Invoice Number" name="invoice_number" value="" />
+                    placeholder="Search by Invoice Number" name="invoice_number" value="" enterkeyhint="done" />
             </div>
         </div>
         <div class="row">
             <!-- Search -->
             <div class="col">
                 <input id='mbr_search' class="form-control py-2 custom-input-space"
-                    placeholder="Search by Member Number" name="mbr_num" value="" />
+                    placeholder="Search by Member Number" name="mbr_num" value="" enterkeyhint="done" />
             </div>
         </div>
         <div class="row">
             <!-- Search -->
             <div class="col">
                 <input id='med_search' class="form-control py-2 custom-input-space"
-                    placeholder="Search by Medallion Number" name="medallion" value="" />
+                    placeholder="Search by Medallion Number" name="medallion" value="" enterkeyhint="done" />
             </div>
         </div>
         <div class="row">
             <!-- Search -->
             <div class="col">
-                <input id='id_search' class="form-control py-2 custom-input-space"
-                    placeholder="Search by ID Number" name="id" value="" />
+                <input id='id_search' class="form-control py-2 custom-input-space" placeholder="Search by ID Number"
+                    name="id" value="" enterkeyhint="done" />
             </div>
         </div>
         {% if current_user.has_role('Admin') or current_user.has_role('Head Troll') or
@@ -84,6 +84,17 @@
 </html>
 
 <script>
+
+    // Add an event listener for the 'keydown' event on the input field
+    document.addEventListener("keyup", function (event) {
+        // Check if the key pressed is "Enter"
+        if (event.key === "Enter") {
+            // Prevent the default form submission behavior (if inside a form)
+            event.preventDefault();
+            // Trigger the button element's click event
+            handle_search();
+        }
+    });
 
     const handle_search = async () => {
         const search_results = document.getElementById('search_results')
@@ -217,6 +228,7 @@
         document.getElementById('inv_search').value = ''
         document.getElementById('mbr_search').value = ''
         document.getElementById('med_search').value = ''
+        document.getElementById('id_search').value = ''
     }
 
 </script>
