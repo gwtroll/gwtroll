@@ -654,6 +654,16 @@ class Payment(db.Model):
 
             self.amount = self.rider_fee_amount
 
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d %H:%M:%S")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
+
 
 class RegLogs(db.Model):
     __tablename__ = "reglogs"
