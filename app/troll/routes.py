@@ -234,3 +234,14 @@ def payment(regid):
         return redirect(url_for('troll.reg', regid=regid))
 
     return render_template('payment.html', form=form, reg=reg, paypal_form=paypal_form)
+
+@bp.route('/<int:regid>/clear_checkin', methods=['GET', 'POST'])
+@login_required
+@permission_required('admin')
+def clear_checkin(regid):
+    reg = get_reg(regid)
+
+    clear_reg_checkin(reg)
+
+
+    return redirect(url_for('troll.reg', regid=regid))

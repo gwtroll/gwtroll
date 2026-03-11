@@ -580,3 +580,12 @@ def get_approval_notification_recipients(departmentid):
         if user.has_role('Department Head') and user.email != None:
             recipients.append(user.email)
     return recipients
+
+def clear_reg_checkin(reg):
+    reg.checkin = None
+    reg.checkedin_by_id = None
+    reg.minor_waiver = None
+    reg.actual_arrival_date = None
+    reg.medallion = None
+    reg.signature = None
+    db.session.commit()
