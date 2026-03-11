@@ -658,6 +658,7 @@ def earlyon_audit():
         {"field": "request_id", "title": "Request ID", "filterControl": "input"},
         {"field": "dept_approval_status", "title": "Department Approval Status", "filterControl": "select"},
         {"field": "autocrat_approval_status", "title": "Autocrat Approval Status", "filterControl": "select"},
+        {"field": "reg_approval", "title": "Registration Approval", "filterControl": "select"},
         {"field": "reg_id", "title": "Registration ID", "filterControl": "input"},
         {"field": "fname", "title": "First Name", "filterControl": "input"},
         {"field": "lname", "title": "Last Name", "filterControl": "input"},
@@ -671,6 +672,7 @@ def earlyon_audit():
     earlyon_applications = EarlyOnRequest.query.all()
     for application in earlyon_applications:
         reg_json = json.loads(application.toJSON())
+        reg_json['reg_approval'] = "Approved" if application.registration.early_on_approved else "Not Approved"
         reg_json['request_id'] = application.id
         reg_json['reg_id'] = application.registration.id
         reg_json['enteredFName'] = application.registration.fname
@@ -680,6 +682,7 @@ def earlyon_audit():
         rows.append(reg_json)
         for rider in application.earlyonriders:
             reg_json_rider = json.loads(rider.toJSON())
+            reg_json_rider['reg_approval'] = "Approved" if rider.reg.early_on_approved else "Not Approved"
             reg_json_rider['request_id'] = application.id
             reg_json_rider['reg_id'] = rider.regid
             reg_json_rider['enteredFName'] = rider.fname
