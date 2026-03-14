@@ -75,7 +75,7 @@ def index():
     pricesheet = PriceSheet.query.filter(PriceSheet.arrival_date==today).first()
     if pricesheet == None:
         pricesheet = PriceSheet.query.order_by(PriceSheet.arrival_date).first()
-        return render_template('index.html', pricesheet=pricesheet, today=today, regcount=reg_count())
+    return render_template('index.html', pricesheet=pricesheet, today=today, regcount=reg_count())
 
 @app.route('/full_signature_export', methods=('GET', 'POST'))
 @login_required
