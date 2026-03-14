@@ -1137,6 +1137,47 @@ def merchant_invoices():
     data["rows"] = rows
     return jsonify(data)
 
+@bp.route("/merchant_atd_payments", methods=("GET", ""))
+@login_required
+@permission_required("merchant_reports")
+def merchant_atd_payments():
+    data = {}
+
+    columns = [
+        {"field": "merchant_id", "title": "Merchant ID", "filterControl": "select"},
+        {"field": "business", "title": "Business", "filterControl": "select"},
+        {"field": "name", "title": "Name", "filterControl": "input"},
+        {"field": "sca_name", "title": "SCA Name", "filterControl": "select"},
+        {
+            "field": "payment_date",
+            "title": "Payment Date",
+            "filterControl": "select",
+        },
+        {"field": "space_fee_amount", "title": "Space Fee", "filterControl": "input"},
+        {
+            "field": "processing_fee_amount",
+            "title": "Processing Fee",
+            "filterControl": "select",
+        },
+        {"field": "electricity_fee_amount", "title": "Electricity Fee", "filterControl": "input"},
+        {"field": "amount", "title": "Total", "filterControl": "input"},
+    ]
+    rows = []
+    full = (
+        Payment.query.filter(Payment.invoice == None, Payment.merchant != None)
+        .order_by(Payment.id)
+        .all()
+    )
+    for pay in full:
+        reg_json = json.loads(pay.toJSON())
+        reg_json["merchant_id"] = pay.merchant.id if pay.merchant else "-"
+        reg_json["business"] = pay.merchant.business_name if pay.merchant else "-"
+        reg_json["name"] = pay.merchant.fname + " " + pay.merchant.lname if pay.merchant else "-"
+        reg_json["sca_name"] = pay.merchant.sca_name if pay.merchant else "-"
+        rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/registration_report", methods=("GET", ""))
 @login_required
