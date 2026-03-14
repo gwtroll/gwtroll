@@ -14,14 +14,14 @@ from flask_security import roles_accepted
 
 @bp.route('/', methods=('GET', 'POST'))
 @login_required
-@permission_required('admin')
+@permission_required('invoice_edit')
 def payment():
     all_payments = Payment.query.order_by(Payment.id).all()
     return render_template('viewpayment.html', payments=all_payments)
 
 @bp.route('/<paymentid>', methods=('GET', 'POST'))
 @login_required
-@permission_required('admin')
+@permission_required('invoice_edit')
 def editpayment(paymentid):
     payment = Payment.query.get(paymentid)
     form = PaymentForm(
