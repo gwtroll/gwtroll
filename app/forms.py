@@ -409,7 +409,7 @@ class CreatePreRegForm(FlaskForm):
         # Prices
         # Registration Price/Balance + NMR Price/Balance
         if obj.age == '18+':
-            registration_price = get_prereg_pricesheet_day(obj.expected_arrival_date)
+            registration_price = get_prereg_pricesheet_day(obj.expected_arrival_date.strftime("%Y/%m/%d"))
             obj.registration_price = registration_price
             obj.registration_balance = registration_price
             if not obj.mbr:
@@ -639,9 +639,9 @@ class EditForm(FlaskForm):
         # Prices
         if obj.age == '18+':
             if obj.prereg == True:
-                registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date if obj.actual_arrival_date else obj.expected_arrival_date)
+                registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d") if obj.actual_arrival_date else obj.expected_arrival_date.strftime("%Y/%m/%d"))
             else:
-                registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
+                registration_price = get_atd_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d"))
             obj.registration_price = registration_price
             if obj.mbr != True:
                 obj.nmr_price = 10

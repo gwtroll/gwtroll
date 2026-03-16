@@ -120,9 +120,9 @@ def checkin(regid):
             #Calculate Price Due
             if reg.age == '18+':
                 if reg.prereg == True:
-                    registration_price = get_prereg_pricesheet_day(reg.actual_arrival_date)
+                    registration_price = get_prereg_pricesheet_day(reg.actual_arrival_date.strftime("%Y/%m/%d"))
                 else:
-                    registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
+                    registration_price = get_atd_pricesheet_day(reg.actual_arrival_date.strftime("%Y/%m/%d"))
                 if reg.registration_price < registration_price:
                     # reg.registration_balance = registration_price - reg.registration_price
                     reg.registration_price = registration_price
