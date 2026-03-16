@@ -641,7 +641,7 @@ class EditForm(FlaskForm):
             if obj.prereg == True:
                 registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d") if obj.actual_arrival_date else obj.expected_arrival_date.strftime("%Y/%m/%d"))
             else:
-                registration_price = get_atd_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d"))
+                registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
             obj.registration_price = registration_price
             if obj.mbr != True:
                 obj.nmr_price = 10

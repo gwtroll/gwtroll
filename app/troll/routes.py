@@ -122,7 +122,7 @@ def checkin(regid):
                 if reg.prereg == True:
                     registration_price = get_prereg_pricesheet_day(reg.actual_arrival_date.strftime("%Y/%m/%d"))
                 else:
-                    registration_price = get_atd_pricesheet_day(reg.actual_arrival_date.strftime("%Y/%m/%d"))
+                    registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
                 if reg.registration_price < registration_price:
                     # reg.registration_balance = registration_price - reg.registration_price
                     reg.registration_price = registration_price
