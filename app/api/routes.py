@@ -526,9 +526,7 @@ def atd_payments():
             datetime.strptime(dt_start, "%Y-%m-%d"),
             datetime.strptime(dt_end, "%Y-%m-%d") + timedelta(days=1),
         ), Payment.reg != None
-    ).all()
-        .order_by(Payment.id)
-        .all()
+    ).order_by(Payment.id).all()
     )
     for pay in all_payments:
         reg_json = json.loads(pay.toJSON())
