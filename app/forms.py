@@ -639,9 +639,22 @@ class EditForm(FlaskForm):
         # Prices
         if obj.age == '18+':
             if obj.prereg == True:
-                registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d") if obj.actual_arrival_date else obj.expected_arrival_date.strftime("%Y/%m/%d"))
+                print("PREREG")
+                if isinstance(obj.expected_arrival_date, str):
+                    registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date if obj.actual_arrival_date else obj.expected_arrival_date)
+                elif isinstance(obj.expected_arrival_date, datetime):
+                    registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d") if obj.actual_arrival_date else obj.expected_arrival_date.strftime("%Y/%m/%d"))
+                else:
+                    registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d") if obj.actual_arrival_date else obj.expected_arrival_date.strftime("%Y/%m/%d"))
             else:
+                print("ATD")
                 registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
+                if isinstance(obj.expected_arrival_date, str):
+                    registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
+                elif isinstance(obj.expected_arrival_date, datetime):
+                    registration_price = get_atd_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d"))
+                else:
+                    registration_price = get_atd_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d"))
             obj.registration_price = registration_price
             if obj.mbr != True:
                 obj.nmr_price = 10
