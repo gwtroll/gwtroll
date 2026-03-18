@@ -507,7 +507,7 @@ def atd_payments():
     data = {}
     columns = [
         {"field": "payment_date", "title": "Payment Date", "filterControl": "input"},
-        {"field": "payment_type", "title": "Payment Type", "filterControl": "input"},
+        {"field": "type", "title": "Payment Type", "filterControl": "input"},
         {"field": "registration_amount", "title": "Registration Amount", "filterControl": "input"},
         {"field": "nmr_amount", "title": "NMR Amount", "filterControl": "input"},
         {"field": "paypal_donation_amount", "title": "PayPal Donation Amount", "filterControl": "input"},
@@ -517,8 +517,6 @@ def atd_payments():
         {"field": "fname", "title": "First Name", "filterControl": "input"},
         {"field": "lname", "title": "Last Name", "filterControl": "input"},
         {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
-        {"field": "age", "title": "Age", "filterControl": "select"},
-        {"field": "prereg", "title": "Pre-Registered", "filterControl": "select"},
     ]
     rows = []
     all_payments = (
@@ -530,6 +528,9 @@ def atd_payments():
     )
     for pay in all_payments:
         reg_json = json.loads(pay.toJSON())
+        reg_json['fname'] = pay.reg.fname
+        reg_json['lname'] = pay.reg.lname
+        reg_json['scaname'] = pay.reg.scaname
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
