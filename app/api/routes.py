@@ -497,6 +497,44 @@ def fullcheckinreport():
     data["rows"] = rows
     return jsonify(data)
 
+@bp.route("/atd_payments", methods=("GET", ""))
+@login_required
+@permission_required("registration_reports")
+def atd_payments():
+    dt_start = request.args.get("dt_start")
+    dt_end = request.args.get("dt_end")
+
+    data = {}
+    columns = [
+        {"field": "payment_date", "title": "Payment Date", "filterControl": "input"},
+        {"field": "type", "title": "Payment Type", "filterControl": "input"},
+        {"field": "registration_amount", "title": "Registration Amount", "filterControl": "input"},
+        {"field": "nmr_amount", "title": "NMR Amount", "filterControl": "input"},
+        {"field": "paypal_donation_amount", "title": "PayPal Donation Amount", "filterControl": "input"},
+        {"field": "amount", "title": "Total Amount", "filterControl": "input"},
+
+        {"field": "id", "title": "Reg ID", "filterControl": "input"},
+        {"field": "fname", "title": "First Name", "filterControl": "input"},
+        {"field": "lname", "title": "Last Name", "filterControl": "input"},
+        {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+    ]
+    rows = []
+    all_payments = (
+        Payment.query.filter(Payment.payment_date.between(
+            datetime.strptime(dt_start, "%Y-%m-%d"),
+            datetime.strptime(dt_end, "%Y-%m-%d") + timedelta(days=1),
+        ), Payment.reg != None
+    ).order_by(Payment.id).all()
+    )
+    for pay in all_payments:
+        reg_json = json.loads(pay.toJSON())
+        reg_json['fname'] = pay.reg.fname
+        reg_json['lname'] = pay.reg.lname
+        reg_json['scaname'] = pay.reg.scaname
+        rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/at_door_count", methods=("GET", ""))
 @login_required
