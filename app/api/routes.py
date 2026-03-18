@@ -522,7 +522,11 @@ def atd_payments():
     ]
     rows = []
     all_payments = (
-        Payment.query.filter(Payment.payment_date >= dt_start and Payment.payment_date <= dt_end)
+        Payment.query.filter(Payment.payment_date.between(
+            datetime.strptime(dt_start, "%Y-%m-%d"),
+            datetime.strptime(dt_end, "%Y-%m-%d") + timedelta(days=1),
+        ), Payment.reg != None
+    ).all()
         .order_by(Payment.id)
         .all()
     )
