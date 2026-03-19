@@ -308,6 +308,9 @@ def get_paypal_transactions(dt_start=None,dt_end=None):
     today = datetime.now()
     start_date = datetime(2025, 8, 1, 0, 0, 0, 0)
     logger.debug(f"Start Date: {start_date.strftime('%Y-%m-%dT%H:%M:%S-0000')} / Today: {today.strftime('%Y-%m-%dT%H:%M:%S-0000')}")
+    print("Dates")
+    print(dt_start)
+    print(dt_end)
 
     page = 1
 
