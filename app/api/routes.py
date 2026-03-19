@@ -1382,8 +1382,15 @@ def toJSON(obj):
 @login_required
 @permission_required("registration_reports")
 def paypal_recon_export():
+    dt_start = request.args.get("dt_start")
+    dt_end = request.args.get("dt_end")
+
     try:
-        paypal_transactions = get_paypal_transactions()
+        if dt_start != None and dt_end != None:
+            paypal_transactions = get_paypal_transactions(dt_start=dt_start,dt_end=dt_end)
+        else: 
+            paypal_transactions = get_paypal_transactions() 
+        
         for key in paypal_transactions:
             logger.debug(
                 f"PayPal Transaction ID: {key}, Details: {paypal_transactions[key]}"
