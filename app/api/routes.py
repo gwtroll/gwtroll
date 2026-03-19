@@ -507,6 +507,8 @@ def atd_payments():
     data = {}
     columns = [
         {"field": "payment_date", "title": "Payment Date", "filterControl": "input"},
+        {"field": "checkin_date", "title": "Checkin Date", "filterControl": "input"},
+
         {"field": "type", "title": "Payment Type", "filterControl": "input"},
         {"field": "registration_amount", "title": "Registration Amount", "filterControl": "input"},
         {"field": "nmr_amount", "title": "NMR Amount", "filterControl": "input"},
@@ -531,6 +533,7 @@ def atd_payments():
         reg_json['fname'] = pay.reg.fname
         reg_json['lname'] = pay.reg.lname
         reg_json['scaname'] = pay.reg.scaname
+        reg_json['checkin_date'] = pay.reg.checkin
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
