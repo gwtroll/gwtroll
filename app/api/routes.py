@@ -1613,7 +1613,6 @@ def land_pre_reg():
     rows = []
     regs = (
         Registrations.query.filter(
-            Registrations.prereg == True,
             Registrations.canceled != True,
             Registrations.duplicate != True,
         )
@@ -1630,6 +1629,14 @@ def land_pre_reg():
                 reg_json["lodging"] = lodging
                 reg_json["invoice_status"] = reg.invoice.invoice_status
                 rows.append(reg_json)
+        elif reg.checkin != None:
+            kingdom = reg.kingdom.name
+            lodging = reg.lodging.name
+            reg_json = json.loads(reg.toJSON())
+            reg_json["kingdom"] = kingdom
+            reg_json["lodging"] = lodging
+            reg_json["invoice_status"] = "CHECKED IN - NO INVOICE"
+            rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
     return jsonify(data)

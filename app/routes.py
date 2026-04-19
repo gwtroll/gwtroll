@@ -310,9 +310,9 @@ def dashboard():
         writer.close()
         return send_file(path2)
 
-    if report_type == 'land_pre-reg':
+    if report_type == 'land_pre_reg':
 
-        file = 'land_pre-reg_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
+        file = 'land_pre_reg_' + str(datetime.now(pytz.timezone('America/Chicago')).isoformat(' ', 'seconds').replace(" ", "_").replace(":","-")) + '.xlsx'
 
         df = pd.read_sql("SELECT lodging, invoice_number, regid, fname, lname, scaname, age, invoice_status FROM registrations WHERE invoice_status = 'PAID' ORDER BY lodging, invoice_number", db.engine)
 
