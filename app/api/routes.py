@@ -501,8 +501,8 @@ def full_checkin_report():
 @login_required
 @permission_required("registration_reports")
 def atd_payments():
-    dt_start = request.args.get("dt_start")
-    dt_end = request.args.get("dt_end")
+    dt_start = request.args.get("dt_start") if request.args.get("dt_start") else "1900-01-01"
+    dt_end = request.args.get("dt_end") if request.args.get("dt_end") else datetime.now().strftime("%Y-%m-%d")
 
     data = {}
     columns = [
@@ -530,10 +530,11 @@ def atd_payments():
     )
     for pay in all_payments:
         reg_json = json.loads(pay.toJSON())
-        reg_json['fname'] = pay.reg.fname
-        reg_json['lname'] = pay.reg.lname
-        reg_json['scaname'] = pay.reg.scaname
-        reg_json['checkin_date'] = pay.reg.checkin
+        if pay.reg:
+            reg_json['fname'] = pay.reg.fname
+            reg_json['lname'] = pay.reg.lname
+            reg_json['scaname'] = pay.reg.scaname
+            reg_json['checkin_date'] = pay.reg.checkin
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
@@ -573,6 +574,68 @@ def at_door_count():
     data["rows"] = rows
     return jsonify(data)
 
+@bp.route("/new_report", methods=("GET", ""))
+@login_required
+@permission_required("registration_reports")
+def new_report():
+    data = {}
+    columns = [
+        {"field": "id", "title": "ID", "filterControl": "input"},
+        {"field": "fname", "title": "First Name", "filterControl": "input"},
+        {"field": "lname", "title": "Last Name", "filterControl": "input"},
+        {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+        {"field": "email", "title": "Email", "filterControl": "input"},
+        {"field": "invoice_email", "title": "Invoice Email", "filterControl": "input"},
+        {"field": "age", "title": "Age", "filterControl": "input"},
+        {"field": "mbr", "title": "Member", "filterControl": "input"},
+        {"field": "mbr_num", "title": "Member Number", "filterControl": "input"},
+        {"field": "mbr_num_exp", "title": "Member Expires", "filterControl": "input"},
+        {"field": "minor_waiver", "title": "Minor Waiver", "filterControl": "input"},
+        {"field": "registration_amount", "title": "Registration Amount", "filterControl": "input"},
+        {"field": "nmr_amount", "title": "NMR Amount", "filterControl": "input"},
+        {"field": "paypal_donation_amount", "title": "PayPal Donation Amount", "filterControl": "input"},
+        {"field": "amount", "title": "Amount", "filterControl": "input"},
+        {"field": "type", "title": "Type", "filterControl": "input"},
+        {"field": "payment_date", "title": "Payment Date", "filterControl": "input"},
+        {"field": "reg_date_time", "title": "Registration Date/Time", "filterControl": "input"},
+        {"field": "prereg", "title": "Pre-Reg", "filterControl": "input"},
+        {"field": "expected_arrival_date", "title": "Expected Arrival Date", "filterControl": "input"},
+        {"field": "checkin", "title": "Check-in Date", "filterControl": "input"},
+        {"field": "medallion", "title": "Medallion", "filterControl": "input"},
+        {"field": "kingdom", "title": "Kingdom", "filterControl": "input"},
+        {"field": "state_province", "title": "State/Province", "filterControl": "input"},
+        {"field": "lodging", "title": "Lodging", "filterControl": "input"},
+    ]
+    rows = []
+    payments = Payment.query.filter().all()
+
+    for pay in payments:
+        if pay.reg is not None:
+            reg_json = json.loads(pay.toJSON())
+            reg_json['fname'] = pay.reg.fname
+            reg_json['lname'] = pay.reg.lname
+            reg_json['scaname'] = pay.reg.scaname
+            reg_json['email'] = pay.reg.email
+            reg_json['invoice_email'] = pay.reg.invoice_email
+            reg_json['age'] = "Adult" if '18+' in pay.reg.age or 'Royal' in pay.reg.age else "Minor"
+            reg_json['mbr'] = pay.reg.mbr
+            reg_json['mbr_num'] = pay.reg.mbr_num
+            reg_json['mbr_num_exp'] = pay.reg.mbr_num_exp.strftime("%Y-%m-%d") if pay.reg.mbr_num_exp else None
+            reg_json['minor_waiver'] = "True" if pay.reg.minor_waiver else "False"
+            reg_json['reg_date_time'] = pay.reg.reg_date_time.strftime("%Y-%m-%d %H:%M:%S") if pay.reg.reg_date_time else None
+            reg_json['prereg'] = pay.reg.prereg
+            reg_json['expected_arrival_date'] = pay.reg.expected_arrival_date.strftime("%Y-%m-%d") if pay.reg.expected_arrival_date else None
+            reg_json['checkin'] = pay.reg.checkin.strftime("%Y-%m-%d %H:%M:%S") if pay.reg.checkin else None
+            reg_json['medallion'] = pay.reg.medallion
+            reg_json['kingdom'] = pay.reg.kingdom.name
+            reg_json['state_province'] = pay.reg.state_province
+            reg_json['lodging'] = pay.reg.lodging.name
+
+
+            rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/kingdom_count", methods=("GET", ""))
 @login_required
