@@ -267,7 +267,7 @@ def removescheduledevent(scheduledeventid):
 @bp.route("/full_export", methods=("GET", ""))
 @login_required
 @permission_required("registration_reports")
-def fullexport():
+def full_export():
     data = {}
     columns = [
         {"field": "id", "title": "ID", "filterControl": "input"},
@@ -383,7 +383,7 @@ def fullexport():
 @bp.route("/full_checkin_report", methods=("GET", ""))
 @login_required
 @permission_required("registration_reports")
-def fullcheckinreport():
+def full_checkin_report():
     dt_start = request.args.get("dt_start")
     dt_end = request.args.get("dt_end")
 
@@ -660,7 +660,7 @@ def log_export():
 @bp.route("/early_on_report", methods=("GET", ""))
 @login_required
 @permission_required("registration_reports")
-def earlyon():
+def early_on_report():
     data = {}
     columns = [
         {"field": "id", "title": "ID", "filterControl": "input"},
@@ -693,7 +693,7 @@ def earlyon():
 @bp.route("/early_on_audit", methods=("GET", ""))
 @login_required
 @permission_required("admin")
-def earlyon_audit():
+def early_on_audit():
     data = {}
     columns = [
         {"field": "request_id", "title": "Request ID", "filterControl": "input"},
@@ -743,7 +743,7 @@ def earlyon_audit():
 @bp.route("/merchant_early_on_report", methods=("GET", ""))
 @login_required
 @permission_required("merchant_reports")
-def merchant_earlyon():
+def merchant_early_on_report():
     data = {}
     columns = [
         {"field": "id", "title": "ID", "filterControl": "input"},
@@ -986,7 +986,7 @@ def royal_registrations():
 @bp.route("/merchant_full_export", methods=("GET", ""))
 @login_required
 @permission_required("merchant_reports")
-def merchant_fullexport():
+def merchant_full_export():
     data = {}
 
     # {"field": "", "title": "", "filterControl":"input"}
@@ -1570,7 +1570,7 @@ def toJSON(obj):
     return json.dumps(data_dict, sort_keys=True, default=str)
 
 
-@bp.route("/land_pre-reg", methods=("GET", ""))
+@bp.route("/land_pre_reg", methods=("GET", ""))
 @login_required
 @permission_required("registration_reports")
 def land_pre_reg():
@@ -1693,7 +1693,7 @@ def paypal_canceled_export():
 @bp.route("/paypal_transactions", methods=("GET", ""))
 @login_required
 @permission_required("admin")
-def paypal_transaction_search():
+def paypal_transactions():
     paypal_transactions = get_paypal_transactions()
     data = {}
     columns = [

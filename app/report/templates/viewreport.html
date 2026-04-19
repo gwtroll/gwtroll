@@ -23,6 +23,11 @@
         <button id="runreport" class="form-control btn btn-primary" onclick="populate_table()">Run Report</button>
     </div>
 </div>
+<div class="row">
+    <div id="download_link" class="col mt-2">
+        
+    </div>
+</div>
 <div id="loader" class="row" style="display: none;">
     <div class="col d-flex justify-content-center m-5">
         <div class="loader"></div>
@@ -45,6 +50,7 @@
         console.log(dt_start.value);
         console.log(dt_end.value);
         console.log(select.value);
+        const link_col = document.getElementById('download_link');
         const baseURL = window.location.origin + "/api/" + select.value;
         const url = new URL(baseURL);
         console.log(url)
@@ -58,8 +64,14 @@
             .then(response => response.json())
             .then((data) => {
                 hideLoader();
-                console.log(url)
-                console.log('checkin')
+                link_col.replaceChildren();
+                let link = document.createElement('a');
+                link.href = window.location.origin + "/report/" + select.value + "/download";
+                link.classList.add("form-control");
+                link.classList.add("btn");
+                link.classList.add("btn-success");
+                link.text = "Download Report"
+                link_col.appendChild(link);
                 $('#myTable').bootstrapTable('destroy');
                 $('#myTable').bootstrapTable({
                     columns: data.columns,
