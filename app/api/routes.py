@@ -335,26 +335,19 @@ def full_export():
             "title": "Registration Price",
             "filterControl": "select",
         },
-        {
-            "field": "registration_balance",
-            "title": "Registration Balance",
-            "filterControl": "input",
-        },
         {"field": "nmr_price", "title": "NMR Price", "filterControl": "select"},
-        {"field": "nmr_balance", "title": "NMR Balance", "filterControl": "input"},
         {
             "field": "paypal_donation",
             "title": "PayPal Donation",
             "filterControl": "input",
         },
-        {
-            "field": "paypal_donation_balance",
-            "title": "PayPal Donation Balance",
-            "filterControl": "input",
-        },
         {"field": "nmr_donation", "title": "NMR Donation", "filterControl": "select"},
         {"field": "total_due", "title": "Total Price", "filterControl": "input"},
         {"field": "balance", "title": "Balance", "filterControl": "input"},
+        {"field": "registration_amount", "title": "Registration Payment Amount", "filterControl": "input"},
+        {"field": "nmr_amount", "title": "NMR Payment Amount", "filterControl": "input"},
+        {"field": "paypal_donation_amount", "title": "PayPal Donation Payment Amount", "filterControl": "input"},
+        {"field": "amount", "title": "Total Payment Amount", "filterControl": "input"},
         {"field": "invoice_status", "title": "Invoice Status", "filterControl": "select"},
         {"field": "minor_waiver", "title": "Minor Waiver", "filterControl": "input"},
         {"field": "checkin", "title": "Checkin Date/Time", "filterControl": "input"},
@@ -374,6 +367,19 @@ def full_export():
         reg_json["kingdom"] = reg.kingdom.name
         reg_json["lodging"] = reg.lodging.name  
         reg_json["checked_in_by"] = reg.checkedin_by.fname + " " + reg.checkedin_by.lname if reg.checkedin_by else "-"
+        reg_json["registration_amount"] = 0
+        reg_json["nmr_amount"] = 0
+        reg_json["paypal_donation_amount"] = 0
+        reg_json["amount"] = 0
+        for pay in reg.payments:
+            if pay.registration_amount is not None:
+                reg_json["registration_amount"] += float(pay.registration_amount)
+            if pay.nmr_amount is not None:
+                reg_json["nmr_amount"] += float(pay.nmr_amount)
+            if pay.paypal_donation_amount is not None:
+                reg_json["paypal_donation_amount"] += float(pay.paypal_donation_amount)
+            if pay.amount is not None:
+                reg_json["amount"] += float(pay.amount) 
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
