@@ -76,6 +76,9 @@
         {% with field=form.expected_arrival_date %}
         {% include 'form_field.html' %}
         {% endwith %}        
+        {% with field=form.actual_arrival_date %}
+        {% include 'form_field.html' %}
+        {% endwith %} 
         {% with field=form.early_on, checkbox=true%}
         {% include 'form_field.html' %}
         {% endwith %}        

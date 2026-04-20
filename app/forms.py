@@ -538,6 +538,9 @@ class EditForm(FlaskForm):
         # Expected Arrival
         if obj.expected_arrival_date:
             self.expected_arrival_date.data = obj.expected_arrival_date.strftime('%Y/%m/%d')       
+        # Actual Arrival
+        if obj.actual_arrival_date:
+            self.actual_arrival_date.data = obj.actual_arrival_date   
         # Emergency Contact Name
         if obj.emergency_contact_name:
             self.emergency_contact_name.data = obj.emergency_contact_name 
@@ -615,6 +618,10 @@ class EditForm(FlaskForm):
         # Expected Arrival
         if self.expected_arrival_date.data:
             obj.expected_arrival_date = self.expected_arrival_date.data
+
+        # Actual Arrival
+        if self.actual_arrival_date.data:
+            obj.actual_arrival_date = self.actual_arrival_date.data
 
         # Emergency Contact Name
         if self.emergency_contact_name.data:
