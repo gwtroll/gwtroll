@@ -120,7 +120,7 @@ def checkin(regid):
             #Calculate Price Due
             if reg.age == '18+':
                 if reg.prereg == True:
-                    registration_price = get_prereg_pricesheet_day(reg.actual_arrival_date)
+                    registration_price = get_prereg_pricesheet_day(reg.actual_arrival_date.strftime("%Y/%m/%d"))
                 else:
                     registration_price = get_atd_pricesheet_day(reg.actual_arrival_date)
                 if reg.registration_price < registration_price:
@@ -130,9 +130,11 @@ def checkin(regid):
             # reg.balance = reg.registration_balance + reg.nmr_balance + reg.paypal_donation_balance
             reg.recalculate_balance()
 
+            reg.checkedin_by_id = current_user.id
+
             db.session.commit()
 
-            # log_reg_action(reg, 'CHECKIN')
+            log_reg_action(reg, 'CHECKIN')
 
             if reg.balance > 0:
                 return redirect(url_for('troll.payment', regid=regid))
@@ -162,7 +164,7 @@ def waiver(regid):
         
         db.session.commit()
 
-        # log_reg_action(reg, 'WAIVER')
+        log_reg_action(reg, 'WAIVER')
 
         return redirect(url_for('troll.checkin', regid=regid))
 
@@ -227,8 +229,19 @@ def payment(regid):
             reg.recalculate_balance()
             db.session.commit()
 
-        # log_reg_action(reg, 'PAYMENT')
+        log_reg_action(reg, 'PAYMENT')
 
         return redirect(url_for('troll.reg', regid=regid))
 
     return render_template('payment.html', form=form, reg=reg, paypal_form=paypal_form)
+
+@bp.route('/<int:regid>/clear_checkin', methods=['GET', 'POST'])
+@login_required
+@permission_required('admin')
+def clear_checkin(regid):
+    reg = get_reg(regid)
+
+    clear_reg_checkin(reg)
+
+
+    return redirect(url_for('troll.reg', regid=regid))

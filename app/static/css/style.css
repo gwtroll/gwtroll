@@ -72,6 +72,13 @@
 
 @media print { body { background: transparent !important; } }
 
+@media print {
+  .element-with-color {
+    -webkit-print-color-adjust: exact; /* for Chrome and Safari */
+    color-adjust: exact;               /* for Firefox */
+  }
+}
+
 .navbar-text{
     padding-left: 1vw;
     padding-right: 1vw;

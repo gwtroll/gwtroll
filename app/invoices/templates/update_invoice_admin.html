@@ -290,6 +290,11 @@
         {% endwith %}
     </div>
     <div class="row">
+        {% with field=form.rider_fee, required=true %}
+        {% include 'form_field.html' %}
+        {% endwith %}
+    </div>
+    <div class="row">
         {% with field=form.invoice_amount, required=true %}
         {% include 'form_field.html' %}
         {% endwith %}

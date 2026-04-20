@@ -12,7 +12,7 @@ agedata = [('-','-'),('18+', 'Adult 18+'), ('13-17', 'Teen 13 - 17'), ('6-12', '
 
 mbrdata = [('-','-'),('Member', 'Member'), ('Non-Member', 'Non-Member')]
 
-reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre-reg', 'land_pre-reg'), ('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report'), ('early_on_report','early_on_report'), ('paypal_paid_export','paypal_paid_export'),('paypal_canceled_export','paypal_canceled_export'),('paypal_recon_export','paypal_recon_export'),('atd_export','atd_export'),('log_export','log_export'),('minor_waivers','minor_waivers')]
+reporttypedata = [('royal_registrations', 'royal_registrations'), ('land_pre_reg', 'land_pre_reg'), ('full_export', 'full_export'), ('full_signatue_export', 'full_signature_export'), ('full_checkin_report', 'full_checkin_report'), ('at_door_count', 'at_door_count'), ('kingdom_count', 'kingdom_count'), ('ghost_report', 'ghost_report'), ('early_on_report','early_on_report'), ('paypal_paid_export','paypal_paid_export'),('paypal_canceled_export','paypal_canceled_export'),('paypal_recon_export','paypal_recon_export'),('atd_export','atd_export'),('log_export','log_export'),('minor_waivers','minor_waivers')]
 
 paymentdata = [('',''),('cash','Cash'), ('zettle','Zettle'),('travlers_check','Travlers Check')]
 
@@ -409,7 +409,7 @@ class CreatePreRegForm(FlaskForm):
         # Prices
         # Registration Price/Balance + NMR Price/Balance
         if obj.age == '18+':
-            registration_price = get_prereg_pricesheet_day(obj.expected_arrival_date)
+            registration_price = get_prereg_pricesheet_day(obj.expected_arrival_date.strftime("%Y/%m/%d"))
             obj.registration_price = registration_price
             obj.registration_balance = registration_price
             if not obj.mbr:
@@ -538,6 +538,9 @@ class EditForm(FlaskForm):
         # Expected Arrival
         if obj.expected_arrival_date:
             self.expected_arrival_date.data = obj.expected_arrival_date.strftime('%Y/%m/%d')       
+        # Actual Arrival
+        if obj.actual_arrival_date:
+            self.actual_arrival_date.data = obj.actual_arrival_date   
         # Emergency Contact Name
         if obj.emergency_contact_name:
             self.emergency_contact_name.data = obj.emergency_contact_name 
@@ -616,6 +619,10 @@ class EditForm(FlaskForm):
         if self.expected_arrival_date.data:
             obj.expected_arrival_date = self.expected_arrival_date.data
 
+        # Actual Arrival
+        if self.actual_arrival_date.data:
+            obj.actual_arrival_date = self.actual_arrival_date.data
+
         # Emergency Contact Name
         if self.emergency_contact_name.data:
             obj.emergency_contact_name = self.emergency_contact_name.data
@@ -639,9 +646,22 @@ class EditForm(FlaskForm):
         # Prices
         if obj.age == '18+':
             if obj.prereg == True:
-                registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date if obj.actual_arrival_date else obj.expected_arrival_date)
+                print("PREREG")
+                if isinstance(obj.expected_arrival_date, str):
+                    registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date if obj.actual_arrival_date else obj.expected_arrival_date)
+                elif isinstance(obj.expected_arrival_date, datetime):
+                    registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d") if obj.actual_arrival_date else obj.expected_arrival_date.strftime("%Y/%m/%d"))
+                else:
+                    registration_price = get_prereg_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d") if obj.actual_arrival_date else obj.expected_arrival_date.strftime("%Y/%m/%d"))
             else:
+                print("ATD")
                 registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
+                if isinstance(obj.expected_arrival_date, str):
+                    registration_price = get_atd_pricesheet_day(obj.actual_arrival_date)
+                elif isinstance(obj.expected_arrival_date, datetime):
+                    registration_price = get_atd_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d"))
+                else:
+                    registration_price = get_atd_pricesheet_day(obj.actual_arrival_date.strftime("%Y/%m/%d"))
             obj.registration_price = registration_price
             if obj.mbr != True:
                 obj.nmr_price = 10

@@ -338,6 +338,8 @@ class Registrations(db.Model):
     lodging = db.relationship("Lodging", backref="regs")
     earlyonrequests_ref = db.relationship("EarlyOnRequest", back_populates="registration", viewonly=True)
     earlyonriders_ref = db.relationship("EarlyOnRider", back_populates="reg", viewonly=True)
+    checkedin_by_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
+    checkedin_by = db.relationship("User", backref="checkedin_regs", foreign_keys=[checkedin_by_id])
 
     # Event
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
@@ -795,16 +797,38 @@ class Payment(db.Model):
     def to_json(self):
         return json.loads(json.dumps(self.to_dict()))
 
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d %H:%M:%S")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
+
 
 class RegLogs(db.Model):
     __tablename__ = "reglogs"
     id = db.Column(db.Integer(), primary_key=True)
     regid = db.Column(db.Integer(), db.ForeignKey("registrations.id"))
+    registration = db.relationship("Registrations", backref="reglogs")
     userid = db.Column(db.Integer(), db.ForeignKey("users.id"))
+    user = db.relationship("User", backref="reglogs")
     timestamp = db.Column(db.DateTime())
     action = db.Column(db.String())
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='reglogs')
+
+    def toJSON(self):
+        data_dict = {}
+        for key in self.__dict__:
+            if not key.startswith("_"):
+                if isinstance(self.__dict__[key], datetime):
+                    data_dict[key] = datetime.strftime(self.__dict__[key], "%Y-%m-%d %H:%M:%S")
+                else:
+                    data_dict[key] = self.__dict__[key]
+        return json.dumps(data_dict, sort_keys=True, default=str)
 
 
 class MarshalInspection(db.Model):

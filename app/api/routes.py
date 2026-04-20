@@ -6,7 +6,7 @@ from app.forms import *
 from app.models import *
 from app.utils.db_utils import *
 from datetime import datetime
-from flask import jsonify, request
+from flask import jsonify, request, url_for
 import json
 import copy
 from app.utils.paypal_api import (
@@ -267,13 +267,15 @@ def removescheduledevent(scheduledeventid):
 @bp.route("/full_export", methods=("GET", ""))
 @login_required
 @permission_required("registration_reports")
-def fullexport():
+def full_export():
     data = {}
     columns = [
         {"field": "id", "title": "ID", "filterControl": "input"},
         {"field": "fname", "title": "First Name", "filterControl": "input"},
         {"field": "lname", "title": "Last Name", "filterControl": "input"},
         {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+        {"field": "kingdom", "title": "Kingdom", "filterControl": "input"},
+        {"field": "lodging", "title": "Lodging", "filterControl": "input"},
         {"field": "city", "title": "City", "filterControl": "input"},
         {
             "field": "state_province",
@@ -333,26 +335,20 @@ def fullexport():
             "title": "Registration Price",
             "filterControl": "select",
         },
-        {
-            "field": "registration_balance",
-            "title": "Registration Balance",
-            "filterControl": "input",
-        },
         {"field": "nmr_price", "title": "NMR Price", "filterControl": "select"},
-        {"field": "nmr_balance", "title": "NMR Balance", "filterControl": "input"},
         {
             "field": "paypal_donation",
             "title": "PayPal Donation",
             "filterControl": "input",
         },
-        {
-            "field": "paypal_donation_balance",
-            "title": "PayPal Donation Balance",
-            "filterControl": "input",
-        },
         {"field": "nmr_donation", "title": "NMR Donation", "filterControl": "select"},
         {"field": "total_due", "title": "Total Price", "filterControl": "input"},
         {"field": "balance", "title": "Balance", "filterControl": "input"},
+        {"field": "registration_amount", "title": "Registration Payment Amount", "filterControl": "input"},
+        {"field": "nmr_amount", "title": "NMR Payment Amount", "filterControl": "input"},
+        {"field": "paypal_donation_amount", "title": "PayPal Donation Payment Amount", "filterControl": "input"},
+        {"field": "amount", "title": "Total Payment Amount", "filterControl": "input"},
+        {"field": "invoice_status", "title": "Invoice Status", "filterControl": "select"},
         {"field": "minor_waiver", "title": "Minor Waiver", "filterControl": "input"},
         {"field": "checkin", "title": "Checkin Date/Time", "filterControl": "input"},
         {"field": "medallion", "title": "Medallion", "filterControl": "input"},
@@ -361,11 +357,29 @@ def fullexport():
             "title": "Actual Arrival Date",
             "filterControl": "input",
         },
+        {"field": "checked_in_by", "title": "Checked In By", "filterControl": "input"},
     ]
     rows = []
     full = Registrations.query.filter().all()
     for reg in full:
         reg_json = json.loads(reg.toJSON())
+        reg_json["invoice_status"] = reg.invoice.invoice_status if reg.invoice else "-"
+        reg_json["kingdom"] = reg.kingdom.name
+        reg_json["lodging"] = reg.lodging.name  
+        reg_json["checked_in_by"] = reg.checkedin_by.fname + " " + reg.checkedin_by.lname if reg.checkedin_by else "-"
+        reg_json["registration_amount"] = 0
+        reg_json["nmr_amount"] = 0
+        reg_json["paypal_donation_amount"] = 0
+        reg_json["amount"] = 0
+        for pay in reg.payments:
+            if pay.registration_amount is not None:
+                reg_json["registration_amount"] += float(pay.registration_amount)
+            if pay.nmr_amount is not None:
+                reg_json["nmr_amount"] += float(pay.nmr_amount)
+            if pay.paypal_donation_amount is not None:
+                reg_json["paypal_donation_amount"] += float(pay.paypal_donation_amount)
+            if pay.amount is not None:
+                reg_json["amount"] += float(pay.amount) 
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
@@ -375,7 +389,7 @@ def fullexport():
 @bp.route("/full_checkin_report", methods=("GET", ""))
 @login_required
 @permission_required("registration_reports")
-def fullcheckinreport():
+def full_checkin_report():
     dt_start = request.args.get("dt_start")
     dt_end = request.args.get("dt_end")
 
@@ -489,6 +503,49 @@ def fullcheckinreport():
     data["rows"] = rows
     return jsonify(data)
 
+@bp.route("/atd_payments", methods=("GET", ""))
+@login_required
+@permission_required("registration_reports")
+def atd_payments():
+    dt_start = request.args.get("dt_start") if request.args.get("dt_start") else "1900-01-01"
+    dt_end = request.args.get("dt_end") if request.args.get("dt_end") else datetime.now().strftime("%Y-%m-%d")
+
+    data = {}
+    columns = [
+        {"field": "payment_date", "title": "Payment Date", "filterControl": "input"},
+        {"field": "checkin_date", "title": "Checkin Date", "filterControl": "input"},
+
+        {"field": "type", "title": "Payment Type", "filterControl": "input"},
+        {"field": "registration_amount", "title": "Registration Amount", "filterControl": "input"},
+        {"field": "nmr_amount", "title": "NMR Amount", "filterControl": "input"},
+        {"field": "paypal_donation_amount", "title": "PayPal Donation Amount", "filterControl": "input"},
+        {"field": "amount", "title": "Total Amount", "filterControl": "input"},
+
+        {"field": "id", "title": "Reg ID", "filterControl": "input"},
+        {"field": "fname", "title": "First Name", "filterControl": "input"},
+        {"field": "lname", "title": "Last Name", "filterControl": "input"},
+        {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+    ]
+    rows = []
+    all_payments = (
+        Payment.query.filter(Payment.payment_date.between(
+            datetime.strptime(dt_start, "%Y-%m-%d"),
+            datetime.strptime(dt_end, "%Y-%m-%d") + timedelta(days=1),
+        ), Payment.reg != None
+    ).order_by(Payment.id).all()
+    )
+    for pay in all_payments:
+        reg_json = json.loads(pay.toJSON())
+        if pay.reg:
+            reg_json['fname'] = pay.reg.fname
+            reg_json['lname'] = pay.reg.lname
+            reg_json['scaname'] = pay.reg.scaname
+            reg_json['checkin_date'] = pay.reg.checkin
+            reg_json['id'] = pay.reg.id
+        rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/at_door_count", methods=("GET", ""))
 @login_required
@@ -524,6 +581,68 @@ def at_door_count():
     data["rows"] = rows
     return jsonify(data)
 
+@bp.route("/new_report", methods=("GET", ""))
+@login_required
+@permission_required("registration_reports")
+def new_report():
+    data = {}
+    columns = [
+        {"field": "id", "title": "ID", "filterControl": "input"},
+        {"field": "fname", "title": "First Name", "filterControl": "input"},
+        {"field": "lname", "title": "Last Name", "filterControl": "input"},
+        {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+        {"field": "email", "title": "Email", "filterControl": "input"},
+        {"field": "invoice_email", "title": "Invoice Email", "filterControl": "input"},
+        {"field": "age", "title": "Age", "filterControl": "input"},
+        {"field": "mbr", "title": "Member", "filterControl": "input"},
+        {"field": "mbr_num", "title": "Member Number", "filterControl": "input"},
+        {"field": "mbr_num_exp", "title": "Member Expires", "filterControl": "input"},
+        {"field": "minor_waiver", "title": "Minor Waiver", "filterControl": "input"},
+        {"field": "registration_amount", "title": "Registration Amount", "filterControl": "input"},
+        {"field": "nmr_amount", "title": "NMR Amount", "filterControl": "input"},
+        {"field": "paypal_donation_amount", "title": "PayPal Donation Amount", "filterControl": "input"},
+        {"field": "amount", "title": "Amount", "filterControl": "input"},
+        {"field": "type", "title": "Type", "filterControl": "input"},
+        {"field": "payment_date", "title": "Payment Date", "filterControl": "input"},
+        {"field": "reg_date_time", "title": "Registration Date/Time", "filterControl": "input"},
+        {"field": "prereg", "title": "Pre-Reg", "filterControl": "input"},
+        {"field": "expected_arrival_date", "title": "Expected Arrival Date", "filterControl": "input"},
+        {"field": "checkin", "title": "Check-in Date", "filterControl": "input"},
+        {"field": "medallion", "title": "Medallion", "filterControl": "input"},
+        {"field": "kingdom", "title": "Kingdom", "filterControl": "input"},
+        {"field": "state_province", "title": "State/Province", "filterControl": "input"},
+        {"field": "lodging", "title": "Lodging", "filterControl": "input"},
+    ]
+    rows = []
+    payments = Payment.query.filter().all()
+
+    for pay in payments:
+        if pay.reg is not None:
+            reg_json = json.loads(pay.toJSON())
+            reg_json['fname'] = pay.reg.fname
+            reg_json['lname'] = pay.reg.lname
+            reg_json['scaname'] = pay.reg.scaname
+            reg_json['email'] = pay.reg.email
+            reg_json['invoice_email'] = pay.reg.invoice_email
+            reg_json['age'] = "Adult" if '18+' in pay.reg.age or 'Royal' in pay.reg.age else "Minor"
+            reg_json['mbr'] = pay.reg.mbr
+            reg_json['mbr_num'] = pay.reg.mbr_num
+            reg_json['mbr_num_exp'] = pay.reg.mbr_num_exp.strftime("%Y-%m-%d") if pay.reg.mbr_num_exp else None
+            reg_json['minor_waiver'] = "True" if pay.reg.minor_waiver else "False"
+            reg_json['reg_date_time'] = pay.reg.reg_date_time.strftime("%Y-%m-%d %H:%M:%S") if pay.reg.reg_date_time else None
+            reg_json['prereg'] = pay.reg.prereg
+            reg_json['expected_arrival_date'] = pay.reg.expected_arrival_date.strftime("%Y-%m-%d") if pay.reg.expected_arrival_date else None
+            reg_json['checkin'] = pay.reg.checkin.strftime("%Y-%m-%d %H:%M:%S") if pay.reg.checkin else None
+            reg_json['medallion'] = pay.reg.medallion
+            reg_json['kingdom'] = pay.reg.kingdom.name
+            reg_json['state_province'] = pay.reg.state_province
+            reg_json['lodging'] = pay.reg.lodging.name
+
+
+            rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/kingdom_count", methods=("GET", ""))
 @login_required
@@ -563,22 +682,68 @@ def kingdom_count():
     reg_json = json.loads(json.dumps(data))
     return reg_json
 
+@bp.route("/troll_checkin_count", methods=("GET", ""))
+@login_required
+@permission_required("registration_reports")
+def troll_checkin_count():
+    data = {}
+    columns = [
+        {"field": "id", "title": "ID", "filterControl": "input"},
+        {"field": "medallion", "title": "Medallion", "filterControl": "input"},
+        {"field": "checkin", "title": "Check-in Date/Time", "filterControl": "input"},
+        {"field": "checked_in_by", "title": "Checked In By", "filterControl": "select"},
+    ]
+    rows = []
+    checked_in_list = Registrations.query.filter(
+        Registrations.checkin != None).order_by(Registrations.checkin).all()
+    for reg in checked_in_list:
+        reg_json = json.loads(reg.toJSON())
+        reg_json["id"] = "<a href='" + url_for('troll.reg', regid=str(reg.id)) + "' target='_blank' rel='noopener noreferrer'>" + str(reg.id) + "</a>"
+        reg_json["checked_in_by"] = reg.checkedin_by.fname + " " + reg.checkedin_by.lname + " (" + reg.checkedin_by.username + ")" if reg.checkedin_by else "-"
+        rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
+
+@bp.route("/log_export", methods=("GET", ""))
+@login_required
+@permission_required("registration_reports")
+def log_export():
+    data = {}
+    columns = [
+        {"field": "reg", "title": "Registration", "filterControl": "input"},
+        {"field": "user", "title": "User", "filterControl": "input"},
+        {"field": "timestamp", "title": "Timestamp", "filterControl": "input"},
+        {"field": "action", "title": "Action", "filterControl": "select"},
+    ]
+    rows = []
+    reglogs = RegLogs.query.order_by(RegLogs.timestamp).all()
+    for reg in reglogs:
+        reg_json = json.loads(reg.toJSON())
+        reg_json["reg"] = "<a href='" + url_for('troll.reg', regid=str(reg.regid)) + "' target='_blank' rel='noopener noreferrer'>" + str(reg.registration.fname) + " " + str(reg.registration.lname) + "</a>"
+        reg_json["user"] = str(reg.user.fname) + " " + str(reg.user.lname)
+        rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/early_on_report", methods=("GET", ""))
 @login_required
 @permission_required("registration_reports")
-def earlyon():
+def early_on_report():
     data = {}
     columns = [
         {"field": "id", "title": "ID", "filterControl": "input"},
         {"field": "fname", "title": "First Name", "filterControl": "input"},
         {"field": "lname", "title": "Last Name", "filterControl": "input"},
         {"field": "scaname", "title": "SCA Name", "filterControl": "input"},
+        {"field": "age", "title": "Age", "filterControl": "input"},
         {"field": "phone", "title": "Phone", "filterControl": "input"},
         {"field": "email", "title": "Email", "filterControl": "input"},
         {"field": "kingdom", "title": "Kingdom", "filterControl": "select"},
         {"field": "lodging", "title": "Lodging", "filterControl": "select"},
         {"field": "balance", "title": "Balance", "filterControl": "input"},
+        {"field": "expected_arrival_date", "title": "ExpectedArrival Date", "filterControl": "input"},
     ]
     rows = []
     earlyon_list = Registrations.query.filter(
@@ -598,12 +763,13 @@ def earlyon():
 @bp.route("/early_on_audit", methods=("GET", ""))
 @login_required
 @permission_required("admin")
-def earlyon_audit():
+def early_on_audit():
     data = {}
     columns = [
         {"field": "request_id", "title": "Request ID", "filterControl": "input"},
         {"field": "dept_approval_status", "title": "Department Approval Status", "filterControl": "select"},
         {"field": "autocrat_approval_status", "title": "Autocrat Approval Status", "filterControl": "select"},
+        {"field": "reg_approval", "title": "Registration Approval", "filterControl": "select"},
         {"field": "reg_id", "title": "Registration ID", "filterControl": "input"},
         {"field": "fname", "title": "First Name", "filterControl": "input"},
         {"field": "lname", "title": "Last Name", "filterControl": "input"},
@@ -617,6 +783,7 @@ def earlyon_audit():
     earlyon_applications = EarlyOnRequest.query.all()
     for application in earlyon_applications:
         reg_json = json.loads(application.toJSON())
+        reg_json['reg_approval'] = "Approved" if application.registration.early_on_approved else "Not Approved"
         reg_json['request_id'] = application.id
         reg_json['reg_id'] = application.registration.id
         reg_json['enteredFName'] = application.registration.fname
@@ -626,6 +793,7 @@ def earlyon_audit():
         rows.append(reg_json)
         for rider in application.earlyonriders:
             reg_json_rider = json.loads(rider.toJSON())
+            reg_json_rider['reg_approval'] = "Approved" if rider.reg.early_on_approved else "Not Approved"
             reg_json_rider['request_id'] = application.id
             reg_json_rider['reg_id'] = rider.regid
             reg_json_rider['enteredFName'] = rider.fname
@@ -645,7 +813,7 @@ def earlyon_audit():
 @bp.route("/merchant_early_on_report", methods=("GET", ""))
 @login_required
 @permission_required("merchant_reports")
-def merchant_earlyon():
+def merchant_early_on_report():
     data = {}
     columns = [
         {"field": "id", "title": "ID", "filterControl": "input"},
@@ -888,7 +1056,7 @@ def royal_registrations():
 @bp.route("/merchant_full_export", methods=("GET", ""))
 @login_required
 @permission_required("merchant_reports")
-def merchant_fullexport():
+def merchant_full_export():
     data = {}
 
     # {"field": "", "title": "", "filterControl":"input"}
@@ -1080,6 +1248,47 @@ def merchant_invoices():
     data["rows"] = rows
     return jsonify(data)
 
+@bp.route("/merchant_atd_payments", methods=("GET", ""))
+@login_required
+@permission_required("merchant_reports")
+def merchant_atd_payments():
+    data = {}
+
+    columns = [
+        {"field": "merchant_id", "title": "Merchant ID", "filterControl": "select"},
+        {"field": "business", "title": "Business", "filterControl": "select"},
+        {"field": "name", "title": "Name", "filterControl": "input"},
+        {"field": "sca_name", "title": "SCA Name", "filterControl": "select"},
+        {
+            "field": "payment_date",
+            "title": "Payment Date",
+            "filterControl": "select",
+        },
+        {"field": "space_fee_amount", "title": "Space Fee", "filterControl": "input"},
+        {
+            "field": "processing_fee_amount",
+            "title": "Processing Fee",
+            "filterControl": "select",
+        },
+        {"field": "electricity_fee_amount", "title": "Electricity Fee", "filterControl": "input"},
+        {"field": "amount", "title": "Total", "filterControl": "input"},
+    ]
+    rows = []
+    full = (
+        Payment.query.filter(Payment.invoice == None, Payment.merchant != None)
+        .order_by(Payment.id)
+        .all()
+    )
+    for pay in full:
+        reg_json = json.loads(pay.toJSON())
+        reg_json["merchant_id"] = pay.merchant.id if pay.merchant else "-"
+        reg_json["business"] = pay.merchant.business_name if pay.merchant else "-"
+        reg_json["name"] = pay.merchant.fname + " " + pay.merchant.lname if pay.merchant else "-"
+        reg_json["sca_name"] = pay.merchant.sca_name if pay.merchant else "-"
+        rows.append(reg_json)
+    data["columns"] = columns
+    data["rows"] = rows
+    return jsonify(data)
 
 @bp.route("/registration_report", methods=("GET", ""))
 @login_required
@@ -1128,6 +1337,8 @@ def registration_report():
             "title": "Total Price Paid",
             "filterControl": "input",
         },
+        {"field": "kingdom", "title": "Kingdom", "filterControl": "input"},
+        {"field": "lodging", "title": "Lodging", "filterControl": "input"}
     ]
     rows = []
     # invoices = Invoice.query.filter().all()
@@ -1156,6 +1367,8 @@ def mapping_registration_report(obj, temp_obj, count):
     temp_obj["count"] = count
     match obj.invoice.invoice_type:
         case "REGISTRATION":
+            temp_obj["kingdom"] = obj.kingdom.name
+            temp_obj["lodging"] = obj.lodging.name
             temp_obj["date"] = obj.reg_date_time.date()
             temp_obj["time"] = obj.reg_date_time.time()
             temp_obj["name"] = obj.fname + " " + obj.lname
@@ -1242,8 +1455,15 @@ def toJSON(obj):
 @login_required
 @permission_required("registration_reports")
 def paypal_recon_export():
+    dt_start = request.args.get("dt_start")
+    dt_end = request.args.get("dt_end")
+
     try:
-        paypal_transactions = get_paypal_transactions()
+        if dt_start != None and dt_end != None:
+            paypal_transactions = get_paypal_transactions(dt_start=dt_start,dt_end=dt_end)
+        else: 
+            paypal_transactions = get_paypal_transactions() 
+        
         for key in paypal_transactions:
             logger.debug(
                 f"PayPal Transaction ID: {key}, Details: {paypal_transactions[key]}"
@@ -1420,7 +1640,7 @@ def toJSON(obj):
     return json.dumps(data_dict, sort_keys=True, default=str)
 
 
-@bp.route("/land_pre-reg", methods=("GET", ""))
+@bp.route("/land_pre_reg", methods=("GET", ""))
 @login_required
 @permission_required("registration_reports")
 def land_pre_reg():
@@ -1463,7 +1683,6 @@ def land_pre_reg():
     rows = []
     regs = (
         Registrations.query.filter(
-            Registrations.prereg == True,
             Registrations.canceled != True,
             Registrations.duplicate != True,
         )
@@ -1480,6 +1699,14 @@ def land_pre_reg():
                 reg_json["lodging"] = lodging
                 reg_json["invoice_status"] = reg.invoice.invoice_status
                 rows.append(reg_json)
+        elif reg.checkin != None:
+            kingdom = reg.kingdom.name
+            lodging = reg.lodging.name
+            reg_json = json.loads(reg.toJSON())
+            reg_json["kingdom"] = kingdom
+            reg_json["lodging"] = lodging
+            reg_json["invoice_status"] = "CHECKED IN - NO INVOICE"
+            rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
     return jsonify(data)
@@ -1543,7 +1770,7 @@ def paypal_canceled_export():
 @bp.route("/paypal_transactions", methods=("GET", ""))
 @login_required
 @permission_required("admin")
-def paypal_transaction_search():
+def paypal_transactions():
     paypal_transactions = get_paypal_transactions()
     data = {}
     columns = [

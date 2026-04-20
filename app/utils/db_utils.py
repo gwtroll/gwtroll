@@ -331,16 +331,16 @@ def get_scheduledevents():
     
 #     return event_choices
 
-# def log_reg_action(reg, action):
-#     print(reg)
-#     reglog = RegLogs(
-#         regid = reg.id,
-#         userid = current_user.id,
-#         timestamp = datetime.now(),
-#         action = action
-#     )
-#     db.session.add(reglog)
-#     db.session.commit()
+def log_reg_action(reg, action):
+    print(reg)
+    reglog = RegLogs(
+        regid = reg.id,
+        userid = current_user.id,
+        timestamp = datetime.now(),
+        action = action
+    )
+    db.session.add(reglog)
+    db.session.commit()
 
 # def calculate_price_calc(reg):
 #     today_datetime = datetime.today()
@@ -580,3 +580,12 @@ def get_approval_notification_recipients(departmentid):
         if user.has_role('Department Head') and user.email != None:
             recipients.append(user.email)
     return recipients
+
+def clear_reg_checkin(reg):
+    reg.checkin = None
+    reg.checkedin_by_id = None
+    reg.minor_waiver = None
+    reg.actual_arrival_date = None
+    reg.medallion = None
+    reg.signature = None
+    db.session.commit()
