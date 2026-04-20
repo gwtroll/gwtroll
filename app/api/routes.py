@@ -541,6 +541,7 @@ def atd_payments():
             reg_json['lname'] = pay.reg.lname
             reg_json['scaname'] = pay.reg.scaname
             reg_json['checkin_date'] = pay.reg.checkin
+            reg_json['id'] = pay.reg.id
         rows.append(reg_json)
     data["columns"] = columns
     data["rows"] = rows
