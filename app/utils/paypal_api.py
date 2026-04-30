@@ -307,14 +307,15 @@ def get_paypal_transactions(dt_start=None,dt_end=None):
 
     today = datetime.now()
     start_date = datetime(2025, 8, 1, 0, 0, 0, 0) if dt_start == None else datetime.strptime(dt_start, '%Y-%m-%d')
-    logger.debug(f"Start Date: {start_date.strftime('%Y-%m-%dT%H:%M:%S-00:00')} / Today: {today.strftime('%Y-%m-%dT%H:%M:%S-00:00')}")
+    end_date = today if dt_end == None else datetime.strptime(dt_end, '%Y-%m-%d') + timedelta(days=1) - timedelta(microseconds=1)
+    logger.debug(f"Start Date: {start_date.strftime('%Y-%m-%dT%H:%M:%S-0000')} / Today: {today.strftime('%Y-%m-%dT%H:%M:%S-0000')}")
 
     page = 1
 
-    while start_date <= today:
-        start_date_string = start_date.strftime("%Y-%m-%dT%H:%M:%S-00:00") if dt_start == None else dt_start + "T00:00:00-00:00"
-        end_date_string = (start_date + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S-00:00") if dt_end == None else dt_end + "T00:00:00-00:00"
-        
+    while start_date <= end_date:
+        start_date_string = start_date.strftime("%Y-%m-%dT%H:%M:%S-0000")
+        end_date_string = (start_date + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S-0000")
+
         logger.debug(f"Fetching transactions from {start_date_string} to {end_date_string} page {page}")
 
         params = (
