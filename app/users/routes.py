@@ -38,7 +38,7 @@ def users():
 def createuser():
 
     form = CreateUserForm()
-    form.role.choices = get_role_choices()
+    form.roles.choices = get_role_choices()
     form.department.choices = get_department_choices()
     
     if request.method == 'POST' and form.validate_on_submit():
@@ -47,7 +47,7 @@ def createuser():
             flash("Username Already Taken - Please Try Again",'error')
             return render_template('createuser.html', form=form)
         user = User()
-        form.populate_object(user)
+        user.populate_object(form.data)
         db.session.add(user)
         db.session.commit()
 
@@ -63,11 +63,11 @@ def edituser(userid):
     if (not current_user.has_role('Admin')) and user.has_role('Admin'):
         return redirect(url_for('users.users'))
     form = EditUserForm()
-    form.role.choices = get_role_choices()
+    form.roles.choices = get_role_choices()
     form.department.choices = get_department_choices()
 
     if request.method == 'POST' and form.validate_on_submit():
-        form.populate_object(user)
+        user.populate_object(form.data)
         db.session.commit()
         return redirect(url_for('users.users'))
     

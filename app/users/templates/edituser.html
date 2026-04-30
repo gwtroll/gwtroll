@@ -79,12 +79,12 @@
             <p>Roles</p>
             <div class="row form-group">
                 <div class="col form-group">
-                        {% for role in form.role %}
+                        {% for role in form.roles %}
                         <div class="col form-group">
                             {{ role(class_='form-check-input') }} {{ role.label }}
                         </div>
                     {% endfor %}
-                    {% if form.role.errors %}{% for error in form.role.errors %}<span class="error">{{ error
+                    {% if form.roles.errors %}{% for error in form.roles.errors %}<span class="error">{{ error
                         }}</span>{% endfor %}{% endif %}
                 </div>
             </div>

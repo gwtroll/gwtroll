@@ -8,6 +8,10 @@ import sqlalchemy.orm as so
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+import uuid
+
+import app.utils.db_utils as utils
+
 
 def get_attribute_type(obj, attribute_name):
     mapper = inspect(obj)
@@ -52,37 +56,118 @@ class EventVariables(db.Model):
     merchant_squarefoot_fee = db.Column(db.Numeric(10, 2), default=0.10, nullable=False)
     merchant_bounced_check_fee = db.Column(db.Integer(), default=35, nullable=False)
 
+    def populate_object(self, data):
+        # SET Default Values
+
+        for i in data:
+            if i in self.__dir__():
+                match i:
+                    case "id":
+                        pass
+                    case _:
+                        if get_attribute_type(EventVariables,i) == str:
+                            self.__setattr__(i, data[i].strip())
+                        elif get_attribute_type(EventVariables,i) == bool:
+                            if data[i] == "y" or data[i] == True:
+                                self.__setattr__(i, True)
+                            else:
+                                self.__setattr__(i, False)
+                        else:
+                            self.__setattr__(i, data[i])
+
+    def to_dict(self):
+        dict = {}
+        all_fields = {k: getattr(self, k) for k in dir(self)}
+        for field in all_fields:
+            if not field.startswith('_'):
+                match field:
+                    case 'start_date' | 'end_date' | 'preregistration_open_date' | 'preregistration_close_date' | 'merchant_application_deadline' | 'merchant_preregistration_open_date' | 'merchant_preregistration_close_date':
+                         if self.__getattribute__(field) != None:
+                            dict[field] = datetime.strftime(self.__getattribute__(field), "%Y-%m-%d")
+                    case _:
+                        if type(self.__getattribute__(field)) in [int,str,bool]:
+                            dict[field]=self.__getattribute__(field)
+        return dict
+    
+    def to_json(self):
+        return json.loads(json.dumps(self.to_dict()))
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     username: so.Mapped[str] = so.mapped_column(sa.String(64), index=True, unique=True)
     email: so.Mapped[str] = so.mapped_column(sa.String(120), nullable=True)
-
-    # email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True,
-    #                                        unique=True)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
-
     roles = db.relationship("Role", secondary="user_roles")
-
     fname: so.Mapped[str] = so.mapped_column(sa.String(64))
-
     lname: so.Mapped[str] = so.mapped_column(sa.String(64))
-
     medallion = db.Column(db.Integer())
-
     department_id = db.Column(db.Integer(), db.ForeignKey("departments.id"))
     department = db.relationship("Department", backref="user_department", viewonly=True)
-
     scheduled_events = db.relationship(
         "ScheduledEvent", secondary="user_scheduledevents"
     )
-
     active = db.Column(db.Boolean())
-
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
 
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='users')
+
+    def populate_object(self, data):
+        # SET Default Values
+        if self.active == None:
+            self.active = True
+        if self.fs_uniquifier == None:
+            self.fs_uniquifier = uuid.uuid4().hex
+        for i in data:
+            if i in self.__dir__():
+                match i:
+                    case "id":
+                        pass
+                    case "username" | "email":
+                            self.__setattr__(i, data[i].strip().lower())
+                    case "department":
+                        self.department_id = data[i] if data[i] != "-" or data[i] != None else None
+                    case "roles":
+                        current_role_ids = []
+                        user_role_permissions = [str(r[0]) for r in utils.get_role_choices()]
+                        for role in self.roles:
+                            current_role_ids.append(str(role.id))
+                        for roleid in data['roles']:
+                            if roleid in user_role_permissions and roleid not in current_role_ids:
+                                self.roles.append(utils.get_role(roleid))
+                        for roleid in current_role_ids:
+                            if roleid in user_role_permissions and roleid not in data['roles']:
+                                self.roles.remove(utils.get_role(roleid))
+        # First Name - Strip
+                    case _:
+                        if get_attribute_type(User,i) == str:
+                            self.__setattr__(i, data[i].strip())
+                        elif get_attribute_type(User,i) == bool:
+                            if data[i] == "y" or data[i] == True:
+                                self.__setattr__(i, True)
+                            else:
+                                self.__setattr__(i, False)
+                        else:
+                            self.__setattr__(i, data[i])
+
+    def to_dict(self):
+        dict = {}
+        all_fields = {k: getattr(self, k) for k in dir(self)}
+        for field in all_fields:
+            if not field.startswith('_'):
+                match field:
+                    case 'start_date' | 'end_date' | 'preregistration_open_date' | 'preregistration_close_date' | 'merchant_application_deadline' | 'merchant_preregistration_open_date' | 'merchant_preregistration_close_date':
+                         if self.__getattribute__(field) != None:
+                            dict[field] = datetime.strftime(self.__getattribute__(field), "%Y-%m-%d")
+                    case _:
+                        if type(self.__getattribute__(field)) in [int,str,bool]:
+                            dict[field]=self.__getattribute__(field)
+        dict['department'] = self.department.name if self.department else None
+        return dict
+    
+    def to_json(self):
+        return json.loads(json.dumps(self.to_dict()))
 
     def __repr__(self):
         return "<User {}>".format(self.username)
@@ -115,7 +200,6 @@ class User(UserMixin, db.Model):
     def get_scheduledevent_ids(self):
         return [event.id for event in self.scheduled_events]
 
-
 # Role Data Model
 class Role(db.Model, RoleMixin):
     __tablename__ = "roles"
@@ -126,7 +210,6 @@ class Role(db.Model, RoleMixin):
     def __repr__(self):
         return "<Role {}>".format(self.name)
 
-
 # UserRoles association table
 class UserRoles(db.Model):
     __tablename__ = "user_roles"
@@ -134,12 +217,10 @@ class UserRoles(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey("users.id", ondelete="CASCADE"))
     role_id = db.Column(db.Integer(), db.ForeignKey("roles.id", ondelete="CASCADE"))
 
-
 class Permissions(db.Model):
     __tablename__ = "permissions"
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
-
 
 class RolePermissions(db.Model):
     __tablename__ = "role_permissions"
@@ -149,11 +230,9 @@ class RolePermissions(db.Model):
         db.Integer(), db.ForeignKey("permissions.id", ondelete="CASCADE")
     )
 
-
 @login.user_loader
 def load_user(id):
     return User.query.filter_by(fs_uniquifier=id).first()
-
 
 class Department(db.Model):
     __tablename__ = "departments"
@@ -164,7 +243,6 @@ class Department(db.Model):
 
     def __repr__(self):
         return "<Department {}>".format(self.name)
-
 
 class EarlyOnRequest(db.Model):
     __tablename__ = "earlyonrequest"
@@ -230,7 +308,6 @@ class EarlyOnRequest(db.Model):
                     data_dict[key] = self.__dict__[key]
         return json.dumps(data_dict, sort_keys=True, default=str)
 
-
 class EarlyOnRider(db.Model):
     __tablename__ = "earlyonrider"
     id = db.Column(db.Integer(), primary_key=True)
@@ -252,7 +329,6 @@ class EarlyOnRider(db.Model):
                 else:
                     data_dict[key] = self.__dict__[key]
         return json.dumps(data_dict, sort_keys=True, default=str)
-
 
 class EarlyOnRequestRiders(db.Model):
     __tablename__ = "earlyonrequest_riders"
@@ -507,7 +583,6 @@ class Registrations(db.Model):
             })
         return items
 
-
 class Invoice(db.Model):
     __tablename__ = "invoice"
     invoice_number = db.Column(db.Integer(), primary_key=True)
@@ -535,7 +610,7 @@ class Invoice(db.Model):
     # )
     # balance = db.Column(db.Numeric(10, 2))
     notes = db.Column(db.Text())
-    regs = db.relationship("Registrations", back_populates="invoice")
+    regs = db.relationship("Registrations", secondary="registration_invoices")
     merchants = db.relationship("Merchant", back_populates="invoice")
     earlyonrequests = db.relationship("EarlyOnRequest", back_populates="invoice")
     payments = db.relationship("Payment", back_populates="invoice")
@@ -998,18 +1073,6 @@ class Lodging(db.Model):
     name = db.Column(db.String(), nullable=False)
     # event_id = db.Column(db.Integer(), db.ForeignKey('event.id'))
     # event = db.relationship("Event", backref='lodging')
-
-
-# class Event(db.Model):
-#     __tablename__ = 'event'
-#     id = db.Column(db.Integer(), primary_key=True)
-#     name = db.Column(db.String(), nullable=False)
-#     year = db.Column(db.Integer(), nullable=False)
-#     start_date = db.Column(db.Date(), nullable=False)
-#     end_date = db.Column(db.Date(), nullable=False)
-#     location = db.Column(db.String(), nullable=False)
-#     description = db.Column(db.Text(), nullable=False)
-
 
 class Merchant(db.Model):
     __tablename__ = "merchant"

@@ -66,7 +66,7 @@ class CreateUserForm(FlaskForm):
     # id = StringField('User Id', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
     email = EmailField('Email', validators=[Optional()])
-    role = MultiCheckboxField('Role', validators=[DataRequired()])
+    roles = MultiCheckboxField('Role', validators=[DataRequired()])
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     department = SelectField('Department', validators=[DataRequired()], choices=[])
@@ -83,7 +83,7 @@ class CreateUserForm(FlaskForm):
         if self.email.data:
             obj.email = self.email.data.strip().lower()
         # Roles - Iterate
-        for roleid in self.role.data:
+        for roleid in self.roles.data:
             obj.roles.append(get_role(roleid))
         # First Name - Strip
         if self.fname.data:
@@ -143,7 +143,7 @@ class CreateRoleForm(FlaskForm):
 
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    role = MultiCheckboxField('Role', validators=[Optional()])
+    roles = MultiCheckboxField('Role', validators=[Optional()])
     fname = StringField('First Name', validators=[DataRequired()])
     email = EmailField('Email', validators=[Optional()])
     lname = StringField('Last Name', validators=[DataRequired()])
@@ -164,11 +164,11 @@ class EditUserForm(FlaskForm):
         user_role_permissions = [str(r[0]) for r in get_role_choices()]
         for role in obj.roles:
             current_role_ids.append(str(role.id))
-        for roleid in self.role.data:
+        for roleid in self.roles.data:
             if roleid in user_role_permissions and roleid not in current_role_ids:
                 obj.roles.append(get_role(roleid))
         for roleid in current_role_ids:
-            if roleid in user_role_permissions and roleid not in self.role.data:
+            if roleid in user_role_permissions and roleid not in self.roles.data:
                 obj.roles.remove(get_role(roleid))
         # First Name - Strip
         if self.fname.data:
@@ -196,7 +196,7 @@ class EditUserForm(FlaskForm):
             role_array = []
             for role in obj.roles:
                 role_array.append(str(role.id))
-            self.role.data = role_array
+            self.roles.data = role_array
         # First Name
         if obj.fname:
             self.fname.data = obj.fname
